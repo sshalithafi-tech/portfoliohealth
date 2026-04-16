@@ -1,6 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useQuickAssessmentQuestions } from "../hooks/useData";
+import { getDimensionBadgeClass } from "../utils/scoring";
+import { LoadingSpinner } from "../components/ScoreComponents";
 import { 
   ArrowLeft, 
   ArrowRight, 
@@ -12,7 +15,7 @@ import { toast } from "sonner";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-const industries = [
+const INDUSTRIES = [
   "Manufacturing",
   "Technology",
   "Healthcare",
@@ -26,10 +29,47 @@ const industries = [
   "Other"
 ];
 
+// Question option button component
+const QuestionOption = ({ option, questionId, optionIndex, isSelected, onSelect }) => (
+  <button
+    data-testid={`option-${questionId}-${optionIndex}`}
+    onClick={() => onSelect(option.value)}
+    className={`w-full p-4 rounded-xl border text-left transition-all flex items-center justify-between group ${
+      isSelected
+        ? "bg-[#2f81f7]/20 border-[#2f81f7] text-white"
+        : "bg-[#111827] border-[#374151] text-gray-300 hover:border-[#2f81f7]/50 hover:bg-[#1F2937]"
+    }`}
+  >
+    <span className="font-medium">{option.label}</span>
+    <ChevronRight size={18} className={`transition-all ${
+      isSelected ? "text-[#2f81f7]" : "text-gray-500 group-hover:text-gray-300"
+    }`} />
+  </button>
+);
+
+// Progress dots component
+const ProgressDots = ({ questions, currentQuestion, answers, onDotClick }) => (
+  <div className="flex items-center justify-center gap-1.5 mt-8">
+    {questions.map((q, idx) => (
+      <button
+        key={`dot-${q.id}`}
+        onClick={() => onDotClick(idx)}
+        className={`h-2 rounded-full transition-all ${
+          idx === currentQuestion
+            ? "bg-[#2f81f7] w-6"
+            : answers[String(q.id)]
+            ? "bg-[#238636] w-2"
+            : "bg-[#374151] w-2"
+        }`}
+      />
+    ))}
+  </div>
+);
+
 const QuickAssessmentPage = () => {
   const navigate = useNavigate();
+  const { questions, loading } = useQuickAssessmentQuestions();
   const [step, setStep] = useState("intro"); // intro, questions, submitting
-  const [questions, setQuestions] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
   const [companyInfo, setCompanyInfo] = useState({
@@ -38,33 +78,21 @@ const QuickAssessmentPage = () => {
     respondent_name: "",
     respondent_email: ""
   });
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchQuestions = async () => {
-      try {
-        const response = await axios.get(`${BACKEND_URL}/api/quick-assessment/questions`);
-        setQuestions(response.data.questions);
-      } catch (err) {
-        console.error("Failed to fetch questions:", err);
-        toast.error("Failed to load assessment questions");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchQuestions();
+  const handleCompanyInfoChange = useCallback((field, value) => {
+    setCompanyInfo(prev => ({ ...prev, [field]: value }));
   }, []);
 
-  const handleStartAssessment = (e) => {
+  const handleStartAssessment = useCallback((e) => {
     e.preventDefault();
     if (!companyInfo.company_name || !companyInfo.industry) {
       toast.error("Please fill in company name and industry");
       return;
     }
     setStep("questions");
-  };
+  }, [companyInfo]);
 
-  const handleAnswer = (questionId, value) => {
+  const handleAnswer = useCallback((questionId, value) => {
     setAnswers(prev => ({ ...prev, [questionId]: value }));
     
     // Auto-advance to next question
@@ -73,9 +101,9 @@ const QuickAssessmentPage = () => {
         setCurrentQuestion(prev => prev + 1);
       }, 300);
     }
-  };
+  }, [currentQuestion, questions.length]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     if (Object.keys(answers).length < questions.length) {
       toast.error("Please answer all questions");
       return;
@@ -92,7 +120,6 @@ const QuickAssessmentPage = () => {
         answers: answers
       });
       
-      // Navigate to results page
       navigate(`/quick-assessment/${response.data.id}/results`, { 
         state: { result: response.data } 
       });
@@ -101,17 +128,29 @@ const QuickAssessmentPage = () => {
       toast.error("Failed to submit assessment");
       setStep("questions");
     }
-  };
+  }, [answers, questions.length, companyInfo, navigate]);
+
+  const handleBack = useCallback(() => {
+    if (step === "intro") {
+      navigate("/");
+    } else {
+      setStep("intro");
+    }
+  }, [step, navigate]);
 
   const progress = questions.length > 0 ? ((currentQuestion + 1) / questions.length) * 100 : 0;
   const currentQ = questions[currentQuestion];
 
+  // Get dimension badge label
+  const getDimensionLabel = (dimension) => {
+    if (dimension === "qualifier") return "Portfolio Size";
+    return dimension.charAt(0).toUpperCase() + dimension.slice(1);
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0B1120] flex items-center justify-center">
-        <div className="animate-pulse-glow w-12 h-12 rounded-full bg-[#2f81f7]/20 flex items-center justify-center">
-          <div className="w-6 h-6 rounded-full bg-[#2f81f7]" />
-        </div>
+      <div className="min-h-screen bg-[#0B1120]">
+        <LoadingSpinner className="min-h-screen" />
       </div>
     );
   }
@@ -121,7 +160,7 @@ const QuickAssessmentPage = () => {
       {/* Header */}
       <header className="h-16 border-b border-[#374151] bg-[#111827] flex items-center px-6">
         <button
-          onClick={() => step === "intro" ? navigate("/") : setStep("intro")}
+          onClick={handleBack}
           data-testid="back-btn"
           className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mr-6"
         >
@@ -178,7 +217,7 @@ const QuickAssessmentPage = () => {
                     type="text"
                     data-testid="quick-company-name"
                     value={companyInfo.company_name}
-                    onChange={(e) => setCompanyInfo(prev => ({ ...prev, company_name: e.target.value }))}
+                    onChange={(e) => handleCompanyInfoChange("company_name", e.target.value)}
                     className="w-full px-4 py-3 bg-[#0B1120] border border-[#374151] rounded-lg text-white focus:ring-2 focus:ring-[#2f81f7] focus:border-transparent transition-all outline-none"
                     placeholder="Your Company Name"
                     required
@@ -190,12 +229,12 @@ const QuickAssessmentPage = () => {
                   <select
                     data-testid="quick-industry"
                     value={companyInfo.industry}
-                    onChange={(e) => setCompanyInfo(prev => ({ ...prev, industry: e.target.value }))}
+                    onChange={(e) => handleCompanyInfoChange("industry", e.target.value)}
                     className="w-full px-4 py-3 bg-[#0B1120] border border-[#374151] rounded-lg text-white focus:ring-2 focus:ring-[#2f81f7] focus:border-transparent transition-all outline-none"
                     required
                   >
                     <option value="">Select industry</option>
-                    {industries.map(ind => (
+                    {INDUSTRIES.map(ind => (
                       <option key={ind} value={ind}>{ind}</option>
                     ))}
                   </select>
@@ -208,7 +247,7 @@ const QuickAssessmentPage = () => {
                       type="text"
                       data-testid="quick-respondent-name"
                       value={companyInfo.respondent_name}
-                      onChange={(e) => setCompanyInfo(prev => ({ ...prev, respondent_name: e.target.value }))}
+                      onChange={(e) => handleCompanyInfoChange("respondent_name", e.target.value)}
                       className="w-full px-4 py-3 bg-[#0B1120] border border-[#374151] rounded-lg text-white focus:ring-2 focus:ring-[#2f81f7] focus:border-transparent transition-all outline-none"
                       placeholder="John Smith"
                     />
@@ -219,7 +258,7 @@ const QuickAssessmentPage = () => {
                       type="email"
                       data-testid="quick-respondent-email"
                       value={companyInfo.respondent_email}
-                      onChange={(e) => setCompanyInfo(prev => ({ ...prev, respondent_email: e.target.value }))}
+                      onChange={(e) => handleCompanyInfoChange("respondent_email", e.target.value)}
                       className="w-full px-4 py-3 bg-[#0B1120] border border-[#374151] rounded-lg text-white focus:ring-2 focus:ring-[#2f81f7] focus:border-transparent transition-all outline-none"
                       placeholder="you@company.com"
                     />
@@ -241,16 +280,10 @@ const QuickAssessmentPage = () => {
 
         {/* Questions Step */}
         {step === "questions" && currentQ && (
-          <div className="animate-fade-in" key={currentQuestion}>
+          <div className="animate-fade-in" key={`question-${currentQuestion}`}>
             <div className="mb-8">
-              <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                currentQ.dimension === "people" ? "bg-[#2f81f7]/20 text-[#2f81f7]" :
-                currentQ.dimension === "process" ? "bg-[#238636]/20 text-[#238636]" :
-                currentQ.dimension === "data" ? "bg-[#D29922]/20 text-[#D29922]" :
-                currentQ.dimension === "technology" ? "bg-[#A371F7]/20 text-[#A371F7]" :
-                "bg-gray-500/20 text-gray-400"
-              }`}>
-                {currentQ.dimension === "qualifier" ? "Portfolio Size" : currentQ.dimension.charAt(0).toUpperCase() + currentQ.dimension.slice(1)}
+              <span className={`px-3 py-1 rounded-full text-xs font-medium ${getDimensionBadgeClass(currentQ.dimension)}`}>
+                {getDimensionLabel(currentQ.dimension)}
               </span>
             </div>
 
@@ -260,21 +293,14 @@ const QuickAssessmentPage = () => {
 
             <div className="space-y-3">
               {currentQ.options.map((option, idx) => (
-                <button
-                  key={idx}
-                  data-testid={`option-${currentQ.id}-${idx}`}
-                  onClick={() => handleAnswer(String(currentQ.id), option.value)}
-                  className={`w-full p-4 rounded-xl border text-left transition-all flex items-center justify-between group ${
-                    answers[String(currentQ.id)] === option.value
-                      ? "bg-[#2f81f7]/20 border-[#2f81f7] text-white"
-                      : "bg-[#111827] border-[#374151] text-gray-300 hover:border-[#2f81f7]/50 hover:bg-[#1F2937]"
-                  }`}
-                >
-                  <span className="font-medium">{option.label}</span>
-                  <ChevronRight size={18} className={`transition-all ${
-                    answers[String(currentQ.id)] === option.value ? "text-[#2f81f7]" : "text-gray-500 group-hover:text-gray-300"
-                  }`} />
-                </button>
+                <QuestionOption
+                  key={`option-${currentQ.id}-${idx}`}
+                  option={option}
+                  questionId={currentQ.id}
+                  optionIndex={idx}
+                  isSelected={answers[String(currentQ.id)] === option.value}
+                  onSelect={(value) => handleAnswer(String(currentQ.id), value)}
+                />
               ))}
             </div>
 
@@ -312,21 +338,12 @@ const QuickAssessmentPage = () => {
             </div>
 
             {/* Question dots */}
-            <div className="flex items-center justify-center gap-1.5 mt-8">
-              {questions.map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setCurrentQuestion(idx)}
-                  className={`w-2 h-2 rounded-full transition-all ${
-                    idx === currentQuestion
-                      ? "bg-[#2f81f7] w-6"
-                      : answers[String(questions[idx].id)]
-                      ? "bg-[#238636]"
-                      : "bg-[#374151]"
-                  }`}
-                />
-              ))}
-            </div>
+            <ProgressDots
+              questions={questions}
+              currentQuestion={currentQuestion}
+              answers={answers}
+              onDotClick={setCurrentQuestion}
+            />
           </div>
         )}
 

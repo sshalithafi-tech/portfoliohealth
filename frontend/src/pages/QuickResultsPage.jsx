@@ -1,7 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { useParams, useLocation, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../App";
+import { useQuickAssessmentResult } from "../hooks/useData";
+import { 
+  getScoreColor, 
+  getTrafficLightBgClass,
+  prepareRadarData
+} from "../utils/scoring";
+import { 
+  LoadingSpinner, 
+  TrafficLightIcon 
+} from "../components/ScoreComponents";
 import { 
   Download,
   ArrowRight,
@@ -10,9 +20,7 @@ import {
   Database,
   Monitor,
   Save,
-  CheckCircle,
-  AlertTriangle,
-  AlertCircle
+  CheckCircle
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -33,38 +41,55 @@ const DIMENSION_ICONS = {
   technology: Monitor
 };
 
+const DIMENSIONS = ["people", "process", "data", "technology"];
+
+// Dimension score card component
+const DimensionCard = ({ dimension, score, traffic, level }) => {
+  const Icon = DIMENSION_ICONS[dimension];
+  const color = getScoreColor(score);
+  
+  return (
+    <div 
+      data-testid={`quick-dimension-${dimension}`}
+      className={`p-5 bg-[#111827] border rounded-xl animate-fade-in flex items-center gap-4 ${getTrafficLightBgClass(traffic)}`}
+    >
+      <div 
+        className="w-12 h-12 rounded-lg flex items-center justify-center" 
+        style={{ backgroundColor: `${color}20` }}
+      >
+        <Icon size={24} style={{ color }} />
+      </div>
+      <div className="flex-1">
+        <div className="flex items-center justify-between mb-1">
+          <h3 className="font-semibold text-white capitalize">{dimension}</h3>
+          <TrafficLightIcon status={traffic} size={20} />
+        </div>
+        <div className="flex items-baseline gap-2">
+          <span 
+            className="text-2xl font-bold font-['JetBrains_Mono']" 
+            style={{ color }}
+          >
+            {score}
+          </span>
+          <span className="text-gray-500">/ 5</span>
+          <span className="text-sm text-gray-400 ml-2">· {level}</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const QuickResultsPage = () => {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
   
-  const [result, setResult] = useState(location.state?.result || null);
-  const [loading, setLoading] = useState(!location.state?.result);
+  const { result, loading, saved, setSaved } = useQuickAssessmentResult(id, location.state?.result);
   const [downloading, setDownloading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
 
-  useEffect(() => {
-    if (!result && id) {
-      const fetchResult = async () => {
-        try {
-          const response = await axios.get(`${BACKEND_URL}/api/quick-assessment/${id}`);
-          setResult(response.data);
-          setSaved(response.data.saved);
-        } catch (err) {
-          console.error("Failed to fetch results:", err);
-          toast.error("Failed to load assessment results");
-          navigate("/quick-assessment");
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchResult();
-    }
-  }, [id, result, navigate]);
-
-  const downloadPDF = async () => {
+  const downloadPDF = useCallback(async () => {
     setDownloading(true);
     try {
       const response = await axios.get(`${BACKEND_URL}/api/quick-assessment/${id}/pdf`, {
@@ -87,9 +112,9 @@ const QuickResultsPage = () => {
     } finally {
       setDownloading(false);
     }
-  };
+  }, [id, result?.company_name]);
 
-  const saveToAccount = async () => {
+  const saveToAccount = useCallback(async () => {
     if (!user) {
       toast.info("Please sign in to save this assessment");
       navigate("/login", { state: { returnTo: `/quick-assessment/${id}/results` } });
@@ -107,33 +132,12 @@ const QuickResultsPage = () => {
     } finally {
       setSaving(false);
     }
-  };
-
-  const getTrafficLightIcon = (status) => {
-    if (status === "green") return <CheckCircle size={20} className="text-[#238636]" />;
-    if (status === "amber") return <AlertTriangle size={20} className="text-[#D29922]" />;
-    return <AlertCircle size={20} className="text-[#F85149]" />;
-  };
-
-  const getTrafficLightBg = (status) => {
-    if (status === "green") return "bg-[#238636]/20 border-[#238636]/30";
-    if (status === "amber") return "bg-[#D29922]/20 border-[#D29922]/30";
-    return "bg-[#F85149]/20 border-[#F85149]/30";
-  };
-
-  const getScoreColor = (score) => {
-    if (score >= 4) return "#2f81f7";
-    if (score >= 3) return "#238636";
-    if (score >= 2) return "#D29922";
-    return "#F85149";
-  };
+  }, [id, user, navigate, setSaved]);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0B1120] flex items-center justify-center">
-        <div className="animate-pulse-glow w-12 h-12 rounded-full bg-[#2f81f7]/20 flex items-center justify-center">
-          <div className="w-6 h-6 rounded-full bg-[#2f81f7]" />
-        </div>
+      <div className="min-h-screen bg-[#0B1120]">
+        <LoadingSpinner className="min-h-screen" />
       </div>
     );
   }
@@ -152,22 +156,13 @@ const QuickResultsPage = () => {
   const scores = result.scores || {};
   const trafficLights = result.traffic_lights || {};
   const levelNames = result.level_names || {};
-
-  const radarData = [
-    { dimension: "People", score: scores.people || 0, fullMark: 5 },
-    { dimension: "Process", score: scores.process || 0, fullMark: 5 },
-    { dimension: "Data", score: scores.data || 0, fullMark: 5 },
-    { dimension: "Technology", score: scores.technology || 0, fullMark: 5 },
-  ];
+  const radarData = prepareRadarData(scores);
 
   return (
     <div className="min-h-screen bg-[#0B1120]">
       {/* Header */}
       <header className="h-16 border-b border-[#374151] bg-[#111827] flex items-center px-6">
-        <Link
-          to="/"
-          className="flex items-center gap-3"
-        >
+        <Link to="/" className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-[#2f81f7] flex items-center justify-center">
             <span className="text-white font-bold text-sm">P</span>
           </div>
@@ -177,7 +172,7 @@ const QuickResultsPage = () => {
         <div className="flex-1" />
         
         <div className="flex items-center gap-3">
-          {!saved && (
+          {!saved ? (
             <button
               onClick={saveToAccount}
               disabled={saving}
@@ -187,8 +182,7 @@ const QuickResultsPage = () => {
               <Save size={16} />
               {saving ? "Saving..." : "Save to Account"}
             </button>
-          )}
-          {saved && (
+          ) : (
             <span className="flex items-center gap-2 px-4 py-2 text-[#238636]">
               <CheckCircle size={16} />
               Saved
@@ -216,7 +210,7 @@ const QuickResultsPage = () => {
         </div>
 
         {/* Overall Score */}
-        <div className="p-8 bg-gradient-to-r from-[#111827] to-[#0B1120] border border-[#374151] rounded-2xl mb-8 animate-fade-in" style={{ animationDelay: "0.1s" }}>
+        <div className="p-8 bg-gradient-to-r from-[#111827] to-[#0B1120] border border-[#374151] rounded-2xl mb-8 animate-fade-in">
           <div className="flex flex-col lg:flex-row items-center gap-8">
             <div className="text-center lg:text-left flex-1">
               <p className="text-xs uppercase tracking-[0.2em] text-gray-400 mb-2">Overall Maturity</p>
@@ -233,8 +227,8 @@ const QuickResultsPage = () => {
               <p className="text-xl font-semibold text-white mt-2 font-['Outfit']">
                 {levelNames.overall || "–"}
               </p>
-              <div className={`inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-full border ${getTrafficLightBg(trafficLights.overall)}`}>
-                {getTrafficLightIcon(trafficLights.overall)}
+              <div className={`inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-full border ${getTrafficLightBgClass(trafficLights.overall)}`}>
+                <TrafficLightIcon status={trafficLights.overall} size={16} />
                 <span className="text-sm font-medium text-white capitalize">{trafficLights.overall} Status</span>
               </div>
             </div>
@@ -260,42 +254,19 @@ const QuickResultsPage = () => {
 
         {/* Dimension Scores with Traffic Lights */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-          {["people", "process", "data", "technology"].map((dim, idx) => {
-            const Icon = DIMENSION_ICONS[dim];
-            const score = scores[dim] || 0;
-            const traffic = trafficLights[dim] || "red";
-            const level = levelNames[dim] || "Unknown";
-            
-            return (
-              <div 
-                key={dim}
-                data-testid={`quick-dimension-${dim}`}
-                className={`p-5 bg-[#111827] border rounded-xl animate-fade-in flex items-center gap-4 ${getTrafficLightBg(traffic)}`}
-                style={{ animationDelay: `${0.2 + idx * 0.1}s` }}
-              >
-                <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${getScoreColor(score)}20` }}>
-                  <Icon size={24} style={{ color: getScoreColor(score) }} />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-1">
-                    <h3 className="font-semibold text-white capitalize">{dim}</h3>
-                    {getTrafficLightIcon(traffic)}
-                  </div>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-bold font-['JetBrains_Mono']" style={{ color: getScoreColor(score) }}>
-                      {score}
-                    </span>
-                    <span className="text-gray-500">/ 5</span>
-                    <span className="text-sm text-gray-400 ml-2">· {level}</span>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+          {DIMENSIONS.map((dim, idx) => (
+            <DimensionCard
+              key={dim}
+              dimension={dim}
+              score={scores[dim] || 0}
+              traffic={trafficLights[dim] || "red"}
+              level={levelNames[dim] || "Unknown"}
+            />
+          ))}
         </div>
 
         {/* CTA Box */}
-        <div className="p-8 bg-gradient-to-br from-[#2f81f7]/10 to-[#111827] border border-[#2f81f7]/30 rounded-2xl animate-fade-in" style={{ animationDelay: "0.6s" }}>
+        <div className="p-8 bg-gradient-to-br from-[#2f81f7]/10 to-[#111827] border border-[#2f81f7]/30 rounded-2xl animate-fade-in">
           <h2 className="text-xl font-semibold text-white mb-4 font-['Outfit']">
             Ready for a Deeper Assessment?
           </h2>

@@ -1,5 +1,5 @@
-import { useState, useEffect, createContext, useContext } from "react";
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { useState, useEffect, useCallback, createContext, useContext } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import axios from "axios";
 import { Toaster } from "sonner";
 
@@ -49,7 +49,7 @@ const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null); // null = checking, false = not authenticated
   const [loading, setLoading] = useState(true);
 
-  const checkAuth = async () => {
+  const checkAuth = useCallback(async () => {
     try {
       const response = await axios.get(`${BACKEND_URL}/api/auth/me`);
       setUser(response.data);
@@ -58,28 +58,28 @@ const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     checkAuth();
-  }, []);
+  }, [checkAuth]);
 
-  const login = async (email, password) => {
+  const login = useCallback(async (email, password) => {
     const response = await axios.post(`${BACKEND_URL}/api/auth/login`, { email, password });
     setUser(response.data);
     return response.data;
-  };
+  }, []);
 
-  const register = async (email, password, name) => {
+  const register = useCallback(async (email, password, name) => {
     const response = await axios.post(`${BACKEND_URL}/api/auth/register`, { email, password, name });
     setUser(response.data);
     return response.data;
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     await axios.post(`${BACKEND_URL}/api/auth/logout`);
     setUser(false);
-  };
+  }, []);
 
   return (
     <AuthContext.Provider value={{ user, loading, login, register, logout, checkAuth }}>

@@ -1105,7 +1105,6 @@ async def generate_quick_assessment_pdf(quick_id: str):
     
     # Overall Score
     overall = scores.get("overall", 0)
-    overall_level = quick.get("overall_level", 1)
     level_name = quick.get("level_names", {}).get("overall", "Unknown")
     
     story.append(Paragraph(f"<b>OVERALL MATURITY LEVEL: {overall} / 5.0 — {level_name}</b>", heading_style))
@@ -1239,7 +1238,7 @@ async def startup_event():
         logger.info(f"Admin user created: {admin_email}")
     elif not verify_password(admin_password, existing["password_hash"]):
         await db.users.update_one({"email": admin_email}, {"$set": {"password_hash": hash_password(admin_password)}})
-        logger.info(f"Admin password updated")
+        logger.info("Admin password updated")
 
 @app.on_event("shutdown")
 async def shutdown_db_client():

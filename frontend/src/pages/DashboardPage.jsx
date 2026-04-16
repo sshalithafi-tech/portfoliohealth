@@ -1,14 +1,14 @@
-import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
 import { useAuth } from "../App";
 import Layout from "../components/Layout";
+import { useDashboardData } from "../hooks/useData";
+import { getScoreColorClass } from "../utils/scoring";
+import { LoadingSpinner, StatusBadge, EmptyState } from "../components/ScoreComponents";
 import { 
   ClipboardCheck, 
   Building2, 
   TrendingUp, 
   Play,
-  BarChart3,
   Users,
   Database,
   Monitor,
@@ -23,65 +23,80 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const DIMENSION_CONFIG = [
+  { icon: Users, label: "People", key: "people" },
+  { icon: ClipboardCheck, label: "Process", key: "process" },
+  { icon: Database, label: "Data", key: "data" },
+  { icon: Monitor, label: "Technology", key: "technology" },
+];
+
+// Extracted stat card component
+const StatCard = ({ icon: Icon, label, value, color = "#2f81f7" }) => (
+  <div className="p-6 bg-[#111827] border border-[#374151] rounded-xl card-hover">
+    <div className="flex items-center gap-4">
+      <div 
+        className="w-12 h-12 rounded-lg flex items-center justify-center"
+        style={{ backgroundColor: `${color}20` }}
+      >
+        <Icon size={24} style={{ color }} />
+      </div>
+      <div>
+        <p className="text-gray-400 text-sm">{label}</p>
+        <p className="text-2xl font-semibold text-white font-['JetBrains_Mono']">
+          {value}
+        </p>
+      </div>
+    </div>
+  </div>
+);
+
+// Extracted quick action card
+const QuickActionCard = ({ to, icon: Icon, title, description, color = "#2f81f7", highlight = false, badge = null }) => (
+  <Link 
+    to={to}
+    data-testid={`${title.toLowerCase().replace(/\s+/g, '-')}-btn`}
+    className={`p-6 border rounded-xl card-hover group ${
+      highlight 
+        ? `bg-gradient-to-br from-[${color}]/10 to-[#111827] border-[${color}]/30`
+        : 'bg-[#111827] border-[#374151]'
+    }`}
+  >
+    <Icon size={32} style={{ color }} className="mb-4" />
+    <h3 
+      className="text-lg font-semibold text-white mb-2 group-hover:transition-colors"
+      style={{ '--hover-color': color }}
+    >
+      {title}
+    </h3>
+    <p className="text-gray-400 text-sm">{description}</p>
+    {badge && (
+      <p className="text-xs mt-2" style={{ color }}>{badge}</p>
+    )}
+  </Link>
+);
 
 const DashboardPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [stats, setStats] = useState(null);
-  const [recentAssessments, setRecentAssessments] = useState([]);
-  const [quickAssessments, setQuickAssessments] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { stats, recentAssessments, loading } = useDashboardData();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [statsRes, assessmentsRes, quickRes] = await Promise.all([
-          axios.get(`${BACKEND_URL}/api/dashboard/stats`),
-          axios.get(`${BACKEND_URL}/api/assessments`),
-          axios.get(`${BACKEND_URL}/api/quick-assessments`).catch(() => ({ data: [] }))
-        ]);
-        setStats(statsRes.data);
-        setRecentAssessments(assessmentsRes.data.slice(0, 5));
-        setQuickAssessments(quickRes.data.slice(0, 3));
-      } catch (err) {
-        console.error("Failed to fetch dashboard data:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+  const radarData = stats?.average_scores ? DIMENSION_CONFIG.map(({ label, key }) => ({
+    dimension: label,
+    score: stats.average_scores[key] || 0,
+    fullMark: 5
+  })) : [];
 
-  const radarData = stats?.average_scores ? [
-    { dimension: "People", score: stats.average_scores.people, fullMark: 5 },
-    { dimension: "Process", score: stats.average_scores.process, fullMark: 5 },
-    { dimension: "Data", score: stats.average_scores.data, fullMark: 5 },
-    { dimension: "Technology", score: stats.average_scores.technology, fullMark: 5 },
-  ] : [];
-
-  const getScoreColor = (score) => {
-    if (score >= 4) return "text-[#2f81f7]";
-    if (score >= 3) return "text-[#238636]";
-    if (score >= 2) return "text-[#D29922]";
-    return "text-[#F85149]";
-  };
-
-  const getStatusBadge = (status) => {
-    if (status === "completed") {
-      return <span className="px-2 py-1 text-xs rounded bg-[#238636]/20 text-[#238636]">Completed</span>;
-    }
-    return <span className="px-2 py-1 text-xs rounded bg-[#D29922]/20 text-[#D29922]">In Progress</span>;
+  const handleRowClick = (assessment) => {
+    const path = assessment.status === "completed" 
+      ? `/assessments/${assessment.id}/report` 
+      : `/assessments/${assessment.id}`;
+    navigate(path);
   };
 
   if (loading) {
     return (
       <Layout>
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-pulse-glow w-12 h-12 rounded-full bg-[#2f81f7]/20 flex items-center justify-center">
-            <div className="w-6 h-6 rounded-full bg-[#2f81f7]" />
-          </div>
-        </div>
+        <LoadingSpinner className="h-64" />
       </Layout>
     );
   }
@@ -109,61 +124,30 @@ const DashboardPage = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 stagger-children">
-          <div className="p-6 bg-[#111827] border border-[#374151] rounded-xl card-hover">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-[#2f81f7]/20 flex items-center justify-center">
-                <ClipboardCheck size={24} className="text-[#2f81f7]" />
-              </div>
-              <div>
-                <p className="text-gray-400 text-sm">Total Assessments</p>
-                <p className="text-2xl font-semibold text-white font-['JetBrains_Mono']">
-                  {stats?.total_assessments || 0}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-6 bg-[#111827] border border-[#374151] rounded-xl card-hover">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-[#238636]/20 flex items-center justify-center">
-                <TrendingUp size={24} className="text-[#238636]" />
-              </div>
-              <div>
-                <p className="text-gray-400 text-sm">Completed</p>
-                <p className="text-2xl font-semibold text-white font-['JetBrains_Mono']">
-                  {stats?.completed_assessments || 0}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-6 bg-[#111827] border border-[#374151] rounded-xl card-hover">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-[#D29922]/20 flex items-center justify-center">
-                <BarChart3 size={24} className="text-[#D29922]" />
-              </div>
-              <div>
-                <p className="text-gray-400 text-sm">In Progress</p>
-                <p className="text-2xl font-semibold text-white font-['JetBrains_Mono']">
-                  {stats?.in_progress_assessments || 0}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-6 bg-[#111827] border border-[#374151] rounded-xl card-hover">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-[#A371F7]/20 flex items-center justify-center">
-                <Building2 size={24} className="text-[#A371F7]" />
-              </div>
-              <div>
-                <p className="text-gray-400 text-sm">Companies</p>
-                <p className="text-2xl font-semibold text-white font-['JetBrains_Mono']">
-                  {stats?.total_companies || 0}
-                </p>
-              </div>
-            </div>
-          </div>
+          <StatCard 
+            icon={ClipboardCheck} 
+            label="Total Assessments" 
+            value={stats?.total_assessments || 0} 
+            color="#2f81f7" 
+          />
+          <StatCard 
+            icon={TrendingUp} 
+            label="Completed" 
+            value={stats?.completed_assessments || 0} 
+            color="#238636" 
+          />
+          <StatCard 
+            icon={Zap} 
+            label="Quick Screenings" 
+            value={stats?.total_quick_assessments || 0} 
+            color="#D29922" 
+          />
+          <StatCard 
+            icon={Building2} 
+            label="Companies" 
+            value={stats?.total_companies || 0} 
+            color="#A371F7" 
+          />
         </div>
 
         {/* Main Content Grid */}
@@ -192,16 +176,11 @@ const DashboardPage = () => {
                   </ResponsiveContainer>
                 </div>
                 <div className="mt-4 grid grid-cols-2 gap-4">
-                  {[
-                    { icon: Users, label: "People", key: "people" },
-                    { icon: ClipboardCheck, label: "Process", key: "process" },
-                    { icon: Database, label: "Data", key: "data" },
-                    { icon: Monitor, label: "Technology", key: "technology" },
-                  ].map(({ icon: Icon, label, key }) => (
+                  {DIMENSION_CONFIG.map(({ icon: Icon, label, key }) => (
                     <div key={key} className="flex items-center gap-2">
                       <Icon size={16} className="text-gray-400" />
                       <span className="text-sm text-gray-400">{label}:</span>
-                      <span className={`font-semibold font-['JetBrains_Mono'] ${getScoreColor(stats?.average_scores?.[key])}`}>
+                      <span className={`font-semibold font-['JetBrains_Mono'] ${getScoreColorClass(stats?.average_scores?.[key])}`}>
                         {stats?.average_scores?.[key]?.toFixed(1) || "–"}
                       </span>
                     </div>
@@ -240,23 +219,23 @@ const DashboardPage = () => {
                   <tbody className="text-sm">
                     {recentAssessments.map((assessment) => (
                       <tr 
-                        key={assessment.id} 
+                        key={assessment.id}
                         className="border-b border-[#374151]/50 hover:bg-[#1F2937] cursor-pointer transition-colors"
-                        onClick={() => navigate(assessment.status === "completed" ? `/assessments/${assessment.id}/report` : `/assessments/${assessment.id}`)}
+                        onClick={() => handleRowClick(assessment)}
                         data-testid={`assessment-row-${assessment.id}`}
                       >
                         <td className="py-4 pr-4 text-white">{assessment.company_name}</td>
                         <td className="py-4 pr-4 text-gray-400">{assessment.respondent_name}</td>
                         <td className="py-4 pr-4">
                           {assessment.scores?.overall ? (
-                            <span className={`font-['JetBrains_Mono'] font-semibold ${getScoreColor(assessment.scores.overall)}`}>
+                            <span className={`font-['JetBrains_Mono'] font-semibold ${getScoreColorClass(assessment.scores.overall)}`}>
                               {assessment.scores.overall.toFixed(1)}
                             </span>
                           ) : (
                             <span className="text-gray-500">–</span>
                           )}
                         </td>
-                        <td className="py-4 pr-4">{getStatusBadge(assessment.status)}</td>
+                        <td className="py-4 pr-4"><StatusBadge status={assessment.status} /></td>
                         <td className="py-4 text-gray-400">
                           {new Date(assessment.created_at).toLocaleDateString()}
                         </td>
@@ -266,16 +245,18 @@ const DashboardPage = () => {
                 </table>
               </div>
             ) : (
-              <div className="h-48 flex flex-col items-center justify-center text-gray-500">
-                <ClipboardCheck size={48} className="mb-4 opacity-50" />
-                <p>No assessments yet</p>
-                <Link 
-                  to="/assessments" 
-                  className="mt-4 text-[#2f81f7] hover:text-[#58a6ff] transition-colors"
-                >
-                  Start your first assessment
-                </Link>
-              </div>
+              <EmptyState
+                icon={ClipboardCheck}
+                title="No assessments yet"
+                action={
+                  <Link 
+                    to="/assessments" 
+                    className="text-[#2f81f7] hover:text-[#58a6ff] transition-colors"
+                  >
+                    Start your first assessment
+                  </Link>
+                }
+              />
             )}
           </div>
         </div>

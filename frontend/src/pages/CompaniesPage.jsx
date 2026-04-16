@@ -1,7 +1,9 @@
-import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useCallback } from "react";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import Layout from "../components/Layout";
+import { useCompanies } from "../hooks/useData";
+import { LoadingSpinner, EmptyState } from "../components/ScoreComponents";
 import { 
   Plus, 
   Building2, 
@@ -21,10 +23,71 @@ import {
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
+const INDUSTRIES = [
+  "Manufacturing",
+  "Technology",
+  "Healthcare",
+  "Retail",
+  "Financial Services",
+  "Automotive",
+  "Energy",
+  "Telecommunications",
+  "Consumer Goods",
+  "Industrial Equipment",
+  "Other"
+];
+
+// Company card component
+const CompanyCard = ({ company }) => (
+  <div
+    data-testid={`company-card-${company.id}`}
+    className="p-6 bg-[#111827] border border-[#374151] rounded-xl card-hover group"
+  >
+    <div className="flex items-start justify-between">
+      <div className="flex items-center gap-3">
+        <div className="w-12 h-12 rounded-lg bg-[#2f81f7]/20 flex items-center justify-center">
+          <Building2 size={24} className="text-[#2f81f7]" />
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold text-white group-hover:text-[#2f81f7] transition-colors">
+            {company.name}
+          </h3>
+          <p className="text-sm text-gray-400">{company.industry}</p>
+        </div>
+      </div>
+    </div>
+
+    {company.portfolio_size && (
+      <p className="mt-4 text-sm text-gray-400">
+        Portfolio: {company.portfolio_size}
+      </p>
+    )}
+
+    {company.primary_challenge && (
+      <p className="mt-2 text-sm text-gray-500 line-clamp-2">
+        {company.primary_challenge}
+      </p>
+    )}
+
+    <div className="mt-4 pt-4 border-t border-[#374151] flex items-center justify-between">
+      <div className="flex items-center gap-2 text-sm text-gray-400">
+        <Calendar size={14} />
+        {new Date(company.created_at).toLocaleDateString()}
+      </div>
+      <Link
+        to={`/assessments?company=${company.id}`}
+        className="flex items-center gap-1 text-sm text-[#2f81f7] hover:text-[#58a6ff] transition-colors"
+      >
+        <ClipboardCheck size={14} />
+        Assessments
+        <ChevronRight size={14} />
+      </Link>
+    </div>
+  </div>
+);
+
 const CompaniesPage = () => {
-  const navigate = useNavigate();
-  const [companies, setCompanies] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { companies, loading, addCompany } = useCompanies();
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [formData, setFormData] = useState({
@@ -35,56 +98,42 @@ const CompaniesPage = () => {
   });
   const [submitting, setSubmitting] = useState(false);
 
-  const fetchCompanies = async () => {
-    try {
-      const response = await axios.get(`${BACKEND_URL}/api/companies`);
-      setCompanies(response.data);
-    } catch (err) {
-      console.error("Failed to fetch companies:", err);
-      toast.error("Failed to load companies");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchCompanies();
+  const handleFormChange = useCallback((field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   }, []);
 
-  const handleSubmit = async (e) => {
+  const resetForm = useCallback(() => {
+    setFormData({ name: "", industry: "", portfolio_size: "", primary_challenge: "" });
+  }, []);
+
+  const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
     setSubmitting(true);
     try {
       const response = await axios.post(`${BACKEND_URL}/api/companies`, formData);
-      setCompanies([response.data, ...companies]);
+      addCompany(response.data);
       setShowAddDialog(false);
-      setFormData({ name: "", industry: "", portfolio_size: "", primary_challenge: "" });
+      resetForm();
       toast.success("Company added successfully");
     } catch (err) {
       toast.error("Failed to add company");
     } finally {
       setSubmitting(false);
     }
-  };
+  }, [formData, addCompany, resetForm]);
 
   const filteredCompanies = companies.filter(c => 
     c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     c.industry.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const industries = [
-    "Manufacturing",
-    "Technology",
-    "Healthcare",
-    "Retail",
-    "Financial Services",
-    "Automotive",
-    "Energy",
-    "Telecommunications",
-    "Consumer Goods",
-    "Industrial Equipment",
-    "Other"
-  ];
+  if (loading) {
+    return (
+      <Layout>
+        <LoadingSpinner className="h-64" />
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -120,7 +169,7 @@ const CompaniesPage = () => {
                     type="text"
                     data-testid="company-name-input"
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) => handleFormChange("name", e.target.value)}
                     className="w-full px-4 py-3 bg-[#0B1120] border border-[#374151] rounded-lg text-white focus:ring-2 focus:ring-[#2f81f7] focus:border-transparent transition-all outline-none"
                     placeholder="Acme Corporation"
                     required
@@ -131,12 +180,12 @@ const CompaniesPage = () => {
                   <select
                     data-testid="company-industry-select"
                     value={formData.industry}
-                    onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
+                    onChange={(e) => handleFormChange("industry", e.target.value)}
                     className="w-full px-4 py-3 bg-[#0B1120] border border-[#374151] rounded-lg text-white focus:ring-2 focus:ring-[#2f81f7] focus:border-transparent transition-all outline-none"
                     required
                   >
                     <option value="">Select industry</option>
-                    {industries.map(ind => (
+                    {INDUSTRIES.map(ind => (
                       <option key={ind} value={ind}>{ind}</option>
                     ))}
                   </select>
@@ -147,7 +196,7 @@ const CompaniesPage = () => {
                     type="text"
                     data-testid="company-portfolio-input"
                     value={formData.portfolio_size}
-                    onChange={(e) => setFormData({ ...formData, portfolio_size: e.target.value })}
+                    onChange={(e) => handleFormChange("portfolio_size", e.target.value)}
                     className="w-full px-4 py-3 bg-[#0B1120] border border-[#374151] rounded-lg text-white focus:ring-2 focus:ring-[#2f81f7] focus:border-transparent transition-all outline-none"
                     placeholder="e.g., 500 products"
                   />
@@ -157,7 +206,7 @@ const CompaniesPage = () => {
                   <textarea
                     data-testid="company-challenge-input"
                     value={formData.primary_challenge}
-                    onChange={(e) => setFormData({ ...formData, primary_challenge: e.target.value })}
+                    onChange={(e) => handleFormChange("primary_challenge", e.target.value)}
                     className="w-full px-4 py-3 bg-[#0B1120] border border-[#374151] rounded-lg text-white focus:ring-2 focus:ring-[#2f81f7] focus:border-transparent transition-all outline-none resize-none"
                     rows={3}
                     placeholder="Describe their main PPM challenge..."
@@ -190,69 +239,18 @@ const CompaniesPage = () => {
         </div>
 
         {/* Companies Grid */}
-        {loading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-pulse-glow w-12 h-12 rounded-full bg-[#2f81f7]/20 flex items-center justify-center">
-              <div className="w-6 h-6 rounded-full bg-[#2f81f7]" />
-            </div>
-          </div>
-        ) : filteredCompanies.length > 0 ? (
+        {filteredCompanies.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-children">
             {filteredCompanies.map((company) => (
-              <div
-                key={company.id}
-                data-testid={`company-card-${company.id}`}
-                className="p-6 bg-[#111827] border border-[#374151] rounded-xl card-hover group"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-lg bg-[#2f81f7]/20 flex items-center justify-center">
-                      <Building2 size={24} className="text-[#2f81f7]" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-white group-hover:text-[#2f81f7] transition-colors">
-                        {company.name}
-                      </h3>
-                      <p className="text-sm text-gray-400">{company.industry}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {company.portfolio_size && (
-                  <p className="mt-4 text-sm text-gray-400">
-                    Portfolio: {company.portfolio_size}
-                  </p>
-                )}
-
-                {company.primary_challenge && (
-                  <p className="mt-2 text-sm text-gray-500 line-clamp-2">
-                    {company.primary_challenge}
-                  </p>
-                )}
-
-                <div className="mt-4 pt-4 border-t border-[#374151] flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm text-gray-400">
-                    <Calendar size={14} />
-                    {new Date(company.created_at).toLocaleDateString()}
-                  </div>
-                  <Link
-                    to={`/assessments?company=${company.id}`}
-                    className="flex items-center gap-1 text-sm text-[#2f81f7] hover:text-[#58a6ff] transition-colors"
-                  >
-                    <ClipboardCheck size={14} />
-                    Assessments
-                    <ChevronRight size={14} />
-                  </Link>
-                </div>
-              </div>
+              <CompanyCard key={company.id} company={company} />
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-16 text-gray-500">
-            <Building2 size={64} className="mb-4 opacity-50" />
-            <p className="text-lg">No companies found</p>
-            <p className="text-sm mt-2">Add your first company to start tracking assessments</p>
-          </div>
+          <EmptyState
+            icon={Building2}
+            title="No companies found"
+            description="Add your first company to start tracking assessments"
+          />
         )}
       </div>
     </Layout>

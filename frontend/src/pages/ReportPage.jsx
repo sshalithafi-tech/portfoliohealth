@@ -1,7 +1,21 @@
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
 import Layout from "../components/Layout";
+import { useAssessment } from "../hooks/useData";
+import { 
+  getScoreColor, 
+  getScoreColorClass, 
+  prepareRadarData, 
+  prepareBarData,
+  LEVEL_NAMES
+} from "../utils/scoring";
+import { 
+  LoadingSpinner, 
+  NumberedListItem, 
+  AlertListItem, 
+  ArrowListItem 
+} from "../components/ScoreComponents";
 import { 
   ArrowLeft,
   Download,
@@ -35,14 +49,6 @@ import {
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-const LEVEL_NAMES = {
-  1: "Ad Hoc",
-  2: "Developing",
-  3: "Defined",
-  4: "Managed",
-  5: "Optimising"
-};
-
 const DIMENSION_ICONS = {
   people: Users,
   process: ClipboardCheck,
@@ -50,28 +56,66 @@ const DIMENSION_ICONS = {
   technology: Monitor
 };
 
+const DIMENSIONS = ["people", "process", "data", "technology"];
+
+// Extracted component for dimension score card
+const DimensionScoreCard = ({ dimension, score, levelName }) => {
+  const Icon = DIMENSION_ICONS[dimension];
+  const color = getScoreColor(score);
+  
+  return (
+    <div 
+      data-testid={`dimension-score-${dimension}`}
+      className="p-6 bg-[#111827] border border-[#374151] rounded-xl card-hover"
+    >
+      <div className="flex items-center gap-3 mb-4">
+        <div 
+          className="w-10 h-10 rounded-lg flex items-center justify-center" 
+          style={{ backgroundColor: `${color}20` }}
+        >
+          <Icon size={20} style={{ color }} />
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold text-white capitalize">{dimension}</h3>
+          <p className="text-xs text-gray-500">{levelName}</p>
+        </div>
+      </div>
+      <div className="flex items-baseline gap-2 mb-3">
+        <span className={`text-3xl font-bold font-['JetBrains_Mono'] ${getScoreColorClass(score)}`}>
+          {score}
+        </span>
+        <span className="text-gray-500">/ 5</span>
+      </div>
+      <div className="w-full h-2 bg-[#1F2937] rounded-full overflow-hidden">
+        <div 
+          className="h-full rounded-full transition-all duration-500"
+          style={{ width: `${(score / 5) * 100}%`, backgroundColor: color }}
+        />
+      </div>
+    </div>
+  );
+};
+
+// Extracted component for roadmap section
+const RoadmapSection = ({ title, items, color }) => (
+  <div className="p-4 bg-[#0B1120] rounded-lg border border-[#374151]">
+    <h3 className="text-sm uppercase tracking-wider mb-3" style={{ color }}>{title}</h3>
+    <ul className="space-y-2">
+      {(items || []).map((item, idx) => (
+        <ArrowListItem key={`roadmap-${title}-${idx}`} color={color}>
+          {item}
+        </ArrowListItem>
+      ))}
+    </ul>
+  </div>
+);
+
 const ReportPage = () => {
   const { id } = useParams();
-  const [assessment, setAssessment] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { assessment, loading } = useAssessment(id);
   const [downloading, setDownloading] = useState(false);
 
-  useEffect(() => {
-    const fetchAssessment = async () => {
-      try {
-        const response = await axios.get(`${BACKEND_URL}/api/assessments/${id}`);
-        setAssessment(response.data);
-      } catch (err) {
-        console.error("Failed to fetch assessment:", err);
-        toast.error("Failed to load report");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchAssessment();
-  }, [id]);
-
-  const downloadPDF = async () => {
+  const downloadPDF = useCallback(async () => {
     setDownloading(true);
     try {
       const response = await axios.get(`${BACKEND_URL}/api/assessments/${id}/pdf`, {
@@ -94,30 +138,12 @@ const ReportPage = () => {
     } finally {
       setDownloading(false);
     }
-  };
-
-  const getScoreColor = (score) => {
-    if (score >= 4) return "#2f81f7";
-    if (score >= 3) return "#238636";
-    if (score >= 2) return "#D29922";
-    return "#F85149";
-  };
-
-  const getScoreColorClass = (score) => {
-    if (score >= 4) return "text-[#2f81f7]";
-    if (score >= 3) return "text-[#238636]";
-    if (score >= 2) return "text-[#D29922]";
-    return "text-[#F85149]";
-  };
+  }, [id, assessment?.company_name]);
 
   if (loading) {
     return (
       <Layout>
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-pulse-glow w-12 h-12 rounded-full bg-[#2f81f7]/20 flex items-center justify-center">
-            <div className="w-6 h-6 rounded-full bg-[#2f81f7]" />
-          </div>
-        </div>
+        <LoadingSpinner className="h-64" />
       </Layout>
     );
   }
@@ -145,19 +171,8 @@ const ReportPage = () => {
   const levelNames = report.level_names || {};
   const dimSummaries = report.dimension_summaries || {};
   
-  const radarData = [
-    { dimension: "People", score: scores.people || 0, fullMark: 5 },
-    { dimension: "Process", score: scores.process || 0, fullMark: 5 },
-    { dimension: "Data", score: scores.data || 0, fullMark: 5 },
-    { dimension: "Technology", score: scores.technology || 0, fullMark: 5 },
-  ];
-
-  const barData = [
-    { name: "People", score: scores.people || 0 },
-    { name: "Process", score: scores.process || 0 },
-    { name: "Data", score: scores.data || 0 },
-    { name: "Technology", score: scores.technology || 0 },
-  ];
+  const radarData = prepareRadarData(scores);
+  const barData = prepareBarData(scores);
 
   return (
     <Layout>
@@ -261,45 +276,14 @@ const ReportPage = () => {
 
         {/* Dimension Scores */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {["people", "process", "data", "technology"].map((dim) => {
-            const Icon = DIMENSION_ICONS[dim];
-            const score = scores[dim] || 0;
-            return (
-              <div 
-                key={dim}
-                data-testid={`dimension-score-${dim}`}
-                className="p-6 bg-[#111827] border border-[#374151] rounded-xl card-hover"
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${getScoreColor(score)}20` }}>
-                    <Icon size={20} style={{ color: getScoreColor(score) }} />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-white capitalize">{dim}</h3>
-                    <p className="text-xs text-gray-500">{levelNames[dim] || LEVEL_NAMES[Math.round(score)]}</p>
-                  </div>
-                </div>
-                <div className="flex items-baseline gap-2 mb-3">
-                  <span className={`text-3xl font-bold font-['JetBrains_Mono'] ${getScoreColorClass(score)}`}>
-                    {score}
-                  </span>
-                  <span className="text-gray-500">/ 5</span>
-                </div>
-                <div className="w-full h-2 bg-[#1F2937] rounded-full overflow-hidden">
-                  <div 
-                    className="h-full rounded-full transition-all duration-500"
-                    style={{ 
-                      width: `${(score / 5) * 100}%`,
-                      backgroundColor: getScoreColor(score)
-                    }}
-                  />
-                </div>
-                <p className="mt-4 text-sm text-gray-400 line-clamp-3">
-                  {dimSummaries[dim] || "No summary available."}
-                </p>
-              </div>
-            );
-          })}
+          {DIMENSIONS.map((dim) => (
+            <DimensionScoreCard
+              key={dim}
+              dimension={dim}
+              score={scores[dim] || 0}
+              levelName={levelNames[dim] || LEVEL_NAMES[Math.round(scores[dim] || 0)]}
+            />
+          ))}
         </div>
 
         {/* Bar Chart */}
@@ -318,8 +302,8 @@ const ReportPage = () => {
                   }}
                 />
                 <Bar dataKey="score" radius={[0, 4, 4, 0]}>
-                  {barData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={getScoreColor(entry.score)} />
+                  {barData.map((entry) => (
+                    <Cell key={`bar-${entry.name}`} fill={getScoreColor(entry.score)} />
                   ))}
                 </Bar>
               </BarChart>
@@ -336,12 +320,9 @@ const ReportPage = () => {
             </div>
             <ul className="space-y-3">
               {(report.key_findings || []).map((finding, idx) => (
-                <li key={idx} className="flex items-start gap-3">
-                  <span className="w-6 h-6 rounded-full bg-[#2f81f7]/20 text-[#2f81f7] flex items-center justify-center text-xs shrink-0 mt-0.5">
-                    {idx + 1}
-                  </span>
-                  <p className="text-gray-300 text-sm">{finding}</p>
-                </li>
+                <NumberedListItem key={`finding-${idx}`} index={idx} color="#2f81f7">
+                  {finding}
+                </NumberedListItem>
               ))}
             </ul>
           </div>
@@ -353,12 +334,9 @@ const ReportPage = () => {
             </div>
             <ul className="space-y-3">
               {(report.critical_gaps || []).map((gap, idx) => (
-                <li key={idx} className="flex items-start gap-3">
-                  <span className="w-6 h-6 rounded-full bg-[#F85149]/20 text-[#F85149] flex items-center justify-center text-xs shrink-0 mt-0.5">
-                    !
-                  </span>
-                  <p className="text-gray-300 text-sm">{gap}</p>
-                </li>
+                <AlertListItem key={`gap-${idx}`}>
+                  {gap}
+                </AlertListItem>
               ))}
             </ul>
           </div>
@@ -380,39 +358,21 @@ const ReportPage = () => {
             <h2 className="text-lg font-semibold text-white font-['Outfit']">Improvement Roadmap</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="p-4 bg-[#0B1120] rounded-lg border border-[#374151]">
-              <h3 className="text-sm uppercase tracking-wider text-[#2f81f7] mb-3">Immediate (0-3 months)</h3>
-              <ul className="space-y-2">
-                {(report.roadmap?.immediate || []).map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-2 text-sm text-gray-300">
-                    <span className="text-[#2f81f7]">→</span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="p-4 bg-[#0B1120] rounded-lg border border-[#374151]">
-              <h3 className="text-sm uppercase tracking-wider text-[#238636] mb-3">Short-term (3-12 months)</h3>
-              <ul className="space-y-2">
-                {(report.roadmap?.short_term || []).map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-2 text-sm text-gray-300">
-                    <span className="text-[#238636]">→</span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="p-4 bg-[#0B1120] rounded-lg border border-[#374151]">
-              <h3 className="text-sm uppercase tracking-wider text-[#A371F7] mb-3">Strategic (12-24 months)</h3>
-              <ul className="space-y-2">
-                {(report.roadmap?.strategic || []).map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-2 text-sm text-gray-300">
-                    <span className="text-[#A371F7]">→</span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <RoadmapSection 
+              title="Immediate (0-3 months)" 
+              items={report.roadmap?.immediate} 
+              color="#2f81f7" 
+            />
+            <RoadmapSection 
+              title="Short-term (3-12 months)" 
+              items={report.roadmap?.short_term} 
+              color="#238636" 
+            />
+            <RoadmapSection 
+              title="Strategic (12-24 months)" 
+              items={report.roadmap?.strategic} 
+              color="#A371F7" 
+            />
           </div>
         </div>
 
