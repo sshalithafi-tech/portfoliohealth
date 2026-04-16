@@ -39,10 +39,17 @@ const LoginPage = () => {
       >
         <div className="absolute inset-0 bg-black/60" />
         <div className="relative z-10 flex flex-col justify-center px-12">
-          <h1 className="text-4xl font-light text-white mb-4 font-['Outfit']">
-            PortfolioHealth<br />
-            <span className="font-semibold text-[#2f81f7]">Advisor</span>
-          </h1>
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#2f81f7] to-[#1a5fc9] flex items-center justify-center shadow-xl shadow-[#2f81f7]/30">
+              <span className="text-white font-bold text-xl tracking-tight">PH</span>
+            </div>
+            <div>
+              <h1 className="text-3xl font-light text-white font-['Outfit']">
+                Portfolio<span className="font-semibold text-[#2f81f7]">Health</span>
+              </h1>
+              <p className="text-gray-400">Advisor</p>
+            </div>
+          </div>
           <p className="text-gray-300 text-lg max-w-md">
             Assess your organisation's readiness for data-driven Product Portfolio Management decisions.
           </p>

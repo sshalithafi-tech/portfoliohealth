@@ -19,8 +19,8 @@ const LandingPage = () => {
       <header className="border-b border-[#374151] bg-[#111827]/80 backdrop-blur-sm fixed top-0 left-0 right-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-[#2f81f7] flex items-center justify-center">
-              <span className="text-white font-bold">P</span>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2f81f7] to-[#1a5fc9] flex items-center justify-center shadow-lg shadow-[#2f81f7]/20">
+              <span className="text-white font-bold tracking-tight">PH</span>
             </div>
             <div>
               <h1 className="text-white font-semibold font-['Outfit']">PortfolioHealth</h1>
@@ -61,9 +61,14 @@ const LandingPage = () => {
       {/* Hero Section */}
       <div className="pt-32 pb-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
+          <div className="flex items-center justify-center gap-4 mb-8">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#2f81f7] to-[#1a5fc9] flex items-center justify-center shadow-xl shadow-[#2f81f7]/30">
+              <span className="text-white font-bold text-2xl tracking-tight">PH</span>
+            </div>
+          </div>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-light text-white font-['Outfit'] tracking-tight mb-6">
-            PortfolioHealth
-            <span className="block font-semibold text-[#2f81f7]">Advisor</span>
+            Portfolio<span className="font-semibold text-[#2f81f7]">Health</span>
+            <span className="block text-3xl md:text-4xl mt-2 text-gray-400">Advisor</span>
           </h1>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-12">
             Assess your organisation's readiness for data-driven Product Portfolio Management decisions using the PPM Capability Maturity Framework.

@@ -1,121 +1,85 @@
 {
   "theme": "dark",
-  "archetype": "Archetype 4 (Swiss & High-Contrast) tailored for Premium B2B Consulting",
-  "design_philosophy": "McKinsey Digital meets modern SaaS dashboard. The design prioritizes authority, clarity, and structural rigor (PPDT model). It uses a deep navy/charcoal foundation with electric blue accents to create a premium, commanding presence. Generous spacing, optical alignment, and high-contrast data visualization.",
+  "archetype": "Jewel & Luxury (Archetype 5) with Liquid Tech Twist",
+  "domain": "Corporate/Business SaaS (Portfolio Management)",
+  "colors": {
+    "background_base": "#05050A",
+    "surface_glass": "rgba(255, 255, 255, 0.03)",
+    "surface_glass_hover": "rgba(255, 255, 255, 0.08)",
+    "primary_accent": "#2f81f7",
+    "primary_cyan": "#00E5FF",
+    "liquid_gradient": "linear-gradient(135deg, #2f81f7, #00E5FF)",
+    "border_glass": "rgba(255, 255, 255, 0.08)",
+    "border_glass_highlight": "rgba(255, 255, 255, 0.2)",
+    "text_primary": "#FFFFFF",
+    "text_secondary": "rgba(255, 255, 255, 0.65)"
+  },
   "typography": {
     "headings": {
-      "family": "Outfit",
-      "weights": ["light", "regular", "semibold"],
-      "usage": "Use Outfit for all display and heading text to avoid generic templates while maintaining a clean, premium sans-serif look. Use tracking-tight for H1/H2."
+      "family": "Outfit, sans-serif",
+      "classes": "font-outfit tracking-tight text-white",
+      "rules": "Must be used for all H1-H4. Do NOT use Inter for headings."
     },
     "body": {
-      "family": "Inter",
-      "weights": ["regular", "medium"],
-      "usage": "Clean, highly legible body text suitable for dense data and conversational AI interfaces."
+      "family": "Inter, sans-serif",
+      "classes": "font-inter text-white/65 leading-relaxed",
+      "rules": "Strictly for body text, data tables, and small labels."
     },
     "mono": {
-      "family": "JetBrains Mono",
-      "usage": "For data points, scores (1-5 maturity levels), and technical indicators."
-    },
-    "scale": {
-      "h1": "text-4xl sm:text-5xl tracking-tight",
-      "h2": "text-2xl sm:text-3xl tracking-tight",
-      "h3": "text-xl sm:text-2xl",
-      "h4": "text-lg sm:text-xl font-medium",
-      "body": "text-base",
-      "small": "text-sm",
-      "overline": "text-xs tracking-[0.2em] uppercase"
+      "family": "JetBrains Mono, monospace",
+      "classes": "font-mono text-cyan-400"
     }
   },
-  "colors": {
-    "background": {
-      "default": "#0B1120", 
-      "surface": "#111827", 
-      "elevated": "#1F2937" 
-    },
-    "brand": {
-      "primary": "#2f81f7",
-      "primary_hover": "#58a6ff",
-      "accent": "#2f81f7"
-    },
-    "text": {
-      "primary": "#F9FAFB",
-      "secondary": "#9CA3AF",
-      "muted": "#6B7280"
-    },
-    "border": {
-      "default": "#374151",
-      "subtle": "#1F2937"
-    },
-    "status": {
-      "success": "#238636",
-      "warning": "#D29922",
-      "error": "#F85149",
-      "info": "#2f81f7"
-    },
-    "chart_palette": [
-      "#2f81f7",
-      "#A371F7",
-      "#238636",
-      "#D29922",
-      "#F85149"
-    ]
-  },
   "layout_and_spacing": {
-    "philosophy": "Generous Spacing Philosophy. Use 2x spacing for breathing room. The Control Room grid for dashboards.",
-    "dashboard_grid": "grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6",
-    "bento_grid": "grid-cols-1 md:grid-cols-8 lg:grid-cols-12 gap-8",
-    "container_padding": "p-6 sm:p-8 lg:p-12",
-    "borders": "1px solid #374151 with rounded-lg or rounded-xl (subtle roundness max 8px for premium feel)",
-    "shadows": "Diffuse ambient shadows only. shadow-[0_8px_32px_rgba(0,0,0,0.4)] for elevated cards."
+    "philosophy": "Generous Spacing (p-6, p-8) to let the glass breathe. Avoid cramped data views.",
+    "sidebar": "Do not use a traditional full-bleed sidebar. Make it a 'Floating Glass Panel' (m-4 rounded-2xl glassmorphism).",
+    "dashboard_grid": "Use Mode B: The 'Control Room' Grid. Dense, gap-6, grid-cols-1 md:grid-cols-3 lg:grid-cols-4. Every widget stretches to fill its height.",
+    "alignment": "Left-align dense content and data. Avoid centering everything."
   },
-  "components": {
-    "buttons": "Premium feel: bg-[#2f81f7] text-white rounded-md px-6 py-2.5 font-medium hover:bg-[#58a6ff] transition-all. Subtle inner glow border-t border-white/20.",
-    "cards": "Surface background (#111827), 1px subtle border (#374151), flat, no heavy shadows. Add slight hover lift (-translate-y-1) for interactive cards like Assessment History.",
-    "inputs": "Shadcn inputs customized: bg-transparent border-[#374151] text-white focus:ring-2 focus:ring-[#2f81f7] focus:border-transparent rounded-md.",
-    "dialogs": "Crystal Glassmorphism overlay: backdrop-blur-xl bg-black/60. Modal background solid #111827 with 1px border #374151.",
-    "tables": "Shadcn tables. Header text-xs uppercase tracking-wider text-[#9CA3AF]. Rows have hover:bg-[#1F2937]. Left aligned text.",
-    "chat_interface": "User messages: bg-[#1F2937]. AI Consultant: bg-transparent border-l-2 border-[#2f81f7] pl-4. Clean, readable width (max-w-3xl).",
-    "charts": "Use Recharts or Shadcn Charts. 4-axis radar chart for PPDT model, or layered bar charts. Use chart_palette.",
-    "phase_indicator": "Linear stepper with active phase in #2f81f7 and completed phases with a checkmark. Inactive in #374151.",
-    "pdf_export": "Prominent CTA in dashboard. Button with download icon, text 'Export to PDF'."
+  "surface_strategies": {
+    "liquid_background": "The root background must be deep void black (#05050A). Behind the main layout, add 2-3 absolute-positioned div 'blobs' (e.g., w-96 h-96 rounded-full bg-blue-600/20 and bg-cyan-500/20) with massive blur (blur-[120px] or blur-3xl). These act as the 'liquid' light source shining through the glass.",
+    "glass_cards": "Standardize this exact utility combo for cards/panels: 'bg-white/[0.03] backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)]'. For premium realism, add 'border-t-white/20' and 'border-l-white/20' to simulate specular highlights.",
+    "glass_modals": "Dialogs/Modals must use heavy glass: 'bg-[#05050A]/40 backdrop-blur-3xl border border-white/10'.",
+    "buttons_primary": "Use the liquid gradient for primary CTAs: 'bg-gradient-to-r from-[#2f81f7] to-[#00E5FF] text-black font-semibold shadow-[0_0_20px_rgba(0,229,255,0.3)] hover:shadow-[0_0_30px_rgba(0,229,255,0.5)] transition-all'. Note the text-black for APCA contrast.",
+    "buttons_secondary": "Glass outline: 'bg-white/5 border border-white/10 text-white hover:bg-white/10'."
   },
-  "motion_and_interactions": {
-    "hover": "All interactive elements must have a hover state that changes background or border color.",
-    "transitions": "Use transition-all duration-200 ease-in-out for buttons and cards.",
-    "entrance": "Staggered fade-in (opacity 0 to 1, translate-y 4) for dashboard widgets and chat messages."
+  "component_specifics": {
+    "landing_page": "Use 'landing_hero_bg' as the section background. Layer a heavy glass header. The two CTA cards (Quick Check & Full Assessment) must be prominent glass panels with hover lift (-translate-y-1).",
+    "login_register": "Split layout: Image on the left (use 'hero_shapes'), Form on the right inside a floating glass card.",
+    "radar_charts": "Charts must look holographic. Set grid lines to 'rgba(255,255,255,0.1)'. Set radar fill to 'rgba(0, 229, 255, 0.15)' with a 2px solid cyan (#00E5FF) stroke.",
+    "chat_interface": "AI assessment chat: User bubbles are subtle glass ('bg-white/10 border border-white/5'). AI bubbles are liquid-tinted ('bg-blue-900/30 border border-blue-500/30 backdrop-blur-md').",
+    "tables": "Remove all solid backgrounds. Tables are transparent. Headers: 'border-b border-white/10 text-white/50'. Rows: 'border-b border-white/5 hover:bg-white/[0.02] transition-colors'.",
+    "forms_inputs": "Inputs, Selects, and Textareas: 'bg-white/5 border border-white/10 text-white placeholder:text-white/30 focus:border-[#00E5FF] focus:bg-white/10 focus:ring-1 focus:ring-[#00E5FF] transition-all'."
   },
   "media": {
-    "image_urls": [
-      {
-        "url": "https://images.unsplash.com/photo-1693430895886-dced76ef7b0b?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NTJ8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMGFyayUyMGJsdWUlMjBnZW9tZXRyaWN8ZW58MHx8fHwxNzc2MzQyOTQ3fDA&ixlib=rb-4.1.0&q=85",
-        "category": "login_background",
-        "description": "Abstract dark blue geometric background for the login and registration pages, overlay with bg-black/50."
-      },
-      {
-        "url": "https://images.unsplash.com/photo-1770170389700-eb0f9b910ed8?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzN8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMGFpJTIwdGVjaG5vbG9neSUyMG5vZGV8ZW58MHx8fHwxNzc2MzQyOTQ3fDA&ixlib=rb-4.1.0&q=85",
-        "category": "ai_avatar",
-        "description": "Abstract AI technology node to be used as the AI Consultant's avatar in the chat interface."
-      },
-      {
-        "url": "https://images.unsplash.com/photo-1746182969730-236dfcf3f2c8?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxODd8MHwxfHNlYXJjaHwxfHxVbml2ZXJzaXR5JTIwb2YlMjBPdWx1JTIwbG9nb3xlbnwwfHx8fDE3NzYzNDI5Mzd8MA&ixlib=rb-4.1.0&q=85",
-        "category": "university_of_oulu_reference",
-        "description": "Coat of arms/building reference for the University of Oulu. Can be used as a subtle image in the 'About' section or footer background."
-      }
-    ],
-    "icons": "lucide-react"
+    "landing_hero_bg": {
+      "url": "https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/8a1fd49539f9ba0d749527448a5a8795f2be8a64fe1b145dadd8a27eaa09898c.png",
+      "description": "Abstract liquid fluid gradient background, deep navy blue with vibrant cyan leaks. Use as the hero/landing page background."
+    },
+    "dashboard_ambient_bg": {
+      "url": "https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/3b568adb7409134d23d59c3bd08c734c68f92c2ffba5fe6f9866bfe5ec40a92f.png",
+      "description": "Corporate dashboard background with subtle liquid waves. Use behind the glass sidebar and dashboard grid."
+    },
+    "hero_shapes": {
+      "url": "https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/8c7dd872cf9afec460503fdced858c236170fec9136b7d8fb0d593cc6ad0e7c1.png",
+      "description": "3D liquid glass shapes. Use for the left side of the Login/Register split layout."
+    },
+    "abstract_blue_wave": {
+      "url": "https://images.unsplash.com/photo-1679346390768-af1fa0231078?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njd8MHwxfHNlYXJjaHwzfHxkYXJrJTIwbGlxdWlkJTIwYWJzdHJhY3R8ZW58MHx8fHwxNzc2MzYwNzQwfDA&ixlib=rb-4.1.0&q=85",
+      "description": "Abstract blue wavy lines. Use for empty states, report covers, or card accents."
+    }
+  },
+  "accessibility_and_testing": {
+    "data_testid": "ALL interactive and key informational elements MUST include a 'data-testid' attribute (e.g., data-testid='login-submit-button').",
+    "contrast": "Ensure text over blurred areas maintains at least 4.5:1 contrast. Use drop-shadow on text if the liquid background becomes too bright."
   },
   "instructions_to_main_agent": [
-    "1. Initialize a Tailwind project in dark mode by default.",
-    "2. Use 'Outfit' for headings and 'Inter' for body. Update tailwind.config.js to set these font families.",
-    "3. Build the Login/Register page using the login_background image with a heavy dark overlay.",
-    "4. The Dashboard must use 'The Control Room Grid' strategy (tight gaps, dense data).",
-    "5. For the Conversational AI Assessment, implement a chat interface with the ai_avatar.",
-    "6. Build a specific component for the PPDT (People, Process, Data, Technology) 1-5 maturity scoring using Radar/Bar charts.",
-    "7. Implement an Assessment History Table showing previous scores and a Company Longitudinal Tracking chart (line chart over 6-12 months).",
-    "8. Ensure a Phase Progress Indicator is visible during the assessment flow.",
-    "9. Add a distinct PDF Export button on the report view.",
-    "10. Add a footer referencing 'Product Wellbeing framework' and 'University of Oulu research lineage'.",
-    "11. ALL interactive elements must have `data-testid` attributes."
+    "1. Completely overhaul the UI from solid dark blocks (#111827) to the 'Liquid Glass' theme.",
+    "2. Implement the 'liquid_background' strategy at the root layout (App.jsx or equivalent) so it persists across pages, using massive blurred divs.",
+    "3. Convert the Sidebar to a floating glass panel (m-4).",
+    "4. Update all standard Shadcn/Tailwind cards to use the 'glass_cards' utility combo defined above.",
+    "5. Enforce Outfit font for all Headings, Inter for Body.",
+    "6. Update the Recharts/Radar charts to use the holographic cyan/transparent styling.",
+    "7. Consume the provided media URLs for their designated sections."
   ]
 }

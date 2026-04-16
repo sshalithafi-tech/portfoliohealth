@@ -163,8 +163,8 @@ const QuickResultsPage = () => {
       {/* Header */}
       <header className="h-16 border-b border-[#374151] bg-[#111827] flex items-center px-6">
         <Link to="/" className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-[#2f81f7] flex items-center justify-center">
-            <span className="text-white font-bold text-sm">P</span>
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#2f81f7] to-[#1a5fc9] flex items-center justify-center shadow-md shadow-[#2f81f7]/20">
+            <span className="text-white font-bold text-xs tracking-tight">PH</span>
           </div>
           <span className="text-white font-semibold font-['Outfit']">PortfolioHealth</span>
         </Link>

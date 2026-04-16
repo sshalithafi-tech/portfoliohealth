@@ -41,8 +41,8 @@ const Layout = ({ children }) => {
           {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-[#2f81f7] flex items-center justify-center">
-            <span className="text-white font-bold text-sm">P</span>
+          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#2f81f7] to-[#1a5fc9] flex items-center justify-center shadow-lg shadow-[#2f81f7]/20">
+            <span className="text-white font-bold text-sm tracking-tight">PH</span>
           </div>
           <span className="text-white font-semibold font-['Outfit']">PortfolioHealth</span>
         </div>
@@ -66,8 +66,8 @@ const Layout = ({ children }) => {
       `}>
         <div className="h-16 flex items-center px-6 border-b border-[#374151]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-[#2f81f7] flex items-center justify-center">
-              <span className="text-white font-bold">P</span>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2f81f7] to-[#1a5fc9] flex items-center justify-center shadow-lg shadow-[#2f81f7]/20">
+              <span className="text-white font-bold tracking-tight">PH</span>
             </div>
             <div>
               <h1 className="text-white font-semibold font-['Outfit']">PortfolioHealth</h1>
