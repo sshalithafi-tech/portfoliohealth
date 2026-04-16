@@ -91,6 +91,14 @@ async def get_current_user(request: Request) -> dict:
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
+# Admin dependency
+async def require_admin(request: Request) -> dict:
+    user = await get_current_user(request)
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return user
+
+
 # Create the main app
 app = FastAPI()
 
@@ -738,6 +746,172 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
 @api_router.get("/")
 async def root():
     return {"message": "PortfolioHealth Advisor API", "status": "healthy"}
+
+# ============================================
+# ADMIN ENDPOINTS - View all assessments
+# ============================================
+
+@api_router.get("/admin/assessments")
+async def admin_get_all_assessments(current_user: dict = Depends(require_admin)):
+    """Get ALL assessments across all users (admin only)"""
+    assessments = await db.assessments.find(
+        {},
+        {"_id": 1, "company_id": 1, "company_name": 1, "company_industry": 1,
+         "respondent_name": 1, "respondent_role": 1, "status": 1, "scores": 1,
+         "created_at": 1, "completed_at": 1, "user_id": 1}
+    ).sort("created_at", -1).to_list(5000)
+
+    # Enrich with user info
+    user_ids = list(set(a.get("user_id") for a in assessments if a.get("user_id")))
+    users_map = {}
+    for uid in user_ids:
+        try:
+            u = await db.users.find_one({"_id": ObjectId(uid)}, {"_id": 0, "name": 1, "email": 1})
+            if u:
+                users_map[uid] = u
+        except Exception:
+            pass
+
+    result = []
+    for a in assessments:
+        user_info = users_map.get(a.get("user_id"), {})
+        result.append({
+            "id": str(a["_id"]),
+            "company_name": a.get("company_name", ""),
+            "company_industry": a.get("company_industry", ""),
+            "respondent_name": a.get("respondent_name", ""),
+            "respondent_role": a.get("respondent_role", ""),
+            "status": a.get("status", ""),
+            "scores": a.get("scores"),
+            "created_at": a.get("created_at", ""),
+            "completed_at": a.get("completed_at"),
+            "consultant_name": user_info.get("name", "Unknown"),
+            "consultant_email": user_info.get("email", ""),
+        })
+    return result
+
+@api_router.get("/admin/quick-assessments")
+async def admin_get_all_quick_assessments(current_user: dict = Depends(require_admin)):
+    """Get ALL quick assessments (admin only)"""
+    quick = await db.quick_assessments.find(
+        {},
+        {"_id": 1, "company_name": 1, "industry": 1, "respondent_name": 1,
+         "respondent_email": 1, "scores": 1, "traffic_lights": 1, "level_names": 1,
+         "created_at": 1, "user_id": 1}
+    ).sort("created_at", -1).to_list(5000)
+
+    return [{
+        "id": str(q["_id"]),
+        "company_name": q.get("company_name", ""),
+        "industry": q.get("industry", ""),
+        "respondent_name": q.get("respondent_name", ""),
+        "respondent_email": q.get("respondent_email", ""),
+        "scores": q.get("scores"),
+        "traffic_lights": q.get("traffic_lights"),
+        "level_names": q.get("level_names"),
+        "created_at": q.get("created_at", ""),
+        "saved_by_user": bool(q.get("user_id")),
+    } for q in quick]
+
+@api_router.get("/admin/stats")
+async def admin_get_stats(current_user: dict = Depends(require_admin)):
+    """Get global stats across all users (admin only)"""
+    total_assessments = await db.assessments.count_documents({})
+    completed_assessments = await db.assessments.count_documents({"status": "completed"})
+    total_quick = await db.quick_assessments.count_documents({})
+    total_companies = await db.companies.count_documents({})
+    total_users = await db.users.count_documents({})
+
+    return {
+        "total_assessments": total_assessments,
+        "completed_assessments": completed_assessments,
+        "in_progress_assessments": total_assessments - completed_assessments,
+        "total_quick_assessments": total_quick,
+        "total_companies": total_companies,
+        "total_users": total_users,
+    }
+
+@api_router.get("/admin/export/assessments")
+async def admin_export_assessments_csv(current_user: dict = Depends(require_admin)):
+    """Export all assessments as CSV (admin only)"""
+    import csv
+    import io
+
+    assessments = await db.assessments.find(
+        {},
+        {"_id": 1, "company_name": 1, "company_industry": 1, "respondent_name": 1,
+         "respondent_role": 1, "status": 1, "scores": 1, "created_at": 1, "completed_at": 1}
+    ).sort("created_at", -1).to_list(10000)
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["Company", "Industry", "Respondent", "Role", "Status",
+                     "People", "Process", "Data", "Technology", "Overall", "Date", "Completed"])
+
+    for a in assessments:
+        scores = a.get("scores") or {}
+        writer.writerow([
+            a.get("company_name", ""),
+            a.get("company_industry", ""),
+            a.get("respondent_name", ""),
+            a.get("respondent_role", ""),
+            a.get("status", ""),
+            scores.get("people", ""),
+            scores.get("process", ""),
+            scores.get("data", ""),
+            scores.get("technology", ""),
+            scores.get("overall", ""),
+            a.get("created_at", ""),
+            a.get("completed_at", ""),
+        ])
+
+    csv_content = output.getvalue()
+    return StreamingResponse(
+        iter([csv_content]),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=assessments_export.csv"}
+    )
+
+@api_router.get("/admin/export/quick-assessments")
+async def admin_export_quick_csv(current_user: dict = Depends(require_admin)):
+    """Export all quick assessments as CSV (admin only)"""
+    import csv
+    import io
+
+    quick = await db.quick_assessments.find(
+        {},
+        {"_id": 1, "company_name": 1, "industry": 1, "respondent_name": 1,
+         "respondent_email": 1, "scores": 1, "created_at": 1}
+    ).sort("created_at", -1).to_list(10000)
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["Company", "Industry", "Respondent", "Email",
+                     "People", "Process", "Data", "Technology", "Overall", "Date"])
+
+    for q in quick:
+        scores = q.get("scores") or {}
+        writer.writerow([
+            q.get("company_name", ""),
+            q.get("industry", ""),
+            q.get("respondent_name", ""),
+            q.get("respondent_email", ""),
+            scores.get("people", ""),
+            scores.get("process", ""),
+            scores.get("data", ""),
+            scores.get("technology", ""),
+            scores.get("overall", ""),
+            q.get("created_at", ""),
+        ])
+
+    csv_content = output.getvalue()
+    return StreamingResponse(
+        iter([csv_content]),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=quick_assessments_export.csv"}
+    )
+
+
 
 # ============================================
 # QUICK ASSESSMENT ENDPOINTS

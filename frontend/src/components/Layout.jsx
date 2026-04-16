@@ -7,7 +7,8 @@ import {
   LogOut,
   Menu,
   X,
-  ChevronRight
+  ChevronRight,
+  Shield
 } from "lucide-react";
 import { useState } from "react";
 
@@ -28,6 +29,7 @@ const Layout = ({ children }) => {
     { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { path: "/assessments", label: "Assessments", icon: ClipboardCheck },
     { path: "/companies", label: "Companies", icon: Building2 },
+    ...(user?.role === "admin" ? [{ path: "/admin", label: "Admin Data", icon: Shield }] : []),
   ];
 
   const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + "/");

@@ -14,6 +14,7 @@ import ReportPage from "./pages/ReportPage";
 import LandingPage from "./pages/LandingPage";
 import QuickAssessmentPage from "./pages/QuickAssessmentPage";
 import QuickResultsPage from "./pages/QuickResultsPage";
+import AdminPage from "./pages/AdminPage";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -155,6 +156,7 @@ function App() {
             <Route path="/assessments/:id" element={<ProtectedRoute><AssessmentChatPage /></ProtectedRoute>} />
             <Route path="/assessments/:id/report" element={<ProtectedRoute><ReportPage /></ProtectedRoute>} />
             <Route path="/companies" element={<ProtectedRoute><CompaniesPage /></ProtectedRoute>} />
+            <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
             <Route path="/quick-assessment" element={<QuickAssessmentPage />} />
             <Route path="/quick-assessment/:id/results" element={<QuickResultsPage />} />
           </Routes>

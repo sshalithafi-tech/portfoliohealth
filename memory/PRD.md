@@ -53,6 +53,14 @@ SaaS application for PPM (Product Portfolio Management) Capability Maturity Asse
   - Scrollable phase indicators
   - Responsive text scaling
 
+### Admin Panel ✅ (April 2026)
+- Admin-only page at /admin showing ALL assessments across all users
+- Global stats: total assessments, completed, quick assessments, companies, users
+- Tabbed tables: Full Assessments and Quick Assessments with search/filter
+- CSV export for both assessment types
+- Role-based access (admin role required)
+- API endpoints: /api/admin/stats, /api/admin/assessments, /api/admin/quick-assessments, /api/admin/export/*
+
 ### Code Quality ✅
 - Custom React hooks (useData.js)
 - Extracted UI components (ScoreComponents.jsx)
