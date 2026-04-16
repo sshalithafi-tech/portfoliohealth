@@ -35,15 +35,11 @@ import {
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 const DIMENSION_ICONS = {
-  people: Users,
-  process: ClipboardCheck,
-  data: Database,
-  technology: Monitor
+  people: Users, process: ClipboardCheck, data: Database, technology: Monitor
 };
 
 const DIMENSIONS = ["people", "process", "data", "technology"];
 
-// Dimension score card component
 const DimensionCard = ({ dimension, score, traffic, level }) => {
   const Icon = DIMENSION_ICONS[dimension];
   const color = getScoreColor(score);
@@ -51,17 +47,17 @@ const DimensionCard = ({ dimension, score, traffic, level }) => {
   return (
     <div 
       data-testid={`quick-dimension-${dimension}`}
-      className={`p-5 bg-[#111827] border rounded-xl animate-fade-in flex items-center gap-4 ${getTrafficLightBgClass(traffic)}`}
+      className={`p-5 glass-card rounded-xl animate-fade-in flex items-center gap-4 ${getTrafficLightBgClass(traffic)}`}
     >
       <div 
         className="w-12 h-12 rounded-lg flex items-center justify-center" 
-        style={{ backgroundColor: `${color}20` }}
+        style={{ backgroundColor: `${color}15` }}
       >
         <Icon size={24} style={{ color }} />
       </div>
       <div className="flex-1">
         <div className="flex items-center justify-between mb-1">
-          <h3 className="font-semibold text-white capitalize">{dimension}</h3>
+          <h3 className="font-semibold text-white capitalize font-['Outfit']">{dimension}</h3>
           <TrafficLightIcon status={traffic} size={20} />
         </div>
         <div className="flex items-baseline gap-2">
@@ -71,8 +67,8 @@ const DimensionCard = ({ dimension, score, traffic, level }) => {
           >
             {score}
           </span>
-          <span className="text-gray-500">/ 5</span>
-          <span className="text-sm text-gray-400 ml-2">· {level}</span>
+          <span className="text-white/30">/ 5</span>
+          <span className="text-sm text-white/40 ml-2">· {level}</span>
         </div>
       </div>
     </div>
@@ -95,7 +91,6 @@ const QuickResultsPage = () => {
       const response = await axios.get(`${BACKEND_URL}/api/quick-assessment/${id}/pdf`, {
         responseType: "blob"
       });
-      
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
@@ -104,7 +99,6 @@ const QuickResultsPage = () => {
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
-      
       toast.success("PDF downloaded successfully");
     } catch (err) {
       console.error("Failed to download PDF:", err);
@@ -120,7 +114,6 @@ const QuickResultsPage = () => {
       navigate("/login", { state: { returnTo: `/quick-assessment/${id}/results` } });
       return;
     }
-    
     setSaving(true);
     try {
       await axios.post(`${BACKEND_URL}/api/quick-assessment/${id}/save`);
@@ -136,7 +129,7 @@ const QuickResultsPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0B1120]">
+      <div className="min-h-screen">
         <LoadingSpinner className="min-h-screen" />
       </div>
     );
@@ -144,9 +137,9 @@ const QuickResultsPage = () => {
 
   if (!result) {
     return (
-      <div className="min-h-screen bg-[#0B1120] flex flex-col items-center justify-center">
-        <p className="text-gray-400 mb-4">Assessment not found</p>
-        <Link to="/quick-assessment" className="text-[#2f81f7] hover:text-[#58a6ff]">
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <p className="text-white/50 mb-4">Assessment not found</p>
+        <Link to="/quick-assessment" className="text-[#00E5FF] hover:text-[#00E5FF]/80">
           Start a new assessment
         </Link>
       </div>
@@ -159,13 +152,11 @@ const QuickResultsPage = () => {
   const radarData = prepareRadarData(scores);
 
   return (
-    <div className="min-h-screen bg-[#0B1120]">
-      {/* Header */}
-      <header className="h-16 border-b border-[#374151] bg-[#111827] flex items-center px-6">
+    <div className="min-h-screen">
+      {/* Glass Header */}
+      <header className="h-16 glass-surface flex items-center px-6 relative z-10">
         <Link to="/" className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#2f81f7] to-[#1a5fc9] flex items-center justify-center shadow-md shadow-[#2f81f7]/20">
-            <span className="text-white font-bold text-xs tracking-tight">PH</span>
-          </div>
+          <img src="https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/6407f98124d827501f865028cbbf81566506fd19a8f17f5fd5b271241d491414.png" alt="PH" className="w-8 h-8 rounded-lg object-contain" />
           <span className="text-white font-semibold font-['Outfit']">PortfolioHealth</span>
         </Link>
         
@@ -177,7 +168,7 @@ const QuickResultsPage = () => {
               onClick={saveToAccount}
               disabled={saving}
               data-testid="save-assessment-btn"
-              className="flex items-center gap-2 px-4 py-2 bg-[#111827] border border-[#374151] text-gray-300 rounded-lg hover:border-[#2f81f7] hover:text-white transition-all disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 btn-glass rounded-xl disabled:opacity-50"
             >
               <Save size={16} />
               {saving ? "Saving..." : "Save to Account"}
@@ -192,7 +183,7 @@ const QuickResultsPage = () => {
             onClick={downloadPDF}
             disabled={downloading}
             data-testid="download-quick-pdf-btn"
-            className="flex items-center gap-2 px-5 py-2 bg-[#2f81f7] text-white rounded-lg hover:bg-[#58a6ff] transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-5 py-2 btn-liquid rounded-xl disabled:opacity-50"
           >
             <Download size={16} />
             {downloading ? "Generating..." : "Export PDF"}
@@ -200,20 +191,20 @@ const QuickResultsPage = () => {
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto px-6 py-12">
+      <div className="max-w-4xl mx-auto px-6 py-12 relative z-10">
         {/* Title */}
         <div className="text-center mb-12 animate-fade-in">
           <h1 className="text-3xl font-semibold text-white font-['Outfit'] tracking-tight mb-2">
             PPDT Quick Health Check Results
           </h1>
-          <p className="text-gray-400">{result.company_name} · {result.industry}</p>
+          <p className="text-white/50">{result.company_name} · {result.industry}</p>
         </div>
 
         {/* Overall Score */}
-        <div className="p-8 bg-gradient-to-r from-[#111827] to-[#0B1120] border border-[#374151] rounded-2xl mb-8 animate-fade-in">
+        <div className="p-8 glass-surface-highlight rounded-2xl mb-8 animate-fade-in">
           <div className="flex flex-col lg:flex-row items-center gap-8">
             <div className="text-center lg:text-left flex-1">
-              <p className="text-xs uppercase tracking-[0.2em] text-gray-400 mb-2">Overall Maturity</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-white/40 mb-2">Overall Maturity</p>
               <div className="flex items-baseline gap-3 justify-center lg:justify-start">
                 <span 
                   data-testid="quick-overall-score"
@@ -222,7 +213,7 @@ const QuickResultsPage = () => {
                 >
                   {scores.overall?.toFixed(1) || "–"}
                 </span>
-                <span className="text-2xl text-gray-500">/ 5.0</span>
+                <span className="text-2xl text-white/30">/ 5.0</span>
               </div>
               <p className="text-xl font-semibold text-white mt-2 font-['Outfit']">
                 {levelNames.overall || "–"}
@@ -235,15 +226,15 @@ const QuickResultsPage = () => {
             <div className="w-full lg:w-72 h-72">
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={radarData}>
-                  <PolarGrid stroke="#374151" />
-                  <PolarAngleAxis dataKey="dimension" tick={{ fill: "#9CA3AF", fontSize: 12 }} />
-                  <PolarRadiusAxis domain={[0, 5]} tick={{ fill: "#6B7280", fontSize: 10 }} />
+                  <PolarGrid stroke="rgba(255,255,255,0.08)" />
+                  <PolarAngleAxis dataKey="dimension" tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 12 }} />
+                  <PolarRadiusAxis domain={[0, 5]} tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} />
                   <Radar
                     name="Score"
                     dataKey="score"
-                    stroke="#2f81f7"
-                    fill="#2f81f7"
-                    fillOpacity={0.3}
+                    stroke="#00E5FF"
+                    fill="#00E5FF"
+                    fillOpacity={0.15}
                     strokeWidth={2}
                   />
                 </RadarChart>
@@ -252,9 +243,9 @@ const QuickResultsPage = () => {
           </div>
         </div>
 
-        {/* Dimension Scores with Traffic Lights */}
+        {/* Dimension Scores */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-          {DIMENSIONS.map((dim, idx) => (
+          {DIMENSIONS.map((dim) => (
             <DimensionCard
               key={dim}
               dimension={dim}
@@ -266,25 +257,25 @@ const QuickResultsPage = () => {
         </div>
 
         {/* CTA Box */}
-        <div className="p-8 bg-gradient-to-br from-[#2f81f7]/10 to-[#111827] border border-[#2f81f7]/30 rounded-2xl animate-fade-in">
+        <div className="p-8 glass-card rounded-2xl animate-fade-in hover:border-[#00E5FF]/20">
           <h2 className="text-xl font-semibold text-white mb-4 font-['Outfit']">
             Ready for a Deeper Assessment?
           </h2>
-          <p className="text-gray-300 mb-6">
+          <p className="text-white/60 mb-6">
             {result.cta_message}
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
             <Link
               to={user ? "/assessments" : "/register"}
               data-testid="start-full-assessment-cta"
-              className="flex items-center justify-center gap-2 px-6 py-3 bg-[#2f81f7] text-white font-medium rounded-lg hover:bg-[#58a6ff] transition-colors"
+              className="flex items-center justify-center gap-2 px-6 py-3 btn-liquid rounded-xl"
             >
               {user ? "Start Full Assessment" : "Create Account to Start"}
               <ArrowRight size={18} />
             </Link>
             <Link
               to="/"
-              className="flex items-center justify-center gap-2 px-6 py-3 bg-[#111827] border border-[#374151] text-gray-300 rounded-lg hover:border-[#2f81f7] hover:text-white transition-colors"
+              className="flex items-center justify-center gap-2 px-6 py-3 btn-glass rounded-xl"
             >
               Back to Home
             </Link>
@@ -292,8 +283,8 @@ const QuickResultsPage = () => {
         </div>
 
         {/* Footer */}
-        <div className="text-center py-8 mt-8 border-t border-[#374151]">
-          <p className="text-sm text-gray-500">
+        <div className="text-center py-8 mt-8 border-t border-white/[0.06]">
+          <p className="text-sm text-white/30">
             Based on: PPM Capability Maturity Research · University of Oulu (2026)
           </p>
         </div>

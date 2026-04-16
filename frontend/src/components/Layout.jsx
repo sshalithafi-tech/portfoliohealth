@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
+const LOGO_MARK = "https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/6407f98124d827501f865028cbbf81566506fd19a8f17f5fd5b271241d491414.png";
+
 const Layout = ({ children }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -31,19 +33,17 @@ const Layout = ({ children }) => {
   const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + "/");
 
   return (
-    <div className="min-h-screen bg-[#0B1120]">
+    <div className="min-h-screen">
       {/* Mobile Header */}
-      <div className="lg:hidden h-16 bg-[#111827] border-b border-[#374151] flex items-center justify-between px-4">
+      <div className="lg:hidden h-16 glass-surface flex items-center justify-between px-4 relative z-50">
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="p-2 text-gray-400 hover:text-white transition-colors"
+          className="p-2 text-white/50 hover:text-white transition-colors"
         >
           {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
         <div className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#2f81f7] to-[#1a5fc9] flex items-center justify-center shadow-lg shadow-[#2f81f7]/20">
-            <span className="text-white font-bold text-sm tracking-tight">PH</span>
-          </div>
+          <img src={LOGO_MARK} alt="PH" className="w-9 h-9 rounded-lg object-contain" />
           <span className="text-white font-semibold font-['Outfit']">PortfolioHealth</span>
         </div>
         <div className="w-10" />
@@ -52,26 +52,26 @@ const Layout = ({ children }) => {
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* Sidebar */}
+      {/* Floating Glass Sidebar */}
       <aside className={`
-        fixed top-0 left-0 h-full w-64 bg-[#111827] border-r border-[#374151] z-50
+        fixed top-0 left-0 h-full w-64 z-50
+        lg:top-4 lg:left-4 lg:h-[calc(100vh-2rem)] lg:rounded-2xl
+        glass-surface-highlight
         transform transition-transform duration-300 ease-in-out
         lg:translate-x-0
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
-        <div className="h-16 flex items-center px-6 border-b border-[#374151]">
+        <div className="h-16 flex items-center px-6 border-b border-white/[0.06]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2f81f7] to-[#1a5fc9] flex items-center justify-center shadow-lg shadow-[#2f81f7]/20">
-              <span className="text-white font-bold tracking-tight">PH</span>
-            </div>
+            <img src={LOGO_MARK} alt="PortfolioHealth" className="w-10 h-10 rounded-xl object-contain" />
             <div>
               <h1 className="text-white font-semibold font-['Outfit']">PortfolioHealth</h1>
-              <p className="text-xs text-gray-500">PPM Assessment</p>
+              <p className="text-xs text-white/40">PPM Assessment</p>
             </div>
           </div>
         </div>
@@ -84,10 +84,10 @@ const Layout = ({ children }) => {
               data-testid={`nav-${label.toLowerCase()}`}
               onClick={() => setSidebarOpen(false)}
               className={`
-                flex items-center gap-3 px-4 py-3 rounded-lg transition-all
+                flex items-center gap-3 px-4 py-3 rounded-xl transition-all
                 ${isActive(path)
-                  ? 'bg-[#2f81f7]/20 text-[#2f81f7] border-l-2 border-[#2f81f7]'
-                  : 'text-gray-400 hover:text-white hover:bg-[#1F2937]'
+                  ? 'bg-gradient-to-r from-[#2f81f7]/20 to-[#00E5FF]/10 text-[#00E5FF] border border-[#00E5FF]/20'
+                  : 'text-white/50 hover:text-white hover:bg-white/[0.04]'
                 }
               `}
             >
@@ -98,22 +98,22 @@ const Layout = ({ children }) => {
           ))}
         </nav>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-[#374151]">
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/[0.06]">
           <div className="flex items-center gap-3 px-4 py-3 mb-2">
-            <div className="w-10 h-10 rounded-full bg-[#1F2937] flex items-center justify-center">
-              <span className="text-[#2f81f7] font-semibold">
+            <div className="w-10 h-10 rounded-full bg-white/[0.06] flex items-center justify-center">
+              <span className="text-[#00E5FF] font-semibold">
                 {user?.name?.charAt(0)?.toUpperCase() || "U"}
               </span>
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm text-white font-medium truncate">{user?.name}</p>
-              <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+              <p className="text-xs text-white/40 truncate">{user?.email}</p>
             </div>
           </div>
           <button
             onClick={handleLogout}
             data-testid="logout-btn"
-            className="flex items-center gap-3 w-full px-4 py-3 text-gray-400 hover:text-white hover:bg-[#1F2937] rounded-lg transition-all"
+            className="flex items-center gap-3 w-full px-4 py-3 text-white/50 hover:text-white hover:bg-white/[0.04] rounded-xl transition-all"
           >
             <LogOut size={20} />
             <span>Sign Out</span>
@@ -122,18 +122,18 @@ const Layout = ({ children }) => {
       </aside>
 
       {/* Main Content */}
-      <main className="lg:ml-64 min-h-screen">
+      <main className="lg:ml-[calc(16rem+2rem)] min-h-screen">
         <div className="p-6 lg:p-8">
           {children}
         </div>
         
         {/* Footer */}
-        <footer className="border-t border-[#374151] px-6 lg:px-8 py-6">
-          <div className="flex flex-col items-center gap-3 text-sm text-gray-500">
+        <footer className="border-t border-white/[0.06] px-6 lg:px-8 py-6">
+          <div className="flex flex-col items-center gap-3 text-sm text-white/40">
             <p>
               Academically grounded in published PPM research · University of Oulu
             </p>
-            <p className="text-xs text-gray-600 text-center max-w-2xl">
+            <p className="text-xs text-white/25 text-center max-w-2xl">
               This tool is an independent academic research output developed as part of a Master's thesis at the University of Oulu (IEM–IPIC, 2026). Assessment methodology is grounded in peer-reviewed PPM research. Not affiliated with or endorsed by any commercial framework.
             </p>
             <p>

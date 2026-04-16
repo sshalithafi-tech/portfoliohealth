@@ -21,7 +21,7 @@ export const DIMENSION_LABELS = {
  * Get Tailwind color class based on score
  */
 export const getScoreColorClass = (score) => {
-  if (score >= 4) return "text-[#2f81f7]";
+  if (score >= 4) return "text-[#00E5FF]";
   if (score >= 3) return "text-[#238636]";
   if (score >= 2) return "text-[#D29922]";
   return "text-[#F85149]";
@@ -31,7 +31,7 @@ export const getScoreColorClass = (score) => {
  * Get hex color based on score
  */
 export const getScoreColor = (score) => {
-  if (score >= 4) return "#2f81f7";
+  if (score >= 4) return "#00E5FF";
   if (score >= 3) return "#238636";
   if (score >= 2) return "#D29922";
   return "#F85149";
@@ -50,9 +50,9 @@ export const getTrafficLight = (score) => {
  * Get traffic light background class
  */
 export const getTrafficLightBgClass = (status) => {
-  if (status === "green") return "bg-[#238636]/20 border-[#238636]/30";
-  if (status === "amber") return "bg-[#D29922]/20 border-[#D29922]/30";
-  return "bg-[#F85149]/20 border-[#F85149]/30";
+  if (status === "green") return "bg-[#238636]/10 border-[#238636]/20";
+  if (status === "amber") return "bg-[#D29922]/10 border-[#D29922]/20";
+  return "bg-[#F85149]/10 border-[#F85149]/20";
 };
 
 /**

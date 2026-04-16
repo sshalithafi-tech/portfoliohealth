@@ -16,38 +16,28 @@ import { toast } from "sonner";
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 const INDUSTRIES = [
-  "Manufacturing",
-  "Technology",
-  "Healthcare",
-  "Retail",
-  "Financial Services",
-  "Automotive",
-  "Energy",
-  "Telecommunications",
-  "Consumer Goods",
-  "Industrial Equipment",
-  "Other"
+  "Manufacturing", "Technology", "Healthcare", "Retail",
+  "Financial Services", "Automotive", "Energy",
+  "Telecommunications", "Consumer Goods", "Industrial Equipment", "Other"
 ];
 
-// Question option button component
 const QuestionOption = ({ option, questionId, optionIndex, isSelected, onSelect }) => (
   <button
     data-testid={`option-${questionId}-${optionIndex}`}
     onClick={() => onSelect(option.value)}
     className={`w-full p-4 rounded-xl border text-left transition-all flex items-center justify-between group ${
       isSelected
-        ? "bg-[#2f81f7]/20 border-[#2f81f7] text-white"
-        : "bg-[#111827] border-[#374151] text-gray-300 hover:border-[#2f81f7]/50 hover:bg-[#1F2937]"
+        ? "bg-[#00E5FF]/10 border-[#00E5FF]/30 text-white"
+        : "bg-white/[0.03] border-white/[0.08] text-white/70 hover:border-[#00E5FF]/20 hover:bg-white/[0.05]"
     }`}
   >
     <span className="font-medium">{option.label}</span>
     <ChevronRight size={18} className={`transition-all ${
-      isSelected ? "text-[#2f81f7]" : "text-gray-500 group-hover:text-gray-300"
+      isSelected ? "text-[#00E5FF]" : "text-white/30 group-hover:text-white/50"
     }`} />
   </button>
 );
 
-// Progress dots component
 const ProgressDots = ({ questions, currentQuestion, answers, onDotClick }) => (
   <div className="flex items-center justify-center gap-1.5 mt-8">
     {questions.map((q, idx) => (
@@ -56,10 +46,10 @@ const ProgressDots = ({ questions, currentQuestion, answers, onDotClick }) => (
         onClick={() => onDotClick(idx)}
         className={`h-2 rounded-full transition-all ${
           idx === currentQuestion
-            ? "bg-[#2f81f7] w-6"
+            ? "bg-[#00E5FF] w-6"
             : answers[String(q.id)]
             ? "bg-[#238636] w-2"
-            : "bg-[#374151] w-2"
+            : "bg-white/[0.15] w-2"
         }`}
       />
     ))}
@@ -69,14 +59,11 @@ const ProgressDots = ({ questions, currentQuestion, answers, onDotClick }) => (
 const QuickAssessmentPage = () => {
   const navigate = useNavigate();
   const { questions, loading } = useQuickAssessmentQuestions();
-  const [step, setStep] = useState("intro"); // intro, questions, submitting
+  const [step, setStep] = useState("intro");
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
   const [companyInfo, setCompanyInfo] = useState({
-    company_name: "",
-    industry: "",
-    respondent_name: "",
-    respondent_email: ""
+    company_name: "", industry: "", respondent_name: "", respondent_email: ""
   });
 
   const handleCompanyInfoChange = useCallback((field, value) => {
@@ -94,8 +81,6 @@ const QuickAssessmentPage = () => {
 
   const handleAnswer = useCallback((questionId, value) => {
     setAnswers(prev => ({ ...prev, [questionId]: value }));
-    
-    // Auto-advance to next question
     if (currentQuestion < questions.length - 1) {
       setTimeout(() => {
         setCurrentQuestion(prev => prev + 1);
@@ -108,9 +93,7 @@ const QuickAssessmentPage = () => {
       toast.error("Please answer all questions");
       return;
     }
-    
     setStep("submitting");
-    
     try {
       const response = await axios.post(`${BACKEND_URL}/api/quick-assessment/submit`, {
         company_name: companyInfo.company_name,
@@ -119,7 +102,6 @@ const QuickAssessmentPage = () => {
         respondent_email: companyInfo.respondent_email || null,
         answers: answers
       });
-      
       navigate(`/quick-assessment/${response.data.id}/results`, { 
         state: { result: response.data } 
       });
@@ -141,7 +123,6 @@ const QuickAssessmentPage = () => {
   const progress = questions.length > 0 ? ((currentQuestion + 1) / questions.length) * 100 : 0;
   const currentQ = questions[currentQuestion];
 
-  // Get dimension badge label
   const getDimensionLabel = (dimension) => {
     if (dimension === "qualifier") return "Portfolio Size";
     return dimension.charAt(0).toUpperCase() + dimension.slice(1);
@@ -149,34 +130,32 @@ const QuickAssessmentPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0B1120]">
+      <div className="min-h-screen">
         <LoadingSpinner className="min-h-screen" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0B1120]">
-      {/* Header */}
-      <header className="h-16 border-b border-[#374151] bg-[#111827] flex items-center px-6">
+    <div className="min-h-screen">
+      {/* Glass Header */}
+      <header className="h-16 glass-surface flex items-center px-6 relative z-10">
         <button
           onClick={handleBack}
           data-testid="back-btn"
-          className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mr-6"
+          className="flex items-center gap-2 text-white/50 hover:text-white transition-colors mr-6"
         >
           <ArrowLeft size={20} />
           <span className="hidden sm:inline">Back</span>
         </button>
         
         <div className="flex items-center gap-3 flex-1">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#2f81f7] to-[#1a5fc9] flex items-center justify-center shadow-md shadow-[#2f81f7]/20">
-            <span className="text-white font-bold text-xs tracking-tight">PH</span>
-          </div>
+          <img src="https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/6407f98124d827501f865028cbbf81566506fd19a8f17f5fd5b271241d491414.png" alt="PH" className="w-8 h-8 rounded-lg object-contain" />
           <span className="text-white font-semibold font-['Outfit']">PortfolioHealth</span>
         </div>
 
         {step === "questions" && (
-          <span className="text-gray-400 text-sm">
+          <span className="text-white/50 text-sm">
             {currentQuestion + 1} of {questions.length}
           </span>
         )}
@@ -184,53 +163,53 @@ const QuickAssessmentPage = () => {
 
       {/* Progress Bar */}
       {step === "questions" && (
-        <div className="h-1 bg-[#1F2937]">
+        <div className="h-1 bg-white/[0.06] relative z-10">
           <div 
-            className="h-full bg-[#2f81f7] transition-all duration-300"
+            className="h-full bg-gradient-to-r from-[#2f81f7] to-[#00E5FF] transition-all duration-300"
             style={{ width: `${progress}%` }}
           />
         </div>
       )}
 
-      <div className="max-w-2xl mx-auto px-6 py-12">
+      <div className="max-w-2xl mx-auto px-6 py-12 relative z-10">
         {/* Intro Step */}
         {step === "intro" && (
           <div className="animate-fade-in">
             <h1 className="text-3xl font-semibold text-white font-['Outfit'] tracking-tight mb-4">
               Quick PPDT Health Check
             </h1>
-            <p className="text-gray-400 mb-8">
+            <p className="text-white/50 mb-8">
               Answer 15 questions to get an instant assessment of your organisation's 
               PPM capability maturity across People, Process, Data, and Technology dimensions.
             </p>
 
             <form onSubmit={handleStartAssessment} className="space-y-6">
-              <div className="p-6 bg-[#111827] border border-[#374151] rounded-xl space-y-4">
+              <div className="p-6 glass-surface-highlight rounded-xl space-y-4">
                 <div className="flex items-center gap-3 mb-4">
-                  <Building2 size={20} className="text-[#2f81f7]" />
-                  <h2 className="text-lg font-semibold text-white">Company Information</h2>
+                  <Building2 size={20} className="text-[#00E5FF]" />
+                  <h2 className="text-lg font-semibold text-white font-['Outfit']">Company Information</h2>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm text-gray-400">Company Name *</label>
+                  <label className="text-sm text-white/50">Company Name *</label>
                   <input
                     type="text"
                     data-testid="quick-company-name"
                     value={companyInfo.company_name}
                     onChange={(e) => handleCompanyInfoChange("company_name", e.target.value)}
-                    className="w-full px-4 py-3 bg-[#0B1120] border border-[#374151] rounded-lg text-white focus:ring-2 focus:ring-[#2f81f7] focus:border-transparent transition-all outline-none"
+                    className="w-full px-4 py-3 glass-input rounded-xl outline-none"
                     placeholder="Your Company Name"
                     required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm text-gray-400">Industry *</label>
+                  <label className="text-sm text-white/50">Industry *</label>
                   <select
                     data-testid="quick-industry"
                     value={companyInfo.industry}
                     onChange={(e) => handleCompanyInfoChange("industry", e.target.value)}
-                    className="w-full px-4 py-3 bg-[#0B1120] border border-[#374151] rounded-lg text-white focus:ring-2 focus:ring-[#2f81f7] focus:border-transparent transition-all outline-none"
+                    className="w-full px-4 py-3 glass-input rounded-xl outline-none"
                     required
                   >
                     <option value="">Select industry</option>
@@ -242,24 +221,24 @@ const QuickAssessmentPage = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-sm text-gray-400">Your Name (optional)</label>
+                    <label className="text-sm text-white/50">Your Name (optional)</label>
                     <input
                       type="text"
                       data-testid="quick-respondent-name"
                       value={companyInfo.respondent_name}
                       onChange={(e) => handleCompanyInfoChange("respondent_name", e.target.value)}
-                      className="w-full px-4 py-3 bg-[#0B1120] border border-[#374151] rounded-lg text-white focus:ring-2 focus:ring-[#2f81f7] focus:border-transparent transition-all outline-none"
+                      className="w-full px-4 py-3 glass-input rounded-xl outline-none"
                       placeholder="John Smith"
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm text-gray-400">Email (optional)</label>
+                    <label className="text-sm text-white/50">Email (optional)</label>
                     <input
                       type="email"
                       data-testid="quick-respondent-email"
                       value={companyInfo.respondent_email}
                       onChange={(e) => handleCompanyInfoChange("respondent_email", e.target.value)}
-                      className="w-full px-4 py-3 bg-[#0B1120] border border-[#374151] rounded-lg text-white focus:ring-2 focus:ring-[#2f81f7] focus:border-transparent transition-all outline-none"
+                      className="w-full px-4 py-3 glass-input rounded-xl outline-none"
                       placeholder="you@company.com"
                     />
                   </div>
@@ -269,7 +248,7 @@ const QuickAssessmentPage = () => {
               <button
                 type="submit"
                 data-testid="start-quick-assessment-btn"
-                className="w-full py-4 px-6 bg-[#2f81f7] text-white font-medium rounded-lg hover:bg-[#58a6ff] transition-all btn-premium flex items-center justify-center gap-2"
+                className="w-full py-4 px-6 btn-liquid rounded-xl flex items-center justify-center gap-2"
               >
                 Start Assessment
                 <ArrowRight size={20} />
@@ -305,11 +284,11 @@ const QuickAssessmentPage = () => {
             </div>
 
             {/* Navigation */}
-            <div className="flex items-center justify-between mt-8 pt-8 border-t border-[#374151]">
+            <div className="flex items-center justify-between mt-8 pt-8 border-t border-white/[0.06]">
               <button
                 onClick={() => setCurrentQuestion(prev => Math.max(0, prev - 1))}
                 disabled={currentQuestion === 0}
-                className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 text-white/50 hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <ArrowLeft size={18} />
                 Previous
@@ -319,7 +298,7 @@ const QuickAssessmentPage = () => {
                 <button
                   onClick={() => setCurrentQuestion(prev => prev + 1)}
                   disabled={!answers[String(currentQ.id)]}
-                  className="flex items-center gap-2 px-6 py-2 bg-[#2f81f7] text-white rounded-lg hover:bg-[#58a6ff] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 px-6 py-2 btn-liquid rounded-xl disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   Next
                   <ArrowRight size={18} />
@@ -329,7 +308,7 @@ const QuickAssessmentPage = () => {
                   onClick={handleSubmit}
                   disabled={Object.keys(answers).length < questions.length}
                   data-testid="submit-quick-assessment-btn"
-                  className="flex items-center gap-2 px-6 py-2 bg-[#238636] text-white rounded-lg hover:bg-[#238636]/80 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 px-6 py-2 bg-[#238636] text-white rounded-xl hover:bg-[#238636]/80 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   Get Results
                   <ArrowRight size={18} />
@@ -337,7 +316,6 @@ const QuickAssessmentPage = () => {
               )}
             </div>
 
-            {/* Question dots */}
             <ProgressDots
               questions={questions}
               currentQuestion={currentQuestion}
@@ -350,9 +328,9 @@ const QuickAssessmentPage = () => {
         {/* Submitting Step */}
         {step === "submitting" && (
           <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
-            <Loader2 size={48} className="text-[#2f81f7] animate-spin mb-6" />
-            <h2 className="text-xl font-semibold text-white mb-2">Calculating Your Scores</h2>
-            <p className="text-gray-400">This will only take a moment...</p>
+            <Loader2 size={48} className="text-[#00E5FF] animate-spin mb-6" />
+            <h2 className="text-xl font-semibold text-white mb-2 font-['Outfit']">Calculating Your Scores</h2>
+            <p className="text-white/50">This will only take a moment...</p>
           </div>
         )}
       </div>

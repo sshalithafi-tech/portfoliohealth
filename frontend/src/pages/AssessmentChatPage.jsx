@@ -54,8 +54,6 @@ const AssessmentChatPage = () => {
       setAssessment(response.data);
       setMessages(response.data.chat_history || []);
       setCurrentPhase(response.data.current_phase || "welcome");
-      
-      // If no messages, start the assessment
       if (!response.data.chat_history || response.data.chat_history.length === 0) {
         startAssessment();
       }
@@ -90,7 +88,6 @@ const AssessmentChatPage = () => {
     setInputValue("");
     setSending(true);
 
-    // Add user message immediately
     const tempUserMsg = {
       role: "user",
       content: userMessage,
@@ -103,10 +100,8 @@ const AssessmentChatPage = () => {
         message: userMessage
       });
 
-      // Add assistant response
       setMessages(prev => [...prev, response.data.message]);
 
-      // Check if report is ready
       if (response.data.report_ready) {
         toast.success("Assessment complete! Report generated.");
         setTimeout(() => {
@@ -114,8 +109,7 @@ const AssessmentChatPage = () => {
         }, 2000);
       }
 
-      // Estimate phase based on message count
-      const messageCount = messages.length + 2; // +2 for new user and assistant messages
+      const messageCount = messages.length + 2;
       if (messageCount <= 4) setCurrentPhase("welcome");
       else if (messageCount <= 14) setCurrentPhase("people");
       else if (messageCount <= 24) setCurrentPhase("process");
@@ -128,7 +122,6 @@ const AssessmentChatPage = () => {
     } catch (err) {
       console.error("Failed to send message:", err);
       toast.error("Failed to send message. Please try again.");
-      // Remove the optimistic user message on error
       setMessages(prev => prev.slice(0, -1));
       setInputValue(userMessage);
     } finally {
@@ -143,22 +136,22 @@ const AssessmentChatPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0B1120] flex items-center justify-center">
-        <div className="animate-pulse-glow w-12 h-12 rounded-full bg-[#2f81f7]/20 flex items-center justify-center">
-          <div className="w-6 h-6 rounded-full bg-[#2f81f7]" />
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse-glow w-12 h-12 rounded-full bg-[#00E5FF]/15 flex items-center justify-center">
+          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#2f81f7] to-[#00E5FF]" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0B1120] flex flex-col">
-      {/* Header */}
-      <header className="h-16 border-b border-[#374151] bg-[#111827] flex items-center px-6 shrink-0">
+    <div className="min-h-screen flex flex-col">
+      {/* Glass Header */}
+      <header className="h-16 glass-surface flex items-center px-6 shrink-0 relative z-10">
         <Link
           to="/assessments"
           data-testid="back-to-assessments"
-          className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mr-6"
+          className="flex items-center gap-2 text-white/50 hover:text-white transition-colors mr-6"
         >
           <ArrowLeft size={20} />
           <span className="hidden sm:inline">Back</span>
@@ -166,10 +159,10 @@ const AssessmentChatPage = () => {
         
         <div className="flex items-center gap-4 flex-1">
           <div className="flex items-center gap-2">
-            <Building2 size={18} className="text-[#2f81f7]" />
+            <Building2 size={18} className="text-[#00E5FF]" />
             <span className="text-white font-medium">{assessment?.company_name}</span>
           </div>
-          <div className="hidden md:flex items-center gap-2 text-gray-400">
+          <div className="hidden md:flex items-center gap-2 text-white/50">
             <User size={14} />
             <span className="text-sm">{assessment?.respondent_name} · {assessment?.respondent_role}</span>
           </div>
@@ -179,7 +172,7 @@ const AssessmentChatPage = () => {
           <Link
             to={`/assessments/${id}/report`}
             data-testid="view-report-btn"
-            className="flex items-center gap-2 px-4 py-2 bg-[#238636] text-white rounded-lg hover:bg-[#238636]/80 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-[#238636] text-white rounded-xl hover:bg-[#238636]/80 transition-colors"
           >
             <FileText size={16} />
             View Report
@@ -188,7 +181,7 @@ const AssessmentChatPage = () => {
       </header>
 
       {/* Phase Indicator */}
-      <div className="h-14 border-b border-[#374151] bg-[#111827]/50 flex items-center px-6 overflow-x-auto shrink-0">
+      <div className="h-14 glass-surface flex items-center px-6 overflow-x-auto shrink-0 relative z-10">
         <div className="flex items-center gap-2">
           {PHASES.map((phase, idx) => {
             const currentIdx = getPhaseIndex(currentPhase);
@@ -198,14 +191,14 @@ const AssessmentChatPage = () => {
             return (
               <div key={phase.key} className="flex items-center">
                 <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm transition-all ${
-                  isCompleted ? 'bg-[#238636]/20 text-[#238636]' :
-                  isCurrent ? 'bg-[#2f81f7]/20 text-[#2f81f7] ring-1 ring-[#2f81f7]' :
-                  'bg-[#374151]/30 text-gray-500'
+                  isCompleted ? 'bg-[#238636]/15 text-[#238636] border border-[#238636]/20' :
+                  isCurrent ? 'bg-[#00E5FF]/15 text-[#00E5FF] border border-[#00E5FF]/30' :
+                  'bg-white/[0.03] text-white/30 border border-white/[0.05]'
                 }`}>
                   {isCompleted ? (
                     <CheckCircle2 size={14} />
                   ) : isCurrent ? (
-                    <div className="w-3.5 h-3.5 rounded-full bg-[#2f81f7] animate-pulse" />
+                    <div className="w-3.5 h-3.5 rounded-full bg-[#00E5FF] animate-pulse" />
                   ) : (
                     <Circle size={14} />
                   )}
@@ -213,7 +206,7 @@ const AssessmentChatPage = () => {
                 </div>
                 {idx < PHASES.length - 1 && (
                   <div className={`w-8 h-0.5 mx-1 ${
-                    idx < currentIdx ? 'bg-[#238636]' : 'bg-[#374151]'
+                    idx < currentIdx ? 'bg-[#238636]/50' : 'bg-white/[0.06]'
                   }`} />
                 )}
               </div>
@@ -223,7 +216,7 @@ const AssessmentChatPage = () => {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-6 py-6">
+      <div className="flex-1 overflow-y-auto px-6 py-6 relative z-10">
         <div className="max-w-3xl mx-auto space-y-6">
           {messages.map((msg, idx) => (
             <div
@@ -237,37 +230,31 @@ const AssessmentChatPage = () => {
               {msg.role === "user" ? (
                 <div className="chat-message-user max-w-[80%] px-4 py-3">
                   <p className="text-white whitespace-pre-wrap">{msg.content}</p>
-                  <p className="text-xs text-gray-500 mt-2">
+                  <p className="text-xs text-white/30 mt-2">
                     {new Date(msg.timestamp).toLocaleTimeString()}
                   </p>
                 </div>
               ) : (
                 <div className="chat-message-assistant">
                   <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-full bg-[#2f81f7]/20 flex items-center justify-center shrink-0 mt-1">
-                      <img 
-                        src="https://images.unsplash.com/photo-1770170389700-eb0f9b910ed8?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzN8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMGFpJTIwdGVjaG5vbG9neSUyMG5vZGV8ZW58MHx8fHwxNzc2MzQyOTQ3fDA&ixlib=rb-4.1.0&q=85"
-                        alt="AI"
-                        className="w-8 h-8 rounded-full object-cover"
-                      />
-                    </div>
+                    <img src="https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/6407f98124d827501f865028cbbf81566506fd19a8f17f5fd5b271241d491414.png" alt="PH" className="w-8 h-8 rounded-full object-contain shrink-0 mt-1" />
                     <div className="flex-1">
-                      <p className="text-xs text-[#2f81f7] font-medium mb-2">PortfolioHealth Advisor</p>
-                      <div className="text-gray-200 prose prose-invert prose-sm max-w-none">
+                      <p className="text-xs text-[#00E5FF] font-medium mb-2">PortfolioHealth Advisor</p>
+                      <div className="text-white/80 prose prose-invert prose-sm max-w-none">
                         <ReactMarkdown
                           components={{
                             p: ({ children }) => <p className="mb-3 last:mb-0">{children}</p>,
                             strong: ({ children }) => <strong className="text-white">{children}</strong>,
                             ul: ({ children }) => <ul className="list-disc list-inside mb-3">{children}</ul>,
                             ol: ({ children }) => <ol className="list-decimal list-inside mb-3">{children}</ol>,
-                            code: ({ children }) => <code className="bg-[#1F2937] px-1 py-0.5 rounded text-[#2f81f7]">{children}</code>,
-                            pre: ({ children }) => <pre className="bg-[#1F2937] p-3 rounded-lg overflow-x-auto text-sm">{children}</pre>
+                            code: ({ children }) => <code className="bg-white/[0.08] px-1 py-0.5 rounded text-[#00E5FF]">{children}</code>,
+                            pre: ({ children }) => <pre className="bg-white/[0.05] p-3 rounded-lg overflow-x-auto text-sm">{children}</pre>
                           }}
                         >
                           {msg.content.replace(/```json[\s\S]*?```/g, '')}
                         </ReactMarkdown>
                       </div>
-                      <p className="text-xs text-gray-500 mt-2">
+                      <p className="text-xs text-white/25 mt-2">
                         {new Date(msg.timestamp).toLocaleTimeString()}
                       </p>
                     </div>
@@ -280,15 +267,15 @@ const AssessmentChatPage = () => {
           {sending && (
             <div className="chat-message-assistant animate-fade-in">
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-[#2f81f7]/20 flex items-center justify-center shrink-0">
-                  <Loader2 size={16} className="text-[#2f81f7] animate-spin" />
+                <div className="w-8 h-8 rounded-full bg-[#00E5FF]/15 flex items-center justify-center shrink-0">
+                  <Loader2 size={16} className="text-[#00E5FF] animate-spin" />
                 </div>
-                <div className="flex items-center gap-2 text-gray-400">
+                <div className="flex items-center gap-2 text-white/50">
                   <span>Thinking</span>
                   <span className="flex gap-1">
-                    <span className="w-1.5 h-1.5 bg-[#2f81f7] rounded-full animate-bounce" style={{ animationDelay: "0s" }} />
-                    <span className="w-1.5 h-1.5 bg-[#2f81f7] rounded-full animate-bounce" style={{ animationDelay: "0.1s" }} />
-                    <span className="w-1.5 h-1.5 bg-[#2f81f7] rounded-full animate-bounce" style={{ animationDelay: "0.2s" }} />
+                    <span className="w-1.5 h-1.5 bg-[#00E5FF] rounded-full animate-bounce" style={{ animationDelay: "0s" }} />
+                    <span className="w-1.5 h-1.5 bg-[#00E5FF] rounded-full animate-bounce" style={{ animationDelay: "0.1s" }} />
+                    <span className="w-1.5 h-1.5 bg-[#00E5FF] rounded-full animate-bounce" style={{ animationDelay: "0.2s" }} />
                   </span>
                 </div>
               </div>
@@ -300,7 +287,7 @@ const AssessmentChatPage = () => {
       </div>
 
       {/* Input */}
-      <div className="border-t border-[#374151] bg-[#111827] p-4 shrink-0">
+      <div className="glass-surface p-4 shrink-0 relative z-10">
         <form onSubmit={sendMessage} className="max-w-3xl mx-auto">
           <div className="flex items-center gap-3">
             <input
@@ -311,21 +298,21 @@ const AssessmentChatPage = () => {
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="Type your response..."
               disabled={sending || assessment?.status === "completed"}
-              className="flex-1 px-4 py-3 bg-[#0B1120] border border-[#374151] rounded-lg text-white focus:ring-2 focus:ring-[#2f81f7] focus:border-transparent transition-all outline-none disabled:opacity-50"
+              className="flex-1 px-4 py-3 glass-input rounded-xl outline-none disabled:opacity-50"
             />
             <button
               type="submit"
               data-testid="send-message-btn"
               disabled={!inputValue.trim() || sending || assessment?.status === "completed"}
-              className="p-3 bg-[#2f81f7] text-white rounded-lg hover:bg-[#58a6ff] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-3 btn-liquid rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Send size={20} />
             </button>
           </div>
           {assessment?.status === "completed" && (
-            <p className="text-center text-gray-500 text-sm mt-3">
+            <p className="text-center text-white/40 text-sm mt-3">
               This assessment is complete.{" "}
-              <Link to={`/assessments/${id}/report`} className="text-[#2f81f7] hover:text-[#58a6ff]">
+              <Link to={`/assessments/${id}/report`} className="text-[#00E5FF] hover:text-[#00E5FF]/80">
                 View the report
               </Link>
             </p>

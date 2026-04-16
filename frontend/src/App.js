@@ -94,9 +94,9 @@ const ProtectedRoute = ({ children }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0B1120]">
-        <div className="animate-pulse-glow w-12 h-12 rounded-full bg-[#2f81f7]/20 flex items-center justify-center">
-          <div className="w-6 h-6 rounded-full bg-[#2f81f7]" />
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse-glow w-12 h-12 rounded-full bg-[#00E5FF]/15 flex items-center justify-center">
+          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#2f81f7] to-[#00E5FF]" />
         </div>
       </div>
     );
@@ -115,9 +115,9 @@ const PublicRoute = ({ children }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0B1120]">
-        <div className="animate-pulse-glow w-12 h-12 rounded-full bg-[#2f81f7]/20 flex items-center justify-center">
-          <div className="w-6 h-6 rounded-full bg-[#2f81f7]" />
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse-glow w-12 h-12 rounded-full bg-[#00E5FF]/15 flex items-center justify-center">
+          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#2f81f7] to-[#00E5FF]" />
         </div>
       </div>
     );
@@ -130,23 +130,35 @@ const PublicRoute = ({ children }) => {
   return children;
 };
 
+// Liquid background blobs that persist across all pages
+const LiquidBackground = () => (
+  <div className="liquid-bg">
+    <div className="liquid-blob liquid-blob-1" />
+    <div className="liquid-blob liquid-blob-2" />
+    <div className="liquid-blob liquid-blob-3" />
+  </div>
+);
+
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <LiquidBackground />
         <Toaster position="top-right" richColors />
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
-          <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
-          <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-          <Route path="/assessments" element={<ProtectedRoute><AssessmentsPage /></ProtectedRoute>} />
-          <Route path="/assessments/:id" element={<ProtectedRoute><AssessmentChatPage /></ProtectedRoute>} />
-          <Route path="/assessments/:id/report" element={<ProtectedRoute><ReportPage /></ProtectedRoute>} />
-          <Route path="/companies" element={<ProtectedRoute><CompaniesPage /></ProtectedRoute>} />
-          <Route path="/quick-assessment" element={<QuickAssessmentPage />} />
-          <Route path="/quick-assessment/:id/results" element={<QuickResultsPage />} />
-        </Routes>
+        <div className="relative z-10">
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
+            <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+            <Route path="/assessments" element={<ProtectedRoute><AssessmentsPage /></ProtectedRoute>} />
+            <Route path="/assessments/:id" element={<ProtectedRoute><AssessmentChatPage /></ProtectedRoute>} />
+            <Route path="/assessments/:id/report" element={<ProtectedRoute><ReportPage /></ProtectedRoute>} />
+            <Route path="/companies" element={<ProtectedRoute><CompaniesPage /></ProtectedRoute>} />
+            <Route path="/quick-assessment" element={<QuickAssessmentPage />} />
+            <Route path="/quick-assessment/:id/results" element={<QuickResultsPage />} />
+          </Routes>
+        </div>
       </BrowserRouter>
     </AuthProvider>
   );

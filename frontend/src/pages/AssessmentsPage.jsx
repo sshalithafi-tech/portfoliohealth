@@ -26,30 +26,29 @@ import {
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-// Assessment table row component
 const AssessmentRow = ({ assessment, onClick }) => (
   <tr 
     data-testid={`assessment-row-${assessment.id}`}
-    className="border-b border-[#374151]/50 hover:bg-[#1F2937] cursor-pointer transition-colors"
+    className="border-b border-white/[0.04] hover:bg-white/[0.02] cursor-pointer transition-colors"
     onClick={onClick}
   >
     <td className="px-6 py-4">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-lg bg-[#2f81f7]/20 flex items-center justify-center">
+        <div className="w-10 h-10 rounded-lg bg-[#2f81f7]/15 flex items-center justify-center">
           <Building2 size={18} className="text-[#2f81f7]" />
         </div>
         <div>
           <p className="text-white font-medium">{assessment.company_name}</p>
-          <p className="text-xs text-gray-500">{assessment.company_industry}</p>
+          <p className="text-xs text-white/30">{assessment.company_industry}</p>
         </div>
       </div>
     </td>
     <td className="px-6 py-4">
       <div className="flex items-center gap-2">
-        <User size={14} className="text-gray-400" />
+        <User size={14} className="text-white/40" />
         <div>
-          <p className="text-gray-300">{assessment.respondent_name}</p>
-          <p className="text-xs text-gray-500">{assessment.respondent_role}</p>
+          <p className="text-white/60">{assessment.respondent_name}</p>
+          <p className="text-xs text-white/30">{assessment.respondent_role}</p>
         </div>
       </div>
     </td>
@@ -62,11 +61,11 @@ const AssessmentRow = ({ assessment, onClick }) => (
           {assessment.scores.overall.toFixed(1)}
         </span>
       ) : (
-        <span className="text-gray-500">–</span>
+        <span className="text-white/30">–</span>
       )}
     </td>
     <td className="px-6 py-4">
-      <div className="flex items-center gap-2 text-gray-400">
+      <div className="flex items-center gap-2 text-white/40">
         <Calendar size={14} />
         <span className="text-sm">
           {new Date(assessment.created_at).toLocaleDateString()}
@@ -74,7 +73,7 @@ const AssessmentRow = ({ assessment, onClick }) => (
       </div>
     </td>
     <td className="px-6 py-4">
-      <ChevronRight size={18} className="text-gray-400" />
+      <ChevronRight size={18} className="text-white/30" />
     </td>
   </tr>
 );
@@ -95,7 +94,6 @@ const AssessmentsPage = () => {
   });
   const [submitting, setSubmitting] = useState(false);
 
-  // Update form when company filter changes
   useEffect(() => {
     if (companyFilter) {
       setFormData(prev => ({ ...prev, company_id: companyFilter }));
@@ -159,10 +157,10 @@ const AssessmentsPage = () => {
             <h1 className="text-3xl font-semibold text-white font-['Outfit'] tracking-tight">
               Assessments
               {selectedCompany && (
-                <span className="text-[#2f81f7]"> · {selectedCompany.name}</span>
+                <span className="text-[#00E5FF]"> · {selectedCompany.name}</span>
               )}
             </h1>
-            <p className="text-gray-400 mt-1">
+            <p className="text-white/50 mt-1">
               {selectedCompany 
                 ? `Viewing assessments for ${selectedCompany.name}` 
                 : "Manage and review PPDT capability assessments"}
@@ -172,13 +170,13 @@ const AssessmentsPage = () => {
             <DialogTrigger asChild>
               <button
                 data-testid="new-assessment-btn"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-[#2f81f7] text-white font-medium rounded-lg hover:bg-[#58a6ff] transition-all btn-premium"
+                className="inline-flex items-center gap-2 px-6 py-3 btn-liquid rounded-xl"
               >
                 <Plus size={18} />
                 New Assessment
               </button>
             </DialogTrigger>
-            <DialogContent className="bg-[#111827] border-[#374151] text-white max-w-md">
+            <DialogContent className="glass-heavy border-white/10 text-white max-w-md rounded-2xl">
               <DialogHeader>
                 <DialogTitle className="text-xl font-semibold font-['Outfit']">
                   Start New Assessment
@@ -186,12 +184,12 @@ const AssessmentsPage = () => {
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4 mt-4">
                 <div className="space-y-2">
-                  <label className="text-sm text-gray-400">Company *</label>
+                  <label className="text-sm text-white/50">Company *</label>
                   <select
                     data-testid="assessment-company-select"
                     value={formData.company_id}
                     onChange={(e) => handleFormChange("company_id", e.target.value)}
-                    className="w-full px-4 py-3 bg-[#0B1120] border border-[#374151] rounded-lg text-white focus:ring-2 focus:ring-[#2f81f7] focus:border-transparent transition-all outline-none"
+                    className="w-full px-4 py-3 glass-input rounded-xl outline-none"
                     required
                   >
                     <option value="">Select company</option>
@@ -200,31 +198,31 @@ const AssessmentsPage = () => {
                     ))}
                   </select>
                   {companies.length === 0 && (
-                    <Link to="/companies" className="text-sm text-[#2f81f7] hover:text-[#58a6ff]">
+                    <Link to="/companies" className="text-sm text-[#00E5FF] hover:text-[#00E5FF]/80">
                       + Add a company first
                     </Link>
                   )}
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm text-gray-400">Respondent Name *</label>
+                  <label className="text-sm text-white/50">Respondent Name *</label>
                   <input
                     type="text"
                     data-testid="respondent-name-input"
                     value={formData.respondent_name}
                     onChange={(e) => handleFormChange("respondent_name", e.target.value)}
-                    className="w-full px-4 py-3 bg-[#0B1120] border border-[#374151] rounded-lg text-white focus:ring-2 focus:ring-[#2f81f7] focus:border-transparent transition-all outline-none"
+                    className="w-full px-4 py-3 glass-input rounded-xl outline-none"
                     placeholder="John Smith"
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm text-gray-400">Respondent Role *</label>
+                  <label className="text-sm text-white/50">Respondent Role *</label>
                   <input
                     type="text"
                     data-testid="respondent-role-input"
                     value={formData.respondent_role}
                     onChange={(e) => handleFormChange("respondent_role", e.target.value)}
-                    className="w-full px-4 py-3 bg-[#0B1120] border border-[#374151] rounded-lg text-white focus:ring-2 focus:ring-[#2f81f7] focus:border-transparent transition-all outline-none"
+                    className="w-full px-4 py-3 glass-input rounded-xl outline-none"
                     placeholder="VP of Product Management"
                     required
                   />
@@ -233,7 +231,7 @@ const AssessmentsPage = () => {
                   type="submit"
                   data-testid="start-assessment-submit-btn"
                   disabled={submitting || companies.length === 0}
-                  className="w-full py-3 px-6 bg-[#2f81f7] text-white font-medium rounded-lg hover:bg-[#58a6ff] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-3 px-6 btn-liquid rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {submitting ? "Creating..." : "Start Assessment"}
                 </button>
@@ -245,23 +243,23 @@ const AssessmentsPage = () => {
         {/* Filters */}
         <div className="flex flex-col md:flex-row gap-4">
           <div className="relative flex-1 max-w-md">
-            <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+            <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
             <input
               type="text"
               data-testid="assessment-search-input"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 bg-[#111827] border border-[#374151] rounded-lg text-white focus:ring-2 focus:ring-[#2f81f7] focus:border-transparent transition-all outline-none"
+              className="w-full pl-12 pr-4 py-3 glass-input rounded-xl outline-none"
               placeholder="Search by company or respondent..."
             />
           </div>
           <div className="flex items-center gap-2">
-            <Filter size={18} className="text-gray-400" />
+            <Filter size={18} className="text-white/40" />
             <select
               data-testid="status-filter-select"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-3 bg-[#111827] border border-[#374151] rounded-lg text-white focus:ring-2 focus:ring-[#2f81f7] focus:border-transparent transition-all outline-none"
+              className="px-4 py-3 glass-input rounded-xl outline-none"
             >
               <option value="all">All Status</option>
               <option value="in_progress">In Progress</option>
@@ -271,7 +269,7 @@ const AssessmentsPage = () => {
           {companyFilter && (
             <Link
               to="/assessments"
-              className="px-4 py-3 text-[#2f81f7] hover:text-[#58a6ff] transition-colors"
+              className="px-4 py-3 text-[#00E5FF] hover:text-[#00E5FF]/80 transition-colors"
             >
               Clear company filter
             </Link>
@@ -280,11 +278,11 @@ const AssessmentsPage = () => {
 
         {/* Assessments List */}
         {filteredAssessments.length > 0 ? (
-          <div className="bg-[#111827] border border-[#374151] rounded-xl overflow-hidden">
+          <div className="glass-surface-highlight rounded-xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="text-left text-xs uppercase tracking-wider text-gray-400 border-b border-[#374151] bg-[#0B1120]">
+                  <tr className="text-left text-xs uppercase tracking-wider text-white/40 border-b border-white/[0.08]">
                     <th className="px-6 py-4">Company</th>
                     <th className="px-6 py-4">Respondent</th>
                     <th className="px-6 py-4">Status</th>
@@ -294,7 +292,7 @@ const AssessmentsPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredAssessments.map((assessment, idx) => (
+                  {filteredAssessments.map((assessment) => (
                     <AssessmentRow
                       key={assessment.id}
                       assessment={assessment}
@@ -306,7 +304,7 @@ const AssessmentsPage = () => {
             </div>
           </div>
         ) : (
-          <div className="bg-[#111827] border border-[#374151] rounded-xl">
+          <div className="glass-surface-highlight rounded-xl">
             <EmptyState
               icon={ClipboardCheck}
               title="No assessments found"
@@ -314,7 +312,7 @@ const AssessmentsPage = () => {
               action={
                 <button
                   onClick={() => setShowNewDialog(true)}
-                  className="px-6 py-2 bg-[#2f81f7] text-white rounded-lg hover:bg-[#58a6ff] transition-colors"
+                  className="px-6 py-2 btn-liquid rounded-xl"
                 >
                   Create Assessment
                 </button>

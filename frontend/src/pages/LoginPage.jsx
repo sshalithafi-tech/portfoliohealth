@@ -28,86 +28,84 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen flex">
-      {/* Left side - Background */}
+      {/* Left side - 3D Liquid shapes */}
       <div 
         className="hidden lg:flex lg:w-1/2 relative"
         style={{
-          backgroundImage: "url('https://images.unsplash.com/photo-1693430895886-dced76ef7b0b?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NTJ8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMGFyayUyMGJsdWUlMjBnZW9tZXRyaWN8ZW58MHx8fHwxNzc2MzQyOTQ3fDA&ixlib=rb-4.1.0&q=85')",
+          backgroundImage: "url('https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/8c7dd872cf9afec460503fdced858c236170fec9136b7d8fb0d593cc6ad0e7c1.png')",
           backgroundSize: "cover",
           backgroundPosition: "center"
         }}
       >
-        <div className="absolute inset-0 bg-black/60" />
+        <div className="absolute inset-0 bg-[#05050A]/40" />
         <div className="relative z-10 flex flex-col justify-center px-12">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#2f81f7] to-[#1a5fc9] flex items-center justify-center shadow-xl shadow-[#2f81f7]/30">
-              <span className="text-white font-bold text-xl tracking-tight">PH</span>
-            </div>
+            <img src="https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/6407f98124d827501f865028cbbf81566506fd19a8f17f5fd5b271241d491414.png" alt="PortfolioHealth" className="w-14 h-14 rounded-2xl object-contain" />
             <div>
               <h1 className="text-3xl font-light text-white font-['Outfit']">
-                Portfolio<span className="font-semibold text-[#2f81f7]">Health</span>
+                Portfolio<span className="font-semibold text-[#00E5FF]">Health</span>
               </h1>
-              <p className="text-gray-400">Advisor</p>
+              <p className="text-white/50">Advisor</p>
             </div>
           </div>
-          <p className="text-gray-300 text-lg max-w-md">
+          <p className="text-white/70 text-lg max-w-md">
             Assess your organisation's readiness for data-driven Product Portfolio Management decisions.
           </p>
           <div className="mt-8 flex items-center gap-4">
-            <div className="h-px flex-1 bg-gradient-to-r from-[#2f81f7] to-transparent" />
+            <div className="h-px flex-1 bg-gradient-to-r from-[#00E5FF]/50 to-transparent" />
           </div>
-          <p className="mt-4 text-sm text-gray-400">
+          <p className="mt-4 text-sm text-white/40">
             Academically grounded in published PPM research
           </p>
         </div>
       </div>
 
       {/* Right side - Login form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-[#0B1120]">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-[#05050A]">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-semibold text-white font-['Outfit'] tracking-tight">
               Welcome Back
             </h2>
-            <p className="text-gray-400 mt-2">Sign in to continue your assessments</p>
+            <p className="text-white/50 mt-2">Sign in to continue your assessments</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-              <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm animate-fade-in">
+              <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm animate-fade-in backdrop-blur-sm">
                 {error}
               </div>
             )}
 
             <div className="space-y-2">
-              <label className="text-sm text-gray-400">Email</label>
+              <label className="text-sm text-white/50">Email</label>
               <input
                 type="email"
                 data-testid="login-email-input"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 bg-[#111827] border border-[#374151] rounded-lg text-white focus:ring-2 focus:ring-[#2f81f7] focus:border-transparent transition-all outline-none"
+                className="w-full px-4 py-3 glass-input rounded-xl outline-none"
                 placeholder="you@company.com"
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm text-gray-400">Password</label>
+              <label className="text-sm text-white/50">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   data-testid="login-password-input"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 bg-[#111827] border border-[#374151] rounded-lg text-white focus:ring-2 focus:ring-[#2f81f7] focus:border-transparent transition-all outline-none pr-12"
+                  className="w-full px-4 py-3 glass-input rounded-xl outline-none pr-12"
                   placeholder="••••••••"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -118,10 +116,10 @@ const LoginPage = () => {
               type="submit"
               data-testid="login-submit-button"
               disabled={loading}
-              className="w-full py-3 px-6 bg-[#2f81f7] text-white font-medium rounded-lg hover:bg-[#58a6ff] transition-all disabled:opacity-50 disabled:cursor-not-allowed btn-premium flex items-center justify-center gap-2"
+              className="w-full py-3 px-6 btn-liquid rounded-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
               ) : (
                 <>
                   <LogIn size={20} />
@@ -131,15 +129,15 @@ const LoginPage = () => {
             </button>
           </form>
 
-          <p className="mt-8 text-center text-gray-400">
+          <p className="mt-8 text-center text-white/50">
             Don't have an account?{" "}
-            <Link to="/register" className="text-[#2f81f7] hover:text-[#58a6ff] transition-colors">
+            <Link to="/register" className="text-[#00E5FF] hover:text-[#00E5FF]/80 transition-colors">
               Create one
             </Link>
           </p>
 
-          <div className="mt-12 pt-8 border-t border-[#374151]">
-            <p className="text-xs text-gray-500 text-center">
+          <div className="mt-12 pt-8 border-t border-white/[0.06]">
+            <p className="text-xs text-white/25 text-center">
               PPM Capability Maturity Framework · University of Oulu Research
             </p>
           </div>
