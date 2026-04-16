@@ -40,13 +40,25 @@ Build a PPDT Capability Maturity Advisor — a specialized AI assessment consult
 - ✅ List and search companies
 - ✅ Link assessments to companies for longitudinal tracking
 
-### Assessment System
+### Full Assessment System
 - ✅ Create assessments linked to companies
 - ✅ AI-powered conversational assessment chat
 - ✅ Claude Sonnet 4.5 integration via Emergent LLM key
 - ✅ Phase tracking (Welcome → People → Process → Data → Technology → Decision → Benchmark → Report)
 - ✅ Chat history persistence
 - ✅ Automatic report generation with scores
+
+### Quick Assessment (10-Minute Rapid Screening) - NEW
+- ✅ Landing page with "Quick Check" and "Full Assessment" options
+- ✅ 15 fixed multiple-choice questions (3-4 per PPDT dimension)
+- ✅ Progress bar and question navigation
+- ✅ No login required to take assessment
+- ✅ Instant results with radar chart visualization
+- ✅ Traffic light indicators (Red/Amber/Green) per dimension
+- ✅ Weighted scoring (Data ×0.35, Process ×0.25, People ×0.25, Technology ×0.15)
+- ✅ One-page PDF export "PPDT Quick Health Check"
+- ✅ Save to account functionality
+- ✅ CTA conversion hook to Full Assessment
 
 ### Reporting
 - ✅ PPDT scores display with radar/bar charts
@@ -58,8 +70,10 @@ Build a PPDT Capability Maturity Advisor — a specialized AI assessment consult
 ### Dashboard
 - ✅ Assessment statistics (total, completed, in progress)
 - ✅ Company count
+- ✅ Quick assessment count
 - ✅ Average PPDT scores across completed assessments
 - ✅ Recent assessments table
+- ✅ Quick actions for Quick Check, Companies, Assessments
 
 ### UI/UX
 - ✅ Dark professional theme matching McKinsey Digital aesthetic
@@ -70,15 +84,21 @@ Build a PPDT Capability Maturity Advisor — a specialized AI assessment consult
 - ✅ University of Oulu research reference in footer
 
 ## API Endpoints
+
+### Authentication
 - `POST /api/auth/register` - User registration
 - `POST /api/auth/login` - User login
 - `POST /api/auth/logout` - User logout
 - `GET /api/auth/me` - Get current user
 - `POST /api/auth/refresh` - Refresh token
+
+### Dashboard & Companies
 - `GET /api/dashboard/stats` - Dashboard statistics
 - `GET/POST /api/companies` - Companies CRUD
 - `GET /api/companies/{id}` - Get company details
 - `GET /api/companies/{id}/assessments` - Company assessments
+
+### Full Assessment
 - `GET/POST /api/assessments` - Assessments CRUD
 - `GET /api/assessments/{id}` - Get assessment details
 - `PATCH /api/assessments/{id}` - Update assessment
@@ -86,15 +106,33 @@ Build a PPDT Capability Maturity Advisor — a specialized AI assessment consult
 - `POST /api/assessments/{id}/chat` - Send chat message
 - `GET /api/assessments/{id}/pdf` - Download PDF report
 
+### Quick Assessment (NEW)
+- `GET /api/quick-assessment/questions` - Get all 15 questions
+- `POST /api/quick-assessment/submit` - Submit answers, get results
+- `GET /api/quick-assessment/{id}` - Get assessment by ID
+- `GET /api/quick-assessment/{id}/pdf` - Download PDF report
+- `POST /api/quick-assessment/{id}/save` - Save to user account
+- `GET /api/quick-assessments` - Get user's quick assessments
+
+## Quick Assessment Questions
+| # | Dimension | Question |
+|---|-----------|----------|
+| 1 | Qualifier | How many products are in your active portfolio? |
+| 2-4 | People | Decision-making, roles/ownership, data literacy |
+| 5-7 | Process | PPM governance, product classification, end-of-life |
+| 8-11 | Data | Profitability, master data, system integration, data model |
+| 12-15 | Technology | System integration, dashboards, reporting effort, architecture |
+
 ## Prioritized Backlog
 
 ### P0 - Critical (Completed)
-- ✅ Core assessment flow
-- ✅ AI integration
+- ✅ Core full assessment flow
+- ✅ AI integration (Claude Sonnet 4.5)
 - ✅ User authentication
 - ✅ Company management
 - ✅ Report generation
 - ✅ PDF export
+- ✅ Quick Assessment (10-min screening)
 
 ### P1 - High Priority (Future)
 - [ ] Email notifications for completed assessments
@@ -115,7 +153,6 @@ Build a PPDT Capability Maturity Advisor — a specialized AI assessment consult
 - [ ] Mobile app
 
 ## Next Tasks
-1. Test complete assessment flow end-to-end
-2. Verify PDF export formatting
-3. Add longitudinal tracking visualization for repeat assessments
-4. Implement assessment comparison features
+1. Add longitudinal tracking visualization for repeat assessments
+2. Implement assessment comparison features
+3. Add email notifications for completed assessments
