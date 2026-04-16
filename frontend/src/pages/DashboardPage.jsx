@@ -31,17 +31,18 @@ const DIMENSION_CONFIG = [
 ];
 
 const StatCard = ({ icon: Icon, label, value, color = "#00E5FF" }) => (
-  <div className="p-6 glass-card rounded-xl">
-    <div className="flex items-center gap-4">
+  <div className="p-4 sm:p-6 glass-card rounded-xl">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
       <div 
-        className="w-12 h-12 rounded-lg flex items-center justify-center"
+        className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center shrink-0"
         style={{ backgroundColor: `${color}15` }}
       >
-        <Icon size={24} style={{ color }} />
+        <Icon size={20} style={{ color }} className="sm:hidden" />
+        <Icon size={24} style={{ color }} className="hidden sm:block" />
       </div>
       <div>
-        <p className="text-white/50 text-sm">{label}</p>
-        <p className="text-2xl font-semibold text-white font-['JetBrains_Mono']">
+        <p className="text-white/50 text-xs sm:text-sm">{label}</p>
+        <p className="text-xl sm:text-2xl font-semibold text-white font-['JetBrains_Mono']">
           {value}
         </p>
       </div>
@@ -77,19 +78,19 @@ const DashboardPage = () => {
 
   return (
     <Layout>
-      <div className="space-y-8" data-testid="patient-dashboard">
+      <div className="space-y-6 sm:space-y-8" data-testid="patient-dashboard">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="flex flex-col gap-4">
           <div>
-            <h1 className="text-3xl font-semibold text-white font-['Outfit'] tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-semibold text-white font-['Outfit'] tracking-tight">
               Welcome back, {user?.name?.split(" ")[0]}
             </h1>
-            <p className="text-white/50 mt-1">Here's an overview of your PPDT assessments</p>
+            <p className="text-white/50 mt-1 text-sm sm:text-base">Here's an overview of your PPDT assessments</p>
           </div>
           <Link
             to="/assessments"
             data-testid="start-assessment-btn"
-            className="inline-flex items-center gap-2 px-6 py-3 btn-liquid rounded-xl"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 btn-liquid rounded-xl w-full sm:w-auto sm:self-start"
           >
             <Play size={18} />
             New Assessment
@@ -97,7 +98,7 @@ const DashboardPage = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 stagger-children">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 stagger-children">
           <StatCard icon={ClipboardCheck} label="Total Assessments" value={stats?.total_assessments || 0} color="#2f81f7" />
           <StatCard icon={TrendingUp} label="Completed" value={stats?.completed_assessments || 0} color="#238636" />
           <StatCard icon={Zap} label="Quick Screenings" value={stats?.total_quick_assessments || 0} color="#D29922" />
@@ -217,7 +218,7 @@ const DashboardPage = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
           <Link 
             to="/quick-assessment"
             data-testid="quick-assessment-btn"

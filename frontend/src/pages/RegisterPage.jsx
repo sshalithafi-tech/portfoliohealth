@@ -70,8 +70,12 @@ const RegisterPage = () => {
       </div>
 
       {/* Right side - Register form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-[#05050A]">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-8 bg-[#05050A]">
         <div className="w-full max-w-md">
+          {/* Mobile logo */}
+          <div className="flex items-center justify-center gap-3 mb-6 lg:hidden">
+            <img src="https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/6407f98124d827501f865028cbbf81566506fd19a8f17f5fd5b271241d491414.png" alt="PortfolioHealth" className="w-12 h-12 rounded-xl object-contain" />
+          </div>
           <div className="text-center mb-8">
             <h2 className="text-3xl font-semibold text-white font-['Outfit'] tracking-tight">
               Create Account

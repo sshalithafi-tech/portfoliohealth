@@ -154,28 +154,29 @@ const QuickResultsPage = () => {
   return (
     <div className="min-h-screen">
       {/* Glass Header */}
-      <header className="h-16 glass-surface flex items-center px-6 relative z-10">
-        <Link to="/" className="flex items-center gap-3">
-          <img src="https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/6407f98124d827501f865028cbbf81566506fd19a8f17f5fd5b271241d491414.png" alt="PH" className="w-8 h-8 rounded-lg object-contain" />
-          <span className="text-white font-semibold font-['Outfit']">PortfolioHealth</span>
+      <header className="h-14 sm:h-16 glass-surface flex items-center px-4 sm:px-6 relative z-10">
+        <Link to="/" className="flex items-center gap-2 sm:gap-3">
+          <img src="https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/6407f98124d827501f865028cbbf81566506fd19a8f17f5fd5b271241d491414.png" alt="PH" className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg object-contain" />
+          <span className="text-white font-semibold font-['Outfit'] text-sm sm:text-base">PortfolioHealth</span>
         </Link>
         
         <div className="flex-1" />
         
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           {!saved ? (
             <button
               onClick={saveToAccount}
               disabled={saving}
               data-testid="save-assessment-btn"
-              className="flex items-center gap-2 px-4 py-2 btn-glass rounded-xl disabled:opacity-50"
+              className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 btn-glass rounded-xl disabled:opacity-50 text-xs sm:text-sm"
             >
-              <Save size={16} />
-              {saving ? "Saving..." : "Save to Account"}
+              <Save size={14} />
+              <span className="hidden sm:inline">{saving ? "Saving..." : "Save to Account"}</span>
+              <span className="sm:hidden">{saving ? "..." : "Save"}</span>
             </button>
           ) : (
-            <span className="flex items-center gap-2 px-4 py-2 text-[#238636]">
-              <CheckCircle size={16} />
+            <span className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 text-[#238636] text-xs sm:text-sm">
+              <CheckCircle size={14} />
               Saved
             </span>
           )}
@@ -183,10 +184,11 @@ const QuickResultsPage = () => {
             onClick={downloadPDF}
             disabled={downloading}
             data-testid="download-quick-pdf-btn"
-            className="flex items-center gap-2 px-5 py-2 btn-liquid rounded-xl disabled:opacity-50"
+            className="flex items-center gap-1 sm:gap-2 px-3 sm:px-5 py-2 btn-liquid rounded-xl disabled:opacity-50 text-xs sm:text-sm"
           >
-            <Download size={16} />
-            {downloading ? "Generating..." : "Export PDF"}
+            <Download size={14} />
+            <span className="hidden sm:inline">{downloading ? "Generating..." : "Export PDF"}</span>
+            <span className="sm:hidden">{downloading ? "..." : "PDF"}</span>
           </button>
         </div>
       </header>
@@ -223,7 +225,7 @@ const QuickResultsPage = () => {
                 <span className="text-sm font-medium text-white capitalize">{trafficLights.overall} Status</span>
               </div>
             </div>
-            <div className="w-full lg:w-72 h-72">
+            <div className="w-full lg:w-72 h-56 sm:h-72">
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={radarData}>
                   <PolarGrid stroke="rgba(255,255,255,0.08)" />
@@ -257,8 +259,8 @@ const QuickResultsPage = () => {
         </div>
 
         {/* CTA Box */}
-        <div className="p-8 glass-card rounded-2xl animate-fade-in hover:border-[#00E5FF]/20">
-          <h2 className="text-xl font-semibold text-white mb-4 font-['Outfit']">
+        <div className="p-6 sm:p-8 glass-card rounded-2xl animate-fade-in hover:border-[#00E5FF]/20">
+          <h2 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4 font-['Outfit']">
             Ready for a Deeper Assessment?
           </h2>
           <p className="text-white/60 mb-6">

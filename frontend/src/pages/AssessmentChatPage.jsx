@@ -147,20 +147,20 @@ const AssessmentChatPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Glass Header */}
-      <header className="h-16 glass-surface flex items-center px-6 shrink-0 relative z-10">
+      <header className="h-14 sm:h-16 glass-surface flex items-center px-3 sm:px-6 shrink-0 relative z-10">
         <Link
           to="/assessments"
           data-testid="back-to-assessments"
-          className="flex items-center gap-2 text-white/50 hover:text-white transition-colors mr-6"
+          className="flex items-center gap-1 sm:gap-2 text-white/50 hover:text-white transition-colors mr-3 sm:mr-6"
         >
-          <ArrowLeft size={20} />
+          <ArrowLeft size={18} />
           <span className="hidden sm:inline">Back</span>
         </Link>
         
-        <div className="flex items-center gap-4 flex-1">
-          <div className="flex items-center gap-2">
-            <Building2 size={18} className="text-[#00E5FF]" />
-            <span className="text-white font-medium">{assessment?.company_name}</span>
+        <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+            <Building2 size={16} className="text-[#00E5FF] shrink-0" />
+            <span className="text-white font-medium text-sm sm:text-base truncate">{assessment?.company_name}</span>
           </div>
           <div className="hidden md:flex items-center gap-2 text-white/50">
             <User size={14} />
@@ -172,17 +172,18 @@ const AssessmentChatPage = () => {
           <Link
             to={`/assessments/${id}/report`}
             data-testid="view-report-btn"
-            className="flex items-center gap-2 px-4 py-2 bg-[#238636] text-white rounded-xl hover:bg-[#238636]/80 transition-colors"
+            className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 bg-[#238636] text-white rounded-xl hover:bg-[#238636]/80 transition-colors text-xs sm:text-sm shrink-0"
           >
-            <FileText size={16} />
-            View Report
+            <FileText size={14} />
+            <span className="hidden sm:inline">View Report</span>
+            <span className="sm:hidden">Report</span>
           </Link>
         )}
       </header>
 
       {/* Phase Indicator */}
-      <div className="h-14 glass-surface flex items-center px-6 overflow-x-auto shrink-0 relative z-10">
-        <div className="flex items-center gap-2">
+      <div className="h-12 sm:h-14 glass-surface flex items-center px-3 sm:px-6 overflow-x-auto shrink-0 relative z-10 scrollbar-hide">
+        <div className="flex items-center gap-1 sm:gap-2">
           {PHASES.map((phase, idx) => {
             const currentIdx = getPhaseIndex(currentPhase);
             const isCompleted = idx < currentIdx;
@@ -287,9 +288,9 @@ const AssessmentChatPage = () => {
       </div>
 
       {/* Input */}
-      <div className="glass-surface p-4 shrink-0 relative z-10">
+      <div className="glass-surface p-3 sm:p-4 shrink-0 relative z-10">
         <form onSubmit={sendMessage} className="max-w-3xl mx-auto">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <input
               ref={inputRef}
               type="text"
@@ -298,15 +299,15 @@ const AssessmentChatPage = () => {
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="Type your response..."
               disabled={sending || assessment?.status === "completed"}
-              className="flex-1 px-4 py-3 glass-input rounded-xl outline-none disabled:opacity-50"
+              className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 glass-input rounded-xl outline-none disabled:opacity-50 text-sm sm:text-base"
             />
             <button
               type="submit"
               data-testid="send-message-btn"
               disabled={!inputValue.trim() || sending || assessment?.status === "completed"}
-              className="p-3 btn-liquid rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-2.5 sm:p-3 btn-liquid rounded-xl disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
             >
-              <Send size={20} />
+              <Send size={18} />
             </button>
           </div>
           {assessment?.status === "completed" && (

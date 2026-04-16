@@ -152,15 +152,15 @@ const AssessmentsPage = () => {
     <Layout>
       <div className="space-y-8">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="flex flex-col gap-4">
           <div>
-            <h1 className="text-3xl font-semibold text-white font-['Outfit'] tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-semibold text-white font-['Outfit'] tracking-tight">
               Assessments
               {selectedCompany && (
                 <span className="text-[#00E5FF]"> · {selectedCompany.name}</span>
               )}
             </h1>
-            <p className="text-white/50 mt-1">
+            <p className="text-white/50 mt-1 text-sm sm:text-base">
               {selectedCompany 
                 ? `Viewing assessments for ${selectedCompany.name}` 
                 : "Manage and review PPDT capability assessments"}
@@ -170,7 +170,7 @@ const AssessmentsPage = () => {
             <DialogTrigger asChild>
               <button
                 data-testid="new-assessment-btn"
-                className="inline-flex items-center gap-2 px-6 py-3 btn-liquid rounded-xl"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 btn-liquid rounded-xl w-full sm:w-auto"
               >
                 <Plus size={18} />
                 New Assessment

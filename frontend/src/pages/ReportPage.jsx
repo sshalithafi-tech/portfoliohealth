@@ -62,27 +62,28 @@ const DimensionScoreCard = ({ dimension, score, levelName }) => {
   return (
     <div 
       data-testid={`dimension-score-${dimension}`}
-      className="p-6 glass-card rounded-xl"
+      className="p-4 sm:p-6 glass-card rounded-xl"
     >
-      <div className="flex items-center gap-3 mb-4">
+      <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
         <div 
-          className="w-10 h-10 rounded-lg flex items-center justify-center" 
+          className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center shrink-0" 
           style={{ backgroundColor: `${color}15` }}
         >
-          <Icon size={20} style={{ color }} />
+          <Icon size={16} style={{ color }} className="sm:hidden" />
+          <Icon size={20} style={{ color }} className="hidden sm:block" />
         </div>
-        <div>
-          <h3 className="text-lg font-semibold text-white capitalize font-['Outfit']">{dimension}</h3>
-          <p className="text-xs text-white/40">{levelName}</p>
+        <div className="min-w-0">
+          <h3 className="text-sm sm:text-lg font-semibold text-white capitalize font-['Outfit'] truncate">{dimension}</h3>
+          <p className="text-[10px] sm:text-xs text-white/40 truncate">{levelName}</p>
         </div>
       </div>
-      <div className="flex items-baseline gap-2 mb-3">
-        <span className={`text-3xl font-bold font-['JetBrains_Mono'] ${getScoreColorClass(score)}`}>
+      <div className="flex items-baseline gap-1 sm:gap-2 mb-2 sm:mb-3">
+        <span className={`text-xl sm:text-3xl font-bold font-['JetBrains_Mono'] ${getScoreColorClass(score)}`}>
           {score}
         </span>
-        <span className="text-white/30">/ 5</span>
+        <span className="text-white/30 text-xs sm:text-base">/ 5</span>
       </div>
-      <div className="w-full h-2 bg-white/[0.06] rounded-full overflow-hidden">
+      <div className="w-full h-1.5 sm:h-2 bg-white/[0.06] rounded-full overflow-hidden">
         <div 
           className="h-full rounded-full transition-all duration-500"
           style={{ width: `${(score / 5) * 100}%`, backgroundColor: color }}
@@ -169,47 +170,48 @@ const ReportPage = () => {
     <Layout>
       <div className="space-y-8">
         {/* Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-start gap-3 sm:gap-4">
             <Link
               to="/assessments"
               data-testid="back-to-assessments"
-              className="p-2 rounded-xl glass-surface text-white/50 hover:text-white hover:border-[#00E5FF]/20 transition-all"
+              className="p-2 rounded-xl glass-surface text-white/50 hover:text-white hover:border-[#00E5FF]/20 transition-all shrink-0 mt-1"
             >
-              <ArrowLeft size={20} />
+              <ArrowLeft size={18} />
             </Link>
             <div>
-              <h1 className="text-2xl lg:text-3xl font-semibold text-white font-['Outfit'] tracking-tight">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-white font-['Outfit'] tracking-tight">
                 PPDT Assessment Report
               </h1>
-              <p className="text-white/40 mt-1">
+              <p className="text-white/40 mt-1 text-xs sm:text-sm">
                 Based on: PPM Capability Maturity Research · University of Oulu (2026)
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Link
               to={`/assessments/${id}`}
               data-testid="view-chat-btn"
-              className="flex items-center gap-2 px-4 py-2 btn-glass rounded-xl"
+              className="flex items-center gap-2 px-3 sm:px-4 py-2 btn-glass rounded-xl text-sm"
             >
-              <MessageSquare size={18} />
-              View Chat
+              <MessageSquare size={16} />
+              <span className="hidden sm:inline">View Chat</span>
+              <span className="sm:hidden">Chat</span>
             </Link>
             <button
               onClick={downloadPDF}
               data-testid="download-pdf-btn"
               disabled={downloading}
-              className="flex items-center gap-2 px-6 py-3 btn-liquid rounded-xl disabled:opacity-50"
+              className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 btn-liquid rounded-xl disabled:opacity-50 text-sm"
             >
-              <Download size={18} />
-              {downloading ? "Generating..." : "Export PDF"}
+              <Download size={16} />
+              {downloading ? "..." : "Export PDF"}
             </button>
           </div>
         </div>
 
         {/* Company Info Bar */}
-        <div className="p-4 glass-surface-highlight rounded-xl flex flex-wrap items-center gap-6 text-sm">
+        <div className="p-3 sm:p-4 glass-surface-highlight rounded-xl flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3 sm:gap-6 text-sm">
           <div className="flex items-center gap-2">
             <Building2 size={16} className="text-[#00E5FF]" />
             <span className="text-white/50">Company:</span>
@@ -228,14 +230,14 @@ const ReportPage = () => {
         </div>
 
         {/* Overall Score */}
-        <div className="p-8 glass-surface-highlight rounded-2xl">
-          <div className="flex flex-col lg:flex-row items-center gap-8">
+        <div className="p-6 sm:p-8 glass-surface-highlight rounded-2xl">
+          <div className="flex flex-col items-center gap-6 sm:gap-8 lg:flex-row">
             <div className="text-center lg:text-left flex-1">
               <p className="text-xs uppercase tracking-[0.2em] text-[#00E5FF] mb-2">Overall Maturity Level</p>
-              <div className="flex items-baseline gap-4">
+              <div className="flex items-baseline gap-3 sm:gap-4 justify-center lg:justify-start">
                 <span 
                   data-testid="overall-score"
-                  className={`text-6xl lg:text-7xl font-bold font-['JetBrains_Mono'] ${getScoreColorClass(scores.overall)}`}
+                  className={`text-5xl sm:text-6xl lg:text-7xl font-bold font-['JetBrains_Mono'] ${getScoreColorClass(scores.overall)}`}
                 >
                   {scores.overall?.toFixed(1) || "–"}
                 </span>
@@ -266,7 +268,7 @@ const ReportPage = () => {
         </div>
 
         {/* Dimension Scores */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
           {DIMENSIONS.map((dim) => (
             <DimensionScoreCard
               key={dim}

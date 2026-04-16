@@ -35,16 +35,16 @@ const Layout = ({ children }) => {
   return (
     <div className="min-h-screen">
       {/* Mobile Header */}
-      <div className="lg:hidden h-16 glass-surface flex items-center justify-between px-4 relative z-50">
+      <div className="lg:hidden h-14 glass-surface flex items-center justify-between px-3 relative z-50">
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
           className="p-2 text-white/50 hover:text-white transition-colors"
         >
-          {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
+          {sidebarOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
         <div className="flex items-center gap-2">
-          <img src={LOGO_MARK} alt="PH" className="w-9 h-9 rounded-lg object-contain" />
-          <span className="text-white font-semibold font-['Outfit']">PortfolioHealth</span>
+          <img src={LOGO_MARK} alt="PH" className="w-8 h-8 rounded-lg object-contain" />
+          <span className="text-white font-semibold font-['Outfit'] text-sm">PortfolioHealth</span>
         </div>
         <div className="w-10" />
       </div>
@@ -123,17 +123,17 @@ const Layout = ({ children }) => {
 
       {/* Main Content */}
       <main className="lg:ml-[calc(16rem+2rem)] min-h-screen">
-        <div className="p-6 lg:p-8">
+        <div className="p-4 sm:p-6 lg:p-8">
           {children}
         </div>
         
         {/* Footer */}
-        <footer className="border-t border-white/[0.06] px-6 lg:px-8 py-6">
-          <div className="flex flex-col items-center gap-3 text-sm text-white/40">
-            <p>
+        <footer className="border-t border-white/[0.06] px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex flex-col items-center gap-2 sm:gap-3 text-xs sm:text-sm text-white/40">
+            <p className="text-center">
               Academically grounded in published PPM research · University of Oulu
             </p>
-            <p className="text-xs text-white/25 text-center max-w-2xl">
+            <p className="text-[10px] sm:text-xs text-white/25 text-center max-w-2xl">
               This tool is an independent academic research output developed as part of a Master's thesis at the University of Oulu (IEM–IPIC, 2026). Assessment methodology is grounded in peer-reviewed PPM research. Not affiliated with or endorsed by any commercial framework.
             </p>
             <p>

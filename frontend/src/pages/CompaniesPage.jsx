@@ -127,18 +127,18 @@ const CompaniesPage = () => {
     <Layout>
       <div className="space-y-8">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="flex flex-col gap-4">
           <div>
-            <h1 className="text-3xl font-semibold text-white font-['Outfit'] tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-semibold text-white font-['Outfit'] tracking-tight">
               Companies
             </h1>
-            <p className="text-white/50 mt-1">Manage client companies for longitudinal tracking</p>
+            <p className="text-white/50 mt-1 text-sm sm:text-base">Manage client companies for longitudinal tracking</p>
           </div>
           <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
             <DialogTrigger asChild>
               <button
                 data-testid="add-company-btn"
-                className="inline-flex items-center gap-2 px-6 py-3 btn-liquid rounded-xl"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 btn-liquid rounded-xl w-full sm:w-auto"
               >
                 <Plus size={18} />
                 Add Company
@@ -228,7 +228,7 @@ const CompaniesPage = () => {
 
         {/* Companies Grid */}
         {filteredCompanies.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-children">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 stagger-children">
             {filteredCompanies.map((company) => (
               <CompanyCard key={company.id} company={company} />
             ))}
