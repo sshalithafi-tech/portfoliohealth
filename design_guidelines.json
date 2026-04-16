@@ -1,0 +1,121 @@
+{
+  "theme": "dark",
+  "archetype": "Archetype 4 (Swiss & High-Contrast) tailored for Premium B2B Consulting",
+  "design_philosophy": "McKinsey Digital meets modern SaaS dashboard. The design prioritizes authority, clarity, and structural rigor (PPDT model). It uses a deep navy/charcoal foundation with electric blue accents to create a premium, commanding presence. Generous spacing, optical alignment, and high-contrast data visualization.",
+  "typography": {
+    "headings": {
+      "family": "Outfit",
+      "weights": ["light", "regular", "semibold"],
+      "usage": "Use Outfit for all display and heading text to avoid generic templates while maintaining a clean, premium sans-serif look. Use tracking-tight for H1/H2."
+    },
+    "body": {
+      "family": "Inter",
+      "weights": ["regular", "medium"],
+      "usage": "Clean, highly legible body text suitable for dense data and conversational AI interfaces."
+    },
+    "mono": {
+      "family": "JetBrains Mono",
+      "usage": "For data points, scores (1-5 maturity levels), and technical indicators."
+    },
+    "scale": {
+      "h1": "text-4xl sm:text-5xl tracking-tight",
+      "h2": "text-2xl sm:text-3xl tracking-tight",
+      "h3": "text-xl sm:text-2xl",
+      "h4": "text-lg sm:text-xl font-medium",
+      "body": "text-base",
+      "small": "text-sm",
+      "overline": "text-xs tracking-[0.2em] uppercase"
+    }
+  },
+  "colors": {
+    "background": {
+      "default": "#0B1120", 
+      "surface": "#111827", 
+      "elevated": "#1F2937" 
+    },
+    "brand": {
+      "primary": "#2f81f7",
+      "primary_hover": "#58a6ff",
+      "accent": "#2f81f7"
+    },
+    "text": {
+      "primary": "#F9FAFB",
+      "secondary": "#9CA3AF",
+      "muted": "#6B7280"
+    },
+    "border": {
+      "default": "#374151",
+      "subtle": "#1F2937"
+    },
+    "status": {
+      "success": "#238636",
+      "warning": "#D29922",
+      "error": "#F85149",
+      "info": "#2f81f7"
+    },
+    "chart_palette": [
+      "#2f81f7",
+      "#A371F7",
+      "#238636",
+      "#D29922",
+      "#F85149"
+    ]
+  },
+  "layout_and_spacing": {
+    "philosophy": "Generous Spacing Philosophy. Use 2x spacing for breathing room. The Control Room grid for dashboards.",
+    "dashboard_grid": "grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6",
+    "bento_grid": "grid-cols-1 md:grid-cols-8 lg:grid-cols-12 gap-8",
+    "container_padding": "p-6 sm:p-8 lg:p-12",
+    "borders": "1px solid #374151 with rounded-lg or rounded-xl (subtle roundness max 8px for premium feel)",
+    "shadows": "Diffuse ambient shadows only. shadow-[0_8px_32px_rgba(0,0,0,0.4)] for elevated cards."
+  },
+  "components": {
+    "buttons": "Premium feel: bg-[#2f81f7] text-white rounded-md px-6 py-2.5 font-medium hover:bg-[#58a6ff] transition-all. Subtle inner glow border-t border-white/20.",
+    "cards": "Surface background (#111827), 1px subtle border (#374151), flat, no heavy shadows. Add slight hover lift (-translate-y-1) for interactive cards like Assessment History.",
+    "inputs": "Shadcn inputs customized: bg-transparent border-[#374151] text-white focus:ring-2 focus:ring-[#2f81f7] focus:border-transparent rounded-md.",
+    "dialogs": "Crystal Glassmorphism overlay: backdrop-blur-xl bg-black/60. Modal background solid #111827 with 1px border #374151.",
+    "tables": "Shadcn tables. Header text-xs uppercase tracking-wider text-[#9CA3AF]. Rows have hover:bg-[#1F2937]. Left aligned text.",
+    "chat_interface": "User messages: bg-[#1F2937]. AI Consultant: bg-transparent border-l-2 border-[#2f81f7] pl-4. Clean, readable width (max-w-3xl).",
+    "charts": "Use Recharts or Shadcn Charts. 4-axis radar chart for PPDT model, or layered bar charts. Use chart_palette.",
+    "phase_indicator": "Linear stepper with active phase in #2f81f7 and completed phases with a checkmark. Inactive in #374151.",
+    "pdf_export": "Prominent CTA in dashboard. Button with download icon, text 'Export to PDF'."
+  },
+  "motion_and_interactions": {
+    "hover": "All interactive elements must have a hover state that changes background or border color.",
+    "transitions": "Use transition-all duration-200 ease-in-out for buttons and cards.",
+    "entrance": "Staggered fade-in (opacity 0 to 1, translate-y 4) for dashboard widgets and chat messages."
+  },
+  "media": {
+    "image_urls": [
+      {
+        "url": "https://images.unsplash.com/photo-1693430895886-dced76ef7b0b?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NTJ8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMGFyayUyMGJsdWUlMjBnZW9tZXRyaWN8ZW58MHx8fHwxNzc2MzQyOTQ3fDA&ixlib=rb-4.1.0&q=85",
+        "category": "login_background",
+        "description": "Abstract dark blue geometric background for the login and registration pages, overlay with bg-black/50."
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1770170389700-eb0f9b910ed8?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzN8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMGFpJTIwdGVjaG5vbG9neSUyMG5vZGV8ZW58MHx8fHwxNzc2MzQyOTQ3fDA&ixlib=rb-4.1.0&q=85",
+        "category": "ai_avatar",
+        "description": "Abstract AI technology node to be used as the AI Consultant's avatar in the chat interface."
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1746182969730-236dfcf3f2c8?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxODd8MHwxfHNlYXJjaHwxfHxVbml2ZXJzaXR5JTIwb2YlMjBPdWx1JTIwbG9nb3xlbnwwfHx8fDE3NzYzNDI5Mzd8MA&ixlib=rb-4.1.0&q=85",
+        "category": "university_of_oulu_reference",
+        "description": "Coat of arms/building reference for the University of Oulu. Can be used as a subtle image in the 'About' section or footer background."
+      }
+    ],
+    "icons": "lucide-react"
+  },
+  "instructions_to_main_agent": [
+    "1. Initialize a Tailwind project in dark mode by default.",
+    "2. Use 'Outfit' for headings and 'Inter' for body. Update tailwind.config.js to set these font families.",
+    "3. Build the Login/Register page using the login_background image with a heavy dark overlay.",
+    "4. The Dashboard must use 'The Control Room Grid' strategy (tight gaps, dense data).",
+    "5. For the Conversational AI Assessment, implement a chat interface with the ai_avatar.",
+    "6. Build a specific component for the PPDT (People, Process, Data, Technology) 1-5 maturity scoring using Radar/Bar charts.",
+    "7. Implement an Assessment History Table showing previous scores and a Company Longitudinal Tracking chart (line chart over 6-12 months).",
+    "8. Ensure a Phase Progress Indicator is visible during the assessment flow.",
+    "9. Add a distinct PDF Export button on the report view.",
+    "10. Add a footer referencing 'Product Wellbeing framework' and 'University of Oulu research lineage'.",
+    "11. ALL interactive elements must have `data-testid` attributes."
+  ]
+}
