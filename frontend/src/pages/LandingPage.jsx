@@ -23,8 +23,8 @@ const LandingPage = () => {
               <span className="text-white font-bold">P</span>
             </div>
             <div>
-              <h1 className="text-white font-semibold font-['Outfit']">PPDT Advisor</h1>
-              <p className="text-xs text-gray-500">Maturity Assessment</p>
+              <h1 className="text-white font-semibold font-['Outfit']">PortfolioHealth</h1>
+              <p className="text-xs text-gray-500">PPM Assessment</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -62,11 +62,11 @@ const LandingPage = () => {
       <div className="pt-32 pb-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-light text-white font-['Outfit'] tracking-tight mb-6">
-            PPDT Capability
-            <span className="block font-semibold text-[#2f81f7]">Maturity Advisor</span>
+            PortfolioHealth
+            <span className="block font-semibold text-[#2f81f7]">Advisor</span>
           </h1>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-12">
-            Assess your organisation's readiness for data-driven Product Portfolio Management decisions using the proven PPDT framework.
+            Assess your organisation's readiness for data-driven Product Portfolio Management decisions using the PPM Capability Maturity Framework.
           </p>
           
           {/* Two Options */}
@@ -163,9 +163,12 @@ const LandingPage = () => {
 
       {/* Footer */}
       <footer className="border-t border-[#374151] py-8 px-6">
-        <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500">
-          <p>Product Wellbeing Framework · University of Oulu Research Lineage</p>
-          <p>© {new Date().getFullYear()} PPDT Capability Maturity Advisor</p>
+        <div className="max-w-5xl mx-auto flex flex-col items-center gap-3 text-sm text-gray-500">
+          <p>Academically grounded in published PPM research · University of Oulu</p>
+          <p className="text-xs text-gray-600 text-center max-w-2xl">
+            This tool is an independent academic research output developed as part of a Master's thesis at the University of Oulu (IEM–IPIC, 2026). Assessment methodology is grounded in peer-reviewed PPM research. Not affiliated with or endorsed by any commercial framework.
+          </p>
+          <p>© {new Date().getFullYear()} PortfolioHealth Advisor</p>
         </div>
       </footer>
     </div>

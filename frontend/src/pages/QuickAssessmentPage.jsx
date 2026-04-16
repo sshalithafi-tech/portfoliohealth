@@ -172,7 +172,7 @@ const QuickAssessmentPage = () => {
           <div className="w-8 h-8 rounded-lg bg-[#2f81f7] flex items-center justify-center">
             <span className="text-white font-bold text-sm">P</span>
           </div>
-          <span className="text-white font-semibold font-['Outfit']">Quick Health Check</span>
+          <span className="text-white font-semibold font-['Outfit']">PortfolioHealth</span>
         </div>
 
         {step === "questions" && (

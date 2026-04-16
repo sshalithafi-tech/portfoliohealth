@@ -1,7 +1,13 @@
-# PPDT Capability Maturity Advisor - Product Requirements Document
+# PortfolioHealth Advisor - Product Requirements Document
 
 ## Original Problem Statement
-Build a PPDT Capability Maturity Advisor — a specialized AI assessment consultant grounded in Hannila's Product Wellbeing framework (2026) and doctoral research on data-driven Product Portfolio Management (Hannila, 2019). The app conducts structured, conversational capability maturity assessments across four dimensions: People, Process, Data, and Technology (PPDT model), scoring organizations against five maturity levels.
+Build a PortfolioHealth Advisor — a specialized AI assessment consultant grounded in peer-reviewed PPM research from the University of Oulu. The app conducts structured, conversational capability maturity assessments across four dimensions: People, Process, Data, and Technology (PPDT model), scoring organizations against five maturity levels.
+
+## Branding
+- **App Name**: PortfolioHealth Advisor
+- **Tagline**: Academically grounded in published PPM research · University of Oulu
+- **Framework Name**: PPM Capability Maturity Framework
+- **Attribution**: This tool is an independent academic research output developed as part of a Master's thesis at the University of Oulu (IEM–IPIC, 2026). Assessment methodology is grounded in peer-reviewed PPM research. Not affiliated with or endorsed by any commercial framework.
 
 ## User Personas
 1. **Consultants** - Primary users who conduct assessments for client companies

@@ -150,9 +150,9 @@ class SendMessageRequest(BaseModel):
     message: str
 
 # PPDT System Prompt
-PPDT_SYSTEM_PROMPT = """You are the PPDT Capability Maturity Advisor — a specialised AI assessment consultant grounded in Hannila's Product Wellbeing framework (Hannila, Vierimaa & Salonen, 2026) and the doctoral research on data-driven Product Portfolio Management (Hannila, 2019).
+PPDT_SYSTEM_PROMPT = """You are the PortfolioHealth Advisor — a specialised AI assessment consultant grounded in peer-reviewed PPM research from the University of Oulu.
 
-Your role is to conduct a structured, conversational capability maturity assessment of an organisation's readiness to make fact-based, data-driven Product Portfolio Management (PPM) decisions. You assess the organisation across four capability dimensions — People, Process, Data, and Technology (the PPDT model) — and score them against five maturity levels derived from the Product Wellbeing framework.
+Your role is to conduct a structured, conversational capability maturity assessment of an organisation's readiness to make fact-based, data-driven Product Portfolio Management (PPM) decisions. You assess the organisation across four capability dimensions — People, Process, Data, and Technology (the PPDT model) — and score them against five maturity levels derived from the PPM Capability Maturity Framework.
 
 You are rigorous but conversational. You ask one focused question at a time. You do not overwhelm the respondent. You listen carefully, probe intelligently, and map every response to the PPDT scoring rubric in the background.
 
@@ -166,7 +166,7 @@ LEVEL 1 — AD HOC: No structured approach. Decisions are reactive and intuition
 LEVEL 2 — DEVELOPING: Some processes and roles exist but are inconsistently applied.
 LEVEL 3 — DEFINED: Structured PPM processes and roles are formally established.
 LEVEL 4 — MANAGED: PPM decisions are systematically supported by integrated data.
-LEVEL 5 — OPTIMISING (Product Wellbeing): All four PPDT pillars are fully aligned and continuously improved.
+LEVEL 5 — OPTIMISING: All four PPDT pillars are fully aligned and continuously improved.
 
 ASSESSMENT FLOW:
 PHASE 0 — WELCOME & CONTEXT SETTING (2–3 exchanges): Greet warmly. Ask for context about the company and respondent.
@@ -608,7 +608,7 @@ async def generate_pdf_report(assessment_id: str, current_user: dict = Depends(g
     story.append(Paragraph(f"<b>Industry:</b> {assessment.get('company_industry', 'N/A')}", body_style))
     story.append(Paragraph(f"<b>Respondent:</b> {assessment.get('respondent_name', 'N/A')} ({assessment.get('respondent_role', 'N/A')})", body_style))
     story.append(Paragraph(f"<b>Date:</b> {assessment.get('completed_at', assessment.get('created_at', 'N/A'))[:10]}", body_style))
-    story.append(Paragraph("<b>Framework:</b> Hannila's Product Wellbeing Framework (2026)", body_style))
+    story.append(Paragraph("<b>Framework:</b> PPM Capability Maturity Research · University of Oulu (2026)", body_style))
     story.append(Spacer(1, 20))
     
     # Overall Score
@@ -689,13 +689,13 @@ async def generate_pdf_report(assessment_id: str, current_user: dict = Depends(g
     story.append(Spacer(1, 20))
     
     # Footer
-    story.append(Paragraph("Based on: Hannila's Product Wellbeing Framework (2026) | University of Oulu Research", 
+    story.append(Paragraph("Based on: PPM Capability Maturity Research · University of Oulu (2026)", 
                           ParagraphStyle('Footer', fontSize=8, textColor=colors.grey)))
     
     doc.build(story)
     buffer.seek(0)
     
-    filename = f"PPDT_Assessment_{assessment.get('company_name', 'Report').replace(' ', '_')}_{assessment_id[:8]}.pdf"
+    filename = f"PortfolioHealth_Assessment_{assessment.get('company_name', 'Report').replace(' ', '_')}_{assessment_id[:8]}.pdf"
     
     return StreamingResponse(
         buffer,
@@ -737,7 +737,7 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
 # Health check
 @api_router.get("/")
 async def root():
-    return {"message": "PPDT Capability Maturity Advisor API", "status": "healthy"}
+    return {"message": "PortfolioHealth Advisor API", "status": "healthy"}
 
 # ============================================
 # QUICK ASSESSMENT ENDPOINTS
@@ -1092,7 +1092,7 @@ async def generate_quick_assessment_pdf(quick_id: str):
     story = []
     
     # Title
-    story.append(Paragraph("PPDT Quick Health Check", title_style))
+    story.append(Paragraph("PortfolioHealth Quick Assessment", title_style))
     story.append(Paragraph(f"<b>{quick.get('company_name', 'Unknown Company')}</b>", heading_style))
     story.append(Spacer(1, 12))
     
@@ -1162,18 +1162,18 @@ async def generate_quick_assessment_pdf(quick_id: str):
     cta_text = f"Based on your score of {overall}/5, your organisation is at the <b>{level_name}</b> stage. Companies at this level typically have {gap_desc}. A full PPDT assessment takes 60–90 minutes and produces a prioritised improvement roadmap with specific, actionable recommendations."
     story.append(Paragraph(cta_text, body_style))
     story.append(Spacer(1, 12))
-    story.append(Paragraph("<b>Schedule a Full Assessment →</b> Contact your PPDT Advisor consultant", cta_style))
+    story.append(Paragraph("<b>Schedule a Full Assessment →</b> Contact your PortfolioHealth Advisor consultant", cta_style))
     
     story.append(Spacer(1, 30))
     
     # Footer
-    story.append(Paragraph("Based on: Hannila's Product Wellbeing Framework (2026) | University of Oulu Research", 
+    story.append(Paragraph("Based on: PPM Capability Maturity Research · University of Oulu (2026)", 
                           ParagraphStyle('Footer', fontSize=8, textColor=colors.grey)))
     
     doc.build(story)
     buffer.seek(0)
     
-    filename = f"PPDT_Quick_Health_Check_{quick.get('company_name', 'Report').replace(' ', '_')}_{quick_id[:8]}.pdf"
+    filename = f"PortfolioHealth_Quick_Assessment_{quick.get('company_name', 'Report').replace(' ', '_')}_{quick_id[:8]}.pdf"
     
     return StreamingResponse(
         buffer,

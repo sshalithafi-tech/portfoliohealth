@@ -192,7 +192,7 @@ const ReportPage = () => {
                 PPDT Assessment Report
               </h1>
               <p className="text-gray-400 mt-1">
-                Based on Hannila's Product Wellbeing Framework (2026)
+                Based on: PPM Capability Maturity Research · University of Oulu (2026)
               </p>
             </div>
           </div>
@@ -392,7 +392,7 @@ const ReportPage = () => {
         {/* Footer */}
         <div className="text-center py-8 border-t border-[#374151]">
           <p className="text-sm text-gray-500">
-            Based on Hannila's Product Wellbeing Framework (2026) · University of Oulu Research
+            Based on: PPM Capability Maturity Research · University of Oulu (2026)
           </p>
         </div>
       </div>

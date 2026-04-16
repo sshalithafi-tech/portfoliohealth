@@ -252,7 +252,7 @@ const AssessmentChatPage = () => {
                       />
                     </div>
                     <div className="flex-1">
-                      <p className="text-xs text-[#2f81f7] font-medium mb-2">PPDT Advisor</p>
+                      <p className="text-xs text-[#2f81f7] font-medium mb-2">PortfolioHealth Advisor</p>
                       <div className="text-gray-200 prose prose-invert prose-sm max-w-none">
                         <ReactMarkdown
                           components={{

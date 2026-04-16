@@ -166,7 +166,7 @@ const QuickResultsPage = () => {
           <div className="w-8 h-8 rounded-lg bg-[#2f81f7] flex items-center justify-center">
             <span className="text-white font-bold text-sm">P</span>
           </div>
-          <span className="text-white font-semibold font-['Outfit']">PPDT Advisor</span>
+          <span className="text-white font-semibold font-['Outfit']">PortfolioHealth</span>
         </Link>
         
         <div className="flex-1" />
@@ -294,7 +294,7 @@ const QuickResultsPage = () => {
         {/* Footer */}
         <div className="text-center py-8 mt-8 border-t border-[#374151]">
           <p className="text-sm text-gray-500">
-            Based on Hannila's Product Wellbeing Framework (2026) · University of Oulu Research
+            Based on: PPM Capability Maturity Research · University of Oulu (2026)
           </p>
         </div>
       </div>

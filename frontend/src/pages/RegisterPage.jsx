@@ -47,8 +47,8 @@ const RegisterPage = () => {
         <div className="absolute inset-0 bg-black/60" />
         <div className="relative z-10 flex flex-col justify-center px-12">
           <h1 className="text-4xl font-light text-white mb-4 font-['Outfit']">
-            PPDT Capability<br />
-            <span className="font-semibold text-[#2f81f7]">Maturity Advisor</span>
+            PortfolioHealth<br />
+            <span className="font-semibold text-[#2f81f7]">Advisor</span>
           </h1>
           <p className="text-gray-300 text-lg max-w-md">
             Join our platform to conduct professional PPM capability assessments for your clients.
@@ -155,7 +155,7 @@ const RegisterPage = () => {
 
           <div className="mt-12 pt-8 border-t border-[#374151]">
             <p className="text-xs text-gray-500 text-center">
-              Product Wellbeing Framework · University of Oulu Research
+              PPM Capability Maturity Framework · University of Oulu Research
             </p>
           </div>
         </div>

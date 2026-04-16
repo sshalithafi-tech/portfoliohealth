@@ -44,7 +44,7 @@ const Layout = ({ children }) => {
           <div className="w-8 h-8 rounded-lg bg-[#2f81f7] flex items-center justify-center">
             <span className="text-white font-bold text-sm">P</span>
           </div>
-          <span className="text-white font-semibold font-['Outfit']">PPDT</span>
+          <span className="text-white font-semibold font-['Outfit']">PortfolioHealth</span>
         </div>
         <div className="w-10" />
       </div>
@@ -70,8 +70,8 @@ const Layout = ({ children }) => {
               <span className="text-white font-bold">P</span>
             </div>
             <div>
-              <h1 className="text-white font-semibold font-['Outfit']">PPDT Advisor</h1>
-              <p className="text-xs text-gray-500">Maturity Assessment</p>
+              <h1 className="text-white font-semibold font-['Outfit']">PortfolioHealth</h1>
+              <p className="text-xs text-gray-500">PPM Assessment</p>
             </div>
           </div>
         </div>
@@ -129,12 +129,15 @@ const Layout = ({ children }) => {
         
         {/* Footer */}
         <footer className="border-t border-[#374151] px-6 lg:px-8 py-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500">
+          <div className="flex flex-col items-center gap-3 text-sm text-gray-500">
             <p>
-              Product Wellbeing Framework · University of Oulu Research Lineage
+              Academically grounded in published PPM research · University of Oulu
+            </p>
+            <p className="text-xs text-gray-600 text-center max-w-2xl">
+              This tool is an independent academic research output developed as part of a Master's thesis at the University of Oulu (IEM–IPIC, 2026). Assessment methodology is grounded in peer-reviewed PPM research. Not affiliated with or endorsed by any commercial framework.
             </p>
             <p>
-              © {new Date().getFullYear()} PPDT Capability Maturity Advisor
+              © {new Date().getFullYear()} PortfolioHealth Advisor
             </p>
           </div>
         </footer>

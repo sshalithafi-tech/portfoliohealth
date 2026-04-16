@@ -40,8 +40,8 @@ const LoginPage = () => {
         <div className="absolute inset-0 bg-black/60" />
         <div className="relative z-10 flex flex-col justify-center px-12">
           <h1 className="text-4xl font-light text-white mb-4 font-['Outfit']">
-            PPDT Capability<br />
-            <span className="font-semibold text-[#2f81f7]">Maturity Advisor</span>
+            PortfolioHealth<br />
+            <span className="font-semibold text-[#2f81f7]">Advisor</span>
           </h1>
           <p className="text-gray-300 text-lg max-w-md">
             Assess your organisation's readiness for data-driven Product Portfolio Management decisions.
@@ -50,7 +50,7 @@ const LoginPage = () => {
             <div className="h-px flex-1 bg-gradient-to-r from-[#2f81f7] to-transparent" />
           </div>
           <p className="mt-4 text-sm text-gray-400">
-            Based on Hannila's Product Wellbeing Framework
+            Academically grounded in published PPM research
           </p>
         </div>
       </div>
@@ -133,7 +133,7 @@ const LoginPage = () => {
 
           <div className="mt-12 pt-8 border-t border-[#374151]">
             <p className="text-xs text-gray-500 text-center">
-              Product Wellbeing Framework · University of Oulu Research
+              PPM Capability Maturity Framework · University of Oulu Research
             </p>
           </div>
         </div>
