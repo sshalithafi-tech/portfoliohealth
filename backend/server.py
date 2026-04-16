@@ -105,6 +105,31 @@ app = FastAPI()
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
+# ============================================
+# NOTIFICATION HELPER
+# ============================================
+
+async def create_notification(
+    notif_type: str,
+    title: str,
+    message: str,
+    user_id: str = None,
+    admin_only: bool = False,
+    meta: dict = None
+):
+    """Create a notification. If user_id is set, it's for that user. If admin_only, only admins see it."""
+    doc = {
+        "type": notif_type,
+        "title": title,
+        "message": message,
+        "user_id": user_id,
+        "admin_only": admin_only,
+        "read_by": [],
+        "meta": meta or {},
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.notifications.insert_one(doc)
+
 # Pydantic Models
 class UserRegister(BaseModel):
     email: EmailStr
@@ -247,6 +272,15 @@ async def register(user: UserRegister, response: Response):
     }
     result = await db.users.insert_one(user_doc)
     user_id = str(result.inserted_id)
+    
+    # Notify admins about new registration
+    await create_notification(
+        notif_type="new_user",
+        title="New User Registered",
+        message=f"{user.name} ({email}) has created an account.",
+        admin_only=True,
+        meta={"user_name": user.name, "user_email": email}
+    )
     
     access_token = create_access_token(user_id, email)
     refresh_token = create_refresh_token(user_id)
@@ -530,6 +564,25 @@ Current Phase: {assessment.get('current_phase', 'welcome')}
     
     await db.assessments.update_one({"_id": ObjectId(assessment_id)}, {"$set": update_data})
     
+    # Notify on assessment completion
+    if status == "completed":
+        company_name = assessment.get("company_name", "Unknown")
+        overall_score = scores.get("overall", "N/A") if scores else "N/A"
+        await create_notification(
+            notif_type="assessment_completed",
+            title="Assessment Completed",
+            message=f"Your assessment for {company_name} is complete. Overall score: {overall_score}/5.",
+            user_id=current_user["id"],
+            meta={"assessment_id": assessment_id, "company_name": company_name, "score": overall_score}
+        )
+        await create_notification(
+            notif_type="assessment_completed",
+            title="Assessment Completed",
+            message=f"{current_user.get('name', 'A consultant')} completed an assessment for {company_name}. Score: {overall_score}/5.",
+            admin_only=True,
+            meta={"assessment_id": assessment_id, "company_name": company_name, "score": overall_score, "consultant": current_user.get("name", "")}
+        )
+    
     return {
         "message": assistant_msg,
         "report_ready": report_data is not None,
@@ -741,6 +794,74 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
         "total_quick_assessments": total_quick_assessments,
         "average_scores": avg_scores
     }
+
+
+# ============================================
+# NOTIFICATION ENDPOINTS
+# ============================================
+
+@api_router.get("/notifications")
+async def get_notifications(current_user: dict = Depends(get_current_user)):
+    """Get notifications for the current user"""
+    user_id = current_user["id"]
+    is_admin = current_user.get("role") == "admin"
+
+    query = {"$or": [{"user_id": user_id}]}
+    if is_admin:
+        query["$or"].append({"admin_only": True})
+        query["$or"].append({"user_id": None, "admin_only": False})
+
+    notifications = await db.notifications.find(
+        query, {"_id": 1, "type": 1, "title": 1, "message": 1, "read_by": 1, "created_at": 1, "meta": 1}
+    ).sort("created_at", -1).limit(50).to_list(50)
+
+    return [{
+        "id": str(n["_id"]),
+        "type": n.get("type", ""),
+        "title": n.get("title", ""),
+        "message": n.get("message", ""),
+        "read": user_id in n.get("read_by", []),
+        "created_at": n.get("created_at", ""),
+        "meta": n.get("meta", {}),
+    } for n in notifications]
+
+@api_router.get("/notifications/unread-count")
+async def get_unread_count(current_user: dict = Depends(get_current_user)):
+    """Get unread notification count"""
+    user_id = current_user["id"]
+    is_admin = current_user.get("role") == "admin"
+
+    query = {"read_by": {"$ne": user_id}, "$or": [{"user_id": user_id}]}
+    if is_admin:
+        query["$or"].append({"admin_only": True})
+        query["$or"].append({"user_id": None, "admin_only": False})
+
+    count = await db.notifications.count_documents(query)
+    return {"count": count}
+
+@api_router.patch("/notifications/{notification_id}/read")
+async def mark_notification_read(notification_id: str, current_user: dict = Depends(get_current_user)):
+    """Mark a single notification as read"""
+    await db.notifications.update_one(
+        {"_id": ObjectId(notification_id)},
+        {"$addToSet": {"read_by": current_user["id"]}}
+    )
+    return {"ok": True}
+
+@api_router.post("/notifications/read-all")
+async def mark_all_read(current_user: dict = Depends(get_current_user)):
+    """Mark all notifications as read for the current user"""
+    user_id = current_user["id"]
+    is_admin = current_user.get("role") == "admin"
+
+    query = {"read_by": {"$ne": user_id}, "$or": [{"user_id": user_id}]}
+    if is_admin:
+        query["$or"].append({"admin_only": True})
+        query["$or"].append({"user_id": None, "admin_only": False})
+
+    await db.notifications.update_many(query, {"$addToSet": {"read_by": user_id}})
+    return {"ok": True}
+
 
 # Health check
 @api_router.get("/")
@@ -1203,6 +1324,15 @@ async def submit_quick_assessment(data: QuickAssessmentSubmit):
     
     result = await db.quick_assessments.insert_one(quick_doc)
     
+    # Notify admins about new quick assessment
+    await create_notification(
+        notif_type="quick_assessment",
+        title="Quick Assessment Completed",
+        message=f"{data.company_name} ({data.industry}) completed a Quick Check. Overall: {scores.get('overall', 0):.1f}/5.",
+        admin_only=True,
+        meta={"quick_id": str(result.inserted_id), "company_name": data.company_name, "score": scores.get("overall", 0)}
+    )
+    
     return {
         "id": str(result.inserted_id),
         "company_name": data.company_name,
@@ -1395,6 +1525,8 @@ async def startup_event():
     await db.assessments.create_index("user_id")
     await db.assessments.create_index("company_id")
     await db.companies.create_index("user_id")
+    await db.notifications.create_index("user_id")
+    await db.notifications.create_index("created_at")
     
     # Seed admin user
     admin_email = os.environ.get("ADMIN_EMAIL", "admin@example.com")

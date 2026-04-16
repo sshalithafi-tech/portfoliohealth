@@ -11,6 +11,7 @@ import {
   Shield
 } from "lucide-react";
 import { useState } from "react";
+import NotificationBell from "./NotificationBell";
 
 const LOGO_MARK = "https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/6407f98124d827501f865028cbbf81566506fd19a8f17f5fd5b271241d491414.png";
 
@@ -111,6 +112,7 @@ const Layout = ({ children }) => {
               <p className="text-sm text-white font-medium truncate">{user?.name}</p>
               <p className="text-xs text-white/40 truncate">{user?.email}</p>
             </div>
+            <NotificationBell />
           </div>
           <button
             onClick={handleLogout}
