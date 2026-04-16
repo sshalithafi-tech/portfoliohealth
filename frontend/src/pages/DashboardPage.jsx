@@ -11,7 +11,8 @@ import {
   BarChart3,
   Users,
   Database,
-  Monitor
+  Monitor,
+  Zap
 } from "lucide-react";
 import {
   RadarChart,
@@ -29,17 +30,20 @@ const DashboardPage = () => {
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [recentAssessments, setRecentAssessments] = useState([]);
+  const [quickAssessments, setQuickAssessments] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [statsRes, assessmentsRes] = await Promise.all([
+        const [statsRes, assessmentsRes, quickRes] = await Promise.all([
           axios.get(`${BACKEND_URL}/api/dashboard/stats`),
-          axios.get(`${BACKEND_URL}/api/assessments`)
+          axios.get(`${BACKEND_URL}/api/assessments`),
+          axios.get(`${BACKEND_URL}/api/quick-assessments`).catch(() => ({ data: [] }))
         ]);
         setStats(statsRes.data);
         setRecentAssessments(assessmentsRes.data.slice(0, 5));
+        setQuickAssessments(quickRes.data.slice(0, 3));
       } catch (err) {
         console.error("Failed to fetch dashboard data:", err);
       } finally {
@@ -279,12 +283,31 @@ const DashboardPage = () => {
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Link 
+            to="/quick-assessment"
+            data-testid="quick-assessment-btn"
+            className="p-6 bg-gradient-to-br from-[#2f81f7]/10 to-[#111827] border border-[#2f81f7]/30 rounded-xl card-hover group"
+          >
+            <Zap size={32} className="text-[#2f81f7] mb-4" />
+            <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-[#2f81f7] transition-colors">
+              Quick Check (10 min)
+            </h3>
+            <p className="text-gray-400 text-sm">
+              Rapid screening with 15 questions and instant results
+            </p>
+            {(stats?.total_quick_assessments > 0) && (
+              <p className="text-xs text-[#2f81f7] mt-2">
+                {stats.total_quick_assessments} screening{stats.total_quick_assessments > 1 ? 's' : ''} saved
+              </p>
+            )}
+          </Link>
+
+          <Link 
             to="/companies"
             data-testid="manage-companies-btn"
             className="p-6 bg-[#111827] border border-[#374151] rounded-xl card-hover group"
           >
-            <Building2 size={32} className="text-[#2f81f7] mb-4" />
-            <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-[#2f81f7] transition-colors">
+            <Building2 size={32} className="text-[#A371F7] mb-4" />
+            <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-[#A371F7] transition-colors">
               Manage Companies
             </h3>
             <p className="text-gray-400 text-sm">
@@ -305,14 +328,6 @@ const DashboardPage = () => {
               Review past assessments and track maturity progress
             </p>
           </Link>
-
-          <div className="p-6 bg-[#111827] border border-[#374151] rounded-xl">
-            <BarChart3 size={32} className="text-[#A371F7] mb-4" />
-            <h3 className="text-lg font-semibold text-white mb-2">PPDT Model</h3>
-            <p className="text-gray-400 text-sm">
-              Assess People, Process, Data, and Technology dimensions for PPM readiness
-            </p>
-          </div>
         </div>
       </div>
     </Layout>

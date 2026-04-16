@@ -11,6 +11,9 @@ import AssessmentsPage from "./pages/AssessmentsPage";
 import AssessmentChatPage from "./pages/AssessmentChatPage";
 import CompaniesPage from "./pages/CompaniesPage";
 import ReportPage from "./pages/ReportPage";
+import LandingPage from "./pages/LandingPage";
+import QuickAssessmentPage from "./pages/QuickAssessmentPage";
+import QuickResultsPage from "./pages/QuickResultsPage";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -133,6 +136,7 @@ function App() {
       <BrowserRouter>
         <Toaster position="top-right" richColors />
         <Routes>
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
           <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
@@ -140,7 +144,8 @@ function App() {
           <Route path="/assessments/:id" element={<ProtectedRoute><AssessmentChatPage /></ProtectedRoute>} />
           <Route path="/assessments/:id/report" element={<ProtectedRoute><ReportPage /></ProtectedRoute>} />
           <Route path="/companies" element={<ProtectedRoute><CompaniesPage /></ProtectedRoute>} />
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/quick-assessment" element={<QuickAssessmentPage />} />
+          <Route path="/quick-assessment/:id/results" element={<QuickResultsPage />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
