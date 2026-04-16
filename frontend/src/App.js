@@ -18,8 +18,14 @@ import AdminPage from "./pages/AdminPage";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-// Configure axios defaults
-axios.defaults.withCredentials = true;
+// Configure axios — use token from localStorage instead of cookies
+axios.interceptors.request.use((config) => {
+  const token = localStorage.getItem("access_token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
 // Auth Context
 export const AuthContext = createContext(null);
@@ -67,18 +73,25 @@ const AuthProvider = ({ children }) => {
 
   const login = useCallback(async (email, password) => {
     const response = await axios.post(`${BACKEND_URL}/api/auth/login`, { email, password });
-    setUser(response.data);
-    return response.data;
+    if (response.data.access_token) {
+      localStorage.setItem("access_token", response.data.access_token);
+    }
+    setUser(response.data.user);
+    return response.data.user;
   }, []);
 
   const register = useCallback(async (email, password, name) => {
     const response = await axios.post(`${BACKEND_URL}/api/auth/register`, { email, password, name });
-    setUser(response.data);
-    return response.data;
+    if (response.data.access_token) {
+      localStorage.setItem("access_token", response.data.access_token);
+    }
+    setUser(response.data.user);
+    return response.data.user;
   }, []);
 
   const logout = useCallback(async () => {
-    await axios.post(`${BACKEND_URL}/api/auth/logout`);
+    try { await axios.post(`${BACKEND_URL}/api/auth/logout`); } catch {}
+    localStorage.removeItem("access_token");
     setUser(false);
   }, []);
 

@@ -289,11 +289,14 @@ async def register(user: UserRegister, response: Response):
     response.set_cookie(key="refresh_token", value=refresh_token, httponly=True, secure=True, samesite="none", max_age=604800, path="/")
     
     return {
-        "id": user_id,
-        "email": email,
-        "name": user.name,
-        "role": "consultant",
-        "created_at": user_doc["created_at"]
+        "access_token": access_token,
+        "user": {
+            "id": user_id,
+            "email": email,
+            "name": user.name,
+            "role": "consultant",
+            "created_at": user_doc["created_at"]
+        }
     }
 
 @api_router.post("/auth/login")
@@ -336,11 +339,14 @@ async def login(user: UserLogin, response: Response, request: Request):
     response.set_cookie(key="refresh_token", value=refresh_token, httponly=True, secure=True, samesite="none", max_age=604800, path="/")
     
     return {
-        "id": user_id,
-        "email": email,
-        "name": db_user["name"],
-        "role": db_user.get("role", "consultant"),
-        "created_at": db_user.get("created_at", "")
+        "access_token": access_token,
+        "user": {
+            "id": user_id,
+            "email": email,
+            "name": db_user["name"],
+            "role": db_user.get("role", "consultant"),
+            "created_at": db_user.get("created_at", "")
+        }
     }
 
 @api_router.post("/auth/logout")
@@ -1498,17 +1504,49 @@ async def get_user_quick_assessments(current_user: dict = Depends(get_current_us
 # Include the router in the main app
 app.include_router(api_router)
 
-# CORS configuration
-frontend_url = os.environ.get('FRONTEND_URL', os.environ.get('CORS_ORIGINS', '*'))
-origins = frontend_url.split(',') if frontend_url != '*' else ["*"]
+# CORS configuration — dynamically allow the request origin for cookie-based auth
+class DynamicCORSMiddleware:
+    """Allow any origin while supporting credentials by echoing the request Origin header."""
+    def __init__(self, app):
+        self.app = app
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=origins,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            return await self.app(scope, receive, send)
+
+        from starlette.requests import Request as StarletteRequest
+        request = StarletteRequest(scope, receive)
+        origin = request.headers.get("origin", "")
+
+        if request.method == "OPTIONS":
+            response = Response(status_code=200)
+            response.headers["access-control-allow-origin"] = origin or "*"
+            response.headers["access-control-allow-credentials"] = "true"
+            response.headers["access-control-allow-methods"] = "GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH"
+            response.headers["access-control-allow-headers"] = "content-type, authorization, cookie"
+            response.headers["access-control-max-age"] = "600"
+            await response(scope, receive, send)
+            return
+
+        async def send_with_cors(message):
+            if message["type"] == "http.response.start":
+                headers = dict(message.get("headers", []))
+                raw_headers = list(message.get("headers", []))
+                # Remove any existing CORS headers
+                raw_headers = [(k, v) for k, v in raw_headers if k.lower() not in [
+                    b"access-control-allow-origin",
+                    b"access-control-allow-credentials",
+                    b"access-control-allow-methods",
+                    b"access-control-allow-headers",
+                ]]
+                raw_headers.append((b"access-control-allow-origin", (origin or "*").encode()))
+                raw_headers.append((b"access-control-allow-credentials", b"true"))
+                message["headers"] = raw_headers
+            await send(message)
+
+        await self.app(scope, receive, send_with_cors)
+
+app.add_middleware(DynamicCORSMiddleware)
 
 # Configure logging
 logging.basicConfig(
