@@ -578,14 +578,14 @@ Current Phase: {assessment.get('current_phase', 'welcome')}
             message=f"Your assessment for {company_name} is complete. Overall score: {overall_score}/5.",
             user_id=current_user["id"],
             meta={"assessment_id": assessment_id, "company_name": company_name, "score": overall_score}
-    )
+        )
         await create_notification(
             notif_type="assessment_completed",
             title="Assessment Completed",
             message=f"{current_user.get('name', 'A consultant')} completed an assessment for {company_name}. Score: {overall_score}/5.",
             admin_only=True,
             meta={"assessment_id": assessment_id, "company_name": company_name, "score": overall_score, "consultant": current_user.get("name", "")}
-    )
+        )
     
     return {
         "message": assistant_msg,
