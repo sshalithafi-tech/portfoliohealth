@@ -26,7 +26,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, Tabl
 from reportlab.lib.units import inch
 
 # LLM Integration
-from emergentintegrations.llm.chat import LlmChat, UserMessage
+import anthropic
 
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
@@ -325,7 +325,7 @@ async def login(user: UserLogin, response: Response, request: Request):
                 "$set": {"last_attempt": datetime.now(timezone.utc).isoformat()}
             },
             upsert=True
-        )
+    )
         raise HTTPException(status_code=401, detail="Invalid email or password")
     
     # Clear failed attempts on success
@@ -509,25 +509,15 @@ Current Phase: {assessment.get('current_phase', 'welcome')}
     full_system = PPDT_SYSTEM_PROMPT + "\n\nCurrent Assessment Context:\n" + company_context
     
     # Initialize Claude chat
-    llm_key = os.environ.get("EMERGENT_LLM_KEY")
-    chat = LlmChat(
-        api_key=llm_key,
-        session_id=f"ppdt-{assessment_id}",
-        system_message=full_system
-    ).with_model("anthropic", "claude-sonnet-4-5-20250929")
-    
-    # Build conversation history for context
-    conversation_context = ""
-    for msg in chat_history[:-1]:  # Exclude the latest user message
-        role_label = "User" if msg["role"] == "user" else "Assistant"
-        conversation_context += f"{role_label}: {msg['content']}\n\n"
-    
-    # Send message with context
-    full_message = conversation_context + f"User: {request.message}"
-    user_message = UserMessage(text=full_message)
-    
     try:
-        response = await chat.send_message(user_message)
+        anthropic_client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+        message = anthropic_client.messages.create(
+            model="claude-sonnet-4-5-20250929",
+            max_tokens=2048,
+            system=full_system,
+            messages=[{"role": "user", "content": initial_prompt}]
+        )
+        response = message.content[0].text
     except Exception as e:
         logging.error(f"LLM error: {e}")
         raise HTTPException(status_code=500, detail="Failed to get AI response")
@@ -580,14 +570,14 @@ Current Phase: {assessment.get('current_phase', 'welcome')}
             message=f"Your assessment for {company_name} is complete. Overall score: {overall_score}/5.",
             user_id=current_user["id"],
             meta={"assessment_id": assessment_id, "company_name": company_name, "score": overall_score}
-        )
+    )
         await create_notification(
             notif_type="assessment_completed",
             title="Assessment Completed",
             message=f"{current_user.get('name', 'A consultant')} completed an assessment for {company_name}. Score: {overall_score}/5.",
             admin_only=True,
             meta={"assessment_id": assessment_id, "company_name": company_name, "score": overall_score, "consultant": current_user.get("name", "")}
-        )
+    )
     
     return {
         "message": assistant_msg,
@@ -614,17 +604,15 @@ Respondent: {assessment.get('respondent_name', 'Unknown')} ({assessment.get('res
     
     full_system = PPDT_SYSTEM_PROMPT + "\n\nCurrent Assessment Context:\n" + company_context
     
-    llm_key = os.environ.get("EMERGENT_LLM_KEY")
-    chat = LlmChat(
-        api_key=llm_key,
-        session_id=f"ppdt-{assessment_id}-start",
-        system_message=full_system
-    ).with_model("anthropic", "claude-sonnet-4-5-20250929")
-    
-    initial_prompt = f"Begin the PPDT assessment for {assessment.get('company_name')}. The respondent is {assessment.get('respondent_name')}, {assessment.get('respondent_role')}. Start with a warm welcome and the first question."
-    
     try:
-        response = await chat.send_message(UserMessage(text=initial_prompt))
+        anthropic_client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+        message = anthropic_client.messages.create(
+            model="claude-sonnet-4-5-20250929",
+            max_tokens=2048,
+            system=full_system,
+            messages=[{"role": "user", "content": initial_prompt}]
+        )
+        response = message.content[0].text
     except Exception as e:
         logging.error(f"LLM error: {e}")
         raise HTTPException(status_code=500, detail="Failed to start assessment")
