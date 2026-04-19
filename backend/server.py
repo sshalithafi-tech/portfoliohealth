@@ -512,7 +512,7 @@ Current Phase: {assessment.get('current_phase', 'welcome')}
     try:
         anthropic_client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
         message = anthropic_client.messages.create(
-            model="claude-sonnet-4-5-20250929",
+            model="claude-sonnet-4-5",
             max_tokens=2048,
             system=full_system,
             messages=[{"role": "user", "content": initial_prompt}]
@@ -607,7 +607,7 @@ Respondent: {assessment.get('respondent_name', 'Unknown')} ({assessment.get('res
     try:
         anthropic_client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
         message = anthropic_client.messages.create(
-            model="claude-sonnet-4-5-20250929",
+            model="claude-sonnet-4-5",
             max_tokens=2048,
             system=full_system,
             messages=[{"role": "user", "content": initial_prompt}]
