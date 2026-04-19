@@ -22,11 +22,12 @@ from io import BytesIO
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image as RLImage
 from reportlab.lib.units import inch
+import urllib.request
 
 # LLM Integration
-import anthropic
+from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
@@ -182,6 +183,9 @@ class AssessmentUpdate(BaseModel):
 class SendMessageRequest(BaseModel):
     message: str
 
+# Contact email for closing statement
+CONTACT_EMAIL = "shalitha.samarakoonmudiyanselage@student.oulu.fi"
+
 # PPDT System Prompt
 PPDT_SYSTEM_PROMPT = """You are the PortfolioHealth Advisor — a specialised AI assessment consultant grounded in peer-reviewed PPM research from the University of Oulu.
 
@@ -198,15 +202,23 @@ MATURITY LEVELS (Score each PPDT dimension 1–5):
 LEVEL 1 — AD HOC: No structured approach. Decisions are reactive and intuition-driven.
 LEVEL 2 — DEVELOPING: Some processes and roles exist but are inconsistently applied.
 LEVEL 3 — DEFINED: Structured PPM processes and roles are formally established.
-LEVEL 4 — MANAGED: PPM decisions are systematically supported by integrated data.
-LEVEL 5 — OPTIMISING: All four PPDT pillars are fully aligned and continuously improved.
+LEVEL 4 — MANAGED: PPM decisions are systematically supported by integrated data. Governance structures are embedded.
+LEVEL 5 — OPTIMISING: All four PPDT pillars are fully aligned and continuously improved. Governance is proactive and adaptive.
+
+GOVERNANCE INDICATORS (Levels 4–5 ONLY):
+When a pillar appears to score at Level 4 or 5, you MUST ask governance-related questions within that pillar. Frame them naturally.
+
+- PEOPLE (Governance at L4-L5): Probe role-based data ownership, accountability frameworks, cross-functional governance participation. E.g. "At higher maturity levels, governance becomes critical. Who owns the product performance data and how is accountability structured?"
+- PROCESS (Governance at L4-L5): Probe formal review cycles, change control, escalation paths, audit trails for portfolio decisions. E.g. "How are portfolio decisions audited? Is there a formal escalation path when criteria are not met?"
+- DATA (Governance at L4-L5): Probe data governance policies, stewardship roles, data quality SLAs, compliance with data standards. E.g. "Do you have formal data stewardship roles? How do you enforce data quality standards across the product lifecycle?"
+- TECHNOLOGY (Governance at L4-L5): Probe system governance, access control, integration governance, PLM audit capabilities, tool ownership policies. E.g. "Who governs access to your PLM/PPM systems? Are there audit logs for critical portfolio decisions?"
 
 ASSESSMENT FLOW:
 PHASE 0 — WELCOME & CONTEXT SETTING (2–3 exchanges): Greet warmly. Ask for context about the company and respondent.
-PHASE 1 — PEOPLE (4–6 questions): Cultural questions, role clarity, data literacy.
-PHASE 2 — PROCESS (4–6 questions): PPM governance, product classification, lifecycle management.
-PHASE 3 — DATA (5–7 questions): Data model, product-level profitability, master data governance.
-PHASE 4 — TECHNOLOGY (3–5 questions): System integration, decision support capability.
+PHASE 1 — PEOPLE (4–6 questions): Cultural questions, role clarity, data literacy. If answers suggest L4+, ask governance questions.
+PHASE 2 — PROCESS (4–6 questions): PPM governance, product classification, lifecycle management. If answers suggest L4+, ask governance questions.
+PHASE 3 — DATA (5–7 questions): Data model, product-level profitability, master data governance. If answers suggest L4+, ask governance questions.
+PHASE 4 — TECHNOLOGY (3–5 questions): System integration, decision support capability. If answers suggest L4+, ask governance questions.
 PHASE 5 — DECISION TYPE CALIBRATION (2–3 questions): Which PPM decision types are most difficult.
 PHASE 6 — BENCHMARK CONTEXT (1–2 questions): Industry context and peer comparison.
 
@@ -217,8 +229,10 @@ BEHAVIOURAL RULES:
 4. PERSONALISE. Use the company name, industry, and portfolio size in your questions.
 5. BE DIRECT. If a respondent gives an answer that indicates low maturity, acknowledge it honestly.
 6. DO NOT RUSH. Quality of assessment matters more than speed.
+7. COMPLETE ALL PHASES. You must complete all phases before generating the report. Do not skip any phase.
+8. SIGNAL COMPLETION CLEARLY. When you have completed ALL phases, generate your final summary message that includes the report JSON. Start your final message with "Thank you for completing this assessment." and include the structured report.
 
-When you have gathered enough information (after completing all phases), generate a comprehensive assessment report in JSON format with the following structure:
+When you have gathered enough information (after completing ALL phases), generate a comprehensive assessment report in JSON format with the following structure:
 {
   "ready_for_report": true,
   "scores": {
@@ -241,6 +255,12 @@ When you have gathered enough information (after completing all phases), generat
     "data": "<1-sentence summary>",
     "technology": "<1-sentence summary>"
   },
+  "governance_observations": {
+    "people": "<governance observation or 'N/A - below Level 4'>",
+    "process": "<governance observation or 'N/A - below Level 4'>",
+    "data": "<governance observation or 'N/A - below Level 4'>",
+    "technology": "<governance observation or 'N/A - below Level 4'>"
+  },
   "key_findings": ["<finding 1>", "<finding 2>", ...],
   "critical_gaps": ["<gap 1>", "<gap 2>", ...],
   "decision_vulnerability": "<analysis of which decision type is most at risk>",
@@ -250,7 +270,8 @@ When you have gathered enough information (after completing all phases), generat
     "strategic": ["<action 1>"]
   },
   "benchmark_context": "<assessment relative to industry peers>",
-  "consultant_note": "<single most important focus area>"
+  "consultant_note": "<single most important focus area>",
+  "closing_statement": "Thank you for completing this capability maturity assessment. If you would like further analysis, expert input, or tailored recommendations based on your results, please reach out via email to arrange a follow-up consultation: """ + CONTACT_EMAIL + """"
 }
 
 Include this JSON block at the END of your final message when the assessment is complete, wrapped in ```json``` code blocks."""
@@ -400,7 +421,22 @@ async def create_company(company: CompanyCreate, current_user: dict = Depends(ge
 @api_router.get("/companies")
 async def get_companies(current_user: dict = Depends(get_current_user)):
     companies = await db.companies.find({"user_id": current_user["id"]}, {"_id": 1, "name": 1, "industry": 1, "portfolio_size": 1, "primary_challenge": 1, "created_at": 1, "user_id": 1}).to_list(1000)
-    return [{"id": str(c["_id"]), **{k: v for k, v in c.items() if k != "_id"}} for c in companies]
+    result = []
+    for c in companies:
+        cid = str(c["_id"])
+        total = await db.assessments.count_documents({"company_id": cid})
+        completed = await db.assessments.count_documents({"company_id": cid, "status": "completed"})
+        # Get latest assessment score
+        latest = await db.assessments.find_one({"company_id": cid, "status": "completed"}, sort=[("completed_at", -1)])
+        latest_score = latest.get("scores", {}).get("overall") if latest else None
+        result.append({
+            "id": cid,
+            **{k: v for k, v in c.items() if k != "_id"},
+            "assessment_count": total,
+            "completed_count": completed,
+            "latest_score": latest_score,
+        })
+    return result
 
 @api_router.get("/companies/{company_id}")
 async def get_company(company_id: str, current_user: dict = Depends(get_current_user)):
@@ -408,6 +444,19 @@ async def get_company(company_id: str, current_user: dict = Depends(get_current_
     if not company:
         raise HTTPException(status_code=404, detail="Company not found")
     return {"id": str(company["_id"]), **{k: v for k, v in company.items() if k != "_id"}}
+
+@api_router.delete("/companies/{company_id}")
+async def delete_company(company_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a company and all its associated assessments"""
+    company = await db.companies.find_one({"_id": ObjectId(company_id), "user_id": current_user["id"]})
+    if not company:
+        raise HTTPException(status_code=404, detail="Company not found")
+    # Delete all assessments for this company
+    await db.assessments.delete_many({"company_id": company_id})
+    # Delete the company
+    await db.companies.delete_one({"_id": ObjectId(company_id)})
+    return {"ok": True, "message": f"Company '{company.get('name', '')}' and all associated assessments deleted."}
+
 
 @api_router.get("/companies/{company_id}/assessments")
 async def get_company_assessments(company_id: str, current_user: dict = Depends(get_current_user)):
@@ -516,16 +565,21 @@ Current Phase: {assessment.get('current_phase', 'welcome')}
     if not claude_messages:
         claude_messages = [{"role": "user", "content": request.message}]
 
-    # Initialize Claude chat
+    # Initialize Claude chat via Emergent integrations
     try:
-        anthropic_client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
-        message = anthropic_client.messages.create(
+        chat = LlmChat(
+            api_key=os.environ.get("EMERGENT_LLM_KEY"),
             model="claude-sonnet-4-5",
-            max_tokens=2048,
-            system=full_system,
-            messages=claude_messages
+            system_message=full_system,
         )
-        response = message.content[0].text
+        for msg in claude_messages:
+            if msg["role"] == "user":
+                chat.messages.append(UserMessage(content=msg["content"]))
+            elif msg["role"] == "assistant":
+                from emergentintegrations.llm.chat import AssistantMessage
+                chat.messages.append(AssistantMessage(content=msg["content"]))
+        
+        response = await chat.send_message_async(request.message)
     except Exception as e:
         logging.error(f"LLM error: {e}")
         raise HTTPException(status_code=500, detail="Failed to get AI response")
@@ -613,14 +667,12 @@ Respondent: {assessment.get('respondent_name', 'Unknown')} ({assessment.get('res
     full_system = PPDT_SYSTEM_PROMPT + "\n\nCurrent Assessment Context:\n" + company_context
     
     try:
-        anthropic_client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
-        message = anthropic_client.messages.create(
+        chat = LlmChat(
+            api_key=os.environ.get("EMERGENT_LLM_KEY"),
             model="claude-sonnet-4-5",
-            max_tokens=2048,
-            system=full_system,
-            messages=[{"role": "user", "content": "Please begin the assessment by introducing yourself and asking the first question."}]
+            system_message=full_system,
         )
-        response = message.content[0].text
+        response = await chat.send_message_async("Please begin the assessment by introducing yourself and asking the first question.")
     except Exception as e:
         logging.error(f"LLM error: {e}")
         raise HTTPException(status_code=500, detail="Failed to start assessment")
@@ -639,6 +691,71 @@ Respondent: {assessment.get('respondent_name', 'Unknown')} ({assessment.get('res
     return {"message": greeting_msg}
 
 # PDF Report Generation
+LOGO_URL = "https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/6407f98124d827501f865028cbbf81566506fd19a8f17f5fd5b271241d491414.png"
+
+def get_pdf_logo():
+    """Download logo and return as BytesIO for reportlab"""
+    try:
+        logo_data = BytesIO()
+        req = urllib.request.urlopen(LOGO_URL, timeout=5)
+        logo_data.write(req.read())
+        logo_data.seek(0)
+        return logo_data
+    except Exception:
+        return None
+
+def build_pdf_header(story, styles, title_text=""):
+    """Add standard PortfolioHealth header to PDF"""
+    logo_style = ParagraphStyle('LogoText', parent=styles['Heading1'], fontSize=22, spaceAfter=2, textColor=colors.HexColor('#00E5FF'))
+    subtitle_style = ParagraphStyle('Subtitle', parent=styles['Normal'], fontSize=9, textColor=colors.HexColor('#888888'), spaceAfter=4)
+    
+    logo_data = get_pdf_logo()
+    if logo_data:
+        try:
+            img = RLImage(logo_data, width=40, height=40)
+            header_table = Table([[img, Paragraph("PortfolioHealth Advisor", logo_style)]], colWidths=[50, 400])
+            header_table.setStyle(TableStyle([
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('LEFTPADDING', (0, 0), (-1, -1), 0),
+            ]))
+            story.append(header_table)
+        except Exception:
+            story.append(Paragraph("PortfolioHealth Advisor", logo_style))
+    else:
+        story.append(Paragraph("PortfolioHealth Advisor", logo_style))
+    
+    story.append(Paragraph("PPM Capability Maturity Assessment · University of Oulu", subtitle_style))
+    
+    # Divider line
+    divider = Table([[""]],colWidths=[490])
+    divider.setStyle(TableStyle([
+        ('LINEBELOW', (0, 0), (-1, -1), 1, colors.HexColor('#00E5FF')),
+    ]))
+    story.append(divider)
+    story.append(Spacer(1, 16))
+    
+    if title_text:
+        title_style = ParagraphStyle('ReportTitle', parent=styles['Heading1'], fontSize=18, spaceAfter=12, textColor=colors.HexColor('#2f81f7'))
+        story.append(Paragraph(title_text, title_style))
+        story.append(Spacer(1, 8))
+
+def build_pdf_closing(story, styles):
+    """Add closing statement CTA to PDF"""
+    closing_style = ParagraphStyle('Closing', parent=styles['Normal'], fontSize=10, textColor=colors.HexColor('#333333'),
+                                   borderPadding=12, backColor=colors.HexColor('#FFF8E1'), borderColor=colors.HexColor('#FFB300'),
+                                   borderWidth=1, borderRadius=4, spaceAfter=8, leading=14)
+    footer_style = ParagraphStyle('Footer', fontSize=8, textColor=colors.grey, alignment=1)
+    
+    story.append(Spacer(1, 20))
+    story.append(Paragraph(
+        f"Thank you for completing this capability maturity assessment. If you would like further analysis, "
+        f"expert input, or tailored recommendations based on your results, please reach out via email to arrange "
+        f"a follow-up consultation: <b>{CONTACT_EMAIL}</b>",
+        closing_style
+    ))
+    story.append(Spacer(1, 20))
+    story.append(Paragraph("© 2026 PortfolioHealth Advisor · Based on PPM Capability Maturity Research · University of Oulu", footer_style))
+
 @api_router.get("/assessments/{assessment_id}/pdf")
 async def generate_pdf_report(assessment_id: str, current_user: dict = Depends(get_current_user)):
     assessment = await db.assessments.find_one({"_id": ObjectId(assessment_id), "user_id": current_user["id"]})
@@ -656,22 +773,22 @@ async def generate_pdf_report(assessment_id: str, current_user: dict = Depends(g
     doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=50, leftMargin=50, topMargin=50, bottomMargin=50)
     
     styles = getSampleStyleSheet()
-    title_style = ParagraphStyle('Title', parent=styles['Heading1'], fontSize=18, spaceAfter=12, textColor=colors.HexColor('#2f81f7'))
     heading_style = ParagraphStyle('Heading', parent=styles['Heading2'], fontSize=14, spaceAfter=8, textColor=colors.HexColor('#2f81f7'))
     body_style = ParagraphStyle('Body', parent=styles['Normal'], fontSize=10, spaceAfter=6)
+    gov_style = ParagraphStyle('Governance', parent=styles['Normal'], fontSize=9, spaceAfter=4, textColor=colors.HexColor('#6B4C00'),
+                               backColor=colors.HexColor('#FFFDE7'), borderPadding=6, borderColor=colors.HexColor('#FFD54F'),
+                               borderWidth=0.5, leading=12)
     
     story = []
     
-    # Title
-    story.append(Paragraph("PPDT CAPABILITY MATURITY ASSESSMENT REPORT", title_style))
-    story.append(Spacer(1, 12))
+    # Logo Header
+    build_pdf_header(story, styles, "PPDT CAPABILITY MATURITY ASSESSMENT REPORT")
     
     # Company Info
     story.append(Paragraph(f"<b>Company:</b> {assessment.get('company_name', 'N/A')}", body_style))
     story.append(Paragraph(f"<b>Industry:</b> {assessment.get('company_industry', 'N/A')}", body_style))
     story.append(Paragraph(f"<b>Respondent:</b> {assessment.get('respondent_name', 'N/A')} ({assessment.get('respondent_role', 'N/A')})", body_style))
     story.append(Paragraph(f"<b>Date:</b> {assessment.get('completed_at', assessment.get('created_at', 'N/A'))[:10]}", body_style))
-    story.append(Paragraph("<b>Framework:</b> PPM Capability Maturity Research · University of Oulu (2026)", body_style))
     story.append(Spacer(1, 20))
     
     # Overall Score
@@ -706,6 +823,18 @@ async def generate_pdf_report(assessment_id: str, current_user: dict = Depends(g
     ]))
     story.append(table)
     story.append(Spacer(1, 20))
+    
+    # Governance Observations (Levels 4-5 only)
+    gov_obs = report.get("governance_observations", {})
+    has_gov = any(v and "N/A" not in str(v) and "below" not in str(v).lower() for v in gov_obs.values())
+    if has_gov:
+        story.append(Paragraph("GOVERNANCE INDICATORS (Levels 4–5)", heading_style))
+        for dim in ["people", "process", "data", "technology"]:
+            obs = gov_obs.get(dim, "")
+            if obs and "N/A" not in str(obs) and "below" not in str(obs).lower():
+                story.append(Paragraph(f"<b>{dim.capitalize()} — Governance:</b> {obs}", gov_style))
+                story.append(Spacer(1, 4))
+        story.append(Spacer(1, 12))
     
     # Key Findings
     story.append(Paragraph("KEY FINDINGS", heading_style))
@@ -749,11 +878,9 @@ async def generate_pdf_report(assessment_id: str, current_user: dict = Depends(g
     # Consultant's Note
     story.append(Paragraph("CONSULTANT'S NOTE", heading_style))
     story.append(Paragraph(report.get("consultant_note", "N/A"), body_style))
-    story.append(Spacer(1, 20))
     
-    # Footer
-    story.append(Paragraph("Based on: PPM Capability Maturity Research · University of Oulu (2026)", 
-                          ParagraphStyle('Footer', fontSize=8, textColor=colors.grey)))
+    # Closing Statement
+    build_pdf_closing(story, styles)
     
     doc.build(story)
     buffer.seek(0)
@@ -1390,17 +1517,14 @@ async def generate_quick_assessment_pdf(quick_id: str):
     doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=50, leftMargin=50, topMargin=50, bottomMargin=50)
     
     styles = getSampleStyleSheet()
-    title_style = ParagraphStyle('Title', parent=styles['Heading1'], fontSize=20, spaceAfter=12, textColor=colors.HexColor('#2f81f7'))
     heading_style = ParagraphStyle('Heading', parent=styles['Heading2'], fontSize=14, spaceAfter=8, textColor=colors.HexColor('#2f81f7'))
     body_style = ParagraphStyle('Body', parent=styles['Normal'], fontSize=11, spaceAfter=8)
     cta_style = ParagraphStyle('CTA', parent=styles['Normal'], fontSize=10, spaceAfter=6, textColor=colors.HexColor('#2f81f7'), borderPadding=10)
     
     story = []
     
-    # Title
-    story.append(Paragraph("PortfolioHealth Quick Assessment", title_style))
-    story.append(Paragraph(f"<b>{quick.get('company_name', 'Unknown Company')}</b>", heading_style))
-    story.append(Spacer(1, 12))
+    # Logo Header
+    build_pdf_header(story, styles, "PPDT QUICK HEALTH CHECK REPORT")
     
     # Company Info
     story.append(Paragraph(f"<b>Industry:</b> {quick.get('industry', 'N/A')}", body_style))
@@ -1470,11 +1594,8 @@ async def generate_quick_assessment_pdf(quick_id: str):
     story.append(Spacer(1, 12))
     story.append(Paragraph("<b>Schedule a Full Assessment →</b> Contact your PortfolioHealth Advisor consultant", cta_style))
     
-    story.append(Spacer(1, 30))
-    
-    # Footer
-    story.append(Paragraph("Based on: PPM Capability Maturity Research · University of Oulu (2026)", 
-                          ParagraphStyle('Footer', fontSize=8, textColor=colors.grey)))
+    # Closing Statement
+    build_pdf_closing(story, styles)
     
     doc.build(story)
     buffer.seek(0)

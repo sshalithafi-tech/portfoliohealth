@@ -305,6 +305,30 @@ const ReportPage = () => {
           </div>
         </div>
 
+        {/* Governance Observations (Levels 4-5) */}
+        {report.governance_observations && Object.values(report.governance_observations).some(v => v && !v.includes("N/A") && !v.toLowerCase().includes("below")) && (
+          <div className="p-6 glass-surface-highlight rounded-xl border-l-4 border-[#FFB300]">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="px-2 py-0.5 bg-[#FFB300]/15 text-[#FFB300] text-xs font-semibold rounded border border-[#FFB300]/20">
+                GOVERNANCE
+              </div>
+              <h2 className="text-lg font-semibold text-white font-['Outfit']">Governance Indicators (Levels 4–5)</h2>
+            </div>
+            <div className="space-y-3">
+              {DIMENSIONS.map(dim => {
+                const obs = report.governance_observations?.[dim];
+                if (!obs || obs.includes("N/A") || obs.toLowerCase().includes("below")) return null;
+                return (
+                  <div key={`gov-${dim}`} className="p-3 bg-[#FFB300]/5 rounded-lg border border-[#FFB300]/10">
+                    <span className="text-xs font-semibold text-[#FFB300] uppercase">{dim}</span>
+                    <p className="text-white/60 text-sm mt-1">{obs}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Key Findings & Critical Gaps */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="p-6 glass-surface-highlight rounded-xl">
@@ -369,6 +393,16 @@ const ReportPage = () => {
             <h2 className="text-lg font-semibold text-white mb-4 font-['Outfit']">Consultant's Note</h2>
             <p className="text-white/70 italic">"{report.consultant_note || "No consultant note available."}"</p>
           </div>
+        </div>
+
+        {/* Closing Statement */}
+        <div className="p-6 glass-card rounded-xl border border-[#FFB300]/20 hover:border-[#FFB300]/30" data-testid="report-closing-statement">
+          <p className="text-white/70 text-sm leading-relaxed mb-3">
+            Thank you for completing this capability maturity assessment. If you would like further analysis, expert input, or tailored recommendations based on your results, please reach out via email to arrange a follow-up consultation:
+          </p>
+          <a href="mailto:shalitha.samarakoonmudiyanselage@student.oulu.fi" className="text-[#FFB300] hover:text-[#FFD54F] font-medium text-sm transition-colors">
+            shalitha.samarakoonmudiyanselage@student.oulu.fi
+          </a>
         </div>
 
         {/* Footer */}

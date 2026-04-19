@@ -96,7 +96,7 @@ export const useCompanies = () => {
     setCompanies(prev => [company, ...prev]);
   }, []);
 
-  return { companies, loading, refetch: fetchCompanies, addCompany };
+  return { companies, setCompanies, loading, refetch: fetchCompanies, addCompany };
 };
 
 /**

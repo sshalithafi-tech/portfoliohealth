@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import Layout from "../components/Layout";
 import { useCompanies } from "../hooks/useData";
+import { getScoreColorClass } from "../utils/scoring";
 import { LoadingSpinner, EmptyState } from "../components/ScoreComponents";
 import { 
   Plus, 
@@ -10,7 +11,10 @@ import {
   Calendar,
   ChevronRight,
   Search,
-  ClipboardCheck
+  ClipboardCheck,
+  Trash2,
+  Download,
+  MoreVertical
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -29,56 +33,179 @@ const INDUSTRIES = [
   "Telecommunications", "Consumer Goods", "Industrial Equipment", "Other"
 ];
 
-const CompanyCard = ({ company }) => (
-  <div
-    data-testid={`company-card-${company.id}`}
-    className="p-6 glass-card rounded-xl group"
-  >
-    <div className="flex items-start justify-between">
-      <div className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded-lg bg-[#2f81f7]/15 flex items-center justify-center">
+const CompanyCard = ({ company, onDelete }) => {
+  const [showActions, setShowActions] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      await axios.delete(`${BACKEND_URL}/api/companies/${company.id}`);
+      toast.success(`${company.name} deleted`);
+      onDelete(company.id);
+    } catch {
+      toast.error("Failed to delete company");
+    } finally {
+      setDeleting(false);
+      setShowConfirm(false);
+    }
+  };
+
+  const downloadPDF = async (type) => {
+    try {
+      // For full assessment, find the latest completed assessment
+      const res = await axios.get(`${BACKEND_URL}/api/companies/${company.id}/assessments`);
+      const assessments = res.data;
+      const completed = assessments.find(a => a.status === "completed");
+      
+      if (type === "full" && completed) {
+        const pdfRes = await axios.get(`${BACKEND_URL}/api/assessments/${completed.id}/pdf`, { responseType: "blob" });
+        const url = window.URL.createObjectURL(new Blob([pdfRes.data]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", `${company.name.replace(/\s+/g, "_")}_Full_Assessment.pdf`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        toast.success("PDF downloaded");
+      } else if (type === "full") {
+        toast.info("No completed assessment found for this company");
+      }
+    } catch {
+      toast.error("Failed to download");
+    }
+    setShowActions(false);
+  };
+
+  return (
+    <div
+      data-testid={`company-card-${company.id}`}
+      className="p-5 sm:p-6 glass-card rounded-xl group relative"
+    >
+      {/* Actions Menu */}
+      <div className="absolute top-4 right-4">
+        <button
+          data-testid={`company-actions-${company.id}`}
+          onClick={() => setShowActions(!showActions)}
+          className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/[0.06] transition-all"
+        >
+          <MoreVertical size={18} />
+        </button>
+        {showActions && (
+          <>
+            <div className="fixed inset-0 z-40" onClick={() => setShowActions(false)} />
+            <div className="absolute right-0 top-8 w-52 glass-heavy rounded-xl shadow-xl z-50 py-1 animate-fade-in">
+              <button
+                data-testid={`download-full-${company.id}`}
+                onClick={() => downloadPDF("full")}
+                className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/[0.05] transition-colors"
+              >
+                <Download size={14} /> Download Full Report
+              </button>
+              <Link
+                to={`/assessments?company=${company.id}`}
+                className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/[0.05] transition-colors"
+                onClick={() => setShowActions(false)}
+              >
+                <ClipboardCheck size={14} /> View Assessments
+              </Link>
+              <hr className="border-white/[0.06] my-1" />
+              <button
+                data-testid={`delete-company-${company.id}`}
+                onClick={() => { setShowConfirm(true); setShowActions(false); }}
+                className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-[#F85149] hover:bg-[#F85149]/10 transition-colors"
+              >
+                <Trash2 size={14} /> Delete Company
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Delete Confirmation Dialog */}
+      {showConfirm && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4" onClick={() => setShowConfirm(false)}>
+          <div className="glass-heavy rounded-2xl p-6 max-w-sm w-full animate-fade-in" onClick={e => e.stopPropagation()} data-testid="delete-confirm-dialog">
+            <h3 className="text-lg font-semibold text-white font-['Outfit'] mb-3">Delete Company?</h3>
+            <p className="text-white/60 text-sm mb-6">
+              Are you sure you want to delete <strong className="text-white">{company.name}</strong> and all associated assessments? This cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="flex-1 py-2.5 btn-glass rounded-xl text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                data-testid="confirm-delete-btn"
+                onClick={handleDelete}
+                disabled={deleting}
+                className="flex-1 py-2.5 bg-[#F85149] text-white rounded-xl text-sm hover:bg-[#F85149]/80 transition-colors disabled:opacity-50"
+              >
+                {deleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="flex items-start gap-3 pr-8">
+        <div className="w-12 h-12 rounded-lg bg-[#2f81f7]/15 flex items-center justify-center shrink-0">
           <Building2 size={24} className="text-[#2f81f7]" />
         </div>
-        <div>
-          <h3 className="text-lg font-semibold text-white group-hover:text-[#00E5FF] transition-colors font-['Outfit']">
+        <div className="min-w-0">
+          <h3 className="text-lg font-semibold text-white group-hover:text-[#00E5FF] transition-colors font-['Outfit'] truncate">
             {company.name}
           </h3>
           <p className="text-sm text-white/50">{company.industry}</p>
         </div>
       </div>
-    </div>
 
-    {company.portfolio_size && (
-      <p className="mt-4 text-sm text-white/50">
-        Portfolio: {company.portfolio_size}
-      </p>
-    )}
-
-    {company.primary_challenge && (
-      <p className="mt-2 text-sm text-white/30 line-clamp-2">
-        {company.primary_challenge}
-      </p>
-    )}
-
-    <div className="mt-4 pt-4 border-t border-white/[0.06] flex items-center justify-between">
-      <div className="flex items-center gap-2 text-sm text-white/40">
-        <Calendar size={14} />
-        {new Date(company.created_at).toLocaleDateString()}
+      {/* Assessment status badges */}
+      <div className="flex flex-wrap gap-2 mt-4">
+        {company.completed_count > 0 && (
+          <span className="px-2.5 py-1 text-xs rounded-full bg-[#238636]/15 text-[#238636] border border-[#238636]/20">
+            {company.completed_count} Completed
+          </span>
+        )}
+        {(company.assessment_count - (company.completed_count || 0)) > 0 && (
+          <span className="px-2.5 py-1 text-xs rounded-full bg-[#D29922]/15 text-[#D29922] border border-[#D29922]/20">
+            {company.assessment_count - (company.completed_count || 0)} In Progress
+          </span>
+        )}
+        {company.latest_score && (
+          <span className={`px-2.5 py-1 text-xs rounded-full font-['JetBrains_Mono'] font-semibold ${getScoreColorClass(company.latest_score)} bg-white/[0.05] border border-white/10`}>
+            Score: {company.latest_score.toFixed(1)}
+          </span>
+        )}
       </div>
-      <Link
-        to={`/assessments?company=${company.id}`}
-        className="flex items-center gap-1 text-sm text-[#00E5FF] hover:text-[#00E5FF]/80 transition-colors"
-      >
-        <ClipboardCheck size={14} />
-        Assessments
-        <ChevronRight size={14} />
-      </Link>
+
+      {company.portfolio_size && (
+        <p className="mt-3 text-sm text-white/40">Portfolio: {company.portfolio_size}</p>
+      )}
+
+      <div className="mt-4 pt-4 border-t border-white/[0.06] flex items-center justify-between">
+        <div className="flex items-center gap-2 text-sm text-white/40">
+          <Calendar size={14} />
+          {new Date(company.created_at).toLocaleDateString()}
+        </div>
+        <Link
+          to={`/assessments?company=${company.id}`}
+          className="flex items-center gap-1 text-sm text-[#00E5FF] hover:text-[#00E5FF]/80 transition-colors"
+        >
+          <ClipboardCheck size={14} />
+          Assessments
+          <ChevronRight size={14} />
+        </Link>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const CompaniesPage = () => {
-  const { companies, loading, addCompany } = useCompanies();
+  const { companies, loading, addCompany, setCompanies } = useCompanies();
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [formData, setFormData] = useState({
@@ -109,6 +236,10 @@ const CompaniesPage = () => {
       setSubmitting(false);
     }
   }, [formData, addCompany, resetForm]);
+
+  const handleDelete = useCallback((companyId) => {
+    setCompanies(prev => prev.filter(c => c.id !== companyId));
+  }, [setCompanies]);
 
   const filteredCompanies = companies.filter(c => 
     c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -230,7 +361,7 @@ const CompaniesPage = () => {
         {filteredCompanies.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 stagger-children">
             {filteredCompanies.map((company) => (
-              <CompanyCard key={company.id} company={company} />
+              <CompanyCard key={company.id} company={company} onDelete={handleDelete} />
             ))}
           </div>
         ) : (

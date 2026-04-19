@@ -103,10 +103,11 @@ const AssessmentChatPage = () => {
       setMessages(prev => [...prev, response.data.message]);
 
       if (response.data.report_ready) {
-        toast.success("Assessment complete! Report generated.");
+        toast.success("Assessment complete! Redirecting to dashboard...");
+        setAssessment(prev => ({ ...prev, status: "completed" }));
         setTimeout(() => {
-          navigate(`/assessments/${id}/report`);
-        }, 2000);
+          navigate("/dashboard");
+        }, 3000);
       }
 
       const messageCount = messages.length + 2;
@@ -279,6 +280,34 @@ const AssessmentChatPage = () => {
                     <span className="w-1.5 h-1.5 bg-[#00E5FF] rounded-full animate-bounce" style={{ animationDelay: "0.2s" }} />
                   </span>
                 </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Closing Statement Card */}
+          {assessment?.status === "completed" && (
+            <div className="animate-fade-in p-5 rounded-2xl border border-[#FFB300]/30 bg-[#FFB300]/5 backdrop-blur-sm" data-testid="closing-statement-card">
+              <p className="text-white/80 text-sm leading-relaxed mb-4">
+                Thank you for completing this capability maturity assessment. If you would like further analysis, expert input, or tailored recommendations based on your results, please reach out via email to arrange a follow-up consultation:
+              </p>
+              <a href="mailto:shalitha.samarakoonmudiyanselage@student.oulu.fi" className="text-[#FFB300] hover:text-[#FFD54F] font-medium text-sm transition-colors">
+                shalitha.samarakoonmudiyanselage@student.oulu.fi
+              </a>
+              <div className="flex gap-3 mt-4">
+                <Link
+                  to={`/assessments/${id}/report`}
+                  className="flex items-center gap-2 px-4 py-2 btn-liquid rounded-xl text-sm"
+                  data-testid="view-report-from-chat"
+                >
+                  <FileText size={16} />
+                  View Report
+                </Link>
+                <Link
+                  to="/dashboard"
+                  className="flex items-center gap-2 px-4 py-2 btn-glass rounded-xl text-sm"
+                >
+                  Go to Dashboard
+                </Link>
               </div>
             </div>
           )}
