@@ -557,11 +557,14 @@ Current Phase: {assessment.get('current_phase', 'welcome')}
     
     full_system = PPDT_SYSTEM_PROMPT + "\n\nCurrent Assessment Context:\n" + company_context
     
-    # Build messages for Claude from chat history
+    # Build messages for Claude from chat history (limit to last 40 messages to stay within limits)
     claude_messages = []
     for msg in chat_history:
         if msg["role"] in ["user", "assistant"]:
             claude_messages.append({"role": msg["role"], "content": msg["content"]})
+    # Keep last 40 messages to avoid token overflow
+    if len(claude_messages) > 40:
+        claude_messages = claude_messages[-40:]
     if not claude_messages:
         claude_messages = [{"role": "user", "content": request.message}]
 
@@ -582,8 +585,25 @@ Current Phase: {assessment.get('current_phase', 'welcome')}
         
         response = await chat.send_message(UserMessage(text=request.message))
     except Exception as e:
-        logging.error(f"LLM error: {e}")
-        raise HTTPException(status_code=500, detail="Failed to get AI response")
+        logging.error(f"LLM error (attempt 1): {e}")
+        # Retry once on transient errors
+        try:
+            import asyncio
+            await asyncio.sleep(2)
+            chat2 = LlmChat(
+                api_key=os.environ.get("EMERGENT_LLM_KEY"),
+                session_id=f"assessment-retry-{assessment_id}",
+                system_message=full_system,
+            ).with_model("anthropic", "claude-sonnet-4-5-20250929")
+            for msg in claude_messages:
+                if msg["role"] == "user":
+                    chat2.messages.append({"role": "user", "content": msg["content"]})
+                elif msg["role"] == "assistant":
+                    chat2.messages.append({"role": "assistant", "content": msg["content"]})
+            response = await chat2.send_message(UserMessage(text=request.message))
+        except Exception as e2:
+            logging.error(f"LLM error (attempt 2): {e2}")
+            raise HTTPException(status_code=500, detail="Failed to get AI response. Please try again.")
     
     # Add assistant response to history
     assistant_msg = {
@@ -598,18 +618,30 @@ Current Phase: {assessment.get('current_phase', 'welcome')}
     scores = None
     status = assessment.get("status", "in_progress")
     
-    if "ready_for_report" in response and '"ready_for_report": true' in response.lower().replace(" ", ""):
-        import json
+    if "ready_for_report" in response:
+        import json as json_mod
         import re
         # Extract JSON from response
         json_match = re.search(r'```json\s*(.*?)\s*```', response, re.DOTALL)
         if json_match:
             try:
-                report_data = json.loads(json_match.group(1))
-                scores = report_data.get("scores")
-                status = "completed"
-            except json.JSONDecodeError:
-                pass
+                report_data = json_mod.loads(json_match.group(1))
+                if report_data.get("ready_for_report"):
+                    scores = report_data.get("scores")
+                    status = "completed"
+            except json_mod.JSONDecodeError as je:
+                logging.error(f"JSON parse error: {je}")
+        else:
+            # Try to find JSON without code block markers
+            json_match2 = re.search(r'\{[\s\S]*"ready_for_report"[\s\S]*\}', response)
+            if json_match2:
+                try:
+                    report_data = json_mod.loads(json_match2.group(0))
+                    if report_data.get("ready_for_report"):
+                        scores = report_data.get("scores")
+                        status = "completed"
+                except json_mod.JSONDecodeError:
+                    pass
     
     # Update assessment
     update_data = {"chat_history": chat_history}
