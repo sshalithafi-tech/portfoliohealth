@@ -508,6 +508,14 @@ Current Phase: {assessment.get('current_phase', 'welcome')}
     
     full_system = PPDT_SYSTEM_PROMPT + "\n\nCurrent Assessment Context:\n" + company_context
     
+    # Build messages for Claude from chat history
+    claude_messages = []
+    for msg in chat_history:
+        if msg["role"] in ["user", "assistant"]:
+            claude_messages.append({"role": msg["role"], "content": msg["content"]})
+    if not claude_messages:
+        claude_messages = [{"role": "user", "content": request.message}]
+
     # Initialize Claude chat
     try:
         anthropic_client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
@@ -515,7 +523,7 @@ Current Phase: {assessment.get('current_phase', 'welcome')}
             model="claude-sonnet-4-5",
             max_tokens=2048,
             system=full_system,
-            messages=[{"role": "user", "content": initial_prompt}]
+            messages=claude_messages
         )
         response = message.content[0].text
     except Exception as e:
@@ -610,7 +618,7 @@ Respondent: {assessment.get('respondent_name', 'Unknown')} ({assessment.get('res
             model="claude-sonnet-4-5",
             max_tokens=2048,
             system=full_system,
-            messages=[{"role": "user", "content": initial_prompt}]
+            messages=[{"role": "user", "content": "Please begin the assessment by introducing yourself and asking the first question."}]
         )
         response = message.content[0].text
     except Exception as e:
