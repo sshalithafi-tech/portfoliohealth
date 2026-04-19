@@ -27,7 +27,7 @@ from reportlab.lib.units import inch
 import urllib.request
 
 # LLM Integration
-from emergentintegrations.llm.chat import LlmChat, UserMessage
+import anthropic
 
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
