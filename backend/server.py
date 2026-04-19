@@ -569,17 +569,18 @@ Current Phase: {assessment.get('current_phase', 'welcome')}
     try:
         chat = LlmChat(
             api_key=os.environ.get("EMERGENT_LLM_KEY"),
-            model="claude-sonnet-4-5",
+            session_id=f"assessment-{assessment_id}",
             system_message=full_system,
-        )
+        ).with_model("anthropic", "claude-sonnet-4-5-20250929")
+        
+        # Load conversation history
         for msg in claude_messages:
             if msg["role"] == "user":
-                chat.messages.append(UserMessage(content=msg["content"]))
+                chat.messages.append({"role": "user", "content": msg["content"]})
             elif msg["role"] == "assistant":
-                from emergentintegrations.llm.chat import AssistantMessage
-                chat.messages.append(AssistantMessage(content=msg["content"]))
+                chat.messages.append({"role": "assistant", "content": msg["content"]})
         
-        response = await chat.send_message_async(request.message)
+        response = await chat.send_message(UserMessage(text=request.message))
     except Exception as e:
         logging.error(f"LLM error: {e}")
         raise HTTPException(status_code=500, detail="Failed to get AI response")
@@ -669,10 +670,10 @@ Respondent: {assessment.get('respondent_name', 'Unknown')} ({assessment.get('res
     try:
         chat = LlmChat(
             api_key=os.environ.get("EMERGENT_LLM_KEY"),
-            model="claude-sonnet-4-5",
+            session_id=f"assessment-start-{assessment_id}",
             system_message=full_system,
-        )
-        response = await chat.send_message_async("Please begin the assessment by introducing yourself and asking the first question.")
+        ).with_model("anthropic", "claude-sonnet-4-5-20250929")
+        response = await chat.send_message(UserMessage(text="Please begin the assessment by introducing yourself and asking the first question."))
     except Exception as e:
         logging.error(f"LLM error: {e}")
         raise HTTPException(status_code=500, detail="Failed to start assessment")

@@ -1,91 +1,57 @@
 # PortfolioHealth Advisor - Product Requirements Document
 
 ## Original Problem Statement
-SaaS application for PPM (Product Portfolio Management) Capability Maturity Assessment. The tool assesses organizations across People, Process, Data, and Technology (PPDT) dimensions using:
-1. Conversational AI Assessment (Claude Sonnet 4.5)
-2. 10-Minute Quick Assessment (15 static MCQ, no login)
-3. User Authentication & Dashboard (tracking history per company)
-4. PDF Report Generation with radar charts and scoring
-5. Dark professional theme with glassmorphism + liquid glass design
+SaaS application for PPM Capability Maturity Assessment across People, Process, Data, and Technology (PPDT).
 
 ## Brand Identity
 - **Name**: PortfolioHealth Advisor
-- **Tagline**: "Academically grounded in published PPM research · University of Oulu"
-- **Custom Logo**: Shield + pulse/bar chart mark (generated, not uploaded)
-- **Theme**: Glassmorphism + Liquid Glass (deep void black with cyan/blue fluid blobs)
+- **Contact Email**: shalitha.samarakoonmudiyanselage@student.oulu.fi
+- **Custom Domain**: portfoliohealth.fi
+- **Theme**: Glassmorphism + Liquid Glass
 
 ## Architecture
-- **Frontend**: React + Tailwind CSS + Shadcn/UI
-- **Backend**: FastAPI (Python)
-- **Database**: MongoDB
-- **AI**: Claude Sonnet 4.5 via Emergent LLM Key
-- **PDF**: WeasyPrint/ReportLab
+- Frontend: React + Tailwind CSS + Shadcn/UI
+- Backend: FastAPI (Python)
+- Database: MongoDB
+- AI: Claude Sonnet 4.5 via Emergent LLM Key (emergentintegrations)
+- PDF: ReportLab
 
-## What's Been Implemented (as of April 16, 2026)
+## What's Been Implemented
 
-### Core Features ✅
-- JWT Authentication (register, login, logout, refresh)
-- Admin seeded account (admin@ppdt.com)
-- Consultant Dashboard with stats, radar charts, recent assessments
-- Company management (CRUD)
-- Full AI-guided Assessment Chat (multi-phase: People → Process → Data → Technology → Decision → Benchmark → Report)
-- Quick Assessment flow (15 static questions, no login required, instant scoring)
-- PDF Report Generation for both assessment types
-- Complete application routing with protected/public routes
+### Core Features
+- JWT Auth with Bearer token (localStorage) — works cross-domain
+- Admin seeded account (admin@ppdt.com / Admin123!)
+- Dashboard with stats, radar charts, recent assessments
+- Company management (CRUD + DELETE with confirmation)
+- Full AI Assessment Chat (PPDT phases + governance indicators at L4-5)
+- Quick Assessment (15 questions, no login, instant scoring)
+- PDF Reports with logo header, governance section, closing statement
+- Admin Panel (all assessments, all users, CSV export)
+- In-app Notifications (bell icon, unread count, mark read)
+- Assessment auto-redirect to dashboard on completion
+- Closing statement with contact email in chat + report + PDF
 
-### Design & Theme ✅
-- Glassmorphism + Liquid Glass theme overhaul (April 2026)
-  - Deep void black background (#05050A)
-  - Animated liquid blobs (blue/cyan gradient)
-  - Glass surfaces with backdrop-blur and specular highlights
-  - Liquid gradient buttons (blue → cyan)
-  - Glass input fields with cyan focus states
-  - Floating glass sidebar panel
-- Custom generated logo (shield + pulse + ascending bars)
-- 3D liquid glass shapes for auth pages
-- Holographic radar charts (cyan stroke, transparent fill)
-- Mobile-responsive across all pages (April 2026)
-  - Compact mobile headers
-  - 2-column stat grids on mobile
-  - Stacked CTA cards
-  - Mobile logo on auth pages
-  - Hamburger menu with slide-out sidebar
-  - Scrollable phase indicators
-  - Responsive text scaling
+### Design
+- Glassmorphism + Liquid Glass theme across all pages
+- Custom generated logo (shield + pulse + bars)
+- Mobile responsive
+- 3D liquid glass auth pages
 
-### Admin Panel ✅ (April 2026)
-- Admin-only page at /admin showing ALL assessments across all users
-- Global stats: total assessments, completed, quick assessments, companies, users
-- Tabbed tables: Full Assessments and Quick Assessments with search/filter
-- CSV export for both assessment types
-- Role-based access (admin role required)
-- API endpoints: /api/admin/stats, /api/admin/assessments, /api/admin/quick-assessments, /api/admin/export/*
-
-### Code Quality ✅
-- Custom React hooks (useData.js)
-- Extracted UI components (ScoreComponents.jsx)
-- Scoring utilities (scoring.js)
-- Clean component separation
+### Governance Indicators (L4-5)
+- People: Role-based data ownership, accountability frameworks
+- Process: Review cycles, change control, escalation paths, audit trails
+- Data: Governance policies, stewardship roles, data quality SLAs
+- Technology: Access control, integration governance, PLM audit
 
 ## Key API Endpoints
-- POST `/api/auth/register`, `/api/auth/login`, `/api/auth/logout`
-- GET `/api/auth/me`
-- GET/POST `/api/companies`
-- GET/POST `/api/assessments`
-- POST `/api/assessments/{id}/start`, `/api/assessments/{id}/chat`
-- GET `/api/assessments/{id}/pdf`
-- POST `/api/quick-assessment/submit`
-- GET `/api/quick-assessment/{id}/pdf`
+- Auth: POST /api/auth/register, /api/auth/login, /api/auth/logout, GET /api/auth/me
+- Companies: GET/POST/DELETE /api/companies
+- Assessments: GET/POST /api/assessments, POST /api/assessments/{id}/start, POST /api/assessments/{id}/chat
+- PDF: GET /api/assessments/{id}/pdf, GET /api/quick-assessment/{id}/pdf
+- Notifications: GET /api/notifications, GET /api/notifications/unread-count, PATCH /api/notifications/{id}/read, POST /api/notifications/read-all
+- Admin: GET /api/admin/stats, /api/admin/assessments, /api/admin/quick-assessments, /api/admin/export/*
 
-## DB Schema
-- users: {email, hashed_password, name, role, created_at}
-- companies: {name, industry, product_count, created_by, created_at}
-- assessments: {company_id, created_by, status, phase, overall_score, dimension_scores, findings, created_at}
-- chat_messages: {assessment_id, role, content, created_at}
-- quick_assessments: {company_name, industry, scores, overall_score, answers, created_at}
-
-## Backlog / Future Tasks
+## Backlog
 - P2: Email notifications for assessment completions
-- P2: Advanced analytics/benchmarking data comparisons across companies
+- P2: Advanced analytics/benchmarking comparisons
 - P3: Multi-language support
-- P3: Team/organization management
