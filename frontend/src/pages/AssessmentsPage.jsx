@@ -13,7 +13,8 @@ import {
   Search,
   Building2,
   User,
-  Filter
+  Filter,
+  Download
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -26,57 +27,76 @@ import {
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-const AssessmentRow = ({ assessment, onClick }) => (
-  <tr 
-    data-testid={`assessment-row-${assessment.id}`}
-    className="border-b border-white/[0.04] hover:bg-white/[0.02] cursor-pointer transition-colors"
-    onClick={onClick}
-  >
-    <td className="px-6 py-4">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-lg bg-[#2f81f7]/15 flex items-center justify-center">
-          <Building2 size={18} className="text-[#2f81f7]" />
+const AssessmentRow = ({ assessment, onClick }) => {
+  const downloadPDF = async (e) => {
+    e.stopPropagation();
+    try {
+      const response = await axios.get(`${BACKEND_URL}/api/assessments/${assessment.id}/pdf`, { responseType: "blob" });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `${assessment.company_name?.replace(/\s+/g, "_")}_Report.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch {
+      // silently fail
+    }
+  };
+
+  return (
+    <tr 
+      data-testid={`assessment-row-${assessment.id}`}
+      className="border-b border-white/[0.04] hover:bg-white/[0.02] cursor-pointer transition-colors"
+      onClick={onClick}
+    >
+      <td className="px-4 sm:px-6 py-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-[#2f81f7]/15 flex items-center justify-center shrink-0">
+            <Building2 size={18} className="text-[#2f81f7]" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-white font-medium truncate">{assessment.company_name}</p>
+            <p className="text-xs text-white/30">{assessment.company_industry}</p>
+          </div>
         </div>
-        <div>
-          <p className="text-white font-medium">{assessment.company_name}</p>
-          <p className="text-xs text-white/30">{assessment.company_industry}</p>
-        </div>
-      </div>
-    </td>
-    <td className="px-6 py-4">
-      <div className="flex items-center gap-2">
-        <User size={14} className="text-white/40" />
-        <div>
-          <p className="text-white/60">{assessment.respondent_name}</p>
-          <p className="text-xs text-white/30">{assessment.respondent_role}</p>
-        </div>
-      </div>
-    </td>
-    <td className="px-6 py-4">
-      <StatusBadge status={assessment.status} />
-    </td>
-    <td className="px-6 py-4">
-      {assessment.scores?.overall ? (
-        <span className={`text-2xl font-bold font-['JetBrains_Mono'] ${getScoreColorClass(assessment.scores.overall)}`}>
-          {assessment.scores.overall.toFixed(1)}
-        </span>
-      ) : (
-        <span className="text-white/30">–</span>
-      )}
-    </td>
-    <td className="px-6 py-4">
-      <div className="flex items-center gap-2 text-white/40">
-        <Calendar size={14} />
-        <span className="text-sm">
+      </td>
+      <td className="px-4 sm:px-6 py-4">
+        <p className="text-white/60 text-sm truncate">{assessment.respondent_name}</p>
+      </td>
+      <td className="px-4 sm:px-6 py-4">
+        <StatusBadge status={assessment.status} />
+      </td>
+      <td className="px-4 sm:px-6 py-4">
+        {assessment.scores?.overall ? (
+          <span className={`text-lg font-bold font-['JetBrains_Mono'] ${getScoreColorClass(assessment.scores.overall)}`}>
+            {assessment.scores.overall.toFixed(1)}
+          </span>
+        ) : (
+          <span className="text-white/30">–</span>
+        )}
+      </td>
+      <td className="px-4 sm:px-6 py-4">
+        <span className="text-sm text-white/40 whitespace-nowrap">
           {new Date(assessment.created_at).toLocaleDateString()}
         </span>
-      </div>
-    </td>
-    <td className="px-6 py-4">
-      <ChevronRight size={18} className="text-white/30" />
-    </td>
-  </tr>
-);
+      </td>
+      <td className="px-4 sm:px-6 py-4">
+        {assessment.status === "completed" ? (
+          <button
+            onClick={downloadPDF}
+            data-testid={`download-report-${assessment.id}`}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#00E5FF] bg-[#00E5FF]/10 hover:bg-[#00E5FF]/20 rounded-lg border border-[#00E5FF]/20 transition-colors whitespace-nowrap"
+          >
+            <Download size={12} /> PDF
+          </button>
+        ) : (
+          <ChevronRight size={16} className="text-white/20" />
+        )}
+      </td>
+    </tr>
+  );
+};
 
 const AssessmentsPage = () => {
   const navigate = useNavigate();
@@ -283,12 +303,12 @@ const AssessmentsPage = () => {
               <table className="w-full">
                 <thead>
                   <tr className="text-left text-xs uppercase tracking-wider text-white/40 border-b border-white/[0.08]">
-                    <th className="px-6 py-4">Company</th>
-                    <th className="px-6 py-4">Respondent</th>
-                    <th className="px-6 py-4">Status</th>
-                    <th className="px-6 py-4">Score</th>
-                    <th className="px-6 py-4">Date</th>
-                    <th className="px-6 py-4"></th>
+                    <th className="px-4 sm:px-6 py-4">Company</th>
+                    <th className="px-4 sm:px-6 py-4">Respondent</th>
+                    <th className="px-4 sm:px-6 py-4">Status</th>
+                    <th className="px-4 sm:px-6 py-4">Score</th>
+                    <th className="px-4 sm:px-6 py-4">Date</th>
+                    <th className="px-4 sm:px-6 py-4">Report</th>
                   </tr>
                 </thead>
                 <tbody>

@@ -4,7 +4,7 @@ ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
 from fastapi import FastAPI, APIRouter, HTTPException, Request, Response, Depends
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, FileResponse
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from bson import ObjectId
@@ -27,7 +27,7 @@ from reportlab.lib.units import inch
 import urllib.request
 
 # LLM Integration
-import anthropic
+from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
@@ -717,39 +717,60 @@ def get_pdf_logo():
         return None
 
 def build_pdf_header(story, styles, title_text=""):
-    """Add standard PortfolioHealth header to PDF"""
-    logo_style = ParagraphStyle('LogoText', parent=styles['Heading1'], fontSize=22, spaceAfter=2, textColor=colors.HexColor('#00E5FF'))
-    subtitle_style = ParagraphStyle('Subtitle', parent=styles['Normal'], fontSize=9, textColor=colors.HexColor('#888888'), spaceAfter=4)
+    """Professional PDF header for management-level reports"""
+    # Brand colors
+    brand_dark = colors.HexColor('#1A1A2E')
+    brand_blue = colors.HexColor('#2f81f7')
+    brand_cyan = colors.HexColor('#00B4D8')
     
-    logo_data = get_pdf_logo()
-    if logo_data:
-        try:
-            img = RLImage(logo_data, width=40, height=40)
-            header_table = Table([[img, Paragraph("PortfolioHealth Advisor", logo_style)]], colWidths=[50, 400])
-            header_table.setStyle(TableStyle([
-                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-                ('LEFTPADDING', (0, 0), (-1, -1), 0),
-            ]))
-            story.append(header_table)
-        except Exception:
-            story.append(Paragraph("PortfolioHealth Advisor", logo_style))
-    else:
-        story.append(Paragraph("PortfolioHealth Advisor", logo_style))
-    
-    story.append(Paragraph("PPM Capability Maturity Assessment · University of Oulu", subtitle_style))
-    
-    # Divider line
-    divider = Table([[""]],colWidths=[490])
-    divider.setStyle(TableStyle([
-        ('LINEBELOW', (0, 0), (-1, -1), 1, colors.HexColor('#00E5FF')),
+    # Header bar - dark navy background
+    header_data = [[""]]
+    header_table = Table(header_data, colWidths=[490], rowHeights=[60])
+    header_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), brand_dark),
+        ('LEFTPADDING', (0, 0), (-1, -1), 20),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
+        ('TOPPADDING', (0, 0), (-1, -1), 0),
     ]))
-    story.append(divider)
-    story.append(Spacer(1, 16))
+    
+    # Brand text on dark header
+    brand_style = ParagraphStyle('BrandName', fontSize=20, fontName='Helvetica-Bold', textColor=colors.white, leading=24)
+    sub_style = ParagraphStyle('BrandSub', fontSize=8, textColor=colors.HexColor('#8899AA'), leading=10)
+    
+    brand_content = Table([
+        [Paragraph("PortfolioHealth Advisor", brand_style)],
+        [Paragraph("PPM Capability Maturity Assessment  |  University of Oulu", sub_style)]
+    ], colWidths=[450])
+    brand_content.setStyle(TableStyle([
+        ('LEFTPADDING', (0, 0), (-1, -1), 0),
+        ('TOPPADDING', (0, 0), (0, 0), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
+    ]))
+    
+    # Wrap in the dark header
+    header_data2 = [[brand_content]]
+    header_bar = Table(header_data2, colWidths=[490], rowHeights=[56])
+    header_bar.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), brand_dark),
+        ('LEFTPADDING', (0, 0), (-1, -1), 20),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+    ]))
+    story.append(header_bar)
+    
+    # Thin accent line
+    accent_line = Table([[""]],colWidths=[490], rowHeights=[3])
+    accent_line.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), brand_cyan),
+    ]))
+    story.append(accent_line)
+    story.append(Spacer(1, 20))
     
     if title_text:
-        title_style = ParagraphStyle('ReportTitle', parent=styles['Heading1'], fontSize=18, spaceAfter=12, textColor=colors.HexColor('#2f81f7'))
+        title_style = ParagraphStyle('ReportTitle', fontName='Helvetica-Bold', fontSize=16, spaceAfter=8, textColor=brand_dark)
         story.append(Paragraph(title_text, title_style))
-        story.append(Spacer(1, 8))
+        story.append(Spacer(1, 6))
 
 def build_pdf_closing(story, styles):
     """Add closing statement CTA to PDF"""
@@ -1632,6 +1653,18 @@ async def get_user_quick_assessments(current_user: dict = Depends(get_current_us
 
 # Include the router in the main app
 app.include_router(api_router)
+
+# SPA catch-all: serve React index.html for all non-API routes (fixes page refresh 404)
+@app.get("/{full_path:path}")
+async def serve_spa(full_path: str):
+    """Serve React SPA for any non-API route (handles browser refresh)"""
+    if full_path.startswith("api/"):
+        raise HTTPException(status_code=404, detail="Not found")
+    index_path = "/app/frontend/build/index.html"
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    # In dev, the frontend dev server handles this
+    raise HTTPException(status_code=404, detail="Not found")
 
 # CORS configuration — dynamically allow the request origin for cookie-based auth
 class DynamicCORSMiddleware:

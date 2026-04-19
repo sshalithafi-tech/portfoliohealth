@@ -84,7 +84,7 @@ const CompanyCard = ({ company, onDelete }) => {
       className="p-5 sm:p-6 glass-card rounded-xl group relative"
     >
       {/* Actions Menu */}
-      <div className="absolute top-4 right-4">
+      <div className="absolute top-4 right-4 z-10">
         <button
           data-testid={`company-actions-${company.id}`}
           onClick={() => setShowActions(!showActions)}
@@ -95,28 +95,29 @@ const CompanyCard = ({ company, onDelete }) => {
         {showActions && (
           <>
             <div className="fixed inset-0 z-40" onClick={() => setShowActions(false)} />
-            <div className="absolute right-0 top-8 w-52 glass-heavy rounded-xl shadow-xl z-50 py-1 animate-fade-in">
+            <div className="absolute right-0 top-10 w-48 rounded-xl shadow-2xl z-50 py-1 animate-fade-in border border-white/10"
+                 style={{ background: 'rgba(13,17,23,0.95)', backdropFilter: 'blur(20px)' }}>
               <button
                 data-testid={`download-full-${company.id}`}
                 onClick={() => downloadPDF("full")}
-                className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/[0.05] transition-colors"
+                className="w-full flex items-center gap-2 px-3 py-2 text-xs text-white/70 hover:text-white hover:bg-white/[0.08] transition-colors"
               >
-                <Download size={14} /> Download Full Report
+                <Download size={13} /> Download Report
               </button>
               <Link
                 to={`/assessments?company=${company.id}`}
-                className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/[0.05] transition-colors"
+                className="w-full flex items-center gap-2 px-3 py-2 text-xs text-white/70 hover:text-white hover:bg-white/[0.08] transition-colors"
                 onClick={() => setShowActions(false)}
               >
-                <ClipboardCheck size={14} /> View Assessments
+                <ClipboardCheck size={13} /> View Assessments
               </Link>
-              <hr className="border-white/[0.06] my-1" />
+              <hr className="border-white/[0.08] my-0.5" />
               <button
                 data-testid={`delete-company-${company.id}`}
                 onClick={() => { setShowConfirm(true); setShowActions(false); }}
-                className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-[#F85149] hover:bg-[#F85149]/10 transition-colors"
+                className="w-full flex items-center gap-2 px-3 py-2 text-xs text-[#F85149] hover:bg-[#F85149]/10 transition-colors"
               >
-                <Trash2 size={14} /> Delete Company
+                <Trash2 size={13} /> Delete Company
               </button>
             </div>
           </>

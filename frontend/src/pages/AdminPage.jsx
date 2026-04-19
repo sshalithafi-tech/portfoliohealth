@@ -224,6 +224,7 @@ const AdminPage = () => {
                       <th className="px-4 sm:px-6 py-3">T</th>
                       <th className="px-4 sm:px-6 py-3">Overall</th>
                       <th className="px-4 sm:px-6 py-3">Date</th>
+                      <th className="px-4 sm:px-6 py-3">Report</th>
                     </tr>
                   </thead>
                   <tbody className="text-sm">
@@ -271,6 +272,28 @@ const AdminPage = () => {
                         </td>
                         <td className="px-4 sm:px-6 py-3 text-white/40 text-xs whitespace-nowrap">
                           {new Date(a.created_at).toLocaleDateString()}
+                        </td>
+                        <td className="px-4 sm:px-6 py-3">
+                          {a.status === "completed" ? (
+                            <button
+                              onClick={async () => {
+                                try {
+                                  const res = await axios.get(`${BACKEND_URL}/api/assessments/${a.id}/pdf`, { responseType: "blob" });
+                                  const url = window.URL.createObjectURL(new Blob([res.data]));
+                                  const link = document.createElement("a");
+                                  link.href = url;
+                                  link.setAttribute("download", `${a.company_name?.replace(/\s+/g, "_")}_Report.pdf`);
+                                  document.body.appendChild(link);
+                                  link.click();
+                                  link.remove();
+                                } catch { /* */ }
+                              }}
+                              data-testid={`admin-download-${a.id}`}
+                              className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium text-[#00E5FF] bg-[#00E5FF]/10 hover:bg-[#00E5FF]/20 rounded-md border border-[#00E5FF]/20 transition-colors whitespace-nowrap"
+                            >
+                              <Download size={10} /> PDF
+                            </button>
+                          ) : <span className="text-white/20 text-xs">–</span>}
                         </td>
                       </tr>
                     ))}
