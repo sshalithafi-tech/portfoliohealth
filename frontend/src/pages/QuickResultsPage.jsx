@@ -23,6 +23,7 @@ import {
   CheckCircle
 } from "lucide-react";
 import { toast } from "sonner";
+import LogoMark from "../components/LogoMark";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -147,7 +148,7 @@ const QuickResultsPage = () => {
       {/* Glass Header */}
       <header className="h-14 sm:h-16 glass-surface flex items-center px-4 sm:px-6 relative z-10">
         <Link to="/" className="flex items-center gap-2 sm:gap-3">
-          <img src="https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/52f8bbaa7bef05bb75194db309bc570b7ebaa50def42d7c4be946a17056a8065.png" alt="PH" className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg object-contain" />
+          <LogoMark className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg" radius={14} />
           <span className="text-white font-semibold font-['Outfit'] text-sm sm:text-base">PortfolioHealth</span>
         </Link>
         

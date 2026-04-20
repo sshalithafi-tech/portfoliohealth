@@ -10,7 +10,7 @@ import {
   BarChart3
 } from "lucide-react";
 
-const LOGO_MARK = "https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/52f8bbaa7bef05bb75194db309bc570b7ebaa50def42d7c4be946a17056a8065.png";
+import LogoMark from "../components/LogoMark";
 
 const LandingPage = () => {
   const { user } = useAuth();
@@ -26,7 +26,7 @@ const LandingPage = () => {
       <header className="glass-surface-highlight fixed top-0 left-0 right-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <img src={LOGO_MARK} alt="PortfolioHealth" className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl object-contain shrink-0" />
+            <LogoMark className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl shrink-0" radius={18} />
             <div className="hidden sm:block">
               <h1 className="text-white font-semibold font-['Outfit']">PortfolioHealth</h1>
               <p className="text-xs text-white/40">PPM Assessment</p>
@@ -67,7 +67,7 @@ const LandingPage = () => {
       <div className="relative z-10 pt-24 sm:pt-32 pb-12 sm:pb-20 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto text-center">
           <div className="flex items-center justify-center gap-4 mb-6 sm:mb-8">
-            <img src={LOGO_MARK} alt="PortfolioHealth" className="w-16 sm:w-20 h-16 sm:h-20 rounded-2xl object-contain drop-shadow-[0_0_20px_rgba(0,229,255,0.3)]" />
+            <LogoMark className="w-16 sm:w-20 h-16 sm:h-20 rounded-2xl drop-shadow-[0_0_20px_rgba(201,168,76,0.35)]" radius={22} />
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-white font-['Outfit'] tracking-tight mb-4 sm:mb-6">
             Portfolio<span className="font-semibold text-[#C9A84C]">Health</span>

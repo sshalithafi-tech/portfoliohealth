@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuth, formatApiErrorDetail } from "../App";
 import { Eye, EyeOff, UserPlus } from "lucide-react";
 import { toast } from "sonner";
+import LogoMark from "../components/LogoMark";
 
 const RegisterPage = () => {
   const { register } = useAuth();
@@ -45,7 +46,7 @@ const RegisterPage = () => {
         <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 60% 50% at 30% 40%, rgba(201, 168, 76, 0.08) 0%, transparent 60%)" }} />
         <div className="relative z-10 flex flex-col justify-center px-12">
           <div className="flex items-center gap-4 mb-6">
-            <img src="https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/52f8bbaa7bef05bb75194db309bc570b7ebaa50def42d7c4be946a17056a8065.png" alt="PortfolioHealth" className="w-14 h-14 rounded-2xl object-contain" />
+            <LogoMark className="w-14 h-14 rounded-2xl" radius={20} />
             <div>
               <h1 className="text-3xl font-light text-white font-['Outfit']">
                 Portfolio<span className="font-semibold text-[#C9A84C]">Health</span>
@@ -72,7 +73,7 @@ const RegisterPage = () => {
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <div className="flex items-center justify-center gap-3 mb-6 lg:hidden">
-            <img src="https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/52f8bbaa7bef05bb75194db309bc570b7ebaa50def42d7c4be946a17056a8065.png" alt="PortfolioHealth" className="w-12 h-12 rounded-xl object-contain" />
+            <LogoMark className="w-12 h-12 rounded-xl" radius={18} />
           </div>
           <div className="text-center mb-8">
             <h2 className="text-3xl font-semibold text-white font-['Outfit'] tracking-tight">

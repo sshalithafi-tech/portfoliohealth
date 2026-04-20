@@ -13,7 +13,7 @@ import {
 import { useState } from "react";
 import NotificationBell from "./NotificationBell";
 
-const LOGO_MARK = "https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/52f8bbaa7bef05bb75194db309bc570b7ebaa50def42d7c4be946a17056a8065.png";
+import LogoMark from "./LogoMark";
 
 const Layout = ({ children }) => {
   const { user, logout } = useAuth();
@@ -46,7 +46,7 @@ const Layout = ({ children }) => {
           {sidebarOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
         <div className="flex items-center gap-2">
-          <img src={LOGO_MARK} alt="PH" className="w-8 h-8 rounded-lg object-contain" />
+          <LogoMark className="w-8 h-8 rounded-lg" radius={14} />
           <span className="text-white font-semibold font-['Outfit'] text-sm">PortfolioHealth</span>
         </div>
         <div className="w-10" />
@@ -71,7 +71,7 @@ const Layout = ({ children }) => {
       `}>
         <div className="h-16 flex items-center px-6 border-b border-white/[0.06]">
           <div className="flex items-center gap-3">
-            <img src={LOGO_MARK} alt="PortfolioHealth" className="w-10 h-10 rounded-xl object-contain" />
+            <LogoMark className="w-10 h-10 rounded-xl" radius={18} />
             <div>
               <h1 className="text-white font-semibold font-['Outfit']">PortfolioHealth</h1>
               <p className="text-xs text-white/40">PPM Assessment</p>

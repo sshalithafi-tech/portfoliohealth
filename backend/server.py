@@ -18,16 +18,18 @@ from pydantic import BaseModel, Field, EmailStr, ConfigDict
 from typing import List, Optional, Dict, Any
 import uuid
 import asyncio
-from io import BytesIO
-from reportlab.lib.pagesizes import A4
-from reportlab.lib import colors
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image as RLImage
-from reportlab.lib.units import inch
-import urllib.request
 
-# LLM Integration
-from emergentintegrations.llm.chat import LlmChat, UserMessage
+# PDF generation (delegated to pdf_builder)
+from pdf_builder import build_full_assessment_pdf, build_quick_assessment_pdf
+
+# Chat / LLM service helpers
+from chat_service import (
+    build_system_prompt,
+    call_llm_with_history,
+    call_llm_greeting,
+    extract_report_json,
+    normalise_report_weights,
+)
 
 import re
 import json as json_mod
@@ -581,99 +583,46 @@ async def send_chat_message(assessment_id: str, request: SendMessageRequest, cur
     assessment = await db.assessments.find_one({"_id": ObjectId(assessment_id), "user_id": current_user["id"]})
     if not assessment:
         raise HTTPException(status_code=404, detail="Assessment not found")
-    
-    # Add user message to history
-    user_msg = {
+
+    # Record user turn
+    chat_history = assessment.get("chat_history", [])
+    chat_history.append({
         "role": "user",
         "content": request.message,
-        "timestamp": datetime.now(timezone.utc).isoformat()
-    }
-    chat_history = assessment.get("chat_history", [])
-    chat_history.append(user_msg)
-    
-    # Build context for Claude
-    company_context = f"""
-Company: {assessment.get('company_name', 'Unknown')}
-Industry: {assessment.get('company_industry', 'Unknown')}
-Respondent: {assessment.get('respondent_name', 'Unknown')} ({assessment.get('respondent_role', 'Unknown')})
-Current Phase: {assessment.get('current_phase', 'welcome')}
-"""
-    
-    full_system = PPDT_SYSTEM_PROMPT + "\n\nCurrent Assessment Context:\n" + company_context
-    
-    # Build messages for Claude from chat history (limit to last 40 messages to stay within limits)
-    claude_messages = []
-    for msg in chat_history:
-        if msg["role"] in ["user", "assistant"]:
-            claude_messages.append({"role": msg["role"], "content": msg["content"]})
-    # Keep last 40 messages to avoid token overflow
-    if len(claude_messages) > 40:
-        claude_messages = claude_messages[-40:]
-    if not claude_messages:
-        claude_messages = [{"role": "user", "content": request.message}]
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    })
 
-    # Initialize Claude via Emergent integrations
+    # Ask Claude
     try:
-        chat = LlmChat(
-            api_key=os.environ.get("EMERGENT_LLM_KEY"),
+        response_text = await call_llm_with_history(
             session_id=f"assessment-chat-{assessment_id}",
-            system_message=full_system,
-        ).with_model("anthropic", "claude-sonnet-4-5-20250929")
-        for msg in claude_messages:
-            chat.messages.append({"role": msg["role"], "content": msg["content"]})
-        response = await chat.send_message(UserMessage(text=request.message))
-    except Exception as e:
-        logging.error(f"LLM error: {e}")
+            system_message=build_system_prompt(PPDT_SYSTEM_PROMPT, assessment),
+            history=chat_history[:-1],
+            user_message=request.message,
+        )
+    except Exception as exc:
+        logging.error(f"LLM error: {exc}")
         raise HTTPException(status_code=500, detail="Failed to get AI response. Please try again.")
-    
-    # Add assistant response to history
+
     assistant_msg = {
         "role": "assistant",
-        "content": response,
-        "timestamp": datetime.now(timezone.utc).isoformat()
+        "content": response_text,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
     }
     chat_history.append(assistant_msg)
-    
-    # Check if report is ready
-    report_data = None
+
+    # Try to extract report JSON from the assistant message
+    report_data = extract_report_json(response_text)
     scores = None
     status = assessment.get("status", "in_progress")
-    
-    if "ready_for_report" in response:
-        import json as json_mod
-        import re
-        # Extract JSON from response
-        json_match = re.search(r'```json\s*(.*?)\s*```', response, re.DOTALL)
-        if json_match:
-            try:
-                report_data = json_mod.loads(json_match.group(1))
-                if report_data.get("ready_for_report"):
-                    scores = report_data.get("scores")
-                    status = "completed"
-            except json_mod.JSONDecodeError as je:
-                logging.error(f"JSON parse error: {je}")
-        else:
-            # Try to find JSON without code block markers
-            json_match2 = re.search(r'\{[\s\S]*"ready_for_report"[\s\S]*\}', response)
-            if json_match2:
-                try:
-                    report_data = json_mod.loads(json_match2.group(0))
-                    if report_data.get("ready_for_report"):
-                        scores = report_data.get("scores")
-                        status = "completed"
-                except json_mod.JSONDecodeError:
-                    pass
-    
-    # Update assessment
+    if report_data and report_data.get("ready_for_report"):
+        report_data = normalise_report_weights(report_data)
+        scores = report_data.get("scores")
+        status = "completed"
+
+    # Persist
     update_data = {"chat_history": chat_history}
     if report_data:
-        # Ensure weights exist with fallback to equal weights
-        if not report_data.get("weights_raw"):
-            report_data["weights_raw"] = {"people": 5, "process": 5, "data": 5, "technology": 5}
-        if not report_data.get("weights_normalised"):
-            raw = report_data["weights_raw"]
-            total = sum(raw.values()) or 1
-            report_data["weights_normalised"] = {k: round(v / total, 4) for k, v in raw.items()}
         update_data["report"] = report_data
         update_data["weights_raw"] = report_data.get("weights_raw")
         update_data["weights_normalised"] = report_data.get("weights_normalised")
@@ -682,10 +631,10 @@ Current Phase: {assessment.get('current_phase', 'welcome')}
     if status == "completed":
         update_data["status"] = "completed"
         update_data["completed_at"] = datetime.now(timezone.utc).isoformat()
-    
+
     await db.assessments.update_one({"_id": ObjectId(assessment_id)}, {"$set": update_data})
-    
-    # Notify on assessment completion
+
+    # Notifications on completion
     if status == "completed":
         company_name = assessment.get("company_name", "Unknown")
         overall_score = scores.get("overall", "N/A") if scores else "N/A"
@@ -701,13 +650,14 @@ Current Phase: {assessment.get('current_phase', 'welcome')}
             title="Assessment Completed",
             message=f"{current_user.get('name', 'A consultant')} completed an assessment for {company_name}. Score: {overall_score}/5.",
             admin_only=True,
-            meta={"assessment_id": assessment_id, "company_name": company_name, "score": overall_score, "consultant": current_user.get("name", "")}
+            meta={"assessment_id": assessment_id, "company_name": company_name,
+                  "score": overall_score, "consultant": current_user.get("name", "")}
         )
-    
+
     return {
         "message": assistant_msg,
         "report_ready": report_data is not None,
-        "report": report_data
+        "report": report_data,
     }
 
 # Start Assessment (generate initial greeting)
@@ -716,325 +666,46 @@ async def start_assessment(assessment_id: str, current_user: dict = Depends(get_
     assessment = await db.assessments.find_one({"_id": ObjectId(assessment_id), "user_id": current_user["id"]})
     if not assessment:
         raise HTTPException(status_code=404, detail="Assessment not found")
-    
+
     if assessment.get("chat_history") and len(assessment["chat_history"]) > 0:
-        return {"message": {"role": "assistant", "content": assessment["chat_history"][0]["content"], "timestamp": assessment["chat_history"][0]["timestamp"]}}
-    
-    # Generate initial greeting
-    company_context = f"""
-Company: {assessment.get('company_name', 'Unknown')}
-Industry: {assessment.get('company_industry', 'Unknown')}
-Respondent: {assessment.get('respondent_name', 'Unknown')} ({assessment.get('respondent_role', 'Unknown')})
-"""
-    
-    full_system = PPDT_SYSTEM_PROMPT + "\n\nCurrent Assessment Context:\n" + company_context
-    
+        first = assessment["chat_history"][0]
+        return {"message": {"role": "assistant", "content": first["content"], "timestamp": first["timestamp"]}}
+
     try:
-        chat = LlmChat(
-            api_key=os.environ.get("EMERGENT_LLM_KEY"),
+        response_text = await call_llm_greeting(
             session_id=f"assessment-start-{assessment_id}",
-            system_message=full_system,
-        ).with_model("anthropic", "claude-sonnet-4-5-20250929")
-        response = await chat.send_message(UserMessage(text="Please begin the assessment by introducing yourself and asking the first question."))
-    except Exception as e:
-        logging.error(f"LLM error: {e}")
+            system_message=build_system_prompt(PPDT_SYSTEM_PROMPT, assessment),
+        )
+    except Exception as exc:
+        logging.error(f"LLM error: {exc}")
         raise HTTPException(status_code=500, detail="Failed to start assessment")
-    
+
     greeting_msg = {
         "role": "assistant",
-        "content": response,
-        "timestamp": datetime.now(timezone.utc).isoformat()
+        "content": response_text,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
     }
-    
     await db.assessments.update_one(
         {"_id": ObjectId(assessment_id)},
         {"$set": {"chat_history": [greeting_msg]}}
     )
-    
     return {"message": greeting_msg}
 
 # PDF Report Generation
-LOGO_URL = "https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/52f8bbaa7bef05bb75194db309bc570b7ebaa50def42d7c4be946a17056a8065.png"
-
-def get_pdf_logo():
-    """Download logo and return as BytesIO for reportlab"""
-    try:
-        logo_data = BytesIO()
-        req = urllib.request.urlopen(LOGO_URL, timeout=5)
-        logo_data.write(req.read())
-        logo_data.seek(0)
-        return logo_data
-    except Exception:
-        return None
-
-def build_pdf_header(story, styles, title_text=""):
-    """Professional PDF header for management-level reports"""
-    # Brand colors
-    brand_dark = colors.HexColor('#1A1A2E')
-    brand_blue = colors.HexColor('#2f81f7')
-    brand_cyan = colors.HexColor('#C9A84C')
-    
-    # Header bar - dark navy background
-    header_data = [[""]]
-    header_table = Table(header_data, colWidths=[490], rowHeights=[60])
-    header_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, -1), brand_dark),
-        ('LEFTPADDING', (0, 0), (-1, -1), 20),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
-        ('TOPPADDING', (0, 0), (-1, -1), 0),
-    ]))
-    
-    # Brand text on dark header
-    brand_style = ParagraphStyle('BrandName', fontSize=20, fontName='Helvetica-Bold', textColor=colors.white, leading=24)
-    sub_style = ParagraphStyle('BrandSub', fontSize=8, textColor=colors.HexColor('#8899AA'), leading=10)
-    
-    brand_content = Table([
-        [Paragraph("PortfolioHealth Advisor", brand_style)],
-        [Paragraph("PPM Capability Maturity Assessment  |  University of Oulu", sub_style)]
-    ], colWidths=[450])
-    brand_content.setStyle(TableStyle([
-        ('LEFTPADDING', (0, 0), (-1, -1), 0),
-        ('TOPPADDING', (0, 0), (0, 0), 8),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
-    ]))
-    
-    # Wrap in the dark header
-    header_data2 = [[brand_content]]
-    header_bar = Table(header_data2, colWidths=[490], rowHeights=[56])
-    header_bar.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, -1), brand_dark),
-        ('LEFTPADDING', (0, 0), (-1, -1), 20),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('TOPPADDING', (0, 0), (-1, -1), 8),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
-    ]))
-    story.append(header_bar)
-    
-    # Thin accent line
-    accent_line = Table([[""]],colWidths=[490], rowHeights=[3])
-    accent_line.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, -1), brand_cyan),
-    ]))
-    story.append(accent_line)
-    story.append(Spacer(1, 20))
-    
-    if title_text:
-        title_style = ParagraphStyle('ReportTitle', fontName='Helvetica-Bold', fontSize=16, spaceAfter=8, textColor=brand_dark)
-        story.append(Paragraph(title_text, title_style))
-        story.append(Spacer(1, 6))
-
-def build_pdf_closing(story, styles):
-    """Professional closing statement for PDF reports"""
-    closing_style = ParagraphStyle('Closing', parent=styles['Normal'], fontSize=9, textColor=colors.HexColor('#333333'),
-                                   borderPadding=12, backColor=colors.HexColor('#FAF6E8'), borderColor=colors.HexColor('#C9A84C'),
-                                   borderWidth=1, leading=13)
-    footer_style = ParagraphStyle('Footer', fontSize=7.5, textColor=colors.HexColor('#999999'), alignment=1, spaceBefore=12)
-    
-    story.append(Spacer(1, 16))
-    story.append(Paragraph(
-        f"Thank you for completing this assessment. For further analysis, expert input, or tailored "
-        f"recommendations, please contact: <b>{CONTACT_EMAIL}</b>",
-        closing_style
-    ))
-    story.append(Spacer(1, 16))
-    footer_line = Table([[""]],colWidths=[490], rowHeights=[1])
-    footer_line.setStyle(TableStyle([('LINEBELOW', (0, 0), (-1, -1), 0.5, colors.HexColor('#CCCCCC'))]))
-    story.append(footer_line)
-    story.append(Paragraph("PortfolioHealth Advisor  |  PPM Capability Maturity Assessment  |  University of Oulu", footer_style))
-    story.append(Paragraph("This report is confidential. Distribution without authorisation is not permitted.", footer_style))
-
 @api_router.get("/assessments/{assessment_id}/pdf")
 async def generate_pdf_report(assessment_id: str, current_user: dict = Depends(get_current_user)):
     assessment = await db.assessments.find_one({"_id": ObjectId(assessment_id), "user_id": current_user["id"]})
     if not assessment:
         raise HTTPException(status_code=404, detail="Assessment not found")
-    
     if not assessment.get("report"):
         raise HTTPException(status_code=400, detail="Assessment report not yet generated")
-    
-    report = assessment["report"]
-    scores = report.get("scores", {})
-    
-    # Create PDF
-    buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=50, leftMargin=50, topMargin=50, bottomMargin=50)
-    
-    styles = getSampleStyleSheet()
-    heading_style = ParagraphStyle('Heading', parent=styles['Heading2'], fontSize=12, spaceAfter=6, spaceBefore=10, 
-                                   textColor=colors.HexColor('#0A1628'), fontName='Helvetica-Bold')
-    body_style = ParagraphStyle('Body', parent=styles['Normal'], fontSize=9.5, spaceAfter=5, leading=13, textColor=colors.HexColor('#333333'))
-    gov_style = ParagraphStyle('Governance', parent=styles['Normal'], fontSize=9, spaceAfter=4, textColor=colors.HexColor('#5C4A1E'),
-                               backColor=colors.HexColor('#FAF6E8'), borderPadding=6, borderColor=colors.HexColor('#C9A84C'),
-                               borderWidth=0.5, leading=12)
-    label_style = ParagraphStyle('Label', parent=styles['Normal'], fontSize=8.5, textColor=colors.HexColor('#666666'), spaceAfter=3)
-    
-    story = []
-    
-    # Logo Header
-    build_pdf_header(story, styles, "PPDT CAPABILITY MATURITY ASSESSMENT REPORT")
-    
-    # Company Info
-    story.append(Paragraph(f"<b>Company:</b> {assessment.get('company_name', 'N/A')}", body_style))
-    story.append(Paragraph(f"<b>Industry:</b> {assessment.get('company_industry', 'N/A')}", body_style))
-    story.append(Paragraph(f"<b>Respondent:</b> {assessment.get('respondent_name', 'N/A')} ({assessment.get('respondent_role', 'N/A')})", body_style))
-    story.append(Paragraph(f"<b>Date:</b> {assessment.get('completed_at', assessment.get('created_at', 'N/A'))[:10]}", body_style))
-    story.append(Spacer(1, 20))
-    
-    # Overall Score
-    overall = scores.get("overall", "N/A")
-    level_names = report.get("level_names", {})
-    story.append(Paragraph(f"<b>OVERALL MATURITY LEVEL:</b> {overall} / 5.0 — {level_names.get('overall', 'N/A')}", heading_style))
-    story.append(Spacer(1, 12))
-    
-    # Dimension Scores Table
-    story.append(Paragraph("DIMENSION SCORES", heading_style))
-    dim_summaries = report.get("dimension_summaries", {})
-    
-    table_data = [["Dimension", "Score", "Level", "Summary"]]
-    for dim in ["people", "process", "data", "technology"]:
-        table_data.append([
-            dim.capitalize(),
-            str(scores.get(dim, "N/A")),
-            level_names.get(dim, "N/A"),
-            dim_summaries.get(dim, "N/A")[:60] + "..." if len(dim_summaries.get(dim, "")) > 60 else dim_summaries.get(dim, "N/A")
-        ])
-    
-    table = Table(table_data, colWidths=[70, 45, 85, 290])
-    table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0A1628')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        ('ALIGN', (1, 0), (1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 8.5),
-        ('FONTSIZE', (0, 1), (-1, -1), 8.5),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 7),
-        ('TOPPADDING', (0, 0), (-1, 0), 7),
-        ('BOTTOMPADDING', (0, 1), (-1, -1), 5),
-        ('TOPPADDING', (0, 1), (-1, -1), 5),
-        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F8F8F8')]),
-        ('LINEBELOW', (0, 0), (-1, 0), 2, colors.HexColor('#C9A84C')),
-        ('LINEBELOW', (0, 1), (-1, -2), 0.5, colors.HexColor('#E0E0E0')),
-        ('LINEBELOW', (0, -1), (-1, -1), 0.5, colors.HexColor('#E0E0E0')),
-    ]))
-    story.append(table)
-    story.append(Spacer(1, 16))
-    
-    # Weighted Score Breakdown
-    weights_raw = report.get("weights_raw", {"people": 5, "process": 5, "data": 5, "technology": 5})
-    raw_total = sum(weights_raw.values()) or 1
-    weights_norm = report.get("weights_normalised", {d: weights_raw.get(d, 5) / raw_total for d in ["people", "process", "data", "technology"]})
-    
-    story.append(Paragraph("WEIGHTED SCORE CALCULATION", heading_style))
-    weight_data = [["Pillar", "Raw Score", "Weight (1-10)", "Normalised", "Contribution"]]
-    for dim in ["people", "process", "data", "technology"]:
-        s = scores.get(dim, 0)
-        w_raw = weights_raw.get(dim, 5)
-        w_norm = weights_norm.get(dim, 0.25)
-        contrib = s * w_norm
-        weight_data.append([dim.capitalize(), str(s), str(w_raw), f"{w_norm:.2f}", f"{contrib:.2f}"])
-    weight_data.append(["", "", "", "Overall:", f"{scores.get('overall', 0):.2f}"])
-    
-    wt = Table(weight_data, colWidths=[75, 55, 75, 70, 80])
-    wt.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0A1628')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTNAME', (3, -1), (-1, -1), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 8.5),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 7),
-        ('TOPPADDING', (0, 0), (-1, 0), 7),
-        ('BOTTOMPADDING', (0, 1), (-1, -1), 5),
-        ('TOPPADDING', (0, 1), (-1, -1), 5),
-        ('ROWBACKGROUNDS', (0, 1), (-1, -2), [colors.white, colors.HexColor('#F8F8F8')]),
-        ('BACKGROUND', (0, -1), (-1, -1), colors.HexColor('#EEE8D5')),
-        ('LINEBELOW', (0, 0), (-1, 0), 2, colors.HexColor('#C9A84C')),
-        ('LINEBELOW', (0, 1), (-1, -2), 0.5, colors.HexColor('#E0E0E0')),
-        ('LINEABOVE', (0, -1), (-1, -1), 1, colors.HexColor('#C9A84C')),
-    ]))
-    story.append(wt)
-    story.append(Spacer(1, 16))
-    
-    # Governance Observations (Levels 4-5 only)
-    gov_obs = report.get("governance_observations", {})
-    has_gov = any(v and "N/A" not in str(v) and "below" not in str(v).lower() for v in gov_obs.values())
-    if has_gov:
-        story.append(Paragraph("GOVERNANCE INDICATORS (Levels 4–5)", heading_style))
-        for dim in ["people", "process", "data", "technology"]:
-            obs = gov_obs.get(dim, "")
-            if obs and "N/A" not in str(obs) and "below" not in str(obs).lower():
-                story.append(Paragraph(f"<b>{dim.capitalize()} — Governance:</b> {obs}", gov_style))
-                story.append(Spacer(1, 4))
-        story.append(Spacer(1, 12))
-    
-    # Governance & Ownership
-    story.append(Paragraph("GOVERNANCE & OWNERSHIP", heading_style))
-    story.append(Paragraph("Governance is the connective tissue between all four PPDT dimensions. Without clear ownership and accountability, even high capability produces unreliable portfolio decisions.", body_style))
-    if report.get("governance_assessment"):
-        story.append(Paragraph(f"<i>{report['governance_assessment']}</i>", body_style))
-    story.append(Spacer(1, 8))
-    
-    # Management Commitment
-    story.append(Paragraph("MANAGEMENT COMMITMENT", heading_style))
-    story.append(Paragraph("Management commitment acts as a multiplier on all capability investments. Without leadership buy-in, PPM improvements produce limited, short-lived change.", body_style))
-    if report.get("management_commitment_assessment"):
-        story.append(Paragraph(f"<i>{report['management_commitment_assessment']}</i>", body_style))
-    story.append(Spacer(1, 12))
-    
-    # Key Findings
-    story.append(Paragraph("KEY FINDINGS", heading_style))
-    for finding in report.get("key_findings", []):
-        story.append(Paragraph(f"• {finding}", body_style))
-    story.append(Spacer(1, 12))
-    
-    # Critical Gaps
-    story.append(Paragraph("CRITICAL CAPABILITY GAPS", heading_style))
-    for gap in report.get("critical_gaps", []):
-        story.append(Paragraph(f"• {gap}", body_style))
-    story.append(Spacer(1, 12))
-    
-    # Decision Vulnerability
-    story.append(Paragraph("DECISION-TYPE VULNERABILITY ANALYSIS", heading_style))
-    story.append(Paragraph(report.get("decision_vulnerability", "N/A"), body_style))
-    story.append(Spacer(1, 12))
-    
-    # Roadmap
-    story.append(Paragraph("IMPROVEMENT ROADMAP", heading_style))
-    roadmap = report.get("roadmap", {})
-    
-    for phase_key, phase_title in [("immediate", "PHASE 1 — IMMEDIATE (0–3 months)"), ("short_term", "PHASE 2 — SHORT-TERM (3–12 months)"), ("strategic", "PHASE 3 — STRATEGIC (12+ months)")]:
-        phase_data = roadmap.get(phase_key, [])
-        story.append(Paragraph(f"<b>{phase_title}</b>", body_style))
-        actions = phase_data.get("actions", phase_data) if isinstance(phase_data, dict) else phase_data
-        if isinstance(actions, list):
-            for item in actions:
-                story.append(Paragraph(f"  • {item}", body_style))
-        if isinstance(phase_data, dict):
-            if phase_data.get("governance_milestone"):
-                story.append(Paragraph(f"  <i>Governance Milestone:</i> {phase_data['governance_milestone']}", body_style))
-            if phase_data.get("management_commitment"):
-                story.append(Paragraph(f"  <i>Management Commitment:</i> {phase_data['management_commitment']}", body_style))
-            if phase_data.get("expected_gain"):
-                story.append(Paragraph(f"  <i>Expected Gain:</i> {phase_data['expected_gain']}", body_style))
-        story.append(Spacer(1, 6))
-    story.append(Spacer(1, 12))
-    
-    # Benchmark Context
-    story.append(Paragraph("BENCHMARK CONTEXT", heading_style))
-    story.append(Paragraph(report.get("benchmark_context", "N/A"), body_style))
-    story.append(Spacer(1, 12))
-    
-    # Consultant's Note
-    story.append(Paragraph("CONSULTANT'S NOTE", heading_style))
-    story.append(Paragraph(report.get("consultant_note", "N/A"), body_style))
-    
-    # Closing Statement
-    build_pdf_closing(story, styles)
-    
-    doc.build(story)
-    buffer.seek(0)
-    
-    filename = f"PortfolioHealth_Assessment_{assessment.get('company_name', 'Report').replace(' ', '_')}_{assessment_id[:8]}.pdf"
-    
+
+    buffer = build_full_assessment_pdf(assessment)
+    filename = (
+        f"PortfolioHealth_Assessment_"
+        f"{assessment.get('company_name', 'Report').replace(' ', '_')}_"
+        f"{assessment_id[:8]}.pdf"
+    )
     return StreamingResponse(
         buffer,
         media_type="application/pdf",
@@ -1656,100 +1327,12 @@ async def generate_quick_assessment_pdf(quick_id: str):
     quick = await db.quick_assessments.find_one({"_id": ObjectId(quick_id)})
     if not quick:
         raise HTTPException(status_code=404, detail="Quick assessment not found")
-    
-    scores = quick.get("scores", {})
-    traffic_lights = quick.get("traffic_lights", {})
-    level_names = quick.get("level_names", {})
-    
-    buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=50, leftMargin=50, topMargin=50, bottomMargin=50)
-    
-    styles = getSampleStyleSheet()
-    heading_style = ParagraphStyle('Heading', parent=styles['Heading2'], fontSize=14, spaceAfter=8, textColor=colors.HexColor('#2f81f7'))
-    body_style = ParagraphStyle('Body', parent=styles['Normal'], fontSize=11, spaceAfter=8)
-    cta_style = ParagraphStyle('CTA', parent=styles['Normal'], fontSize=10, spaceAfter=6, textColor=colors.HexColor('#2f81f7'), borderPadding=10)
-    
-    story = []
-    
-    # Logo Header
-    build_pdf_header(story, styles, "PPDT QUICK HEALTH CHECK REPORT")
-    
-    # Company Info
-    story.append(Paragraph(f"<b>Industry:</b> {quick.get('industry', 'N/A')}", body_style))
-    story.append(Paragraph(f"<b>Date:</b> {quick.get('created_at', 'N/A')[:10]}", body_style))
-    if quick.get('respondent_name'):
-        story.append(Paragraph(f"<b>Respondent:</b> {quick.get('respondent_name')}", body_style))
-    story.append(Spacer(1, 20))
-    
-    # Overall Score
-    overall = scores.get("overall", 0)
-    level_name = quick.get("level_names", {}).get("overall", "Unknown")
-    
-    story.append(Paragraph(f"<b>OVERALL MATURITY LEVEL: {overall} / 5.0 — {level_name}</b>", heading_style))
-    story.append(Spacer(1, 16))
-    
-    # Dimension Scores Table with Traffic Lights
-    def get_traffic_color(status):
-        if status == "green":
-            return colors.HexColor('#238636')
-        elif status == "amber":
-            return colors.HexColor('#D29922')
-        return colors.HexColor('#F85149')
-    
-    table_data = [["Dimension", "Score", "Level", "Status"]]
-    for dim in ["people", "process", "data", "technology"]:
-        score = scores.get(dim, 0)
-        level = level_names.get(dim, "N/A")
-        status = traffic_lights.get(dim, "red").upper()
-        table_data.append([dim.capitalize(), str(score), level, status])
-    
-    table = Table(table_data, colWidths=[100, 60, 100, 80])
-    table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2f81f7')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 10),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f5f5f5')),
-        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#cccccc')),
-    ]))
-    story.append(table)
-    story.append(Spacer(1, 24))
-    
-    # Key Insights
-    story.append(Paragraph("KEY INSIGHTS", heading_style))
-    
-    # Find weakest dimension
-    dim_scores = [(dim, scores.get(dim, 0)) for dim in ["people", "process", "data", "technology"]]
-    dim_scores.sort(key=lambda x: x[1])
-    weakest = dim_scores[0]
-    strongest = dim_scores[-1]
-    
-    story.append(Paragraph(f"• <b>Weakest Area:</b> {weakest[0].capitalize()} ({weakest[1]}/5) — This dimension requires immediate attention.", body_style))
-    story.append(Paragraph(f"• <b>Strongest Area:</b> {strongest[0].capitalize()} ({strongest[1]}/5) — Build on this foundation.", body_style))
-    
-    if scores.get("data", 0) < 3:
-        story.append(Paragraph("• <b>Data Gap Alert:</b> Data capability is the most critical bottleneck in PPM maturity. Prioritise data governance.", body_style))
-    
-    story.append(Spacer(1, 24))
-    
-    # CTA Box
-    story.append(Paragraph("NEXT STEPS", heading_style))
-    gap_desc = quick.get("gap_description", "")
-    cta_text = f"Based on your score of {overall}/5, your organisation is at the <b>{level_name}</b> stage. Companies at this level typically have {gap_desc}. A full PPDT assessment takes 60–90 minutes and produces a prioritised improvement roadmap with specific, actionable recommendations."
-    story.append(Paragraph(cta_text, body_style))
-    story.append(Spacer(1, 12))
-    story.append(Paragraph("<b>Schedule a Full Assessment →</b> Contact your PortfolioHealth Advisor consultant", cta_style))
-    
-    # Closing Statement
-    build_pdf_closing(story, styles)
-    
-    doc.build(story)
-    buffer.seek(0)
-    
-    filename = f"PortfolioHealth_Quick_Assessment_{quick.get('company_name', 'Report').replace(' ', '_')}_{quick_id[:8]}.pdf"
-    
+
+    buffer = build_quick_assessment_pdf(quick)
+    filename = (
+        f"PortfolioHealth_Quick_Assessment_"
+        f"{quick.get('company_name', 'Report').replace(' ', '_')}_{quick_id[:8]}.pdf"
+    )
     return StreamingResponse(
         buffer,
         media_type="application/pdf",
