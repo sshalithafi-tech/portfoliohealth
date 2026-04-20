@@ -5,9 +5,9 @@ import { getTrafficLightBgClass } from "../utils/scoring";
  * Traffic light indicator icon
  */
 export const TrafficLightIcon = ({ status, size = 20 }) => {
-  if (status === "green") return <CheckCircle size={size} className="text-[#238636]" />;
-  if (status === "amber") return <AlertTriangle size={size} className="text-[#D29922]" />;
-  return <AlertCircle size={size} className="text-[#F85149]" />;
+  if (status === "green") return <CheckCircle size={size} className="text-[#34D399]" />;
+  if (status === "amber") return <AlertTriangle size={size} className="text-[#C9A84C]" />;
+  return <AlertCircle size={size} className="text-[#EF4444]" />;
 };
 
 /**
@@ -16,13 +16,13 @@ export const TrafficLightIcon = ({ status, size = 20 }) => {
 export const StatusBadge = ({ status }) => {
   if (status === "completed") {
     return (
-      <span className="px-3 py-1 text-xs rounded-full bg-[#238636]/15 text-[#238636] border border-[#238636]/20">
+      <span className="px-3 py-1 text-xs rounded-full bg-[#34D399]/15 text-[#34D399] border border-[#34D399]/20">
         Completed
       </span>
     );
   }
   return (
-    <span className="px-3 py-1 text-xs rounded-full bg-[#D29922]/15 text-[#D29922] border border-[#D29922]/20">
+    <span className="px-3 py-1 text-xs rounded-full bg-[#C9A84C]/15 text-[#C9A84C] border border-[#C9A84C]/20">
       In Progress
     </span>
   );
@@ -45,8 +45,8 @@ export const TrafficLightBadge = ({ status }) => {
  */
 export const LoadingSpinner = ({ className = "" }) => (
   <div className={`flex items-center justify-center ${className}`}>
-    <div className="animate-pulse-glow w-12 h-12 rounded-full bg-[#00E5FF]/15 flex items-center justify-center">
-      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#2f81f7] to-[#00E5FF]" />
+    <div className="animate-pulse-glow w-12 h-12 rounded-full bg-[#C9A84C]/15 flex items-center justify-center">
+      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#60A5FA] to-[#C9A84C]" />
     </div>
   </div>
 );
@@ -56,10 +56,10 @@ export const LoadingSpinner = ({ className = "" }) => (
  */
 export const ScoreDisplay = ({ score, size = "lg", showMax = true }) => {
   const getColorClass = (s) => {
-    if (s >= 4) return "text-[#00E5FF]";
-    if (s >= 3) return "text-[#238636]";
-    if (s >= 2) return "text-[#D29922]";
-    return "text-[#F85149]";
+    if (s >= 4) return "text-[#C9A84C]";
+    if (s >= 3) return "text-[#34D399]";
+    if (s >= 2) return "text-[#C9A84C]";
+    return "text-[#EF4444]";
   };
 
   const sizeClasses = {
@@ -82,7 +82,7 @@ export const ScoreDisplay = ({ score, size = "lg", showMax = true }) => {
 /**
  * Progress bar
  */
-export const ProgressBar = ({ value, max = 100, color = "#00E5FF" }) => {
+export const ProgressBar = ({ value, max = 100, color = "#C9A84C" }) => {
   const percentage = (value / max) * 100;
   return (
     <div className="w-full h-2 bg-white/[0.06] rounded-full overflow-hidden">
@@ -97,7 +97,7 @@ export const ProgressBar = ({ value, max = 100, color = "#00E5FF" }) => {
 /**
  * Numbered list item
  */
-export const NumberedListItem = ({ index, children, color = "#00E5FF" }) => (
+export const NumberedListItem = ({ index, children, color = "#C9A84C" }) => (
   <li className="flex items-start gap-3">
     <span 
       className="w-6 h-6 rounded-full flex items-center justify-center text-xs shrink-0 mt-0.5"
@@ -112,7 +112,7 @@ export const NumberedListItem = ({ index, children, color = "#00E5FF" }) => (
 /**
  * Arrow list item
  */
-export const ArrowListItem = ({ children, color = "#00E5FF" }) => (
+export const ArrowListItem = ({ children, color = "#C9A84C" }) => (
   <li className="flex items-start gap-2 text-sm text-white/60">
     <span style={{ color }}>→</span>
     {children}
@@ -124,7 +124,7 @@ export const ArrowListItem = ({ children, color = "#00E5FF" }) => (
  */
 export const AlertListItem = ({ children }) => (
   <li className="flex items-start gap-3">
-    <span className="w-6 h-6 rounded-full bg-[#F85149]/15 text-[#F85149] flex items-center justify-center text-xs shrink-0 mt-0.5">
+    <span className="w-6 h-6 rounded-full bg-[#EF4444]/15 text-[#EF4444] flex items-center justify-center text-xs shrink-0 mt-0.5">
       !
     </span>
     <p className="text-white/60 text-sm">{children}</p>

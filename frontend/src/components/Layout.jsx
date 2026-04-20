@@ -13,7 +13,7 @@ import {
 import { useState } from "react";
 import NotificationBell from "./NotificationBell";
 
-const LOGO_MARK = "https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/6407f98124d827501f865028cbbf81566506fd19a8f17f5fd5b271241d491414.png";
+const LOGO_MARK = "https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/d646700fab8f8fe4907058c3e80e52bb7fde0a398525ad319ca353e76a6edf0f.png";
 
 const Layout = ({ children }) => {
   const { user, logout } = useAuth();
@@ -89,7 +89,7 @@ const Layout = ({ children }) => {
               className={`
                 flex items-center gap-3 px-4 py-3 rounded-xl transition-all
                 ${isActive(path)
-                  ? 'bg-gradient-to-r from-[#2f81f7]/20 to-[#00E5FF]/10 text-[#00E5FF] border border-[#00E5FF]/20'
+                  ? 'bg-gradient-to-r from-[#60A5FA]/20 to-[#C9A84C]/10 text-[#C9A84C] border border-[#C9A84C]/20'
                   : 'text-white/50 hover:text-white hover:bg-white/[0.04]'
                 }
               `}
@@ -104,7 +104,7 @@ const Layout = ({ children }) => {
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/[0.06]">
           <div className="flex items-center gap-3 px-4 py-3 mb-2">
             <div className="w-10 h-10 rounded-full bg-white/[0.06] flex items-center justify-center">
-              <span className="text-[#00E5FF] font-semibold">
+              <span className="text-[#C9A84C] font-semibold">
                 {user?.name?.charAt(0)?.toUpperCase() || "U"}
               </span>
             </div>

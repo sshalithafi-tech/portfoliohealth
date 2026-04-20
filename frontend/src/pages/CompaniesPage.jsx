@@ -115,7 +115,7 @@ const CompanyCard = ({ company, onDelete }) => {
               <button
                 data-testid={`delete-company-${company.id}`}
                 onClick={() => { setShowConfirm(true); setShowActions(false); }}
-                className="w-full flex items-center gap-2 px-3 py-2 text-xs text-[#F85149] hover:bg-[#F85149]/10 transition-colors"
+                className="w-full flex items-center gap-2 px-3 py-2 text-xs text-[#EF4444] hover:bg-[#EF4444]/10 transition-colors"
               >
                 <Trash2 size={13} /> Delete Company
               </button>
@@ -143,7 +143,7 @@ const CompanyCard = ({ company, onDelete }) => {
                 data-testid="confirm-delete-btn"
                 onClick={handleDelete}
                 disabled={deleting}
-                className="flex-1 py-2.5 bg-[#F85149] text-white rounded-xl text-sm hover:bg-[#F85149]/80 transition-colors disabled:opacity-50"
+                className="flex-1 py-2.5 bg-[#EF4444] text-white rounded-xl text-sm hover:bg-[#EF4444]/80 transition-colors disabled:opacity-50"
               >
                 {deleting ? "Deleting..." : "Delete"}
               </button>
@@ -153,11 +153,11 @@ const CompanyCard = ({ company, onDelete }) => {
       )}
 
       <div className="flex items-start gap-3 pr-8">
-        <div className="w-12 h-12 rounded-lg bg-[#2f81f7]/15 flex items-center justify-center shrink-0">
-          <Building2 size={24} className="text-[#2f81f7]" />
+        <div className="w-12 h-12 rounded-lg bg-[#60A5FA]/15 flex items-center justify-center shrink-0">
+          <Building2 size={24} className="text-[#60A5FA]" />
         </div>
         <div className="min-w-0">
-          <h3 className="text-lg font-semibold text-white group-hover:text-[#00E5FF] transition-colors font-['Outfit'] truncate">
+          <h3 className="text-lg font-semibold text-white group-hover:text-[#C9A84C] transition-colors font-['Outfit'] truncate">
             {company.name}
           </h3>
           <p className="text-sm text-white/50">{company.industry}</p>
@@ -167,12 +167,12 @@ const CompanyCard = ({ company, onDelete }) => {
       {/* Assessment status badges */}
       <div className="flex flex-wrap gap-2 mt-4">
         {company.completed_count > 0 && (
-          <span className="px-2.5 py-1 text-xs rounded-full bg-[#238636]/15 text-[#238636] border border-[#238636]/20">
+          <span className="px-2.5 py-1 text-xs rounded-full bg-[#34D399]/15 text-[#34D399] border border-[#34D399]/20">
             {company.completed_count} Completed
           </span>
         )}
         {(company.assessment_count - (company.completed_count || 0)) > 0 && (
-          <span className="px-2.5 py-1 text-xs rounded-full bg-[#D29922]/15 text-[#D29922] border border-[#D29922]/20">
+          <span className="px-2.5 py-1 text-xs rounded-full bg-[#C9A84C]/15 text-[#C9A84C] border border-[#C9A84C]/20">
             {company.assessment_count - (company.completed_count || 0)} In Progress
           </span>
         )}
@@ -194,7 +194,7 @@ const CompanyCard = ({ company, onDelete }) => {
         </div>
         <Link
           to={`/assessments?company=${company.id}`}
-          className="flex items-center gap-1 text-sm text-[#00E5FF] hover:text-[#00E5FF]/80 transition-colors"
+          className="flex items-center gap-1 text-sm text-[#C9A84C] hover:text-[#C9A84C]/80 transition-colors"
         >
           <ClipboardCheck size={14} />
           Assessments

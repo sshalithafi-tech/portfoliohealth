@@ -27,13 +27,13 @@ const QuestionOption = ({ option, questionId, optionIndex, isSelected, onSelect 
     onClick={() => onSelect(option.value)}
     className={`w-full p-4 rounded-xl border text-left transition-all flex items-center justify-between group ${
       isSelected
-        ? "bg-[#00E5FF]/10 border-[#00E5FF]/30 text-white"
-        : "bg-white/[0.03] border-white/[0.08] text-white/70 hover:border-[#00E5FF]/20 hover:bg-white/[0.05]"
+        ? "bg-[#C9A84C]/10 border-[#C9A84C]/30 text-white"
+        : "bg-white/[0.03] border-white/[0.08] text-white/70 hover:border-[#C9A84C]/20 hover:bg-white/[0.05]"
     }`}
   >
     <span className="font-medium">{option.label}</span>
     <ChevronRight size={18} className={`transition-all ${
-      isSelected ? "text-[#00E5FF]" : "text-white/30 group-hover:text-white/50"
+      isSelected ? "text-[#C9A84C]" : "text-white/30 group-hover:text-white/50"
     }`} />
   </button>
 );
@@ -46,9 +46,9 @@ const ProgressDots = ({ questions, currentQuestion, answers, onDotClick }) => (
         onClick={() => onDotClick(idx)}
         className={`h-2 rounded-full transition-all ${
           idx === currentQuestion
-            ? "bg-[#00E5FF] w-6"
+            ? "bg-[#C9A84C] w-6"
             : answers[String(q.id)]
-            ? "bg-[#238636] w-2"
+            ? "bg-[#34D399] w-2"
             : "bg-white/[0.15] w-2"
         }`}
       />
@@ -150,7 +150,7 @@ const QuickAssessmentPage = () => {
         </button>
         
         <div className="flex items-center gap-3 flex-1">
-          <img src="https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/6407f98124d827501f865028cbbf81566506fd19a8f17f5fd5b271241d491414.png" alt="PH" className="w-8 h-8 rounded-lg object-contain" />
+          <img src="https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/d646700fab8f8fe4907058c3e80e52bb7fde0a398525ad319ca353e76a6edf0f.png" alt="PH" className="w-8 h-8 rounded-lg object-contain" />
           <span className="text-white font-semibold font-['Outfit']">PortfolioHealth</span>
         </div>
 
@@ -165,7 +165,7 @@ const QuickAssessmentPage = () => {
       {step === "questions" && (
         <div className="h-1 bg-white/[0.06] relative z-10">
           <div 
-            className="h-full bg-gradient-to-r from-[#2f81f7] to-[#00E5FF] transition-all duration-300"
+            className="h-full bg-gradient-to-r from-[#60A5FA] to-[#C9A84C] transition-all duration-300"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -186,7 +186,7 @@ const QuickAssessmentPage = () => {
             <form onSubmit={handleStartAssessment} className="space-y-6">
               <div className="p-6 glass-surface-highlight rounded-xl space-y-4">
                 <div className="flex items-center gap-3 mb-4">
-                  <Building2 size={20} className="text-[#00E5FF]" />
+                  <Building2 size={20} className="text-[#C9A84C]" />
                   <h2 className="text-lg font-semibold text-white font-['Outfit']">Company Information</h2>
                 </div>
 
@@ -308,7 +308,7 @@ const QuickAssessmentPage = () => {
                   onClick={handleSubmit}
                   disabled={Object.keys(answers).length < questions.length}
                   data-testid="submit-quick-assessment-btn"
-                  className="flex items-center gap-2 px-6 py-2 bg-[#238636] text-white rounded-xl hover:bg-[#238636]/80 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 px-6 py-2 bg-[#34D399] text-white rounded-xl hover:bg-[#34D399]/80 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   Get Results
                   <ArrowRight size={18} />
@@ -328,7 +328,7 @@ const QuickAssessmentPage = () => {
         {/* Submitting Step */}
         {step === "submitting" && (
           <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
-            <Loader2 size={48} className="text-[#00E5FF] animate-spin mb-6" />
+            <Loader2 size={48} className="text-[#C9A84C] animate-spin mb-6" />
             <h2 className="text-xl font-semibold text-white mb-2 font-['Outfit']">Calculating Your Scores</h2>
             <p className="text-white/50">This will only take a moment...</p>
           </div>

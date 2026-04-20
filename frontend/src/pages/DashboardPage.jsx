@@ -30,7 +30,7 @@ const DIMENSION_CONFIG = [
   { icon: Monitor, label: "Technology", key: "technology" },
 ];
 
-const StatCard = ({ icon: Icon, label, value, color = "#00E5FF" }) => (
+const StatCard = ({ icon: Icon, label, value, color = "#C9A84C" }) => (
   <div className="p-4 sm:p-6 glass-card rounded-xl">
     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
       <div 
@@ -99,10 +99,10 @@ const DashboardPage = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 stagger-children">
-          <StatCard icon={ClipboardCheck} label="Total Assessments" value={stats?.total_assessments || 0} color="#2f81f7" />
-          <StatCard icon={TrendingUp} label="Completed" value={stats?.completed_assessments || 0} color="#238636" />
-          <StatCard icon={Zap} label="Quick Screenings" value={stats?.total_quick_assessments || 0} color="#D29922" />
-          <StatCard icon={Building2} label="Companies" value={stats?.total_companies || 0} color="#A371F7" />
+          <StatCard icon={ClipboardCheck} label="Total Assessments" value={stats?.total_assessments || 0} color="#60A5FA" />
+          <StatCard icon={TrendingUp} label="Completed" value={stats?.completed_assessments || 0} color="#34D399" />
+          <StatCard icon={Zap} label="Quick Screenings" value={stats?.total_quick_assessments || 0} color="#C9A84C" />
+          <StatCard icon={Building2} label="Companies" value={stats?.total_companies || 0} color="#A78BFA" />
         </div>
 
         {/* Main Content Grid */}
@@ -123,8 +123,8 @@ const DashboardPage = () => {
                       <Radar
                         name="Score"
                         dataKey="score"
-                        stroke="#00E5FF"
-                        fill="#00E5FF"
+                        stroke="#C9A84C"
+                        fill="#C9A84C"
                         fillOpacity={0.15}
                         strokeWidth={2}
                       />
@@ -156,7 +156,7 @@ const DashboardPage = () => {
               <h2 className="text-lg font-semibold text-white font-['Outfit']">
                 Recent Assessments
               </h2>
-              <Link to="/assessments" className="text-[#00E5FF] hover:text-[#00E5FF]/80 text-sm transition-colors">
+              <Link to="/assessments" className="text-[#C9A84C] hover:text-[#C9A84C]/80 text-sm transition-colors">
                 View all
               </Link>
             </div>
@@ -207,7 +207,7 @@ const DashboardPage = () => {
                 action={
                   <Link 
                     to="/assessments" 
-                    className="text-[#00E5FF] hover:text-[#00E5FF]/80 transition-colors"
+                    className="text-[#C9A84C] hover:text-[#C9A84C]/80 transition-colors"
                   >
                     Start your first assessment
                   </Link>
@@ -222,17 +222,17 @@ const DashboardPage = () => {
           <Link 
             to="/quick-assessment"
             data-testid="quick-assessment-btn"
-            className="p-6 glass-card rounded-xl group hover:border-[#00E5FF]/20"
+            className="p-6 glass-card rounded-xl group hover:border-[#C9A84C]/20"
           >
-            <Zap size={32} className="text-[#00E5FF] mb-4" />
-            <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-[#00E5FF] transition-colors font-['Outfit']">
+            <Zap size={32} className="text-[#C9A84C] mb-4" />
+            <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-[#C9A84C] transition-colors font-['Outfit']">
               Quick Check (10 min)
             </h3>
             <p className="text-white/50 text-sm">
               Rapid screening with 15 questions and instant results
             </p>
             {(stats?.total_quick_assessments > 0) && (
-              <p className="text-xs text-[#00E5FF] mt-2">
+              <p className="text-xs text-[#C9A84C] mt-2">
                 {stats.total_quick_assessments} screening{stats.total_quick_assessments > 1 ? 's' : ''} saved
               </p>
             )}
@@ -241,10 +241,10 @@ const DashboardPage = () => {
           <Link 
             to="/companies"
             data-testid="manage-companies-btn"
-            className="p-6 glass-card rounded-xl group hover:border-[#A371F7]/20"
+            className="p-6 glass-card rounded-xl group hover:border-[#A78BFA]/20"
           >
-            <Building2 size={32} className="text-[#A371F7] mb-4" />
-            <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-[#A371F7] transition-colors font-['Outfit']">
+            <Building2 size={32} className="text-[#A78BFA] mb-4" />
+            <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-[#A78BFA] transition-colors font-['Outfit']">
               Manage Companies
             </h3>
             <p className="text-white/50 text-sm">
@@ -255,10 +255,10 @@ const DashboardPage = () => {
           <Link 
             to="/assessments"
             data-testid="view-assessments-btn"
-            className="p-6 glass-card rounded-xl group hover:border-[#238636]/20"
+            className="p-6 glass-card rounded-xl group hover:border-[#34D399]/20"
           >
-            <ClipboardCheck size={32} className="text-[#238636] mb-4" />
-            <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-[#238636] transition-colors font-['Outfit']">
+            <ClipboardCheck size={32} className="text-[#34D399] mb-4" />
+            <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-[#34D399] transition-colors font-['Outfit']">
               View Assessments
             </h3>
             <p className="text-white/50 text-sm">

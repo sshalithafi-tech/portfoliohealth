@@ -28,22 +28,20 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen flex">
-      {/* Left side - 3D Liquid shapes */}
+      {/* Left side - Corporate branding */}
       <div 
         className="hidden lg:flex lg:w-1/2 relative"
         style={{
-          backgroundImage: "url('https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/8c7dd872cf9afec460503fdced858c236170fec9136b7d8fb0d593cc6ad0e7c1.png')",
-          backgroundSize: "cover",
-          backgroundPosition: "center"
+          background: "linear-gradient(135deg, #0A1628 0%, #0d1f3c 50%, #0A1628 100%)"
         }}
       >
-        <div className="absolute inset-0 bg-[#05050A]/40" />
+        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 60% 50% at 30% 40%, rgba(201, 168, 76, 0.08) 0%, transparent 60%)" }} />
         <div className="relative z-10 flex flex-col justify-center px-12">
           <div className="flex items-center gap-4 mb-6">
-            <img src="https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/6407f98124d827501f865028cbbf81566506fd19a8f17f5fd5b271241d491414.png" alt="PortfolioHealth" className="w-14 h-14 rounded-2xl object-contain" />
+            <img src="https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/d646700fab8f8fe4907058c3e80e52bb7fde0a398525ad319ca353e76a6edf0f.png" alt="PortfolioHealth" className="w-14 h-14 rounded-2xl object-contain" />
             <div>
               <h1 className="text-3xl font-light text-white font-['Outfit']">
-                Portfolio<span className="font-semibold text-[#00E5FF]">Health</span>
+                Portfolio<span className="font-semibold text-[#C9A84C]">Health</span>
               </h1>
               <p className="text-white/50">Advisor</p>
             </div>
@@ -52,7 +50,7 @@ const LoginPage = () => {
             Assess your organisation's readiness for data-driven Product Portfolio Management decisions.
           </p>
           <div className="mt-8 flex items-center gap-4">
-            <div className="h-px flex-1 bg-gradient-to-r from-[#00E5FF]/50 to-transparent" />
+            <div className="h-px flex-1 bg-gradient-to-r from-[#C9A84C]/50 to-transparent" />
           </div>
           <p className="mt-4 text-sm text-white/40">
             Academically grounded in published PPM research
@@ -61,11 +59,11 @@ const LoginPage = () => {
       </div>
 
       {/* Right side - Login form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-8 bg-[#05050A]">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-8 bg-[#0A1628]">
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <div className="flex items-center justify-center gap-3 mb-6 lg:hidden">
-            <img src="https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/6407f98124d827501f865028cbbf81566506fd19a8f17f5fd5b271241d491414.png" alt="PortfolioHealth" className="w-12 h-12 rounded-xl object-contain" />
+            <img src="https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/d646700fab8f8fe4907058c3e80e52bb7fde0a398525ad319ca353e76a6edf0f.png" alt="PortfolioHealth" className="w-12 h-12 rounded-xl object-contain" />
           </div>
           <div className="text-center mb-8">
             <h2 className="text-3xl font-semibold text-white font-['Outfit'] tracking-tight">
@@ -135,7 +133,7 @@ const LoginPage = () => {
 
           <p className="mt-8 text-center text-white/50">
             Don't have an account?{" "}
-            <Link to="/register" className="text-[#00E5FF] hover:text-[#00E5FF]/80 transition-colors">
+            <Link to="/register" className="text-[#C9A84C] hover:text-[#C9A84C]/80 transition-colors">
               Create one
             </Link>
           </p>

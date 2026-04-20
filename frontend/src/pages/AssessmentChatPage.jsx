@@ -138,8 +138,8 @@ const AssessmentChatPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse-glow w-12 h-12 rounded-full bg-[#00E5FF]/15 flex items-center justify-center">
-          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#2f81f7] to-[#00E5FF]" />
+        <div className="animate-pulse-glow w-12 h-12 rounded-full bg-[#C9A84C]/15 flex items-center justify-center">
+          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#60A5FA] to-[#C9A84C]" />
         </div>
       </div>
     );
@@ -160,7 +160,7 @@ const AssessmentChatPage = () => {
         
         <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
           <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-            <Building2 size={16} className="text-[#00E5FF] shrink-0" />
+            <Building2 size={16} className="text-[#C9A84C] shrink-0" />
             <span className="text-white font-medium text-sm sm:text-base truncate">{assessment?.company_name}</span>
           </div>
           <div className="hidden md:flex items-center gap-2 text-white/50">
@@ -173,7 +173,7 @@ const AssessmentChatPage = () => {
           <Link
             to={`/assessments/${id}/report`}
             data-testid="view-report-btn"
-            className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 bg-[#238636] text-white rounded-xl hover:bg-[#238636]/80 transition-colors text-xs sm:text-sm shrink-0"
+            className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 bg-[#34D399] text-white rounded-xl hover:bg-[#34D399]/80 transition-colors text-xs sm:text-sm shrink-0"
           >
             <FileText size={14} />
             <span className="hidden sm:inline">View Report</span>
@@ -193,14 +193,14 @@ const AssessmentChatPage = () => {
             return (
               <div key={phase.key} className="flex items-center">
                 <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm transition-all ${
-                  isCompleted ? 'bg-[#238636]/15 text-[#238636] border border-[#238636]/20' :
-                  isCurrent ? 'bg-[#00E5FF]/15 text-[#00E5FF] border border-[#00E5FF]/30' :
+                  isCompleted ? 'bg-[#34D399]/15 text-[#34D399] border border-[#34D399]/20' :
+                  isCurrent ? 'bg-[#C9A84C]/15 text-[#C9A84C] border border-[#C9A84C]/30' :
                   'bg-white/[0.03] text-white/30 border border-white/[0.05]'
                 }`}>
                   {isCompleted ? (
                     <CheckCircle2 size={14} />
                   ) : isCurrent ? (
-                    <div className="w-3.5 h-3.5 rounded-full bg-[#00E5FF] animate-pulse" />
+                    <div className="w-3.5 h-3.5 rounded-full bg-[#C9A84C] animate-pulse" />
                   ) : (
                     <Circle size={14} />
                   )}
@@ -208,7 +208,7 @@ const AssessmentChatPage = () => {
                 </div>
                 {idx < PHASES.length - 1 && (
                   <div className={`w-8 h-0.5 mx-1 ${
-                    idx < currentIdx ? 'bg-[#238636]/50' : 'bg-white/[0.06]'
+                    idx < currentIdx ? 'bg-[#34D399]/50' : 'bg-white/[0.06]'
                   }`} />
                 )}
               </div>
@@ -239,9 +239,9 @@ const AssessmentChatPage = () => {
               ) : (
                 <div className="chat-message-assistant">
                   <div className="flex items-start gap-3">
-                    <img src="https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/6407f98124d827501f865028cbbf81566506fd19a8f17f5fd5b271241d491414.png" alt="PH" className="w-8 h-8 rounded-full object-contain shrink-0 mt-1" />
+                    <img src="https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/d646700fab8f8fe4907058c3e80e52bb7fde0a398525ad319ca353e76a6edf0f.png" alt="PH" className="w-8 h-8 rounded-full object-contain shrink-0 mt-1" />
                     <div className="flex-1">
-                      <p className="text-xs text-[#00E5FF] font-medium mb-2">PortfolioHealth Advisor</p>
+                      <p className="text-xs text-[#C9A84C] font-medium mb-2">PortfolioHealth Advisor</p>
                       <div className="text-white/80 prose prose-invert prose-sm max-w-none">
                         <ReactMarkdown
                           components={{
@@ -249,7 +249,7 @@ const AssessmentChatPage = () => {
                             strong: ({ children }) => <strong className="text-white">{children}</strong>,
                             ul: ({ children }) => <ul className="list-disc list-inside mb-3">{children}</ul>,
                             ol: ({ children }) => <ol className="list-decimal list-inside mb-3">{children}</ol>,
-                            code: ({ children }) => <code className="bg-white/[0.08] px-1 py-0.5 rounded text-[#00E5FF]">{children}</code>,
+                            code: ({ children }) => <code className="bg-white/[0.08] px-1 py-0.5 rounded text-[#C9A84C]">{children}</code>,
                             pre: ({ children }) => <pre className="bg-white/[0.05] p-3 rounded-lg overflow-x-auto text-sm">{children}</pre>
                           }}
                         >
@@ -269,15 +269,15 @@ const AssessmentChatPage = () => {
           {sending && (
             <div className="chat-message-assistant animate-fade-in">
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-[#00E5FF]/15 flex items-center justify-center shrink-0">
-                  <Loader2 size={16} className="text-[#00E5FF] animate-spin" />
+                <div className="w-8 h-8 rounded-full bg-[#C9A84C]/15 flex items-center justify-center shrink-0">
+                  <Loader2 size={16} className="text-[#C9A84C] animate-spin" />
                 </div>
                 <div className="flex items-center gap-2 text-white/50">
                   <span>Thinking</span>
                   <span className="flex gap-1">
-                    <span className="w-1.5 h-1.5 bg-[#00E5FF] rounded-full animate-bounce" style={{ animationDelay: "0s" }} />
-                    <span className="w-1.5 h-1.5 bg-[#00E5FF] rounded-full animate-bounce" style={{ animationDelay: "0.1s" }} />
-                    <span className="w-1.5 h-1.5 bg-[#00E5FF] rounded-full animate-bounce" style={{ animationDelay: "0.2s" }} />
+                    <span className="w-1.5 h-1.5 bg-[#C9A84C] rounded-full animate-bounce" style={{ animationDelay: "0s" }} />
+                    <span className="w-1.5 h-1.5 bg-[#C9A84C] rounded-full animate-bounce" style={{ animationDelay: "0.1s" }} />
+                    <span className="w-1.5 h-1.5 bg-[#C9A84C] rounded-full animate-bounce" style={{ animationDelay: "0.2s" }} />
                   </span>
                 </div>
               </div>
@@ -286,11 +286,11 @@ const AssessmentChatPage = () => {
           
           {/* Closing Statement Card */}
           {assessment?.status === "completed" && (
-            <div className="animate-fade-in p-5 rounded-2xl border border-[#FFB300]/30 bg-[#FFB300]/5 backdrop-blur-sm" data-testid="closing-statement-card">
+            <div className="animate-fade-in p-5 rounded-2xl border border-[#C9A84C]/30 bg-[#C9A84C]/5 backdrop-blur-sm" data-testid="closing-statement-card">
               <p className="text-white/80 text-sm leading-relaxed mb-4">
                 Thank you for completing this capability maturity assessment. If you would like further analysis, expert input, or tailored recommendations based on your results, please reach out via email to arrange a follow-up consultation:
               </p>
-              <a href="mailto:shalitha.samarakoonmudiyanselage@student.oulu.fi" className="text-[#FFB300] hover:text-[#FFD54F] font-medium text-sm transition-colors">
+              <a href="mailto:shalitha.samarakoonmudiyanselage@student.oulu.fi" className="text-[#C9A84C] hover:text-[#D4B85C] font-medium text-sm transition-colors">
                 shalitha.samarakoonmudiyanselage@student.oulu.fi
               </a>
               <div className="flex gap-3 mt-4">
@@ -342,7 +342,7 @@ const AssessmentChatPage = () => {
           {assessment?.status === "completed" && (
             <p className="text-center text-white/40 text-sm mt-3">
               This assessment is complete.{" "}
-              <Link to={`/assessments/${id}/report`} className="text-[#00E5FF] hover:text-[#00E5FF]/80">
+              <Link to={`/assessments/${id}/report`} className="text-[#C9A84C] hover:text-[#C9A84C]/80">
                 View the report
               </Link>
             </p>

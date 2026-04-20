@@ -11,9 +11,9 @@ const ICON_MAP = {
 };
 
 const COLOR_MAP = {
-  new_user: "#A371F7",
-  assessment_completed: "#238636",
-  quick_assessment: "#D29922",
+  new_user: "#A78BFA",
+  assessment_completed: "#34D399",
+  quick_assessment: "#C9A84C",
 };
 
 function timeAgo(dateStr) {
@@ -109,7 +109,7 @@ const NotificationBell = () => {
       >
         <Bell size={20} />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-[#F85149] text-[10px] font-bold text-white">
+          <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-[#EF4444] text-[10px] font-bold text-white">
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
@@ -126,7 +126,7 @@ const NotificationBell = () => {
               <button
                 data-testid="mark-all-read-btn"
                 onClick={markAllRead}
-                className="flex items-center gap-1 text-xs text-[#00E5FF] hover:text-[#00E5FF]/80 transition-colors"
+                className="flex items-center gap-1 text-xs text-[#C9A84C] hover:text-[#C9A84C]/80 transition-colors"
               >
                 <CheckCheck size={14} />
                 Mark all read
@@ -143,7 +143,7 @@ const NotificationBell = () => {
             ) : (
               notifications.map((n) => {
                 const Icon = ICON_MAP[n.type] || Bell;
-                const color = COLOR_MAP[n.type] || "#00E5FF";
+                const color = COLOR_MAP[n.type] || "#C9A84C";
                 return (
                   <div
                     key={n.id}
@@ -165,7 +165,7 @@ const NotificationBell = () => {
                       <p className="text-[10px] text-white/30 mt-1">{timeAgo(n.created_at)}</p>
                     </div>
                     {!n.read && (
-                      <div className="w-2 h-2 rounded-full bg-[#00E5FF] shrink-0 mt-2" />
+                      <div className="w-2 h-2 rounded-full bg-[#C9A84C] shrink-0 mt-2" />
                     )}
                   </div>
                 );

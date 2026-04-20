@@ -18,7 +18,7 @@ import { toast } from "sonner";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-const AdminStatCard = ({ icon: Icon, label, value, color = "#00E5FF" }) => (
+const AdminStatCard = ({ icon: Icon, label, value, color = "#C9A84C" }) => (
   <div className="p-4 sm:p-5 glass-card rounded-xl">
     <div className="flex items-center gap-3">
       <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${color}15` }}>
@@ -117,8 +117,8 @@ const AdminPage = () => {
         {/* Header */}
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#00E5FF]/15 flex items-center justify-center">
-              <Shield size={22} className="text-[#00E5FF]" />
+            <div className="w-10 h-10 rounded-xl bg-[#C9A84C]/15 flex items-center justify-center">
+              <Shield size={22} className="text-[#C9A84C]" />
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-semibold text-white font-['Outfit'] tracking-tight">
@@ -132,12 +132,12 @@ const AdminPage = () => {
         {/* Global Stats */}
         {stats && (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 stagger-children">
-            <AdminStatCard icon={ClipboardCheck} label="Full Assessments" value={stats.total_assessments} color="#2f81f7" />
-            <AdminStatCard icon={TrendingUp} label="Completed" value={stats.completed_assessments} color="#238636" />
-            <AdminStatCard icon={Zap} label="Quick Assessments" value={stats.total_quick_assessments} color="#D29922" />
-            <AdminStatCard icon={Building2} label="Companies" value={stats.total_companies} color="#A371F7" />
-            <AdminStatCard icon={Users} label="Users" value={stats.total_users} color="#00E5FF" />
-            <AdminStatCard icon={ClipboardCheck} label="In Progress" value={stats.in_progress_assessments} color="#F85149" />
+            <AdminStatCard icon={ClipboardCheck} label="Full Assessments" value={stats.total_assessments} color="#60A5FA" />
+            <AdminStatCard icon={TrendingUp} label="Completed" value={stats.completed_assessments} color="#34D399" />
+            <AdminStatCard icon={Zap} label="Quick Assessments" value={stats.total_quick_assessments} color="#C9A84C" />
+            <AdminStatCard icon={Building2} label="Companies" value={stats.total_companies} color="#A78BFA" />
+            <AdminStatCard icon={Users} label="Users" value={stats.total_users} color="#C9A84C" />
+            <AdminStatCard icon={ClipboardCheck} label="In Progress" value={stats.in_progress_assessments} color="#EF4444" />
           </div>
         )}
 
@@ -148,7 +148,7 @@ const AdminPage = () => {
             onClick={() => { setActiveTab("full"); setSearchQuery(""); }}
             className={`px-4 py-3 text-sm font-medium transition-colors border-b-2 -mb-px ${
               activeTab === "full"
-                ? "border-[#00E5FF] text-[#00E5FF]"
+                ? "border-[#C9A84C] text-[#C9A84C]"
                 : "border-transparent text-white/50 hover:text-white"
             }`}
           >
@@ -159,7 +159,7 @@ const AdminPage = () => {
             onClick={() => { setActiveTab("quick"); setSearchQuery(""); }}
             className={`px-4 py-3 text-sm font-medium transition-colors border-b-2 -mb-px ${
               activeTab === "quick"
-                ? "border-[#00E5FF] text-[#00E5FF]"
+                ? "border-[#C9A84C] text-[#C9A84C]"
                 : "border-transparent text-white/50 hover:text-white"
             }`}
           >
@@ -289,7 +289,7 @@ const AdminPage = () => {
                                 } catch { /* */ }
                               }}
                               data-testid={`admin-download-${a.id}`}
-                              className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium text-[#00E5FF] bg-[#00E5FF]/10 hover:bg-[#00E5FF]/20 rounded-md border border-[#00E5FF]/20 transition-colors whitespace-nowrap"
+                              className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium text-[#C9A84C] bg-[#C9A84C]/10 hover:bg-[#C9A84C]/20 rounded-md border border-[#C9A84C]/20 transition-colors whitespace-nowrap"
                             >
                               <Download size={10} /> PDF
                             </button>

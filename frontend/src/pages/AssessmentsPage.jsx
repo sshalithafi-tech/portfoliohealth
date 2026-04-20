@@ -52,8 +52,8 @@ const AssessmentRow = ({ assessment, onClick }) => {
     >
       <td className="px-4 sm:px-6 py-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-[#2f81f7]/15 flex items-center justify-center shrink-0">
-            <Building2 size={18} className="text-[#2f81f7]" />
+          <div className="w-10 h-10 rounded-lg bg-[#60A5FA]/15 flex items-center justify-center shrink-0">
+            <Building2 size={18} className="text-[#60A5FA]" />
           </div>
           <div className="min-w-0">
             <p className="text-white font-medium truncate">{assessment.company_name}</p>
@@ -86,7 +86,7 @@ const AssessmentRow = ({ assessment, onClick }) => {
           <button
             onClick={downloadPDF}
             data-testid={`download-report-${assessment.id}`}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#00E5FF] bg-[#00E5FF]/10 hover:bg-[#00E5FF]/20 rounded-lg border border-[#00E5FF]/20 transition-colors whitespace-nowrap"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#C9A84C] bg-[#C9A84C]/10 hover:bg-[#C9A84C]/20 rounded-lg border border-[#C9A84C]/20 transition-colors whitespace-nowrap"
           >
             <Download size={12} /> PDF
           </button>
@@ -177,7 +177,7 @@ const AssessmentsPage = () => {
             <h1 className="text-2xl sm:text-3xl font-semibold text-white font-['Outfit'] tracking-tight">
               Assessments
               {selectedCompany && (
-                <span className="text-[#00E5FF]"> · {selectedCompany.name}</span>
+                <span className="text-[#C9A84C]"> · {selectedCompany.name}</span>
               )}
             </h1>
             <p className="text-white/50 mt-1 text-sm sm:text-base">
@@ -218,7 +218,7 @@ const AssessmentsPage = () => {
                     ))}
                   </select>
                   {companies.length === 0 && (
-                    <Link to="/companies" className="text-sm text-[#00E5FF] hover:text-[#00E5FF]/80">
+                    <Link to="/companies" className="text-sm text-[#C9A84C] hover:text-[#C9A84C]/80">
                       + Add a company first
                     </Link>
                   )}
@@ -289,7 +289,7 @@ const AssessmentsPage = () => {
           {companyFilter && (
             <Link
               to="/assessments"
-              className="px-4 py-3 text-[#00E5FF] hover:text-[#00E5FF]/80 transition-colors"
+              className="px-4 py-3 text-[#C9A84C] hover:text-[#C9A84C]/80 transition-colors"
             >
               Clear company filter
             </Link>

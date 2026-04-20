@@ -27,7 +27,10 @@ from reportlab.lib.units import inch
 import urllib.request
 
 # LLM Integration
-from anthropic import Anthropic
+from emergentintegrations.llm.chat import LlmChat, UserMessage
+
+import re
+import json as json_mod
 
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
@@ -609,16 +612,16 @@ Current Phase: {assessment.get('current_phase', 'welcome')}
     if not claude_messages:
         claude_messages = [{"role": "user", "content": request.message}]
 
-    # Initialize Claude via Anthropic SDK
+    # Initialize Claude via Emergent integrations
     try:
-        client = Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
-        response_obj = client.messages.create(
-            model="claude-sonnet-4-5-20250929",
-            max_tokens=1024,
-            system=full_system,
-            messages=claude_messages
-        )
-        response = response_obj.content[0].text
+        chat = LlmChat(
+            api_key=os.environ.get("EMERGENT_LLM_KEY"),
+            session_id=f"assessment-chat-{assessment_id}",
+            system_message=full_system,
+        ).with_model("anthropic", "claude-sonnet-4-5-20250929")
+        for msg in claude_messages:
+            chat.messages.append({"role": msg["role"], "content": msg["content"]})
+        response = await chat.send_message(UserMessage(text=request.message))
     except Exception as e:
         logging.error(f"LLM error: {e}")
         raise HTTPException(status_code=500, detail="Failed to get AI response. Please try again.")
@@ -727,14 +730,12 @@ Respondent: {assessment.get('respondent_name', 'Unknown')} ({assessment.get('res
     full_system = PPDT_SYSTEM_PROMPT + "\n\nCurrent Assessment Context:\n" + company_context
     
     try:
-        client = Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
-        response_obj = client.messages.create(
-            model="claude-sonnet-4-5-20250929",
-            max_tokens=1024,
-            system=full_system,
-            messages=[{"role": "user", "content": "Please begin the assessment by introducing yourself and asking the first question."}]
-        )
-        response = response_obj.content[0].text
+        chat = LlmChat(
+            api_key=os.environ.get("EMERGENT_LLM_KEY"),
+            session_id=f"assessment-start-{assessment_id}",
+            system_message=full_system,
+        ).with_model("anthropic", "claude-sonnet-4-5-20250929")
+        response = await chat.send_message(UserMessage(text="Please begin the assessment by introducing yourself and asking the first question."))
     except Exception as e:
         logging.error(f"LLM error: {e}")
         raise HTTPException(status_code=500, detail="Failed to start assessment")
@@ -753,7 +754,7 @@ Respondent: {assessment.get('respondent_name', 'Unknown')} ({assessment.get('res
     return {"message": greeting_msg}
 
 # PDF Report Generation
-LOGO_URL = "https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/6407f98124d827501f865028cbbf81566506fd19a8f17f5fd5b271241d491414.png"
+LOGO_URL = "https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/d646700fab8f8fe4907058c3e80e52bb7fde0a398525ad319ca353e76a6edf0f.png"
 
 def get_pdf_logo():
     """Download logo and return as BytesIO for reportlab"""
@@ -771,7 +772,7 @@ def build_pdf_header(story, styles, title_text=""):
     # Brand colors
     brand_dark = colors.HexColor('#1A1A2E')
     brand_blue = colors.HexColor('#2f81f7')
-    brand_cyan = colors.HexColor('#00B4D8')
+    brand_cyan = colors.HexColor('#C9A84C')
     
     # Header bar - dark navy background
     header_data = [[""]]

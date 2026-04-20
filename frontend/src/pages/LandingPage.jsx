@@ -10,24 +10,17 @@ import {
   BarChart3
 } from "lucide-react";
 
-const LOGO_MARK = "https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/6407f98124d827501f865028cbbf81566506fd19a8f17f5fd5b271241d491414.png";
+const LOGO_MARK = "https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/d646700fab8f8fe4907058c3e80e52bb7fde0a398525ad319ca353e76a6edf0f.png";
 
 const LandingPage = () => {
   const { user } = useAuth();
 
   return (
     <div className="min-h-screen relative">
-      {/* Hero Background Image */}
-      <div 
-        className="absolute inset-0 z-0"
-        style={{
-          backgroundImage: "url('https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/8a1fd49539f9ba0d749527448a5a8795f2be8a64fe1b145dadd8a27eaa09898c.png')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat"
-        }}
-      />
-      <div className="absolute inset-0 bg-[#05050A]/70 z-0" />
+      {/* Hero Background */}
+      <div className="absolute inset-0 z-0" style={{
+        background: "radial-gradient(ellipse 70% 50% at 30% 0%, rgba(201, 168, 76, 0.06) 0%, transparent 60%), radial-gradient(ellipse 50% 40% at 70% 100%, rgba(96, 165, 250, 0.04) 0%, transparent 50%)"
+      }} />
 
       {/* Glass Header */}
       <header className="glass-surface-highlight fixed top-0 left-0 right-0 z-50">
@@ -77,7 +70,7 @@ const LandingPage = () => {
             <img src={LOGO_MARK} alt="PortfolioHealth" className="w-16 sm:w-20 h-16 sm:h-20 rounded-2xl object-contain drop-shadow-[0_0_20px_rgba(0,229,255,0.3)]" />
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-white font-['Outfit'] tracking-tight mb-4 sm:mb-6">
-            Portfolio<span className="font-semibold text-[#00E5FF]">Health</span>
+            Portfolio<span className="font-semibold text-[#C9A84C]">Health</span>
             <span className="block text-2xl sm:text-3xl md:text-4xl mt-2 text-white/50">Advisor</span>
           </h1>
           <p className="text-base sm:text-lg text-white/60 max-w-2xl mx-auto mb-8 sm:mb-12 px-2">
@@ -90,10 +83,10 @@ const LandingPage = () => {
             <Link
               to="/quick-assessment"
               data-testid="quick-assessment-cta"
-              className="group p-6 sm:p-8 glass-card rounded-2xl text-left hover:border-[#00E5FF]/30"
+              className="group p-6 sm:p-8 glass-card rounded-2xl text-left hover:border-[#C9A84C]/30"
             >
-              <div className="w-14 h-14 rounded-xl bg-[#00E5FF]/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <Zap size={28} className="text-[#00E5FF]" />
+              <div className="w-14 h-14 rounded-xl bg-[#C9A84C]/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <Zap size={28} className="text-[#C9A84C]" />
               </div>
               <h2 className="text-xl sm:text-2xl font-semibold text-white mb-2 font-['Outfit']">
                 Quick Check
@@ -112,7 +105,7 @@ const LandingPage = () => {
                   No login required
                 </span>
               </div>
-              <div className="flex items-center gap-2 text-[#00E5FF] font-medium group-hover:gap-3 transition-all">
+              <div className="flex items-center gap-2 text-[#C9A84C] font-medium group-hover:gap-3 transition-all">
                 Start Quick Check <ArrowRight size={18} />
               </div>
             </Link>
@@ -121,10 +114,10 @@ const LandingPage = () => {
             <Link
               to={user ? "/assessments" : "/login"}
               data-testid="full-assessment-cta"
-              className="group p-6 sm:p-8 glass-card rounded-2xl text-left hover:border-[#238636]/30"
+              className="group p-6 sm:p-8 glass-card rounded-2xl text-left hover:border-[#34D399]/30"
             >
-              <div className="w-14 h-14 rounded-xl bg-[#238636]/15 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <ClipboardCheck size={28} className="text-[#238636]" />
+              <div className="w-14 h-14 rounded-xl bg-[#34D399]/15 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <ClipboardCheck size={28} className="text-[#34D399]" />
               </div>
               <h2 className="text-2xl font-semibold text-white mb-2 font-['Outfit']">
                 Full Assessment
@@ -143,7 +136,7 @@ const LandingPage = () => {
                   Detailed report
                 </span>
               </div>
-              <div className="flex items-center gap-2 text-[#238636] font-medium group-hover:gap-3 transition-all">
+              <div className="flex items-center gap-2 text-[#34D399] font-medium group-hover:gap-3 transition-all">
                 {user ? "Start Full Assessment" : "Sign In to Start"} <ArrowRight size={18} />
               </div>
             </Link>
@@ -165,9 +158,9 @@ const LandingPage = () => {
               { icon: FileText, label: "Technology", desc: "Systems integration & decision support" }
             ].map(({ icon: Icon, label, desc }) => (
               <div key={label} className="p-4 sm:p-6 glass-card rounded-xl text-center">
-                <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-lg bg-[#00E5FF]/10 flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                  <Icon size={20} className="text-[#00E5FF] sm:hidden" />
-                  <Icon size={24} className="text-[#00E5FF] hidden sm:block" />
+                <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-lg bg-[#C9A84C]/10 flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                  <Icon size={20} className="text-[#C9A84C] sm:hidden" />
+                  <Icon size={24} className="text-[#C9A84C] hidden sm:block" />
                 </div>
                 <h3 className="text-base sm:text-lg font-semibold text-white mb-1 sm:mb-2">{label}</h3>
                 <p className="text-xs sm:text-sm text-white/50">{desc}</p>

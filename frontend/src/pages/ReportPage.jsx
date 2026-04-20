@@ -23,11 +23,11 @@ const DIMENSIONS = ["people", "process", "data", "technology"];
 const DIM_ICONS = { people: Users, process: ClipboardCheck, data: Database, technology: Monitor };
 
 const MATURITY_LEVELS = [
-  { level: 1, name: "Ad Hoc", desc: "No structured approach. Decisions are reactive, informal, and based on individual intuition. Data is fragmented; processes are undefined.", color: "#F85149" },
-  { level: 2, name: "Developing", desc: "Some processes are defined but inconsistently applied. Basic data collection exists but lacks integration. People have varying levels of PPM understanding.", color: "#D29922" },
-  { level: 3, name: "Defined", desc: "Structured processes and roles are established. Data is accessible but not fully integrated. A common language around portfolio management is forming.", color: "#D29922" },
-  { level: 4, name: "Managed", desc: "Data-driven decisions are supported by integrated systems. Metrics and KPIs are actively tracked and used in governance. Decisions are traceable.", color: "#238636" },
-  { level: 5, name: "Optimizing", desc: "Continuous improvement culture embedded. All four PPDT dimensions fully aligned. PPM decisions are fully fact-based, real-time, and strategically integrated.", color: "#00E5FF" },
+  { level: 1, name: "Ad Hoc", desc: "No structured approach. Decisions are reactive, informal, and based on individual intuition. Data is fragmented; processes are undefined.", color: "#EF4444" },
+  { level: 2, name: "Developing", desc: "Some processes are defined but inconsistently applied. Basic data collection exists but lacks integration. People have varying levels of PPM understanding.", color: "#C9A84C" },
+  { level: 3, name: "Defined", desc: "Structured processes and roles are established. Data is accessible but not fully integrated. A common language around portfolio management is forming.", color: "#C9A84C" },
+  { level: 4, name: "Managed", desc: "Data-driven decisions are supported by integrated systems. Metrics and KPIs are actively tracked and used in governance. Decisions are traceable.", color: "#34D399" },
+  { level: 5, name: "Optimizing", desc: "Continuous improvement culture embedded. All four PPDT dimensions fully aligned. PPM decisions are fully fact-based, real-time, and strategically integrated.", color: "#C9A84C" },
 ];
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -70,7 +70,7 @@ const ReportPage = () => {
     return (
       <Layout>
         <div className="flex flex-col items-center justify-center py-16">
-          <AlertTriangle size={64} className="text-[#D29922] mb-4 opacity-50" />
+          <AlertTriangle size={64} className="text-[#C9A84C] mb-4 opacity-50" />
           <h2 className="text-xl font-semibold text-white mb-2 font-['Outfit']">Report Not Ready</h2>
           <p className="text-white/50 mb-6">This assessment hasn't been completed yet.</p>
           <Link to={`/assessments/${id}`} className="px-6 py-3 btn-liquid rounded-xl">Continue Assessment</Link>
@@ -124,14 +124,14 @@ const ReportPage = () => {
 
         {/* Company Info */}
         <div className="p-3 sm:p-4 glass-surface-highlight rounded-xl flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-6 text-sm">
-          <div className="flex items-center gap-2"><Building2 size={16} className="text-[#00E5FF]" /><span className="text-white/50">Company:</span><span className="text-white font-medium">{assessment.company_name}</span></div>
-          <div className="flex items-center gap-2"><User size={16} className="text-[#00E5FF]" /><span className="text-white/50">Respondent:</span><span className="text-white">{assessment.respondent_name}</span></div>
-          <div className="flex items-center gap-2"><Calendar size={16} className="text-[#00E5FF]" /><span className="text-white/50">Date:</span><span className="text-white">{new Date(assessment.completed_at || assessment.created_at).toLocaleDateString()}</span></div>
+          <div className="flex items-center gap-2"><Building2 size={16} className="text-[#C9A84C]" /><span className="text-white/50">Company:</span><span className="text-white font-medium">{assessment.company_name}</span></div>
+          <div className="flex items-center gap-2"><User size={16} className="text-[#C9A84C]" /><span className="text-white/50">Respondent:</span><span className="text-white">{assessment.respondent_name}</span></div>
+          <div className="flex items-center gap-2"><Calendar size={16} className="text-[#C9A84C]" /><span className="text-white/50">Date:</span><span className="text-white">{new Date(assessment.completed_at || assessment.created_at).toLocaleDateString()}</span></div>
         </div>
 
         {/* Overall Score */}
         <div className="p-6 sm:p-8 glass-surface-highlight rounded-2xl">
-          <p className="text-xs uppercase tracking-[0.2em] text-[#00E5FF] mb-2">Overall Maturity Level</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-[#C9A84C] mb-2">Overall Maturity Level</p>
           <div className="flex items-baseline gap-3">
             <span className={`text-5xl sm:text-6xl font-bold font-['JetBrains_Mono'] ${getScoreColorClass(scores.overall)}`}>
               {scores.overall?.toFixed(2) || "–"}
@@ -182,7 +182,7 @@ const ReportPage = () => {
                 <YAxis domain={[0, 5]} tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }} axisLine={{ stroke: "rgba(255,255,255,0.1)" }} />
                 <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
                 <Legend wrapperStyle={{ color: "rgba(255,255,255,0.6)", fontSize: 12, paddingTop: 8 }} />
-                <Bar dataKey="rawScore" name="Raw Score" fill="#2f81f7" radius={[4, 4, 0, 0]}>
+                <Bar dataKey="rawScore" name="Raw Score" fill="#60A5FA" radius={[4, 4, 0, 0]}>
                   <LabelList dataKey="rawScore" position="top" fill="rgba(255,255,255,0.7)" fontSize={11} formatter={v => v.toFixed(1)} />
                 </Bar>
                 <Bar dataKey="weightedContribution" name="Weighted Contribution" fill="#7ee787" radius={[4, 4, 0, 0]}>
@@ -245,7 +245,7 @@ const ReportPage = () => {
             className="w-full flex items-center justify-between p-5 text-left hover:bg-white/[0.02] transition-colors"
           >
             <div className="flex items-center gap-2">
-              <Info size={18} className="text-[#00E5FF]" />
+              <Info size={18} className="text-[#C9A84C]" />
               <span className="text-white font-medium font-['Outfit']">How is this score calculated?</span>
             </div>
             {showMethodology ? <ChevronUp size={18} className="text-white/50" /> : <ChevronDown size={18} className="text-white/50" />}
@@ -259,18 +259,18 @@ const ReportPage = () => {
                 If a company has world-class engineers (Score: 5) and great software (Score: 5), but their data is completely siloed and inaccurate (Score: 1), a standard average gives them a '3.0 — Satisfactory.' But with a Data score of 1, product-level portfolio analysis is literally impossible. The overall score should reflect that critical bottleneck.
               </p>
               <p className="text-white/60 text-sm leading-relaxed">
-                That is why we use a <span className="text-[#00E5FF] font-semibold">Weighted Sum Equation</span> based on the strategic priorities <em>your organisation</em> assigned to each PPDT dimension:
+                That is why we use a <span className="text-[#C9A84C] font-semibold">Weighted Sum Equation</span> based on the strategic priorities <em>your organisation</em> assigned to each PPDT dimension:
               </p>
               {/* Formula */}
               <div className="p-5 bg-white/[0.03] rounded-xl border border-white/[0.08] text-center">
-                <div className="text-2xl sm:text-3xl text-[#00E5FF] font-['JetBrains_Mono'] tracking-wide mb-4">
+                <div className="text-2xl sm:text-3xl text-[#C9A84C] font-['JetBrains_Mono'] tracking-wide mb-4">
                   M = w<sub className="text-xs">pe</sub> · S<sub className="text-xs">pe</sub> + w<sub className="text-xs">pr</sub> · S<sub className="text-xs">pr</sub> + w<sub className="text-xs">d</sub> · S<sub className="text-xs">d</sub> + w<sub className="text-xs">t</sub> · S<sub className="text-xs">t</sub>
                 </div>
                 <div className="text-white/50 text-xs space-y-1 text-left max-w-md mx-auto">
                   <p><span className="text-white font-medium italic">M</span> = Overall Maturity Score (1.0 to 5.0)</p>
                   <p><span className="text-white font-medium italic">w</span> = Strategic Weight assigned to the specific pillar</p>
                   <p><span className="text-white font-medium italic">S</span> = Assessed Grade (1 to 5) for the pillar</p>
-                  <p className="pt-1 text-[#00E5FF]">All weights sum to 1: w<sub>pe</sub> + w<sub>pr</sub> + w<sub>d</sub> + w<sub>t</sub> = 1</p>
+                  <p className="pt-1 text-[#C9A84C]">All weights sum to 1: w<sub>pe</sub> + w<sub>pr</sub> + w<sub>d</sub> + w<sub>t</sub> = 1</p>
                 </div>
               </div>
               {/* Actual calculation */}
@@ -295,7 +295,7 @@ const ReportPage = () => {
                   </div>
                 </div>
               </div>
-              <div className="p-4 bg-[#00E5FF]/5 border border-[#00E5FF]/15 rounded-xl">
+              <div className="p-4 bg-[#C9A84C]/5 border border-[#C9A84C]/15 rounded-xl">
                 <p className="text-white/70 text-sm italic">
                   "The weighting reflects what <em>your organisation</em> declared as most strategically important. A low score in a high-weight pillar has a disproportionate impact on your overall maturity — and signals where to focus first."
                 </p>
@@ -352,9 +352,9 @@ const ReportPage = () => {
 
         {/* Governance Observations (L4-5) */}
         {report.governance_observations && Object.values(report.governance_observations).some(v => v && !v.includes("N/A") && !v.toLowerCase().includes("below")) && (
-          <div className="p-6 glass-surface-highlight rounded-xl border-l-4 border-[#FFB300]">
+          <div className="p-6 glass-surface-highlight rounded-xl border-l-4 border-[#C9A84C]">
             <div className="flex items-center gap-2 mb-4">
-              <span className="px-2 py-0.5 bg-[#FFB300]/15 text-[#FFB300] text-xs font-semibold rounded border border-[#FFB300]/20">GOVERNANCE</span>
+              <span className="px-2 py-0.5 bg-[#C9A84C]/15 text-[#C9A84C] text-xs font-semibold rounded border border-[#C9A84C]/20">GOVERNANCE</span>
               <h2 className="text-lg font-semibold text-white font-['Outfit']">Governance Indicators (Levels 4–5)</h2>
             </div>
             <div className="space-y-3">
@@ -362,8 +362,8 @@ const ReportPage = () => {
                 const obs = report.governance_observations?.[dim];
                 if (!obs || obs.includes("N/A") || obs.toLowerCase().includes("below")) return null;
                 return (
-                  <div key={`gov-${dim}`} className="p-3 bg-[#FFB300]/5 rounded-lg border border-[#FFB300]/10">
-                    <span className="text-xs font-semibold text-[#FFB300] uppercase">{dim}</span>
+                  <div key={`gov-${dim}`} className="p-3 bg-[#C9A84C]/5 rounded-lg border border-[#C9A84C]/10">
+                    <span className="text-xs font-semibold text-[#C9A84C] uppercase">{dim}</span>
                     <p className="text-white/60 text-sm mt-1">{obs}</p>
                   </div>
                 );
@@ -375,7 +375,7 @@ const ReportPage = () => {
         {/* 6. Governance & Ownership Card */}
         <div className="p-6 glass-surface-highlight rounded-xl">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-lg bg-[#A371F7]/15 flex items-center justify-center"><Shield size={22} className="text-[#A371F7]" /></div>
+            <div className="w-10 h-10 rounded-lg bg-[#A78BFA]/15 flex items-center justify-center"><Shield size={22} className="text-[#A78BFA]" /></div>
             <h2 className="text-lg font-semibold text-white font-['Outfit']">Governance & Ownership</h2>
           </div>
           <p className="text-white/60 text-sm mb-4 leading-relaxed">
@@ -388,7 +388,7 @@ const ReportPage = () => {
               "Are portfolio priorities reviewed on a defined cadence (e.g. quarterly PPM reviews)?"
             ].map((q, i) => (
               <li key={i} className="flex items-start gap-2 text-sm text-white/50">
-                <span className="text-[#A371F7] mt-0.5">-</span>{q}
+                <span className="text-[#A78BFA] mt-0.5">-</span>{q}
               </li>
             ))}
           </ul>
@@ -397,8 +397,8 @@ const ReportPage = () => {
               {report.governance_assessment}
             </p>
           )}
-          <div className="mt-4 p-3 bg-[#F85149]/5 border border-[#F85149]/15 rounded-lg">
-            <p className="text-[#F85149] text-xs font-medium">
+          <div className="mt-4 p-3 bg-[#EF4444]/5 border border-[#EF4444]/15 rounded-lg">
+            <p className="text-[#EF4444] text-xs font-medium">
               "Without governance structures, even well-trained people and advanced technology produce fragmented decisions. Accountability must be assigned — not assumed."
             </p>
           </div>
@@ -407,7 +407,7 @@ const ReportPage = () => {
         {/* 7. Management Commitment Card */}
         <div className="p-6 glass-surface-highlight rounded-xl">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-lg bg-[#238636]/15 flex items-center justify-center"><ArrowUpRight size={22} className="text-[#238636]" /></div>
+            <div className="w-10 h-10 rounded-lg bg-[#34D399]/15 flex items-center justify-center"><ArrowUpRight size={22} className="text-[#34D399]" /></div>
             <div>
               <h2 className="text-lg font-semibold text-white font-['Outfit']">Management Commitment</h2>
               <p className="text-xs text-white/40 italic">The multiplier effect on all capability investments</p>
@@ -421,7 +421,7 @@ const ReportPage = () => {
               "Management commitment enables resource allocation: time, budget, and cross-functional cooperation needed for PPM improvement.",
               "In organisations where leadership actively participates in stage-gate reviews and portfolio prioritisation, maturity levels increase faster and more sustainably."
             ].map((p, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-white/50"><span className="text-[#238636] mt-0.5">-</span>{p}</li>
+              <li key={i} className="flex items-start gap-2 text-sm text-white/50"><span className="text-[#34D399] mt-0.5">-</span>{p}</li>
             ))}
           </ul>
           {report.management_commitment_assessment && (
@@ -429,8 +429,8 @@ const ReportPage = () => {
               {report.management_commitment_assessment}
             </p>
           )}
-          <div className="mt-4 p-3 bg-[#238636]/5 border border-[#238636]/15 rounded-lg">
-            <p className="text-[#238636] text-xs font-medium">
+          <div className="mt-4 p-3 bg-[#34D399]/5 border border-[#34D399]/15 rounded-lg">
+            <p className="text-[#34D399] text-xs font-medium">
               "If management commitment is low, prioritise leadership alignment before investing in tools or training — otherwise capability improvements will not stick."
             </p>
           </div>
@@ -440,23 +440,23 @@ const ReportPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="p-6 glass-surface-highlight rounded-xl">
             <div className="flex items-center gap-2 mb-4">
-              <Target size={20} className="text-[#00E5FF]" />
+              <Target size={20} className="text-[#C9A84C]" />
               <h2 className="text-lg font-semibold text-white font-['Outfit']">Key Findings</h2>
             </div>
             <ul className="space-y-3">
               {(report.key_findings || []).map((f, i) => (
-                <li key={i} className="flex items-start gap-3"><span className="w-5 h-5 rounded-full bg-[#00E5FF]/15 text-[#00E5FF] flex items-center justify-center text-[10px] shrink-0 mt-0.5">{i + 1}</span><p className="text-white/60 text-sm">{f}</p></li>
+                <li key={i} className="flex items-start gap-3"><span className="w-5 h-5 rounded-full bg-[#C9A84C]/15 text-[#C9A84C] flex items-center justify-center text-[10px] shrink-0 mt-0.5">{i + 1}</span><p className="text-white/60 text-sm">{f}</p></li>
               ))}
             </ul>
           </div>
           <div className="p-6 glass-surface-highlight rounded-xl">
             <div className="flex items-center gap-2 mb-4">
-              <AlertTriangle size={20} className="text-[#F85149]" />
+              <AlertTriangle size={20} className="text-[#EF4444]" />
               <h2 className="text-lg font-semibold text-white font-['Outfit']">Critical Capability Gaps</h2>
             </div>
             <ul className="space-y-3">
               {(report.critical_gaps || []).map((g, i) => (
-                <li key={i} className="flex items-start gap-3"><span className="w-5 h-5 rounded-full bg-[#F85149]/15 text-[#F85149] flex items-center justify-center text-[10px] shrink-0 mt-0.5">!</span><p className="text-white/60 text-sm">{g}</p></li>
+                <li key={i} className="flex items-start gap-3"><span className="w-5 h-5 rounded-full bg-[#EF4444]/15 text-[#EF4444] flex items-center justify-center text-[10px] shrink-0 mt-0.5">!</span><p className="text-white/60 text-sm">{g}</p></li>
               ))}
             </ul>
           </div>
@@ -465,7 +465,7 @@ const ReportPage = () => {
         {/* Decision Vulnerability */}
         <div className="p-6 glass-surface-highlight rounded-xl">
           <div className="flex items-center gap-2 mb-4">
-            <AlertTriangle size={20} className="text-[#D29922]" />
+            <AlertTriangle size={20} className="text-[#C9A84C]" />
             <h2 className="text-lg font-semibold text-white font-['Outfit']">Decision-Type Vulnerability Analysis</h2>
           </div>
           <p className="text-white/60 text-sm leading-relaxed">{report.decision_vulnerability || "No analysis available."}</p>
@@ -474,14 +474,14 @@ const ReportPage = () => {
         {/* 8. Enhanced Improvement Roadmap */}
         <div className="p-6 glass-surface-highlight rounded-xl">
           <div className="flex items-center gap-2 mb-6">
-            <TrendingUp size={20} className="text-[#238636]" />
+            <TrendingUp size={20} className="text-[#34D399]" />
             <h2 className="text-lg font-semibold text-white font-['Outfit']">Improvement Roadmap</h2>
           </div>
           <div className="space-y-4">
             {[
-              { key: "immediate", title: "Phase 1 — Immediate (0–3 months)", subtitle: "Stabilise the Foundation", color: "#00E5FF" },
-              { key: "short_term", title: "Phase 2 — Short-Term (3–12 months)", subtitle: "Build Capability", color: "#238636" },
-              { key: "strategic", title: "Phase 3 — Strategic (12+ months)", subtitle: "Optimise and Scale", color: "#A371F7" },
+              { key: "immediate", title: "Phase 1 — Immediate (0–3 months)", subtitle: "Stabilise the Foundation", color: "#C9A84C" },
+              { key: "short_term", title: "Phase 2 — Short-Term (3–12 months)", subtitle: "Build Capability", color: "#34D399" },
+              { key: "strategic", title: "Phase 3 — Strategic (12+ months)", subtitle: "Optimise and Scale", color: "#A78BFA" },
             ].map(phase => {
               const data = report.roadmap?.[phase.key];
               const actions = typeof data === 'object' && !Array.isArray(data) ? data.actions : (Array.isArray(data) ? data : []);
@@ -515,18 +515,18 @@ const ReportPage = () => {
             <h2 className="text-lg font-semibold text-white mb-4 font-['Outfit']">Benchmark Context</h2>
             <p className="text-white/60 text-sm leading-relaxed">{report.benchmark_context || "No benchmark data available."}</p>
           </div>
-          <div className="p-6 glass-card rounded-xl hover:border-[#00E5FF]/20">
+          <div className="p-6 glass-card rounded-xl hover:border-[#C9A84C]/20">
             <h2 className="text-lg font-semibold text-white mb-4 font-['Outfit']">Consultant's Note</h2>
             <p className="text-white/70 italic text-sm leading-relaxed">"{report.consultant_note || "No consultant note available."}"</p>
           </div>
         </div>
 
         {/* Closing Statement */}
-        <div className="p-6 glass-card rounded-xl border border-[#FFB300]/20 hover:border-[#FFB300]/30">
+        <div className="p-6 glass-card rounded-xl border border-[#C9A84C]/20 hover:border-[#C9A84C]/30">
           <p className="text-white/70 text-sm leading-relaxed mb-3">
             Thank you for completing this capability maturity assessment. If you would like further analysis, expert input, or tailored recommendations based on your results, please reach out via email to arrange a follow-up consultation:
           </p>
-          <a href={`mailto:${CONTACT_EMAIL}`} className="text-[#FFB300] hover:text-[#FFD54F] font-medium text-sm transition-colors">{CONTACT_EMAIL}</a>
+          <a href={`mailto:${CONTACT_EMAIL}`} className="text-[#C9A84C] hover:text-[#D4B85C] font-medium text-sm transition-colors">{CONTACT_EMAIL}</a>
         </div>
 
         {/* Footer */}

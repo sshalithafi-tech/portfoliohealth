@@ -1,5 +1,5 @@
 /**
- * Utility functions for PPDT scoring and display
+ * Utility functions for PPDT scoring and display — Corporate Navy theme
  */
 
 export const LEVEL_NAMES = {
@@ -17,95 +17,64 @@ export const DIMENSION_LABELS = {
   technology: "Technology"
 };
 
-/**
- * Get Tailwind color class based on score
- */
 export const getScoreColorClass = (score) => {
-  if (score >= 4) return "text-[#00E5FF]";
-  if (score >= 3) return "text-[#238636]";
-  if (score >= 2) return "text-[#D29922]";
-  return "text-[#F85149]";
+  if (score >= 4) return "text-[#60A5FA]";
+  if (score >= 3) return "text-[#34D399]";
+  if (score >= 2) return "text-[#C9A84C]";
+  return "text-[#EF4444]";
 };
 
-/**
- * Get hex color based on score
- */
 export const getScoreColor = (score) => {
-  if (score >= 4) return "#00E5FF";
-  if (score >= 3) return "#238636";
-  if (score >= 2) return "#D29922";
-  return "#F85149";
+  if (score >= 4) return "#60A5FA";
+  if (score >= 3) return "#34D399";
+  if (score >= 2) return "#C9A84C";
+  return "#EF4444";
 };
 
-/**
- * Get traffic light status based on score
- */
 export const getTrafficLight = (score) => {
   if (score >= 4) return "green";
   if (score >= 3) return "amber";
   return "red";
 };
 
-/**
- * Get traffic light background class
- */
 export const getTrafficLightBgClass = (status) => {
-  if (status === "green") return "bg-[#238636]/10 border-[#238636]/20";
-  if (status === "amber") return "bg-[#D29922]/10 border-[#D29922]/20";
-  return "bg-[#F85149]/10 border-[#F85149]/20";
+  if (status === "green") return "bg-[#34D399]/10 border-[#34D399]/20";
+  if (status === "amber") return "bg-[#C9A84C]/10 border-[#C9A84C]/20";
+  return "bg-[#EF4444]/10 border-[#EF4444]/20";
 };
 
-/**
- * Get level name from score
- */
 export const getLevelName = (score) => {
   const level = Math.max(1, Math.min(5, Math.round(score)));
   return LEVEL_NAMES[level] || "Unknown";
 };
 
-/**
- * Get dimension badge color class
- */
 export const getDimensionBadgeClass = (dimension) => {
   const colors = {
-    people: "bg-[#2f81f7]/20 text-[#2f81f7]",
-    process: "bg-[#238636]/20 text-[#238636]",
-    data: "bg-[#D29922]/20 text-[#D29922]",
-    technology: "bg-[#A371F7]/20 text-[#A371F7]",
-    qualifier: "bg-gray-500/20 text-gray-400"
+    people: "bg-[#60A5FA]/12 text-[#60A5FA] border border-[#60A5FA]/20",
+    process: "bg-[#34D399]/12 text-[#34D399] border border-[#34D399]/20",
+    data: "bg-[#C9A84C]/12 text-[#C9A84C] border border-[#C9A84C]/20",
+    technology: "bg-[#A78BFA]/12 text-[#A78BFA] border border-[#A78BFA]/20",
+    qualifier: "bg-white/[0.06] text-white/40 border border-white/10"
   };
   return colors[dimension] || colors.qualifier;
 };
 
-/**
- * Format date for display
- */
 export const formatDate = (dateString) => {
   if (!dateString) return "N/A";
   return new Date(dateString).toLocaleDateString();
 };
 
-/**
- * Format time for display
- */
 export const formatTime = (dateString) => {
   if (!dateString) return "";
   return new Date(dateString).toLocaleTimeString();
 };
 
-/**
- * Generate unique key for list items
- * Falls back to index if no id available
- */
 export const getItemKey = (item, index, prefix = "item") => {
   if (item?.id) return item.id;
   if (item?._id) return item._id;
   return `${prefix}-${index}`;
 };
 
-/**
- * Prepare radar chart data from scores
- */
 export const prepareRadarData = (scores) => {
   if (!scores) return [];
   return [
@@ -116,9 +85,6 @@ export const prepareRadarData = (scores) => {
   ];
 };
 
-/**
- * Prepare bar chart data from scores
- */
 export const prepareBarData = (scores) => {
   if (!scores) return [];
   return [

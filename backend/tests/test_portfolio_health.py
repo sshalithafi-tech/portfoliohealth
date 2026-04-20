@@ -9,12 +9,12 @@ import time
 
 BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
 
-# Test credentials from test_credentials.md
-ADMIN_EMAIL = "admin@ppdt.com"
-ADMIN_PASSWORD = "Admin123!"
-TEST_USER_EMAIL = f"test_user_{int(time.time())}@example.com"
-TEST_USER_PASSWORD = "Test123!"
-TEST_USER_NAME = "Test User"
+# Test credentials from environment variables (fallback to test_credentials.md defaults)
+ADMIN_EMAIL = os.environ.get('TEST_ADMIN_EMAIL', 'admin@ppdt.com')
+ADMIN_PASSWORD = os.environ.get('TEST_ADMIN_PASSWORD', 'Admin123!')
+TEST_USER_EMAIL = os.environ.get('TEST_USER_EMAIL', f"test_user_{int(time.time())}@example.com")
+TEST_USER_PASSWORD = os.environ.get('TEST_USER_PASSWORD', 'Test123!')
+TEST_USER_NAME = os.environ.get('TEST_USER_NAME', 'Test User')
 
 
 class TestHealthCheck:
@@ -192,7 +192,7 @@ class TestCompanies:
         )
         assert delete_response.status_code == 200, f"Delete failed: {delete_response.text}"
         data = delete_response.json()
-        assert data["ok"] == True
+        assert data["ok"] is True
         print(f"✓ Company deleted successfully: {company_id}")
         
         # Verify company no longer exists
@@ -345,7 +345,7 @@ class TestNotifications:
         )
         assert response.status_code == 200
         data = response.json()
-        assert data["ok"] == True
+        assert data["ok"] is True
         print("✓ Mark all read successful")
 
 
