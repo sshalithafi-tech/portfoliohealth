@@ -69,6 +69,14 @@ Currently active: 5-turn Hannila/PPDT prompt with mandatory JSON emission (ready
   - New `POST /api/assessments/{id}/regenerate-report` endpoint: first tries cheap salvage by re-parsing the last assistant message, then falls back to a JSON-only LLM follow-up using existing chat history.
   - "Report Not Ready" page now has a **Regenerate Report** button that calls this endpoint.
 - **PDF report — 13-section mirror (2026-04-20)** — `pdf_builder.py` rewritten to mirror the web report's numbered 13-section order. New helpers: `build_section_label` (numbered gold "01" label + italic subtitle + thin gold rule), `build_portfolio_context` (expanded company card with size/active products/strategic priority), `build_pillar_maturity_levels` (Hannila L1–L5 ladder + per-pillar interpretation table), `build_assessment_reliability` (High/Med/Low confidence badge + Signal/Tone/Detail factors table with heuristic fallback). Methodology blurb added to Weighted Score Calculation. All old inline section titles removed (numbered labels own them now). Verified via rendered PDF pages 1 + 3.
+- **PDF report — professional layout pass (2026-04-20)** — major readability upgrade for management-level delivery:
+  - Added branded **cover page** (`build_cover_page`): navy banner with brand, "PREPARED FOR" card (company + industry), centered maturity badge (overall score + level name), report date + respondent footer, confidentiality line.
+  - Grouped the 13 sections into **8 per-page clusters** with `PageBreak` between each group so each card gets room to breathe.
+  - Replaced plain string cells with `Paragraph`-wrapping cells throughout (Dimension Scores, Pillar Maturity interpretations, Reliability factors) — no more truncated "..." or column-bleed.
+  - Removed the 60-char `summary` truncation and 140-char `interpretation` truncation that were causing mid-sentence cuts.
+  - Added `_derive_level_name` fallback so the cover-page and overall-score cards never show "N/A" for level.
+  - Added `_page_decoration` onLaterPages canvas callback — slim gold rule + brand + page-number footer on every content page (cover excluded).
+  - Verified via rendered PDF: cover (page 1), context+maturity (page 2), ladder (page 3), dimension-scores with full summaries (page 4). 9 pages total, no overlaps.
 - **Final-report streaming progress indicator (2026-04-20)** — new `FinalReportIndicator.jsx` that replaces the generic "Thinking" dots when the user submits the likely-final turn (≥10 messages). Shows a shimmer gradient bar, rotating stage labels (Synthesising… → Scoring pillars… → Identifying bottleneck… → Drafting roadmap… → Finalising consultant's note…), elapsed-seconds counter, and a subtle "taking longer than usual" hint after 60s. New `progress-sweep` keyframe in `index.css`. Paired with the Regenerate button, a token-exhaustion / network hiccup now looks visually distinct from a real completion.
 
 ## Testing
