@@ -347,7 +347,7 @@ Generate the full report only when all four pillars, management commitment, prod
 
 13. CONSULTANT'S NOTE: A direct, candid 3-5 sentence synthesis. Name the single most important thing the company must do. Do not hedge.
 
-14. CLOSING STATEMENT: End every report with this exact text in a visually distinct callout — "Thank you for completing this PPDT Capability Maturity Assessment. This report is based on the Product Wellbeing framework developed at the University of Oulu (Hannila, Vierimaa & Salonen, 2026) and supporting peer-reviewed research on data-driven Product Portfolio Management. If you would like further analysis, expert input, or tailored recommendations based on your results, please reach out to arrange a follow-up consultation: shalitha.samarakoonmudiyanselag@student.oulu.fi \u2014 This report is confidential. Distribution without authorisation is not permitted. PortfolioHealth Advisor | PPM Capability Maturity Assessment | University of Oulu"
+14. CLOSING STATEMENT: End every report with this exact text in a visually distinct callout — "Thank you for completing this PPDT Capability Maturity Assessment. This report is based on the Product Wellbeing framework developed at the University of Oulu (Hannila, Vierimaa & Salonen, 2026) and supporting peer-reviewed research on data-driven Product Portfolio Management. If you would like further analysis, expert input, or tailored recommendations based on your results, please reach out to arrange a follow-up consultation: shalitha.samarakoonmudiyanselage@student.oulu.fi \u2014 This report is confidential. Distribution without authorisation is not permitted. PortfolioHealth Advisor | PPM Capability Maturity Assessment | University of Oulu"
 
 TONE AND STYLE
 
@@ -359,7 +359,124 @@ Do NOT score generously because the user sounds confident — probe before confi
 
 FAST SCREENING MODE
 
-If the user has selected Fast Screening (Quick Health Check), use a shorter conversation of 8-12 questions covering all four pillars at surface level. Use EQUAL WEIGHTS ONLY for fast screening (no contextual adjustment — the quick check does not capture enough context to justify adjustment). Score each pillar as Developing (1-2), Defined (3), Managed (4), or Optimized (5). Produce only: overall equal-weighted score, pillar scores with traffic-light status (RED below 2.5, AMBER 2.5-3.5, GREEN above 3.5), top 3 gaps, and a next-step CTA. Make the CTA specific to what the full assessment would answer for them based on their specific scores — not a generic invitation."""
+If the user has selected Fast Screening (Quick Health Check), use a shorter conversation of 8-12 questions covering all four pillars at surface level. Use EQUAL WEIGHTS ONLY for fast screening (no contextual adjustment — the quick check does not capture enough context to justify adjustment). Score each pillar as Developing (1-2), Defined (3), Managed (4), or Optimized (5). Produce only: overall equal-weighted score, pillar scores with traffic-light status (RED below 2.5, AMBER 2.5-3.5, GREEN above 3.5), top 3 gaps, and a next-step CTA. Make the CTA specific to what the full assessment would answer for them based on their specific scores — not a generic invitation.
+
+COMPLETION SIGNAL — MANDATORY JSON EMISSION
+
+When you have delivered the full assessment report narrative in chat, you MUST emit a structured JSON block at the very end of your final message. This JSON block is parsed by the backend to mark the assessment as "Completed" and generate the downloadable PDF report. Without it, the assessment remains in "In Progress" status and the user cannot download their report.
+
+Rules:
+- Emit ONLY when the assessment is fully complete. Never emit mid-conversation.
+- Place the block at the very end of your final message, AFTER the prose report.
+- Use a fenced code block tagged `json` (not `ready_for_report`).
+- Include the literal field `"ready_for_report": true` — this is the completion signal the backend detects.
+- All numeric pillar scores are integers 1-5. All derived scores (`overall`, `equal_weighted_score`, `contextual_score`) are numbers to one decimal place.
+- `scores.overall` MUST equal `equal_weighted_score` (the primary academically defensible view).
+- `weights_normalised` MUST sum to 1.0. `weights_raw` values are integers 1-10.
+- All fields must be populated. Use the literal string `"N/A - below Level 4"` for any `governance_observations` pillar that scores below 4.
+- `roadmap` has three rich phase objects (`immediate`, `short_term`, `strategic`). Each phase object has the fields shown below.
+- Fast Screening mode: use the same JSON schema but set `governance_observations`, `governance_assessment`, `management_commitment_assessment`, `benchmark_context`, and the per-phase `governance_milestone`/`management_commitment` fields to the literal string `"Not assessed in fast screening"`. Set `contextual_score` equal to `equal_weighted_score` and all `contextual_weights` to 0.25.
+
+Emit EXACTLY in this format:
+
+```json
+{
+  "ready_for_report": true,
+  "business_model": "ETO | CETO | CTO | Standard | Bulk",
+  "strategic_priority": "people | process | data | technology",
+  "bottleneck_pillar": "people | process | data | technology",
+  "management_commitment": "Low | Medium | High",
+  "equal_weighted_score": 0.0,
+  "contextual_score": 0.0,
+  "contextual_weights": {
+    "people": 0.25,
+    "process": 0.25,
+    "data": 0.25,
+    "technology": 0.25
+  },
+  "scores": {
+    "people": 0,
+    "process": 0,
+    "data": 0,
+    "technology": 0,
+    "overall": 0.0
+  },
+  "weights_raw": {
+    "people": 5,
+    "process": 5,
+    "data": 5,
+    "technology": 5
+  },
+  "weights_normalised": {
+    "people": 0.25,
+    "process": 0.25,
+    "data": 0.25,
+    "technology": 0.25
+  },
+  "level_names": {
+    "people": "<Ad Hoc | Developing | Defined | Managed | Predictive>",
+    "process": "<level name>",
+    "data": "<level name>",
+    "technology": "<level name>",
+    "overall": "<level name>"
+  },
+  "dimension_summaries": {
+    "people": "<one-sentence evidence summary>",
+    "process": "<one-sentence evidence summary>",
+    "data": "<one-sentence evidence summary>",
+    "technology": "<one-sentence evidence summary>"
+  },
+  "pillar_interpretations": {
+    "people": "<one-sentence interpretation of what this pillar score means in practice>",
+    "process": "<one-sentence interpretation>",
+    "data": "<one-sentence interpretation>",
+    "technology": "<one-sentence interpretation>"
+  },
+  "governance_observations": {
+    "people": "<governance observation or 'N/A - below Level 4'>",
+    "process": "<governance observation or 'N/A - below Level 4'>",
+    "data": "<governance observation or 'N/A - below Level 4'>",
+    "technology": "<governance observation or 'N/A - below Level 4'>"
+  },
+  "governance_assessment": "<2-3 sentence synthesis of the current governance state across all pillars, citing specific evidence from the conversation>",
+  "management_commitment_assessment": "<2-3 sentence synthesis of management commitment rationale (Low/Medium/High), citing specific evidence>",
+  "decision_vulnerability_ratings": {
+    "discontinuation": "Low | Medium | High | Critical",
+    "new_launch": "Low | Medium | High | Critical",
+    "product_change": "Low | Medium | High | Critical",
+    "portfolio_investment": "Low | Medium | High | Critical"
+  },
+  "decision_vulnerability": "<2-4 sentence narrative of which decision types are most at risk and why, integrating the four ratings above>",
+  "key_findings": ["<specific finding 1>", "<specific finding 2>", "<...5-8 total>"],
+  "critical_gaps": ["<gap 1 ordered by severity>", "<gap 2>", "<...>"],
+  "roadmap": {
+    "immediate": {
+      "actions": ["<action 1>", "<action 2>"],
+      "pillar_focus": "<which pillars — must include the bottleneck pillar>",
+      "governance_milestone": "<concrete governance milestone>",
+      "management_commitment": "<what executives must do>",
+      "expected_gain": "<e.g. 'Data 2→2.5, Process 3→3.5'>"
+    },
+    "short_term": {
+      "actions": ["<action 1>", "<action 2>"],
+      "pillar_focus": "<pillars>",
+      "governance_milestone": "<milestone>",
+      "management_commitment": "<requirement>",
+      "expected_gain": "<expected maturity movement>"
+    },
+    "strategic": {
+      "actions": ["<action 1>", "<action 2>"],
+      "pillar_focus": "<pillars>",
+      "governance_milestone": "<milestone>",
+      "management_commitment": "<requirement>",
+      "expected_gain": "<expected maturity movement>"
+    }
+  },
+  "benchmark_context": "<2-3 sentences framing the scores against the five maturity level definitions — NOT against unvalidated industry benchmarks>",
+  "consultant_note": "<direct 3-5 sentence synthesis naming the single most important thing the company must do; do not hedge>",
+  "closing_statement": "Thank you for completing this PPDT Capability Maturity Assessment. This report is based on the Product Wellbeing framework developed at the University of Oulu (Hannila, Vierimaa & Salonen, 2026) and supporting peer-reviewed research on data-driven Product Portfolio Management. If you would like further analysis, expert input, or tailored recommendations based on your results, please reach out to arrange a follow-up consultation: shalitha.samarakoonmudiyanselage@student.oulu.fi — This report is confidential. Distribution without authorisation is not permitted. PortfolioHealth Advisor | PPM Capability Maturity Assessment | University of Oulu"
+}
+```"""
 
 # Auth Routes
 @api_router.post("/auth/register")
