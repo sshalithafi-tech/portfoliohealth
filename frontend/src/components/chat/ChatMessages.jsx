@@ -5,13 +5,20 @@ import LogoMark from "../LogoMark";
 
 const CONTACT_EMAIL = "shalitha.samarakoonmudiyanselage@student.oulu.fi";
 
-// Strips the backend JSON emission block from markdown before rendering
-const stripReportBlocks = (content) =>
-  content.replace(/```json[\s\S]*?```/g, '');
+// Strips both fenced JSON blocks AND any loose json-like tail that starts with
+// the closing-JSON marker (defensive — some AI replies break the fence)
+const stripReportBlocks = (content) => {
+  let out = content.replace(/```json[\s\S]*?```/g, '');
+  // Remove any trailing ```json (unterminated) block
+  out = out.replace(/```json[\s\S]*$/g, '');
+  // Remove raw JSON object that contains ready_for_report (no fence)
+  out = out.replace(/\{[\s\S]*?"ready_for_report"[\s\S]*?\n\}\s*$/g, '');
+  return out.trim();
+};
 
 // Detects the assistant's final "emit report" message
 const isReportEmission = (msg) =>
-  msg.role === "assistant" && /ready_for_report|```json/.test(msg.content || "");
+  msg.role === "assistant" && /ready_for_report|```json|# PPDT Capability Maturity Assessment Report/i.test(msg.content || "");
 
 const AssistantBubble = ({ content, timestamp }) => (
   <div className="chat-message-assistant">
@@ -67,17 +74,17 @@ const TypingIndicator = () => (
 const ClosingCard = ({ assessmentId }) => (
   <div
     data-testid="closing-statement-card"
-    className="animate-fade-in p-5 sm:p-6 rounded-2xl border border-[#C9A84C]/30 bg-gradient-to-br from-[#C9A84C]/10 to-transparent backdrop-blur-xl"
+    className="animate-fade-in p-4 sm:p-6 rounded-2xl border border-[#C9A84C]/30 bg-gradient-to-br from-[#C9A84C]/10 to-transparent backdrop-blur-xl"
   >
     <div className="flex items-center gap-3 mb-4">
       <LogoMark className="w-9 h-9 rounded-lg shrink-0" radius={14} />
-      <div>
-        <p className="text-[11px] uppercase tracking-[0.2em] text-[#C9A84C]">Assessment Complete</p>
+      <div className="min-w-0">
+        <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] text-[#C9A84C]">Assessment Complete</p>
         <p className="text-sm text-white/60">Your report is ready on the dashboard.</p>
       </div>
     </div>
 
-    <h3 className="text-base sm:text-lg font-semibold text-white font-['Outfit'] mb-3">
+    <h3 className="text-base sm:text-lg font-semibold text-white font-['Outfit'] mb-3 leading-snug">
       Thank you for completing this PPDT Capability Maturity Assessment.
     </h3>
 
@@ -85,28 +92,28 @@ const ClosingCard = ({ assessmentId }) => (
       <p>
         This assessment is part of a Master's thesis at the University of Oulu: <em>"To develop and validate a PPM Decision-Making Capability Assessment Framework grounded in Hannila's Product Wellbeing PPDT model — identifying which organizational capability gaps most critically impair product portfolio decisions."</em> It is based on the doctoral research of Hannu Hannila and related peer-reviewed studies from the Industrial Engineering and Management department, under the supervision of Professor Janne Härkönen.
       </p>
-      <p>
+      <p className="break-words">
         If you would like further analysis or tailored recommendations based on your results, please contact:{" "}
-        <a href={`mailto:${CONTACT_EMAIL}`} className="text-[#C9A84C] hover:text-[#D4B85C] font-medium">
+        <a href={`mailto:${CONTACT_EMAIL}`} className="text-[#C9A84C] hover:text-[#D4B85C] font-medium break-all">
           {CONTACT_EMAIL}
         </a>
       </p>
       <p className="text-xs text-white/45 italic">
         This report is confidential. Distribution without authorisation is not permitted.
       </p>
-      <p className="text-[11px] uppercase tracking-wider text-white/35 pt-1">
+      <p className="text-[10px] sm:text-[11px] uppercase tracking-wider text-white/35 pt-1">
         PortfolioHealth Advisor · PPM Capability Maturity Assessment · University of Oulu
       </p>
     </div>
 
-    <div className="flex flex-col sm:flex-row gap-3 mt-5">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-5">
       <Link
         to="/dashboard"
         data-testid="go-to-dashboard-btn"
         className="flex items-center justify-center gap-2 px-4 py-2.5 btn-liquid rounded-xl text-sm font-medium"
       >
         <LayoutDashboard size={16} />
-        Go to Dashboard to Download Report
+        <span>Go to Dashboard</span>
       </Link>
       <Link
         to={`/assessments/${assessmentId}/report`}
@@ -114,23 +121,26 @@ const ClosingCard = ({ assessmentId }) => (
         className="flex items-center justify-center gap-2 px-4 py-2.5 btn-glass rounded-xl text-sm"
       >
         <FileText size={16} />
-        View Report Now
+        <span>View Report Now</span>
       </Link>
     </div>
   </div>
 );
 
 export const ChatMessages = ({ messages, sending, isCompleted, assessmentId, messagesEndRef }) => {
-  // When the assessment is completed, hide the final "report emission" message
-  // (backend still stores it for audit), and show only the closing card instead.
+  // When the assessment is completed OR the last message is clearly a report
+  // emission (contains report header / JSON block), hide that noisy final
+  // message and show the Closing Card instead.
   const lastIdx = messages.length - 1;
   const last = messages[lastIdx];
-  const hideLast = isCompleted && last && isReportEmission(last);
+  const lastIsEmission = last && isReportEmission(last);
+  const showClosing = isCompleted || lastIsEmission;
+  const hideLast = showClosing && lastIsEmission;
   const visible = hideLast ? messages.slice(0, lastIdx) : messages;
 
   return (
-    <div className="flex-1 overflow-y-auto px-6 py-6 relative z-10">
-      <div className="max-w-3xl mx-auto space-y-6">
+    <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 relative z-10">
+      <div className="max-w-3xl mx-auto space-y-5 sm:space-y-6">
         {visible.map((msg, idx) => (
           <div
             key={idx}
@@ -146,7 +156,7 @@ export const ChatMessages = ({ messages, sending, isCompleted, assessmentId, mes
 
         {sending && <TypingIndicator />}
 
-        {isCompleted && <ClosingCard assessmentId={assessmentId} />}
+        {showClosing && <ClosingCard assessmentId={assessmentId} />}
 
         <div ref={messagesEndRef} />
       </div>
