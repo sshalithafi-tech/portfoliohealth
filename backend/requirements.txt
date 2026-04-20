@@ -22,7 +22,11 @@ dnspython==2.8.0
 docstring_parser==0.18.0
 ecdsa==0.19.2
 email-validator==2.3.0
-emergentintegrations==0.1.0
+# emergentintegrations is an Emergent-internal package (not on public PyPI).
+# It's pre-installed in the Emergent preview environment. Production (Render)
+# uses the anthropic SDK directly via ANTHROPIC_API_KEY — see chat_service.py.
+# To install locally outside Emergent, run:
+#   pip install emergentintegrations --extra-index-url https://d33sy5i8bnduwe.cloudfront.net/simple/
 fastapi==0.110.1
 fastuuid==0.14.0
 filelock==3.25.2
