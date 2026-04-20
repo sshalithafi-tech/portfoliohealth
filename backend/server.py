@@ -27,7 +27,7 @@ from reportlab.lib.units import inch
 import urllib.request
 
 # LLM Integration
-import anthropic
+from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
@@ -219,8 +219,9 @@ PHASE 1 — PEOPLE (4–6 questions): Cultural questions, role clarity, data lit
 PHASE 2 — PROCESS (4–6 questions): PPM governance, product classification, lifecycle management. If answers suggest L4+, ask governance questions.
 PHASE 3 — DATA (5–7 questions): Data model, product-level profitability, master data governance. If answers suggest L4+, ask governance questions.
 PHASE 4 — TECHNOLOGY (3–5 questions): System integration, decision support capability. If answers suggest L4+, ask governance questions.
-PHASE 5 — DECISION TYPE CALIBRATION (2–3 questions): Which PPM decision types are most difficult.
-PHASE 6 — BENCHMARK CONTEXT (1–2 questions): Industry context and peer comparison.
+PHASE 5 — STRATEGIC WEIGHTING (1 question): Ask the respondent to assign a strategic importance weight (1–10) to each of the four pillars. E.g. "Now I need to understand your strategic priorities. On a scale of 1 to 10, how important is each dimension to your organisation's PPM goals? Please give me a number for People, Process, Data, and Technology."
+PHASE 6 — DECISION TYPE CALIBRATION (2–3 questions): Which PPM decision types are most difficult.
+PHASE 7 — BENCHMARK CONTEXT (1–2 questions): Industry context and peer comparison.
 
 BEHAVIOURAL RULES:
 1. ASK ONE QUESTION AT A TIME. Never ask multiple questions in a single message.
@@ -232,7 +233,9 @@ BEHAVIOURAL RULES:
 7. COMPLETE ALL PHASES. You must complete all phases before generating the report. Do not skip any phase.
 8. SIGNAL COMPLETION CLEARLY. When you have completed ALL phases, generate your final summary message that includes the report JSON. Start your final message with "Thank you for completing this assessment." and include the structured report.
 
-When you have gathered enough information (after completing ALL phases), generate a comprehensive assessment report in JSON format with the following structure:
+When you have gathered enough information (after completing ALL phases including strategic weighting), generate a comprehensive assessment report in JSON format. Calculate the overall score using the WEIGHTED SUM: M = w_pe * S_pe + w_pr * S_pr + w_d * S_d + w_t * S_t, where the weights are normalised from the respondent's 1-10 ratings so they sum to 1.
+
+JSON structure:
 {
   "ready_for_report": true,
   "scores": {
@@ -240,7 +243,19 @@ When you have gathered enough information (after completing ALL phases), generat
     "process": <1-5>,
     "data": <1-5>,
     "technology": <1-5>,
-    "overall": <weighted average to 1 decimal>
+    "overall": <weighted sum to 2 decimals>
+  },
+  "weights_raw": {
+    "people": <1-10 from respondent>,
+    "process": <1-10>,
+    "data": <1-10>,
+    "technology": <1-10>
+  },
+  "weights_normalised": {
+    "people": <0-1 normalised>,
+    "process": <0-1>,
+    "data": <0-1>,
+    "technology": <0-1>
   },
   "level_names": {
     "people": "<level name>",
@@ -255,19 +270,45 @@ When you have gathered enough information (after completing ALL phases), generat
     "data": "<1-sentence summary>",
     "technology": "<1-sentence summary>"
   },
+  "pillar_interpretations": {
+    "people": "<1-sentence interpretation of what their score means in practice>",
+    "process": "<1-sentence interpretation>",
+    "data": "<1-sentence interpretation>",
+    "technology": "<1-sentence interpretation>"
+  },
   "governance_observations": {
     "people": "<governance observation or 'N/A - below Level 4'>",
     "process": "<governance observation or 'N/A - below Level 4'>",
     "data": "<governance observation or 'N/A - below Level 4'>",
     "technology": "<governance observation or 'N/A - below Level 4'>"
   },
+  "governance_assessment": "<2-3 sentence dynamic paragraph about current governance state based on responses about roles, reviews, and decision authority>",
+  "management_commitment_assessment": "<2-3 sentence dynamic paragraph about management commitment based on responses about executive involvement and top-management support>",
   "key_findings": ["<finding 1>", "<finding 2>", ...],
   "critical_gaps": ["<gap 1>", "<gap 2>", ...],
   "decision_vulnerability": "<analysis of which decision type is most at risk>",
   "roadmap": {
-    "immediate": ["<action 1>", "<action 2>"],
-    "short_term": ["<action 1>", "<action 2>"],
-    "strategic": ["<action 1>"]
+    "immediate": {
+      "actions": ["<action 1>", "<action 2>"],
+      "pillar_focus": "<which pillars>",
+      "governance_milestone": "<milestone>",
+      "management_commitment": "<requirement>",
+      "expected_gain": "<expected maturity movement>"
+    },
+    "short_term": {
+      "actions": ["<action 1>", "<action 2>"],
+      "pillar_focus": "<which pillars>",
+      "governance_milestone": "<milestone>",
+      "management_commitment": "<requirement>",
+      "expected_gain": "<expected maturity movement>"
+    },
+    "strategic": {
+      "actions": ["<action 1>", "<action 2>"],
+      "pillar_focus": "<which pillars>",
+      "governance_milestone": "<milestone>",
+      "management_commitment": "<requirement>",
+      "expected_gain": "<expected maturity movement>"
+    }
   },
   "benchmark_context": "<assessment relative to industry peers>",
   "consultant_note": "<single most important focus area>",
@@ -623,7 +664,16 @@ Current Phase: {assessment.get('current_phase', 'welcome')}
     # Update assessment
     update_data = {"chat_history": chat_history}
     if report_data:
+        # Ensure weights exist with fallback to equal weights
+        if not report_data.get("weights_raw"):
+            report_data["weights_raw"] = {"people": 5, "process": 5, "data": 5, "technology": 5}
+        if not report_data.get("weights_normalised"):
+            raw = report_data["weights_raw"]
+            total = sum(raw.values()) or 1
+            report_data["weights_normalised"] = {k: round(v / total, 4) for k, v in raw.items()}
         update_data["report"] = report_data
+        update_data["weights_raw"] = report_data.get("weights_raw")
+        update_data["weights_normalised"] = report_data.get("weights_normalised")
     if scores:
         update_data["scores"] = scores
     if status == "completed":
@@ -855,7 +905,37 @@ async def generate_pdf_report(assessment_id: str, current_user: dict = Depends(g
         ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#cccccc')),
     ]))
     story.append(table)
-    story.append(Spacer(1, 20))
+    story.append(Spacer(1, 16))
+    
+    # Weighted Score Breakdown
+    weights_raw = report.get("weights_raw", {"people": 5, "process": 5, "data": 5, "technology": 5})
+    raw_total = sum(weights_raw.values()) or 1
+    weights_norm = report.get("weights_normalised", {d: weights_raw.get(d, 5) / raw_total for d in ["people", "process", "data", "technology"]})
+    
+    story.append(Paragraph("WEIGHTED SCORE CALCULATION", heading_style))
+    weight_data = [["Pillar", "Raw Score", "Weight (1-10)", "Normalised", "Contribution"]]
+    for dim in ["people", "process", "data", "technology"]:
+        s = scores.get(dim, 0)
+        w_raw = weights_raw.get(dim, 5)
+        w_norm = weights_norm.get(dim, 0.25)
+        contrib = s * w_norm
+        weight_data.append([dim.capitalize(), str(s), str(w_raw), f"{w_norm:.2f}", f"{contrib:.2f}"])
+    weight_data.append(["", "", "", "Overall:", f"{scores.get('overall', 0):.2f}"])
+    
+    wt = Table(weight_data, colWidths=[80, 60, 70, 70, 80])
+    wt.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1A1A2E')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTNAME', (3, -1), (-1, -1), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 9),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+        ('BACKGROUND', (0, 1), (-1, -2), colors.HexColor('#f0f0f0')),
+        ('BACKGROUND', (0, -1), (-1, -1), colors.HexColor('#e8e8e8')),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#cccccc')),
+    ]))
+    story.append(wt)
+    story.append(Spacer(1, 16))
     
     # Governance Observations (Levels 4-5 only)
     gov_obs = report.get("governance_observations", {})
@@ -868,6 +948,20 @@ async def generate_pdf_report(assessment_id: str, current_user: dict = Depends(g
                 story.append(Paragraph(f"<b>{dim.capitalize()} — Governance:</b> {obs}", gov_style))
                 story.append(Spacer(1, 4))
         story.append(Spacer(1, 12))
+    
+    # Governance & Ownership
+    story.append(Paragraph("GOVERNANCE & OWNERSHIP", heading_style))
+    story.append(Paragraph("Governance is the connective tissue between all four PPDT dimensions. Without clear ownership and accountability, even high capability produces unreliable portfolio decisions.", body_style))
+    if report.get("governance_assessment"):
+        story.append(Paragraph(f"<i>{report['governance_assessment']}</i>", body_style))
+    story.append(Spacer(1, 8))
+    
+    # Management Commitment
+    story.append(Paragraph("MANAGEMENT COMMITMENT", heading_style))
+    story.append(Paragraph("Management commitment acts as a multiplier on all capability investments. Without leadership buy-in, PPM improvements produce limited, short-lived change.", body_style))
+    if report.get("management_commitment_assessment"):
+        story.append(Paragraph(f"<i>{report['management_commitment_assessment']}</i>", body_style))
+    story.append(Spacer(1, 12))
     
     # Key Findings
     story.append(Paragraph("KEY FINDINGS", heading_style))
@@ -890,17 +984,21 @@ async def generate_pdf_report(assessment_id: str, current_user: dict = Depends(g
     story.append(Paragraph("IMPROVEMENT ROADMAP", heading_style))
     roadmap = report.get("roadmap", {})
     
-    story.append(Paragraph("<b>IMMEDIATE (0-3 months):</b>", body_style))
-    for item in roadmap.get("immediate", []):
-        story.append(Paragraph(f"  • {item}", body_style))
-    
-    story.append(Paragraph("<b>SHORT-TERM (3-12 months):</b>", body_style))
-    for item in roadmap.get("short_term", []):
-        story.append(Paragraph(f"  • {item}", body_style))
-    
-    story.append(Paragraph("<b>STRATEGIC (12-24 months):</b>", body_style))
-    for item in roadmap.get("strategic", []):
-        story.append(Paragraph(f"  • {item}", body_style))
+    for phase_key, phase_title in [("immediate", "PHASE 1 — IMMEDIATE (0–3 months)"), ("short_term", "PHASE 2 — SHORT-TERM (3–12 months)"), ("strategic", "PHASE 3 — STRATEGIC (12+ months)")]:
+        phase_data = roadmap.get(phase_key, [])
+        story.append(Paragraph(f"<b>{phase_title}</b>", body_style))
+        actions = phase_data.get("actions", phase_data) if isinstance(phase_data, dict) else phase_data
+        if isinstance(actions, list):
+            for item in actions:
+                story.append(Paragraph(f"  • {item}", body_style))
+        if isinstance(phase_data, dict):
+            if phase_data.get("governance_milestone"):
+                story.append(Paragraph(f"  <i>Governance Milestone:</i> {phase_data['governance_milestone']}", body_style))
+            if phase_data.get("management_commitment"):
+                story.append(Paragraph(f"  <i>Management Commitment:</i> {phase_data['management_commitment']}", body_style))
+            if phase_data.get("expected_gain"):
+                story.append(Paragraph(f"  <i>Expected Gain:</i> {phase_data['expected_gain']}", body_style))
+        story.append(Spacer(1, 6))
     story.append(Spacer(1, 12))
     
     # Benchmark Context
