@@ -12,7 +12,9 @@ import {
   Users,
   Database,
   Monitor,
-  Zap
+  Zap,
+  ChevronRight,
+  Calendar
 } from "lucide-react";
 
 const DIMENSION_CONFIG = [
@@ -115,33 +117,40 @@ const DashboardPage = () => {
               <Link to="/assessments" className="text-[#C9A84C] hover:text-[#C9A84C]/80 text-sm transition-colors">View all</Link>
             </div>
             {recentAssessments.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="text-left text-xs uppercase tracking-wider text-white/35 border-b border-white/[0.06]">
-                      <th className="pb-3 pr-4">Company</th>
-                      <th className="pb-3 pr-4">Respondent</th>
-                      <th className="pb-3 pr-4">Score</th>
-                      <th className="pb-3 pr-4">Status</th>
-                      <th className="pb-3">Date</th>
-                    </tr>
-                  </thead>
-                  <tbody className="text-sm">
-                    {recentAssessments.map((a) => (
-                      <tr key={a.id} className="border-b border-white/[0.04] hover:bg-white/[0.02] cursor-pointer transition-colors" onClick={() => handleRowClick(a)} data-testid={`assessment-row-${a.id}`}>
-                        <td className="py-3.5 pr-4 text-white">{a.company_name}</td>
-                        <td className="py-3.5 pr-4 text-white/50">{a.respondent_name}</td>
-                        <td className="py-3.5 pr-4">
-                          {a.scores?.overall ? (
-                            <span className={`font-['JetBrains_Mono'] font-semibold ${getScoreColorClass(a.scores.overall)}`}>{a.scores.overall.toFixed(1)}</span>
-                          ) : <span className="text-white/25">–</span>}
-                        </td>
-                        <td className="py-3.5 pr-4"><StatusBadge status={a.status} /></td>
-                        <td className="py-3.5 text-white/35">{new Date(a.created_at).toLocaleDateString()}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="space-y-2.5">
+                {recentAssessments.map((a) => (
+                  <div
+                    key={a.id}
+                    onClick={() => handleRowClick(a)}
+                    data-testid={`assessment-row-${a.id}`}
+                    className="group flex items-center gap-4 p-3.5 rounded-xl bg-white/[0.02] hover:bg-white/[0.04] border border-white/[0.04] hover:border-[#C9A84C]/20 cursor-pointer transition-all duration-200"
+                  >
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#60A5FA]/20 to-[#60A5FA]/5 border border-[#60A5FA]/15 flex items-center justify-center shrink-0">
+                      <Building2 size={16} className="text-[#60A5FA]" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-white font-medium text-sm truncate leading-tight">{a.company_name}</p>
+                      <p className="text-xs text-white/40 mt-0.5 truncate">{a.respondent_name}</p>
+                    </div>
+                    <div className="hidden sm:flex items-center gap-1.5 text-xs text-white/35 shrink-0">
+                      <Calendar size={12} />
+                      <span>{new Date(a.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span>
+                    </div>
+                    <div className="shrink-0">
+                      <StatusBadge status={a.status} />
+                    </div>
+                    <div className="w-12 text-right shrink-0">
+                      {a.scores?.overall ? (
+                        <span className={`font-['JetBrains_Mono'] font-bold text-base ${getScoreColorClass(a.scores.overall)}`}>
+                          {a.scores.overall.toFixed(1)}
+                        </span>
+                      ) : (
+                        <span className="text-white/25 text-sm">–</span>
+                      )}
+                    </div>
+                    <ChevronRight size={16} className="text-white/25 group-hover:text-[#C9A84C] group-hover:translate-x-0.5 transition-all shrink-0" />
+                  </div>
+                ))}
               </div>
             ) : (
               <EmptyState icon={ClipboardCheck} title="No assessments yet" action={<Link to="/assessments" className="text-[#C9A84C]">Start your first assessment</Link>} />

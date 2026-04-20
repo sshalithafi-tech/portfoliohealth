@@ -59,6 +59,8 @@ Currently active: 5-turn Hannila/PPDT prompt with mandatory JSON emission (ready
 - Admin panel with CSV export + PDF download
 - Refactored backend into `pdf_builder.py` + `chat_service.py`
 - Refactored large React components (ReportPage, AssessmentChatPage, AdminPage)
+- **Assessments Dashboard card grid (2026-04-20)** — converted `AssessmentsPage.jsx` table to a polished 1/2/3-column glass card grid with score ring + level name, respondent/role row, date row, status badge, and gold-hover Download PDF action
+- **Dashboard Recent Assessments redesign (2026-04-20)** — converted the table into compact card rows with company icon tile, status badge, score, and chevron affordance
 
 ## Testing
 - `backend/tests/test_completion_pipeline.py` — synthetic pipeline test (parser → DB → PDF). All 7 checks pass. ✅
