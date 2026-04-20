@@ -20,14 +20,13 @@ export const ScoreBreakdown = ({ scores, weightsRaw, weightsNorm }) => (
         <h3 className="text-sm text-white/50 uppercase tracking-wider mb-3">Strategic Weighting & Contribution</h3>
         <div className="space-y-2">
           {DIMENSIONS.map(d => {
-            const raw = weightsRaw[d] || 5;
-            const pct = ((weightsNorm[d] || 0.25) * 100).toFixed(0);
+            const pct = ((weightsNorm[d] || 0.25) * 100).toFixed(1);
             const contrib = ((scores[d] || 0) * (weightsNorm[d] || 0.25)).toFixed(2);
             return (
               <div key={d} className="flex items-center justify-between py-1.5 border-b border-white/[0.06] text-sm">
-                <span className="text-white/60 capitalize">{d} Weight: <span className="text-white">{raw}</span> ({pct}%)</span>
+                <span className="text-white/60 capitalize">{d} Weight: <span className="text-white">{pct}%</span></span>
                 <span className="text-white/50 font-['JetBrains_Mono'] text-xs">
-                  {scores[d] || 0} x {(weightsNorm[d] || 0.25).toFixed(2)} = <span className="text-[#7ee787] font-semibold">{contrib}</span>
+                  {scores[d] || 0} × {(weightsNorm[d] || 0.25).toFixed(3)} = <span className="text-[#7ee787] font-semibold">{contrib}</span>
                 </span>
               </div>
             );

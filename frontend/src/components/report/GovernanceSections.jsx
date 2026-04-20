@@ -2,28 +2,36 @@ import { Shield, ArrowUpRight } from "lucide-react";
 import { DIMENSIONS } from "./constants";
 
 export const GovernanceObservations = ({ report }) => {
-  const obs = report.governance_observations;
-  const hasValid = obs && Object.values(obs).some(v => v && !v.includes("N/A") && !v.toLowerCase().includes("below"));
-  if (!hasValid) return null;
+  const obs = report.governance_observations || {};
+  const assessment = report.governance_assessment;
+  const hasValid = Object.values(obs).some(v => v && !String(v).includes("N/A") && !String(v).toLowerCase().includes("below"));
+  if (!hasValid && !assessment) return null;
 
   return (
-    <div className="p-6 glass-surface-highlight rounded-xl border-l-4 border-[#C9A84C]">
-      <div className="flex items-center gap-2 mb-4">
-        <span className="px-2 py-0.5 bg-[#C9A84C]/15 text-[#C9A84C] text-xs font-semibold rounded border border-[#C9A84C]/20">GOVERNANCE</span>
-        <h2 className="text-lg font-semibold text-white font-['Outfit']">Governance Indicators (Levels 4–5)</h2>
+    <div data-testid="governance-indicators" className="p-6 glass-surface-highlight rounded-xl border-l-4 border-[#C9A84C]">
+      <div className="flex items-center gap-2 mb-2">
+        <Shield size={20} className="text-[#C9A84C]" />
+        <h2 className="text-lg font-semibold text-white font-['Outfit']">Governance Indicators</h2>
       </div>
-      <div className="space-y-3">
-        {DIMENSIONS.map(dim => {
-          const v = obs?.[dim];
-          if (!v || v.includes("N/A") || v.toLowerCase().includes("below")) return null;
-          return (
-            <div key={`gov-${dim}`} className="p-3 bg-[#C9A84C]/5 rounded-lg border border-[#C9A84C]/10">
-              <span className="text-xs font-semibold text-[#C9A84C] uppercase">{dim}</span>
-              <p className="text-white/60 text-sm mt-1">{v}</p>
-            </div>
-          );
-        })}
-      </div>
+      {assessment && (
+        <p className="text-white/70 text-sm italic leading-relaxed mb-4 p-3 bg-white/[0.03] rounded-lg border border-white/[0.06]">
+          {assessment}
+        </p>
+      )}
+      {hasValid && (
+        <div className="space-y-3">
+          {DIMENSIONS.map(dim => {
+            const v = obs[dim];
+            if (!v || String(v).includes("N/A") || String(v).toLowerCase().includes("below")) return null;
+            return (
+              <div key={`gov-${dim}`} className="p-3 bg-[#C9A84C]/5 rounded-lg border border-[#C9A84C]/10">
+                <span className="text-xs font-semibold text-[#C9A84C] uppercase tracking-wider">{dim}</span>
+                <p className="text-white/70 text-sm mt-1">{v}</p>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

@@ -12,7 +12,7 @@ const Chip = ({ icon: Icon, label, value, testId }) => {
   );
 };
 
-export const ReportHeader = ({ assessmentId, assessment, onDownload, downloading, businessModel, strategicPriority }) => (
+export const ReportHeader = ({ assessmentId, assessment, onDownload, downloading, businessModel, strategicPriority, businessModelNote }) => (
   <>
     <div className="flex flex-col gap-4">
       <div className="flex items-start gap-3">
@@ -43,6 +43,11 @@ export const ReportHeader = ({ assessmentId, assessment, onDownload, downloading
       <Chip icon={Layers} label="Business Model" value={businessModel} testId="chip-business-model" />
       <Chip icon={Target} label="Strategic Priority" value={strategicPriority} testId="chip-strategic-priority" />
     </div>
+    {businessModelNote && (
+      <p data-testid="business-model-note" className="text-[11px] italic text-white/50 -mt-4 pl-2 sm:pl-4">
+        {businessModelNote}
+      </p>
+    )}
   </>
 );
 

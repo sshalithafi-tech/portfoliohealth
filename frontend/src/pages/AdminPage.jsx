@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import { Shield } from "lucide-react";
 import { toast } from "sonner";
 import Layout from "../components/Layout";
+import LogoMark from "../components/LogoMark";
 import { LoadingSpinner } from "../components/ScoreComponents";
 import AdminStatsGrid from "../components/admin/AdminStatsGrid";
 import AdminFilters from "../components/admin/AdminFilters";
@@ -100,9 +100,7 @@ const AdminPage = () => {
     <Layout>
       <div className="space-y-6 sm:space-y-8">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#C9A84C]/15 flex items-center justify-center">
-            <Shield size={22} className="text-[#C9A84C]" />
-          </div>
+          <LogoMark className="w-11 h-11 rounded-xl shrink-0" radius={18} />
           <div>
             <h1 className="text-2xl sm:text-3xl font-semibold text-white font-['Outfit'] tracking-tight">Admin Panel</h1>
             <p className="text-white/50 text-sm">All assessment data across all users</p>

@@ -4,15 +4,28 @@ import { DIMENSIONS } from "./constants";
 
 const DIM_ICONS = { people: Users, process: ClipboardCheck, data: Database, technology: Monitor };
 
-const levelNameFromScore = (s) => {
+const deriveLevelName = (s) => {
   if (s === null || s === undefined || isNaN(s)) return "–";
-  return LEVEL_NAMES[Math.round(s)] || "–";
+  const n = Number(s);
+  if (n < 1.5) return "Ad Hoc";
+  if (n < 2.5) return "Developing";
+  if (n < 3.5) return "Defined";
+  if (n < 4.5) return "Managed";
+  return "Predictive";
+};
+
+const cleanLevel = (candidate, score) => {
+  const fallback = deriveLevelName(score);
+  if (!candidate) return fallback;
+  const trimmed = String(candidate).trim();
+  if (!trimmed || trimmed.toUpperCase() === "N/A" || trimmed === "–") return fallback;
+  return trimmed;
 };
 
 export const OverallScoreCard = ({ scores, levelNames, overallLevel, contextualScore }) => {
   const equal = scores.overall;
-  const equalLevelName = levelNames.overall || LEVEL_NAMES[overallLevel] || "–";
-  const contextualLevelName = levelNameFromScore(contextualScore);
+  const equalLevelName = cleanLevel(levelNames.overall || LEVEL_NAMES[overallLevel], equal);
+  const contextualLevelName = cleanLevel(null, contextualScore);
   const hasContextual = typeof contextualScore === "number";
 
   return (

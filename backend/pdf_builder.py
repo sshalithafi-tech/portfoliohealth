@@ -137,6 +137,9 @@ def build_company_info(story, assessment, report, body):
         story.append(Paragraph(f"<b>Business Model:</b> {bm}", body))
     if sp:
         story.append(Paragraph(f"<b>Strategic Priority:</b> {sp}", body))
+    note = report.get('business_model_note')
+    if note:
+        story.append(Paragraph(f"<i>{note}</i>", body))
     story.append(Spacer(1, 20))
 
 
@@ -189,20 +192,19 @@ def build_dimension_scores_table(story, scores, level_names, dim_summaries, head
 
 def build_weighted_breakdown(story, scores, weights_raw, weights_norm, heading):
     story.append(Paragraph("WEIGHTED SCORE CALCULATION", heading))
-    data = [["Pillar", "Raw Score", "Weight (1-10)", "Normalised", "Contribution"]]
+    data = [["Pillar", "Raw Score", "Weight", "Contribution"]]
     for dim in DIMENSIONS:
         s = scores.get(dim, 0)
-        w_raw = weights_raw.get(dim, 5)
         w_norm = weights_norm.get(dim, 0.25)
-        data.append([dim.capitalize(), str(s), str(w_raw), f"{w_norm:.2f}", f"{s * w_norm:.2f}"])
-    data.append(["", "", "", "Overall:", f"{scores.get('overall', 0):.2f}"])
+        data.append([dim.capitalize(), str(s), f"{w_norm * 100:.1f}%", f"{s * w_norm:.2f}"])
+    data.append(["", "", "Overall:", f"{scores.get('overall', 0):.2f}"])
 
-    table = Table(data, colWidths=[75, 55, 75, 70, 80])
+    table = Table(data, colWidths=[90, 80, 100, 100])
     table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), NAVY),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTNAME', (3, -1), (-1, -1), 'Helvetica-Bold'),
+        ('FONTNAME', (2, -1), (-1, -1), 'Helvetica-Bold'),
         ('FONTSIZE', (0, 0), (-1, -1), 8.5),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 7),
         ('TOPPADDING', (0, 0), (-1, 0), 7),

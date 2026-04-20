@@ -14,7 +14,7 @@ import ScoreBreakdown from "../components/report/ScoreBreakdown";
 import ScoreMethodology from "../components/report/ScoreMethodology";
 import MaturityLevelsPanel from "../components/report/MaturityLevelsPanel";
 import BottleneckSection from "../components/report/BottleneckSection";
-import { GovernanceObservations, GovernanceOwnership, ManagementCommitment } from "../components/report/GovernanceSections";
+import { GovernanceObservations, ManagementCommitment } from "../components/report/GovernanceSections";
 import { FindingsAndGaps, DecisionVulnerability, ImprovementRoadmap } from "../components/report/FindingsAndRoadmap";
 import { BenchmarkAndNote, ClosingStatement, ReportFooter } from "../components/report/BenchmarkAndClosing";
 
@@ -83,6 +83,7 @@ const ReportPage = () => {
           downloading={downloading}
           businessModel={businessModel}
           strategicPriority={strategicPriority}
+          businessModelNote={report.business_model_note}
         />
         <OverallScoreCard
           scores={scores}
@@ -101,7 +102,6 @@ const ReportPage = () => {
         <ScoreMethodology scores={scores} weightsNorm={weightsNorm} />
         <MaturityLevelsPanel overallLevel={overallLevel} scores={scores} report={report} />
         <GovernanceObservations report={report} />
-        <GovernanceOwnership report={report} />
         <ManagementCommitment report={report} />
         <FindingsAndGaps report={report} />
         <DecisionVulnerability report={report} />

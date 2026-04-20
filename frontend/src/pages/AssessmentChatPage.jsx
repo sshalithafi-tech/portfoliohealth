@@ -37,6 +37,15 @@ const AssessmentChatPage = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Auto-focus the input when the AI finishes (initial load done OR after a response arrives)
+  useEffect(() => {
+    if (!loading && !sending && assessment?.status !== "completed") {
+      // Slight delay so scroll finishes first
+      const t = setTimeout(() => inputRef.current?.focus(), 120);
+      return () => clearTimeout(t);
+    }
+  }, [loading, sending, messages.length, assessment?.status]);
+
   const startAssessment = useCallback(async () => {
     try {
       const response = await axios.post(`${BACKEND_URL}/api/assessments/${id}/start`);
