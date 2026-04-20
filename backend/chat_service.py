@@ -8,12 +8,12 @@ import os
 import re
 from typing import Optional
 
-from emergentintegrations.llm.chat import LlmChat, UserMessage
+import anthropic
 
 logger = logging.getLogger(__name__)
 
-MODEL_PROVIDER = "anthropic"
 MODEL_NAME = "claude-sonnet-4-5-20250929"
+_client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 
 VALID_BUSINESS_MODELS = {"Bulk", "Standard", "CTO", "CETO", "ETO"}
 MODEL_COMPLEXITY_ORDER = ["ETO", "CETO", "CTO", "Standard", "Bulk"]
@@ -32,31 +32,31 @@ def build_system_prompt(base_prompt: str, assessment: dict) -> str:
     return base_prompt + ctx
 
 
-def _build_llm_chat(session_id: str, system_message: str) -> LlmChat:
-    return LlmChat(
-        api_key=os.environ.get("EMERGENT_LLM_KEY"),
-        session_id=session_id,
-        system_message=system_message,
-    ).with_model(MODEL_PROVIDER, MODEL_NAME)
-
-
 async def call_llm_with_history(
     *, session_id: str, system_message: str, history: list, user_message: str
 ) -> str:
     """Send a user message to Claude, seeding the chat with prior history."""
-    chat = _build_llm_chat(session_id, system_message)
     trimmed = [m for m in history if m.get("role") in ("user", "assistant")][-40:]
-    for msg in trimmed:
-        chat.messages.append({"role": msg["role"], "content": msg["content"]})
-    return await chat.send_message(UserMessage(text=user_message))
+    messages = [{"role": m["role"], "content": m["content"]} for m in trimmed]
+    messages.append({"role": "user", "content": user_message})
+    response = _client.messages.create(
+        model=MODEL_NAME,
+        max_tokens=8096,
+        system=system_message,
+        messages=messages,
+    )
+    return response.content[0].text
 
 
 async def call_llm_greeting(*, session_id: str, system_message: str) -> str:
     """Kick off an assessment — ask the LLM to introduce itself and ask Q1."""
-    chat = _build_llm_chat(session_id, system_message)
-    return await chat.send_message(UserMessage(
-        text="Please begin the assessment by introducing yourself and asking the first question."
-    ))
+    response = _client.messages.create(
+        model=MODEL_NAME,
+        max_tokens=8096,
+        system=system_message,
+        messages=[{"role": "user", "content": "Please begin the assessment by introducing yourself and asking the first question."}],
+    )
+    return response.content[0].text
 
 
 def extract_report_json(response_text: str) -> Optional[dict]:
