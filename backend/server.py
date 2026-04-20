@@ -754,7 +754,7 @@ Respondent: {assessment.get('respondent_name', 'Unknown')} ({assessment.get('res
     return {"message": greeting_msg}
 
 # PDF Report Generation
-LOGO_URL = "https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/d646700fab8f8fe4907058c3e80e52bb7fde0a398525ad319ca353e76a6edf0f.png"
+LOGO_URL = "https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/52f8bbaa7bef05bb75194db309bc570b7ebaa50def42d7c4be946a17056a8065.png"
 
 def get_pdf_logo():
     """Download logo and return as BytesIO for reportlab"""
@@ -824,21 +824,24 @@ def build_pdf_header(story, styles, title_text=""):
         story.append(Spacer(1, 6))
 
 def build_pdf_closing(story, styles):
-    """Add closing statement CTA to PDF"""
-    closing_style = ParagraphStyle('Closing', parent=styles['Normal'], fontSize=10, textColor=colors.HexColor('#333333'),
-                                   borderPadding=12, backColor=colors.HexColor('#FFF8E1'), borderColor=colors.HexColor('#FFB300'),
-                                   borderWidth=1, borderRadius=4, spaceAfter=8, leading=14)
-    footer_style = ParagraphStyle('Footer', fontSize=8, textColor=colors.grey, alignment=1)
+    """Professional closing statement for PDF reports"""
+    closing_style = ParagraphStyle('Closing', parent=styles['Normal'], fontSize=9, textColor=colors.HexColor('#333333'),
+                                   borderPadding=12, backColor=colors.HexColor('#FAF6E8'), borderColor=colors.HexColor('#C9A84C'),
+                                   borderWidth=1, leading=13)
+    footer_style = ParagraphStyle('Footer', fontSize=7.5, textColor=colors.HexColor('#999999'), alignment=1, spaceBefore=12)
     
-    story.append(Spacer(1, 20))
+    story.append(Spacer(1, 16))
     story.append(Paragraph(
-        f"Thank you for completing this capability maturity assessment. If you would like further analysis, "
-        f"expert input, or tailored recommendations based on your results, please reach out via email to arrange "
-        f"a follow-up consultation: <b>{CONTACT_EMAIL}</b>",
+        f"Thank you for completing this assessment. For further analysis, expert input, or tailored "
+        f"recommendations, please contact: <b>{CONTACT_EMAIL}</b>",
         closing_style
     ))
-    story.append(Spacer(1, 20))
-    story.append(Paragraph("© 2026 PortfolioHealth Advisor · Based on PPM Capability Maturity Research · University of Oulu", footer_style))
+    story.append(Spacer(1, 16))
+    footer_line = Table([[""]],colWidths=[490], rowHeights=[1])
+    footer_line.setStyle(TableStyle([('LINEBELOW', (0, 0), (-1, -1), 0.5, colors.HexColor('#CCCCCC'))]))
+    story.append(footer_line)
+    story.append(Paragraph("PortfolioHealth Advisor  |  PPM Capability Maturity Assessment  |  University of Oulu", footer_style))
+    story.append(Paragraph("This report is confidential. Distribution without authorisation is not permitted.", footer_style))
 
 @api_router.get("/assessments/{assessment_id}/pdf")
 async def generate_pdf_report(assessment_id: str, current_user: dict = Depends(get_current_user)):
@@ -857,11 +860,13 @@ async def generate_pdf_report(assessment_id: str, current_user: dict = Depends(g
     doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=50, leftMargin=50, topMargin=50, bottomMargin=50)
     
     styles = getSampleStyleSheet()
-    heading_style = ParagraphStyle('Heading', parent=styles['Heading2'], fontSize=14, spaceAfter=8, textColor=colors.HexColor('#2f81f7'))
-    body_style = ParagraphStyle('Body', parent=styles['Normal'], fontSize=10, spaceAfter=6)
-    gov_style = ParagraphStyle('Governance', parent=styles['Normal'], fontSize=9, spaceAfter=4, textColor=colors.HexColor('#6B4C00'),
-                               backColor=colors.HexColor('#FFFDE7'), borderPadding=6, borderColor=colors.HexColor('#FFD54F'),
+    heading_style = ParagraphStyle('Heading', parent=styles['Heading2'], fontSize=12, spaceAfter=6, spaceBefore=10, 
+                                   textColor=colors.HexColor('#0A1628'), fontName='Helvetica-Bold')
+    body_style = ParagraphStyle('Body', parent=styles['Normal'], fontSize=9.5, spaceAfter=5, leading=13, textColor=colors.HexColor('#333333'))
+    gov_style = ParagraphStyle('Governance', parent=styles['Normal'], fontSize=9, spaceAfter=4, textColor=colors.HexColor('#5C4A1E'),
+                               backColor=colors.HexColor('#FAF6E8'), borderPadding=6, borderColor=colors.HexColor('#C9A84C'),
                                borderWidth=0.5, leading=12)
+    label_style = ParagraphStyle('Label', parent=styles['Normal'], fontSize=8.5, textColor=colors.HexColor('#666666'), spaceAfter=3)
     
     story = []
     
@@ -894,16 +899,22 @@ async def generate_pdf_report(assessment_id: str, current_user: dict = Depends(g
             dim_summaries.get(dim, "N/A")[:60] + "..." if len(dim_summaries.get(dim, "")) > 60 else dim_summaries.get(dim, "N/A")
         ])
     
-    table = Table(table_data, colWidths=[80, 50, 80, 280])
+    table = Table(table_data, colWidths=[70, 45, 85, 290])
     table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2f81f7')),
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0A1628')),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('ALIGN', (1, 0), (1, -1), 'CENTER'),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 9),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f0f0f0')),
-        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#cccccc')),
+        ('FONTSIZE', (0, 0), (-1, 0), 8.5),
+        ('FONTSIZE', (0, 1), (-1, -1), 8.5),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 7),
+        ('TOPPADDING', (0, 0), (-1, 0), 7),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 5),
+        ('TOPPADDING', (0, 1), (-1, -1), 5),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F8F8F8')]),
+        ('LINEBELOW', (0, 0), (-1, 0), 2, colors.HexColor('#C9A84C')),
+        ('LINEBELOW', (0, 1), (-1, -2), 0.5, colors.HexColor('#E0E0E0')),
+        ('LINEBELOW', (0, -1), (-1, -1), 0.5, colors.HexColor('#E0E0E0')),
     ]))
     story.append(table)
     story.append(Spacer(1, 16))
@@ -923,17 +934,22 @@ async def generate_pdf_report(assessment_id: str, current_user: dict = Depends(g
         weight_data.append([dim.capitalize(), str(s), str(w_raw), f"{w_norm:.2f}", f"{contrib:.2f}"])
     weight_data.append(["", "", "", "Overall:", f"{scores.get('overall', 0):.2f}"])
     
-    wt = Table(weight_data, colWidths=[80, 60, 70, 70, 80])
+    wt = Table(weight_data, colWidths=[75, 55, 75, 70, 80])
     wt.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1A1A2E')),
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0A1628')),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
         ('FONTNAME', (3, -1), (-1, -1), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 9),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
-        ('BACKGROUND', (0, 1), (-1, -2), colors.HexColor('#f0f0f0')),
-        ('BACKGROUND', (0, -1), (-1, -1), colors.HexColor('#e8e8e8')),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#cccccc')),
+        ('FONTSIZE', (0, 0), (-1, -1), 8.5),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 7),
+        ('TOPPADDING', (0, 0), (-1, 0), 7),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 5),
+        ('TOPPADDING', (0, 1), (-1, -1), 5),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -2), [colors.white, colors.HexColor('#F8F8F8')]),
+        ('BACKGROUND', (0, -1), (-1, -1), colors.HexColor('#EEE8D5')),
+        ('LINEBELOW', (0, 0), (-1, 0), 2, colors.HexColor('#C9A84C')),
+        ('LINEBELOW', (0, 1), (-1, -2), 0.5, colors.HexColor('#E0E0E0')),
+        ('LINEABOVE', (0, -1), (-1, -1), 1, colors.HexColor('#C9A84C')),
     ]))
     story.append(wt)
     story.append(Spacer(1, 16))

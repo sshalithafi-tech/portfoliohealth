@@ -150,7 +150,7 @@ const QuickAssessmentPage = () => {
         </button>
         
         <div className="flex items-center gap-3 flex-1">
-          <img src="https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/d646700fab8f8fe4907058c3e80e52bb7fde0a398525ad319ca353e76a6edf0f.png" alt="PH" className="w-8 h-8 rounded-lg object-contain" />
+          <img src="https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/52f8bbaa7bef05bb75194db309bc570b7ebaa50def42d7c4be946a17056a8065.png" alt="PH" className="w-8 h-8 rounded-lg object-contain" />
           <span className="text-white font-semibold font-['Outfit']">PortfolioHealth</span>
         </div>
 

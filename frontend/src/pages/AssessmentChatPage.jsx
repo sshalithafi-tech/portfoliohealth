@@ -239,7 +239,7 @@ const AssessmentChatPage = () => {
               ) : (
                 <div className="chat-message-assistant">
                   <div className="flex items-start gap-3">
-                    <img src="https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/d646700fab8f8fe4907058c3e80e52bb7fde0a398525ad319ca353e76a6edf0f.png" alt="PH" className="w-8 h-8 rounded-full object-contain shrink-0 mt-1" />
+                    <img src="https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/52f8bbaa7bef05bb75194db309bc570b7ebaa50def42d7c4be946a17056a8065.png" alt="PH" className="w-8 h-8 rounded-full object-contain shrink-0 mt-1" />
                     <div className="flex-1">
                       <p className="text-xs text-[#C9A84C] font-medium mb-2">PortfolioHealth Advisor</p>
                       <div className="text-white/80 prose prose-invert prose-sm max-w-none">

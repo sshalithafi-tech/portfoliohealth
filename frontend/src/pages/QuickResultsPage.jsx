@@ -5,8 +5,8 @@ import { useAuth } from "../App";
 import { useQuickAssessmentResult } from "../hooks/useData";
 import { 
   getScoreColor, 
-  getTrafficLightBgClass,
-  prepareRadarData
+  getScoreColorClass,
+  getTrafficLightBgClass
 } from "../utils/scoring";
 import { 
   LoadingSpinner, 
@@ -23,14 +23,6 @@ import {
   CheckCircle
 } from "lucide-react";
 import { toast } from "sonner";
-import {
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  Radar,
-  ResponsiveContainer
-} from "recharts";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -149,14 +141,13 @@ const QuickResultsPage = () => {
   const scores = result.scores || {};
   const trafficLights = result.traffic_lights || {};
   const levelNames = result.level_names || {};
-  const radarData = prepareRadarData(scores);
 
   return (
     <div className="min-h-screen">
       {/* Glass Header */}
       <header className="h-14 sm:h-16 glass-surface flex items-center px-4 sm:px-6 relative z-10">
         <Link to="/" className="flex items-center gap-2 sm:gap-3">
-          <img src="https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/d646700fab8f8fe4907058c3e80e52bb7fde0a398525ad319ca353e76a6edf0f.png" alt="PH" className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg object-contain" />
+          <img src="https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/52f8bbaa7bef05bb75194db309bc570b7ebaa50def42d7c4be946a17056a8065.png" alt="PH" className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg object-contain" />
           <span className="text-white font-semibold font-['Outfit'] text-sm sm:text-base">PortfolioHealth</span>
         </Link>
         
@@ -203,45 +194,34 @@ const QuickResultsPage = () => {
         </div>
 
         {/* Overall Score */}
-        <div className="p-8 glass-surface-highlight rounded-2xl mb-8 animate-fade-in">
-          <div className="flex flex-col lg:flex-row items-center gap-8">
-            <div className="text-center lg:text-left flex-1">
-              <p className="text-xs uppercase tracking-[0.2em] text-white/40 mb-2">Overall Maturity</p>
-              <div className="flex items-baseline gap-3 justify-center lg:justify-start">
-                <span 
-                  data-testid="quick-overall-score"
-                  className="text-6xl font-bold font-['JetBrains_Mono']"
-                  style={{ color: getScoreColor(scores.overall) }}
-                >
-                  {scores.overall?.toFixed(1) || "–"}
-                </span>
-                <span className="text-2xl text-white/30">/ 5.0</span>
-              </div>
-              <p className="text-xl font-semibold text-white mt-2 font-['Outfit']">
-                {levelNames.overall || "–"}
-              </p>
-              <div className={`inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-full border ${getTrafficLightBgClass(trafficLights.overall)}`}>
-                <TrafficLightIcon status={trafficLights.overall} size={16} />
-                <span className="text-sm font-medium text-white capitalize">{trafficLights.overall} Status</span>
-              </div>
+        <div className="p-6 sm:p-8 glass-surface-highlight rounded-2xl mb-8 animate-fade-in">
+          <div className="text-center mb-6">
+            <p className="text-xs uppercase tracking-[0.2em] text-white/40 mb-2">Overall Maturity</p>
+            <span data-testid="quick-overall-score" className="text-5xl sm:text-6xl font-bold font-['JetBrains_Mono']" style={{ color: getScoreColor(scores.overall) }}>
+              {scores.overall?.toFixed(1) || "–"}
+            </span>
+            <span className="text-xl text-white/30 ml-2">/ 5.0</span>
+            <p className="text-lg font-semibold text-white mt-2 font-['Outfit']">{levelNames.overall || "–"}</p>
+            <div className={`inline-flex items-center gap-2 mt-3 px-4 py-1.5 rounded-full border ${getTrafficLightBgClass(trafficLights.overall)}`}>
+              <TrafficLightIcon status={trafficLights.overall} size={14} />
+              <span className="text-sm text-white capitalize">{trafficLights.overall} Status</span>
             </div>
-            <div className="w-full lg:w-72 h-56 sm:h-72">
-              <ResponsiveContainer width="100%" height="100%">
-                <RadarChart data={radarData}>
-                  <PolarGrid stroke="rgba(255,255,255,0.08)" />
-                  <PolarAngleAxis dataKey="dimension" tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 12 }} />
-                  <PolarRadiusAxis domain={[0, 5]} tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} />
-                  <Radar
-                    name="Score"
-                    dataKey="score"
-                    stroke="#C9A84C"
-                    fill="#C9A84C"
-                    fillOpacity={0.15}
-                    strokeWidth={2}
-                  />
-                </RadarChart>
-              </ResponsiveContainer>
-            </div>
+          </div>
+          {/* Dimension bars */}
+          <div className="space-y-3 max-w-lg mx-auto">
+            {DIMENSIONS.map(dim => {
+              const s = scores[dim] || 0;
+              const color = getScoreColor(s);
+              return (
+                <div key={`bar-${dim}`} className="flex items-center gap-3">
+                  <span className="text-sm text-white/50 w-24 capitalize">{dim}</span>
+                  <div className="flex-1 h-2.5 bg-white/[0.06] rounded-full overflow-hidden">
+                    <div className="h-full rounded-full transition-all duration-700" style={{ width: `${(s / 5) * 100}%`, backgroundColor: color }} />
+                  </div>
+                  <span className={`font-['JetBrains_Mono'] font-semibold text-sm w-8 text-right ${getScoreColorClass(s)}`}>{s.toFixed(1)}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
 

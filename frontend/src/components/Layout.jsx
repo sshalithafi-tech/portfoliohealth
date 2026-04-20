@@ -13,7 +13,7 @@ import {
 import { useState } from "react";
 import NotificationBell from "./NotificationBell";
 
-const LOGO_MARK = "https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/d646700fab8f8fe4907058c3e80e52bb7fde0a398525ad319ca353e76a6edf0f.png";
+const LOGO_MARK = "https://static.prod-images.emergentagent.com/jobs/ad26f002-f220-4b9d-b343-979dba7f2367/images/52f8bbaa7bef05bb75194db309bc570b7ebaa50def42d7c4be946a17056a8065.png";
 
 const Layout = ({ children }) => {
   const { user, logout } = useAuth();
