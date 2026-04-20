@@ -24,6 +24,15 @@ TEXT_MUTED = colors.HexColor('#666666')
 ROW_ALT = colors.HexColor('#F8F8F8')
 LINE_LIGHT = colors.HexColor('#E0E0E0')
 
+# Hannila L1–L5 maturity ladder definitions (mirrors the web MaturityLevelsPanel)
+MATURITY_LADDER = [
+    ("L1", "Ad Hoc",      "No structured approach. Decisions are reactive, informal, based on individual intuition. Data is inaccessible or unreliable."),
+    ("L2", "Developing",  "Some processes are defined but inconsistently applied. Basic data collection exists but lacks integration. A few PPM practices emerging."),
+    ("L3", "Defined",     "Structured processes and roles are established. Data is accessible but not fully integrated. A formal PPM discipline is in place."),
+    ("L4", "Managed",     "Data-driven decisions are supported by integrated systems. Metrics are defined and tracked. PPM is aligned to strategy."),
+    ("L5", "Optimising",  "Continuous improvement culture is embedded. An end-to-end PPDT discipline is fully aligned. Predictive, evidence-based decisions."),
+]
+
 
 # ============================================================
 # STYLE FACTORIES
@@ -123,45 +132,285 @@ def build_pdf_closing(story, styles):
 # FULL ASSESSMENT SECTIONS
 # ============================================================
 
-def build_company_info(story, assessment, report, body):
-    story.append(Paragraph(f"<b>Company:</b> {assessment.get('company_name', 'N/A')}", body))
-    story.append(Paragraph(f"<b>Industry:</b> {assessment.get('company_industry', 'N/A')}", body))
+def build_section_label(story, styles, number: int, title: str, subtitle: str = ""):
+    """Numbered section header: '01  PORTFOLIO CONTEXT' with optional italic subtitle.
+
+    Mirrors the web report's numbered section layout."""
+    label_style = ParagraphStyle(
+        'SectionLabel', fontSize=11, fontName='Helvetica-Bold',
+        textColor=NAVY, spaceAfter=2, spaceBefore=14, leading=14,
+    )
+    sub_style = ParagraphStyle(
+        'SectionSubtitle', fontSize=8, fontName='Helvetica-Oblique',
+        textColor=TEXT_MUTED, spaceAfter=8, leading=10,
+    )
     story.append(Paragraph(
-        f"<b>Respondent:</b> {assessment.get('respondent_name', 'N/A')} "
-        f"({assessment.get('respondent_role', 'N/A')})", body))
-    date_str = assessment.get('completed_at', assessment.get('created_at', 'N/A')) or 'N/A'
-    story.append(Paragraph(f"<b>Date:</b> {date_str[:10]}", body))
+        f'<font color="#C9A84C">{number:02d}</font>&nbsp;&nbsp;{title.upper()}',
+        label_style,
+    ))
+    if subtitle:
+        story.append(Paragraph(subtitle, sub_style))
+    # Thin gold underline
+    rule = Table([[""]], colWidths=[490], rowHeights=[1])
+    rule.setStyle(TableStyle([('LINEBELOW', (0, 0), (-1, -1), 0.6, GOLD)]))
+    story.append(rule)
+    story.append(Spacer(1, 6))
+
+
+def build_portfolio_context(story, assessment, report, body):
+    """01 — Portfolio Context. Expanded from the old company_info card to mirror
+    the web PortfolioContext component: company, industry, size, business model,
+    active products, strategic priority, respondent, date."""
+    company_size = (
+        assessment.get('company_size')
+        or assessment.get('portfolio_size')
+        or report.get('company_size')
+        or report.get('portfolio_size')
+    )
+    active_products = (
+        report.get('active_products')
+        or assessment.get('active_products')
+        or report.get('num_products')
+    )
     bm = report.get('business_model')
     sp = report.get('strategic_priority')
-    if bm:
-        story.append(Paragraph(f"<b>Business Model:</b> {bm}", body))
-    if sp:
-        story.append(Paragraph(f"<b>Strategic Priority:</b> {sp}", body))
+    date_str = (assessment.get('completed_at') or assessment.get('created_at') or 'N/A')[:10]
+
+    rows = [
+        ("Company", assessment.get('company_name', 'N/A')),
+        ("Industry", assessment.get('company_industry', 'N/A')),
+        ("Company Size", company_size or "\u2013"),
+        ("Business Model", bm or "\u2013"),
+        ("Active Products", active_products or "\u2013"),
+        ("Strategic Priority", sp or "\u2013"),
+        ("Respondent", f"{assessment.get('respondent_name', 'N/A')} ({assessment.get('respondent_role', 'N/A')})"),
+        ("Date", date_str),
+    ]
+    data = [[Paragraph(f"<b>{k}</b>", body), Paragraph(str(v), body)] for k, v in rows]
+    table = Table(data, colWidths=[130, 360])
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (0, -1), GOLD_BG),
+        ('TEXTCOLOR', (0, 0), (0, -1), NAVY),
+        ('FONTSIZE', (0, 0), (-1, -1), 9),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+        ('TOPPADDING', (0, 0), (-1, -1), 5),
+        ('LEFTPADDING', (0, 0), (-1, -1), 8),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+        ('LINEBELOW', (0, 0), (-1, -1), 0.3, LINE_LIGHT),
+        ('LINEABOVE', (0, 0), (-1, 0), 0.8, GOLD),
+        ('LINEBELOW', (0, -1), (-1, -1), 0.8, GOLD),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+    ]))
+    story.append(table)
+
     note = report.get('business_model_note')
     if note:
-        story.append(Paragraph(f"<i>{note}</i>", body))
-    story.append(Spacer(1, 20))
+        note_style = ParagraphStyle(
+            'ContextNote', fontSize=8, fontName='Helvetica-Oblique',
+            textColor=TEXT_MUTED, spaceBefore=6, leading=10,
+        )
+        story.append(Paragraph(note, note_style))
+    story.append(Spacer(1, 14))
+
+
+def build_company_info(story, assessment, report, body):
+    """Kept for backwards compatibility — delegates to portfolio_context."""
+    build_portfolio_context(story, assessment, report, body)
 
 
 def build_overall_score(story, scores, report, level_names, heading, body):
     equal = scores.get("overall", "N/A")
     ctx = report.get("contextual_score")
     lvl_overall = level_names.get('overall', 'N/A')
-    story.append(Paragraph(
-        "<b>OVERALL MATURITY \u2014 DUAL SCORE</b>",
-        heading))
-    story.append(Paragraph(
-        f"<b>Equal-Weighted (primary):</b> {equal} / 5.0 \u2014 {lvl_overall}",
-        body))
+    # Dual-score card as a 2-col table
+    eq_cell = Paragraph(
+        f'<font size="7" color="#C9A84C"><b>EQUAL-WEIGHTED SCORE · PRIMARY</b></font><br/>'
+        f'<font size="22" color="#0A1628"><b>{equal}</b></font>'
+        f'<font size="10" color="#999999"> / 5.00</font><br/>'
+        f'<font size="10"><b>{lvl_overall}</b></font><br/>'
+        f'<font size="7" color="#666666"><i>Academically validated baseline (25% each pillar)</i></font>',
+        body,
+    )
     if isinstance(ctx, (int, float)):
-        story.append(Paragraph(
-            f"<b>Contextual (secondary):</b> {ctx:.1f} / 5.0 \u2014 adjusted for business model + stated priority",
-            body))
+        ctx_cell = Paragraph(
+            f'<font size="7" color="#666666"><b>CONTEXTUAL SCORE · SECONDARY</b></font><br/>'
+            f'<font size="22" color="#0A1628"><b>{ctx:.2f}</b></font>'
+            f'<font size="10" color="#999999"> / 5.00</font><br/>'
+            f'<font size="7" color="#666666"><i>Adjusted for business model + stated priority</i></font>',
+            body,
+        )
+    else:
+        ctx_cell = Paragraph(
+            '<font size="7" color="#666666"><b>CONTEXTUAL SCORE · SECONDARY</b></font><br/>'
+            '<font size="10" color="#999999"><i>Not yet calculated for this assessment.</i></font>',
+            body,
+        )
+    card = Table([[eq_cell, ctx_cell]], colWidths=[245, 245])
+    card.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), GOLD_BG),
+        ('LINEABOVE', (0, 0), (-1, 0), 1, GOLD),
+        ('LINEBELOW', (0, -1), (-1, -1), 1, GOLD),
+        ('LINEAFTER', (0, 0), (0, 0), 0.5, LINE_LIGHT),
+        ('TOPPADDING', (0, 0), (-1, -1), 12),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+        ('LEFTPADDING', (0, 0), (-1, -1), 14),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 14),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+    ]))
+    story.append(card)
+    story.append(Spacer(1, 12))
+
+
+def build_pillar_maturity_levels(story, scores, report, body):
+    """03 — Pillar Maturity Levels (L1\u2013L5). Hannila ladder + each pillar's level."""
+    # The L1\u2013L5 ladder (mirrors the web MaturityLevelsPanel)
+    ladder_style = ParagraphStyle(
+        'Ladder', fontSize=7.5, textColor=TEXT_DARK, leading=10, spaceAfter=0
+    )
+    ladder_data = [[
+        Paragraph(
+            f'<font color="#C9A84C"><b>{lvl}</b></font>&nbsp;<b>{name}</b><br/>'
+            f'<font color="#666666">{desc}</font>',
+            ladder_style,
+        )
+        for (lvl, name, desc) in MATURITY_LADDER
+    ]]
+    ladder = Table(ladder_data, colWidths=[98, 98, 98, 98, 98])
+    ladder.setStyle(TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#F4F6FA')),
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ('LEFTPADDING', (0, 0), (-1, -1), 6),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+        ('LINEBEFORE', (1, 0), (-1, -1), 0.3, LINE_LIGHT),
+    ]))
+    story.append(ladder)
+    story.append(Spacer(1, 10))
+
+    # Per-pillar interpretations
+    interp_data = [["Pillar", "Score", "Level", "Interpretation"]]
+    pillar_interps = report.get("pillar_interpretations", {}) or {}
+    level_names = report.get("level_names", {}) or {}
+    for dim in DIMENSIONS:
+        s = scores.get(dim, 0)
+        lvl = level_names.get(dim) or _derive_level_name(s)
+        interp = pillar_interps.get(dim, "")
+        if len(interp) > 140:
+            interp = interp[:140] + "\u2026"
+        interp_data.append([dim.capitalize(), str(s), lvl, interp or "\u2013"])
+    table = Table(interp_data, colWidths=[70, 45, 85, 290])
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), NAVY),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('ALIGN', (1, 0), (1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 8.5),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 7),
+        ('TOPPADDING', (0, 0), (-1, 0), 7),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 5),
+        ('TOPPADDING', (0, 1), (-1, -1), 5),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, ROW_ALT]),
+        ('LINEBELOW', (0, 0), (-1, 0), 2, GOLD),
+        ('LINEBELOW', (0, 1), (-1, -1), 0.3, LINE_LIGHT),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+    ]))
+    story.append(table)
+    story.append(Spacer(1, 12))
+
+
+def _derive_level_name(score):
+    try:
+        s = float(score)
+    except (TypeError, ValueError):
+        return "\u2013"
+    if s < 1.5:
+        return "Ad Hoc"
+    if s < 2.5:
+        return "Developing"
+    if s < 3.5:
+        return "Defined"
+    if s < 4.5:
+        return "Managed"
+    return "Optimising"
+
+
+def build_assessment_reliability(story, report, assessment, body):
+    """09 — Assessment Reliability. High/Medium/Low confidence + evidence signals."""
+    provided = report.get("assessment_reliability")
+    if isinstance(provided, dict):
+        confidence = str(provided.get("confidence", "Medium")).capitalize()
+        factors = provided.get("factors") or []
+    elif isinstance(provided, str) and provided:
+        confidence = provided.capitalize()
+        factors = []
+    else:
+        # Heuristic fallback mirroring the web AssessmentReliability component
+        factors = []
+        data_score = float((report.get("scores") or {}).get("data") or 0)
+        if data_score and data_score < 2:
+            factors.append({"label": "Data Availability", "detail": "Limited product-level profitability data.", "tone": "low"})
+        elif data_score and data_score < 3:
+            factors.append({"label": "Data Availability", "detail": "Partial product-level data; some evidence self-reported.", "tone": "medium"})
+        elif data_score:
+            factors.append({"label": "Data Availability", "detail": "Product-level data is accessible enough to ground findings.", "tone": "high"})
+        factors.append({
+            "label": "Respondent Scope",
+            "detail": f"Single respondent ({assessment.get('respondent_role', 'individual view')}) \u2014 not cross-functionally triangulated.",
+            "tone": "medium",
+        })
+        factors.append({"label": "Answer Clarity", "detail": "Based on the respondent's self-reported evidence captured in the conversation.", "tone": "medium"})
+        low_count = sum(1 for f in factors if f.get("tone") == "low")
+        if low_count >= 2:
+            confidence = "Low"
+        elif all(f.get("tone") == "high" for f in factors):
+            confidence = "High"
+        else:
+            confidence = "Medium"
+
+    tone_color = {"High": "#34A853", "Medium": "#C9A84C", "Low": "#C0392B"}.get(confidence, "#C9A84C")
+    blurb = {
+        "High": "Results are well-supported by the evidence shared during the assessment.",
+        "Medium": "Directionally sound \u2014 some signals are self-reported or based on a single respondent.",
+        "Low": "Treat as indicative only \u2014 key evidence is missing or comes from a narrow perspective.",
+    }.get(confidence, "")
+
+    # Confidence badge row
+    badge = Paragraph(
+        f'<font size="7" color="#666666"><b>CONFIDENCE</b></font>&nbsp;&nbsp;'
+        f'<font size="10" color="{tone_color}"><b>{confidence.upper()}</b></font>',
+        body,
+    )
+    story.append(badge)
+    if blurb:
+        story.append(Paragraph(blurb, body))
+    story.append(Spacer(1, 6))
+
+    if factors:
+        data = [["Signal", "Tone", "Detail"]]
+        for f in factors:
+            tone = str(f.get("tone", "medium")).capitalize()
+            data.append([f.get("label", "\u2013"), tone, f.get("detail", "") or "\u2013"])
+        table = Table(data, colWidths=[120, 60, 310])
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), NAVY),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 8.5),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 6),
+            ('TOPPADDING', (0, 0), (-1, 0), 6),
+            ('BOTTOMPADDING', (0, 1), (-1, -1), 5),
+            ('TOPPADDING', (0, 1), (-1, -1), 5),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, ROW_ALT]),
+            ('LINEBELOW', (0, 0), (-1, 0), 1.5, GOLD),
+            ('LINEBELOW', (0, 1), (-1, -1), 0.3, LINE_LIGHT),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ]))
+        story.append(table)
     story.append(Spacer(1, 12))
 
 
 def build_dimension_scores_table(story, scores, level_names, dim_summaries, heading):
-    story.append(Paragraph("DIMENSION SCORES", heading))
     data = [["Dimension", "Score", "Level", "Summary"]]
     for dim in DIMENSIONS:
         summary = dim_summaries.get(dim, "N/A")
@@ -190,8 +439,16 @@ def build_dimension_scores_table(story, scores, level_names, dim_summaries, head
     story.append(Spacer(1, 16))
 
 
-def build_weighted_breakdown(story, scores, weights_raw, weights_norm, heading):
-    story.append(Paragraph("WEIGHTED SCORE CALCULATION", heading))
+def build_weighted_breakdown(story, scores, weights_raw, weights_norm, heading, body):
+    # Methodology one-liner (mirrors the web ScoreMethodology blurb)
+    story.append(Paragraph(
+        "The overall score is a weighted sum across the four PPDT pillars. "
+        "Weights reflect what <b>the organisation</b> declared as most strategically important \u2014 "
+        "so a low score in a high-weight pillar has a disproportionate impact on overall maturity.",
+        body,
+    ))
+    story.append(Spacer(1, 6))
+
     data = [["Pillar", "Raw Score", "Weight", "Contribution"]]
     for dim in DIMENSIONS:
         s = scores.get(dim, 0)
@@ -224,15 +481,13 @@ def build_governance_sections(story, report, heading, body, gov):
     gov_obs = report.get("governance_observations", {}) or {}
     has_gov = any(v and "N/A" not in str(v) and "below" not in str(v).lower() for v in gov_obs.values())
     if has_gov:
-        story.append(Paragraph("GOVERNANCE INDICATORS (Levels 4\u20135)", heading))
         for dim in DIMENSIONS:
             obs = gov_obs.get(dim, "")
             if obs and "N/A" not in str(obs) and "below" not in str(obs).lower():
                 story.append(Paragraph(f"<b>{dim.capitalize()} \u2014 Governance:</b> {obs}", gov))
                 story.append(Spacer(1, 4))
-        story.append(Spacer(1, 12))
+        story.append(Spacer(1, 8))
 
-    story.append(Paragraph("GOVERNANCE &amp; OWNERSHIP", heading))
     story.append(Paragraph(
         "Governance is the connective tissue between all four PPDT dimensions. Without clear "
         "ownership and accountability, even high capability produces unreliable portfolio decisions.",
@@ -249,7 +504,6 @@ def build_bottleneck_section(story, report, scores, heading, body):
         return
     key = str(bottleneck).lower()
     score = scores.get(key, "N/A")
-    story.append(Paragraph("BOTTLENECK PILLAR", heading))
     story.append(Paragraph(
         f"<b>{bottleneck.capitalize()}</b> (score: {score} / 5) is the lowest-scoring pillar and "
         "caps real-world capability regardless of other scores. The bottleneck is where "
@@ -263,7 +517,6 @@ def build_bottleneck_section(story, report, scores, heading, body):
 
 def build_management_commitment_section(story, report, heading, body):
     """Dedicated management-commitment section with Low/Med/High rating."""
-    story.append(Paragraph("MANAGEMENT COMMITMENT", heading))
     rating = report.get("management_commitment")
     if rating:
         story.append(Paragraph(f"<b>Rating:</b> {rating}", body))
@@ -278,7 +531,6 @@ def build_management_commitment_section(story, report, heading, body):
 
 def build_decision_vulnerability_section(story, report, heading, body):
     """Decision-type vulnerability with the 4 risk ratings as a table."""
-    story.append(Paragraph("DECISION-TYPE VULNERABILITY ANALYSIS", heading))
     ratings = report.get("decision_vulnerability_ratings") or {}
     if ratings:
         data = [["Decision Type", "Risk Level"]]
@@ -313,19 +565,19 @@ def build_decision_vulnerability_section(story, report, heading, body):
 
 
 def build_findings_and_gaps(story, report, heading, body):
-    story.append(Paragraph("KEY FINDINGS", heading))
+    # Side-by-side on the web; stacked on the PDF for readability.
+    story.append(Paragraph('<font color="#0A1628"><b>Key Findings</b></font>', body))
     for item in report.get("key_findings", []) or []:
         story.append(Paragraph(f"\u2022 {item}", body))
-    story.append(Spacer(1, 12))
+    story.append(Spacer(1, 10))
 
-    story.append(Paragraph("CRITICAL CAPABILITY GAPS", heading))
+    story.append(Paragraph('<font color="#C0392B"><b>Critical Capability Gaps</b></font>', body))
     for item in report.get("critical_gaps", []) or []:
         story.append(Paragraph(f"\u2022 {item}", body))
     story.append(Spacer(1, 12))
 
 
 def build_roadmap(story, roadmap, heading, body):
-    story.append(Paragraph("IMPROVEMENT ROADMAP", heading))
     phases = [
         ("immediate", "PHASE 1 \u2014 IMMEDIATE (0\u20133 months)"),
         ("short_term", "PHASE 2 \u2014 SHORT-TERM (3\u201312 months)"),
@@ -360,12 +612,12 @@ def build_roadmap(story, roadmap, heading, body):
 
 
 def build_benchmark_and_note(story, report, heading, body):
-    story.append(Paragraph("BENCHMARK CONTEXT", heading))
+    story.append(Paragraph('<font color="#0A1628"><b>Benchmark Context</b></font>', body))
     story.append(Paragraph(report.get("benchmark_context", "N/A"), body))
-    story.append(Spacer(1, 12))
+    story.append(Spacer(1, 10))
 
-    story.append(Paragraph("CONSULTANT'S NOTE", heading))
-    story.append(Paragraph(report.get("consultant_note", "N/A"), body))
+    story.append(Paragraph('<font color="#C9A84C"><b>Consultant\'s Note</b></font>', body))
+    story.append(Paragraph(f'<i>"{report.get("consultant_note", "N/A")}"</i>', body))
 
 
 # ============================================================
@@ -373,7 +625,15 @@ def build_benchmark_and_note(story, report, heading, body):
 # ============================================================
 
 def build_full_assessment_pdf(assessment: dict) -> BytesIO:
-    """Build the full PPDT Assessment PDF and return an in-memory buffer."""
+    """Build the full PPDT Assessment PDF and return an in-memory buffer.
+
+    Mirrors the web report's 13-section numbered layout:
+      01 Portfolio Context · 02 Overall Maturity · 03 Pillar Maturity Levels
+      04 Dimension Scores · 05 Weighted Score Calculation · 06 Bottleneck Pillar
+      07 Governance & Ownership · 08 Management Commitment · 09 Assessment Reliability
+      10 Decision-Type Vulnerability · 11 Key Findings & Critical Gaps
+      12 Improvement Roadmap · 13 Benchmark & Consultant's Note
+    """
     report = assessment["report"]
     scores = report.get("scores", {}) or {}
     weights_raw = report.get("weights_raw", {"people": 5, "process": 5, "data": 5, "technology": 5})
@@ -381,6 +641,8 @@ def build_full_assessment_pdf(assessment: dict) -> BytesIO:
     weights_norm = report.get("weights_normalised", {
         d: weights_raw.get(d, 5) / raw_total for d in DIMENSIONS
     })
+    level_names = report.get("level_names", {}) or {}
+    dim_summaries = report.get("dimension_summaries", {}) or {}
 
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=50, leftMargin=50,
@@ -390,18 +652,46 @@ def build_full_assessment_pdf(assessment: dict) -> BytesIO:
 
     story = []
     build_pdf_header(story, styles, "PPDT CAPABILITY MATURITY ASSESSMENT REPORT")
-    build_company_info(story, assessment, report, body)
-    build_overall_score(story, scores, report, report.get("level_names", {}), heading, body)
-    build_dimension_scores_table(story, scores, report.get("level_names", {}),
-                                 report.get("dimension_summaries", {}), heading)
-    build_weighted_breakdown(story, scores, weights_raw, weights_norm, heading)
+
+    build_section_label(story, styles, 1, "Portfolio Context", "Who and what this report is about")
+    build_portfolio_context(story, assessment, report, body)
+
+    build_section_label(story, styles, 2, "Overall Maturity", "Equal-weighted vs contextual score")
+    build_overall_score(story, scores, report, level_names, heading, body)
+
+    build_section_label(story, styles, 3, "Pillar Maturity Levels", "Where each pillar sits on the L1\u2013L5 Hannila ladder")
+    build_pillar_maturity_levels(story, scores, report, body)
+
+    build_section_label(story, styles, 4, "Dimension Scores", "Raw pillar grades (1\u20135)")
+    build_dimension_scores_table(story, scores, level_names, dim_summaries, heading)
+
+    build_section_label(story, styles, 5, "Weighted Score Calculation", "How the overall score is derived from strategic weighting")
+    build_weighted_breakdown(story, scores, weights_raw, weights_norm, heading, body)
+
+    build_section_label(story, styles, 6, "Bottleneck Pillar", "The weakest pillar caps real-world capability")
     build_bottleneck_section(story, report, scores, heading, body)
+
+    build_section_label(story, styles, 7, "Governance & Ownership", "Accountability for portfolio decisions")
     build_governance_sections(story, report, heading, body, gov)
+
+    build_section_label(story, styles, 8, "Management Commitment", "The multiplier on all capability investments")
     build_management_commitment_section(story, report, heading, body)
-    build_findings_and_gaps(story, report, heading, body)
+
+    build_section_label(story, styles, 9, "Assessment Reliability", "How much to rely on these results")
+    build_assessment_reliability(story, report, assessment, body)
+
+    build_section_label(story, styles, 10, "Decision-Type Vulnerability", "Risk by portfolio decision type")
     build_decision_vulnerability_section(story, report, heading, body)
+
+    build_section_label(story, styles, 11, "Key Findings & Critical Gaps", "What matters most from this assessment")
+    build_findings_and_gaps(story, report, heading, body)
+
+    build_section_label(story, styles, 12, "Improvement Roadmap", "Phased plan \u2014 immediate, short-term, strategic")
     build_roadmap(story, report.get("roadmap", {}), heading, body)
+
+    build_section_label(story, styles, 13, "Benchmark & Consultant's Note", "Context and a direct final take")
     build_benchmark_and_note(story, report, heading, body)
+
     build_pdf_closing(story, styles)
 
     doc.build(story)
