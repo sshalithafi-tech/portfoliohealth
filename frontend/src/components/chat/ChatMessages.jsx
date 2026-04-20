@@ -17,6 +17,26 @@ const stripReportBlocks = (content) => {
   return out.trim();
 };
 
+// The LLM often emits numbered questions as:
+//   1.
+//
+//   **System Landscape & Integration:** ...question...
+//   2.
+//
+//   **PLM as Decision Backbone:** ...
+// That causes ReactMarkdown to render orphan "1." "2." lines detached from
+// their question text. Normalise to proper single-line list items:
+//   1. **System Landscape & Integration:** ...
+const normalizeNumberedItems = (content) => {
+  // Collapse "<num>.\n\n**..." or "<num>.\n**..." into "<num>. **..."
+  return content
+    .replace(/^(\s*)(\d+)\.\s*\n+\s*(\*\*)/gm, '$1$2. $3')
+    // Also handle "<num>)" variants the model sometimes uses
+    .replace(/^(\s*)(\d+)\)\s*\n+\s*(\*\*)/gm, '$1$2. $3');
+};
+
+const cleanContent = (content) => normalizeNumberedItems(stripReportBlocks(content));
+
 // Detects the assistant's final "emit report" message
 const isReportEmission = (msg) =>
   msg.role === "assistant" && /ready_for_report|```json|# PPDT Capability Maturity Assessment Report/i.test(msg.content || "");
@@ -25,20 +45,25 @@ const AssistantBubble = ({ content, timestamp }) => (
   <div className="chat-message-assistant">
     <div className="flex items-start gap-3">
       <LogoMark className="w-8 h-8 rounded-full shrink-0 mt-1" radius={50} />
-      <div className="flex-1">
+      <div className="flex-1 min-w-0">
         <p className="text-xs text-[#C9A84C] font-medium mb-2">PortfolioHealth Advisor</p>
         <div className="text-white/80 prose prose-invert prose-sm max-w-none">
           <ReactMarkdown
             components={{
-              p: ({ children }) => <p className="mb-3 last:mb-0">{children}</p>,
-              strong: ({ children }) => <strong className="text-white">{children}</strong>,
-              ul: ({ children }) => <ul className="list-disc list-inside mb-3">{children}</ul>,
-              ol: ({ children }) => <ol className="list-decimal list-inside mb-3">{children}</ol>,
+              p: ({ children }) => <p className="mb-3 last:mb-0 leading-relaxed">{children}</p>,
+              strong: ({ children }) => <strong className="text-white font-semibold">{children}</strong>,
+              ul: ({ children }) => <ul className="list-disc pl-5 mb-3 space-y-2 marker:text-[#C9A84C]/70">{children}</ul>,
+              ol: ({ children }) => (
+                <ol className="list-decimal pl-6 mb-3 space-y-3 marker:text-[#C9A84C] marker:font-semibold">
+                  {children}
+                </ol>
+              ),
+              li: ({ children }) => <li className="pl-1 leading-relaxed">{children}</li>,
               code: ({ children }) => <code className="bg-white/[0.08] px-1 py-0.5 rounded text-[#C9A84C]">{children}</code>,
               pre: ({ children }) => <pre className="bg-white/[0.05] p-3 rounded-lg overflow-x-auto text-sm">{children}</pre>
             }}
           >
-            {stripReportBlocks(content)}
+            {cleanContent(content)}
           </ReactMarkdown>
         </div>
         <p className="text-xs text-white/25 mt-2">{new Date(timestamp).toLocaleTimeString()}</p>
