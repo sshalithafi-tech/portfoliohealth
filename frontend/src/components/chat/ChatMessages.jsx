@@ -1,9 +1,17 @@
-import { Loader2, FileText } from "lucide-react";
+import { Loader2, LayoutDashboard, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import LogoMark from "../LogoMark";
 
 const CONTACT_EMAIL = "shalitha.samarakoonmudiyanselage@student.oulu.fi";
+
+// Strips the backend JSON emission block from markdown before rendering
+const stripReportBlocks = (content) =>
+  content.replace(/```json[\s\S]*?```/g, '');
+
+// Detects the assistant's final "emit report" message
+const isReportEmission = (msg) =>
+  msg.role === "assistant" && /ready_for_report|```json/.test(msg.content || "");
 
 const AssistantBubble = ({ content, timestamp }) => (
   <div className="chat-message-assistant">
@@ -22,7 +30,7 @@ const AssistantBubble = ({ content, timestamp }) => (
               pre: ({ children }) => <pre className="bg-white/[0.05] p-3 rounded-lg overflow-x-auto text-sm">{children}</pre>
             }}
           >
-            {content.replace(/```json[\s\S]*?```/g, '')}
+            {stripReportBlocks(content)}
           </ReactMarkdown>
         </div>
         <p className="text-xs text-white/25 mt-2">{new Date(timestamp).toLocaleTimeString()}</p>
@@ -57,52 +65,93 @@ const TypingIndicator = () => (
 );
 
 const ClosingCard = ({ assessmentId }) => (
-  <div className="animate-fade-in p-5 rounded-2xl border border-[#C9A84C]/30 bg-[#C9A84C]/5 backdrop-blur-sm" data-testid="closing-statement-card">
-    <p className="text-white/80 text-sm leading-relaxed mb-4">
-      Thank you for completing this capability maturity assessment. If you would like further analysis, expert input, or tailored recommendations based on your results, please reach out via email to arrange a follow-up consultation:
-    </p>
-    <a href={`mailto:${CONTACT_EMAIL}`} className="text-[#C9A84C] hover:text-[#D4B85C] font-medium text-sm transition-colors">
-      {CONTACT_EMAIL}
-    </a>
-    <div className="flex gap-3 mt-4">
+  <div
+    data-testid="closing-statement-card"
+    className="animate-fade-in p-5 sm:p-6 rounded-2xl border border-[#C9A84C]/30 bg-gradient-to-br from-[#C9A84C]/10 to-transparent backdrop-blur-xl"
+  >
+    <div className="flex items-center gap-3 mb-4">
+      <LogoMark className="w-9 h-9 rounded-lg shrink-0" radius={14} />
+      <div>
+        <p className="text-[11px] uppercase tracking-[0.2em] text-[#C9A84C]">Assessment Complete</p>
+        <p className="text-sm text-white/60">Your report is ready on the dashboard.</p>
+      </div>
+    </div>
+
+    <h3 className="text-base sm:text-lg font-semibold text-white font-['Outfit'] mb-3">
+      Thank you for completing this PPDT Capability Maturity Assessment.
+    </h3>
+
+    <div className="space-y-3 text-sm text-white/70 leading-relaxed">
+      <p>
+        This assessment is part of a Master's thesis at the University of Oulu: <em>"To develop and validate a PPM Decision-Making Capability Assessment Framework grounded in Hannila's Product Wellbeing PPDT model — identifying which organizational capability gaps most critically impair product portfolio decisions."</em> It is based on the doctoral research of Hannu Hannila and related peer-reviewed studies from the Industrial Engineering and Management department, under the supervision of Professor Janne Härkönen.
+      </p>
+      <p>
+        If you would like further analysis or tailored recommendations based on your results, please contact:{" "}
+        <a href={`mailto:${CONTACT_EMAIL}`} className="text-[#C9A84C] hover:text-[#D4B85C] font-medium">
+          {CONTACT_EMAIL}
+        </a>
+      </p>
+      <p className="text-xs text-white/45 italic">
+        This report is confidential. Distribution without authorisation is not permitted.
+      </p>
+      <p className="text-[11px] uppercase tracking-wider text-white/35 pt-1">
+        PortfolioHealth Advisor · PPM Capability Maturity Assessment · University of Oulu
+      </p>
+    </div>
+
+    <div className="flex flex-col sm:flex-row gap-3 mt-5">
+      <Link
+        to="/dashboard"
+        data-testid="go-to-dashboard-btn"
+        className="flex items-center justify-center gap-2 px-4 py-2.5 btn-liquid rounded-xl text-sm font-medium"
+      >
+        <LayoutDashboard size={16} />
+        Go to Dashboard to Download Report
+      </Link>
       <Link
         to={`/assessments/${assessmentId}/report`}
-        className="flex items-center gap-2 px-4 py-2 btn-liquid rounded-xl text-sm"
-        data-testid="view-report-from-chat"
+        data-testid="view-report-inline-btn"
+        className="flex items-center justify-center gap-2 px-4 py-2.5 btn-glass rounded-xl text-sm"
       >
         <FileText size={16} />
-        View Report
-      </Link>
-      <Link to="/dashboard" className="flex items-center gap-2 px-4 py-2 btn-glass rounded-xl text-sm">
-        Go to Dashboard
+        View Report Now
       </Link>
     </div>
   </div>
 );
 
-export const ChatMessages = ({ messages, sending, isCompleted, assessmentId, messagesEndRef }) => (
-  <div className="flex-1 overflow-y-auto px-6 py-6 relative z-10">
-    <div className="max-w-3xl mx-auto space-y-6">
-      {messages.map((msg, idx) => (
-        <div
-          key={idx}
-          data-testid={`chat-message-${idx}`}
-          className={`animate-fade-in ${msg.role === "user" ? "flex justify-end" : ""}`}
-          style={{ animationDelay: `${idx * 0.05}s` }}
-        >
-          {msg.role === "user"
-            ? <UserBubble content={msg.content} timestamp={msg.timestamp} />
-            : <AssistantBubble content={msg.content} timestamp={msg.timestamp} />}
-        </div>
-      ))}
+export const ChatMessages = ({ messages, sending, isCompleted, assessmentId, messagesEndRef }) => {
+  // When the assessment is completed, hide the final "report emission" message
+  // (backend still stores it for audit), and show only the closing card instead.
+  const lastIdx = messages.length - 1;
+  const last = messages[lastIdx];
+  const hideLast = isCompleted && last && isReportEmission(last);
+  const visible = hideLast ? messages.slice(0, lastIdx) : messages;
 
-      {sending && <TypingIndicator />}
+  return (
+    <div className="flex-1 overflow-y-auto px-6 py-6 relative z-10">
+      <div className="max-w-3xl mx-auto space-y-6">
+        {visible.map((msg, idx) => (
+          <div
+            key={idx}
+            data-testid={`chat-message-${idx}`}
+            className={`animate-fade-in ${msg.role === "user" ? "flex justify-end" : ""}`}
+            style={{ animationDelay: `${idx * 0.05}s` }}
+          >
+            {msg.role === "user"
+              ? <UserBubble content={msg.content} timestamp={msg.timestamp} />
+              : <AssistantBubble content={msg.content} timestamp={msg.timestamp} />}
+          </div>
+        ))}
 
-      {isCompleted && <ClosingCard assessmentId={assessmentId} />}
+        {sending && <TypingIndicator />}
 
-      <div ref={messagesEndRef} />
+        {isCompleted && <ClosingCard assessmentId={assessmentId} />}
+
+        <div ref={messagesEndRef} />
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default ChatMessages;
