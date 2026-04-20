@@ -2,6 +2,7 @@ import { Loader2, LayoutDashboard, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import LogoMark from "../LogoMark";
+import FinalReportIndicator from "./FinalReportIndicator";
 
 const CONTACT_EMAIL = "shalitha.samarakoonmudiyanselage@student.oulu.fi";
 
@@ -127,7 +128,7 @@ const ClosingCard = ({ assessmentId }) => (
   </div>
 );
 
-export const ChatMessages = ({ messages, sending, isCompleted, assessmentId, messagesEndRef }) => {
+export const ChatMessages = ({ messages, sending, isCompleted, assessmentId, messagesEndRef, isFinalTurn }) => {
   // When the assessment is completed OR the last message is clearly a report
   // emission (contains report header / JSON block), hide that noisy final
   // message and show the Closing Card instead.
@@ -154,7 +155,7 @@ export const ChatMessages = ({ messages, sending, isCompleted, assessmentId, mes
           </div>
         ))}
 
-        {sending && <TypingIndicator />}
+        {sending && (isFinalTurn ? <FinalReportIndicator /> : <TypingIndicator />)}
 
         {showClosing && <ClosingCard assessmentId={assessmentId} />}
 

@@ -267,6 +267,12 @@ select { background-color: #0d1a2e; color: #e0e0e0; }
 .animate-fade-in { animation: fadeIn 0.35s ease-out forwards; }
 .animate-pulse-glow { animation: pulse-glow 2.5s ease-in-out infinite; }
 
+@keyframes progress-sweep {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(400%); }
+}
+.animate-progress-sweep { animation: progress-sweep 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+
 .stagger-children > * { opacity: 0; animation: fadeIn 0.35s ease-out forwards; }
 .stagger-children > *:nth-child(1) { animation-delay: 0.04s; }
 .stagger-children > *:nth-child(2) { animation-delay: 0.08s; }

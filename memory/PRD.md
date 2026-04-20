@@ -68,6 +68,7 @@ Currently active: 5-turn Hannila/PPDT prompt with mandatory JSON emission (ready
   - Tolerant `extract_report_json` — now handles fenced, untagged-fenced, and un-fenced JSON via brace-balanced scan.
   - New `POST /api/assessments/{id}/regenerate-report` endpoint: first tries cheap salvage by re-parsing the last assistant message, then falls back to a JSON-only LLM follow-up using existing chat history.
   - "Report Not Ready" page now has a **Regenerate Report** button that calls this endpoint.
+- **Final-report streaming progress indicator (2026-04-20)** — new `FinalReportIndicator.jsx` that replaces the generic "Thinking" dots when the user submits the likely-final turn (≥10 messages). Shows a shimmer gradient bar, rotating stage labels (Synthesising… → Scoring pillars… → Identifying bottleneck… → Drafting roadmap… → Finalising consultant's note…), elapsed-seconds counter, and a subtle "taking longer than usual" hint after 60s. New `progress-sweep` keyframe in `index.css`. Paired with the Regenerate button, a token-exhaustion / network hiccup now looks visually distinct from a real completion.
 
 ## Testing
 - `backend/tests/test_completion_pipeline.py` — synthetic pipeline test (parser → DB → PDF). All 7 checks pass. ✅

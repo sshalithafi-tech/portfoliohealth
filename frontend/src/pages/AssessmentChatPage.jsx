@@ -125,6 +125,11 @@ const AssessmentChatPage = () => {
   }
 
   const isCompleted = assessment?.status === "completed";
+  // Hannila's 6-turn protocol: Context + 4 pillars + Governance ≈ 12 total messages
+  // (alternating user/assistant). If the user has answered 5 turns (~10 msgs) and
+  // is now sending the governance answer, the next assistant response is the full
+  // report emission — show the dedicated progress indicator.
+  const isFinalTurn = sending && messages.length >= 10;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -136,6 +141,7 @@ const AssessmentChatPage = () => {
         isCompleted={isCompleted}
         assessmentId={id}
         messagesEndRef={messagesEndRef}
+        isFinalTurn={isFinalTurn}
       />
       <ChatInput
         inputRef={inputRef}
