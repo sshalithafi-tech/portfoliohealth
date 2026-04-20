@@ -70,32 +70,55 @@ const MANAGEMENT_POINTS = [
   "In organisations where leadership actively participates in stage-gate reviews and portfolio prioritisation, maturity levels increase faster and more sustainably.",
 ];
 
-export const ManagementCommitment = ({ report }) => (
-  <div className="p-6 glass-surface-highlight rounded-xl">
-    <div className="flex items-center gap-3 mb-4">
-      <div className="w-10 h-10 rounded-lg bg-[#34D399]/15 flex items-center justify-center"><ArrowUpRight size={22} className="text-[#34D399]" /></div>
-      <div>
-        <h2 className="text-lg font-semibold text-white font-['Outfit']">Management Commitment</h2>
-        <p className="text-xs text-white/40 italic">The multiplier effect on all capability investments</p>
+const commitmentTone = (level) => {
+  const k = String(level || "").toLowerCase();
+  if (k === "high") return { color: "#34D399", label: "HIGH" };
+  if (k === "medium") return { color: "#C9A84C", label: "MEDIUM" };
+  if (k === "low") return { color: "#EF4444", label: "LOW" };
+  return null;
+};
+
+export const ManagementCommitment = ({ report }) => {
+  const rating = commitmentTone(report.management_commitment);
+  return (
+    <div data-testid="management-commitment-section" className="p-6 glass-surface-highlight rounded-xl">
+      <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-[#34D399]/15 flex items-center justify-center"><ArrowUpRight size={22} className="text-[#34D399]" /></div>
+          <div>
+            <h2 className="text-lg font-semibold text-white font-['Outfit']">Management Commitment</h2>
+            <p className="text-xs text-white/40 italic">The multiplier effect on all capability investments</p>
+          </div>
+        </div>
+        {rating && (
+          <div
+            data-testid="management-commitment-badge"
+            className="px-4 py-2 rounded-xl flex items-center gap-2 font-['Outfit']"
+            style={{ backgroundColor: `${rating.color}18`, borderColor: `${rating.color}40`, borderWidth: 1 }}
+          >
+            <span className="text-[10px] uppercase tracking-wider" style={{ color: rating.color }}>Rating</span>
+            <span className="text-base font-bold" style={{ color: rating.color }}>{rating.label}</span>
+          </div>
+        )}
       </div>
-    </div>
-    <p className="text-white/60 text-sm mb-4 leading-relaxed">
-      Management commitment acts as a multiplier on all capability investments. Without leadership buy-in, investments in People training and Process redesign produce limited, short-lived change. With it, even modest interventions can rapidly elevate maturity across all four PPDT dimensions.
-    </p>
-    <ul className="space-y-2 mb-4">
-      {MANAGEMENT_POINTS.map((p, i) => (
-        <li key={i} className="flex items-start gap-2 text-sm text-white/50"><span className="text-[#34D399] mt-0.5">-</span>{p}</li>
-      ))}
-    </ul>
-    {report.management_commitment_assessment && (
-      <p className="text-white/70 text-sm italic leading-relaxed p-3 bg-white/[0.03] rounded-lg border border-white/[0.06]">
-        {report.management_commitment_assessment}
+      <p className="text-white/60 text-sm mb-4 leading-relaxed">
+        Management commitment acts as a multiplier on all capability investments. Without leadership buy-in, investments in People training and Process redesign produce limited, short-lived change. With it, even modest interventions can rapidly elevate maturity across all four PPDT dimensions.
       </p>
-    )}
-    <div className="mt-4 p-3 bg-[#34D399]/5 border border-[#34D399]/15 rounded-lg">
+      <ul className="space-y-2 mb-4">
+        {MANAGEMENT_POINTS.map((p, i) => (
+          <li key={i} className="flex items-start gap-2 text-sm text-white/50"><span className="text-[#34D399] mt-0.5">-</span>{p}</li>
+        ))}
+      </ul>
+      {report.management_commitment_assessment && (
+        <p className="text-white/70 text-sm italic leading-relaxed p-3 bg-white/[0.03] rounded-lg border border-white/[0.06]">
+          {report.management_commitment_assessment}
+        </p>
+      )}
+      <div className="mt-4 p-3 bg-[#34D399]/5 border border-[#34D399]/15 rounded-lg">
       <p className="text-[#34D399] text-xs font-medium">
         "If management commitment is low, prioritise leadership alignment before investing in tools or training — otherwise capability improvements will not stick."
       </p>
     </div>
   </div>
-);
+  );
+};

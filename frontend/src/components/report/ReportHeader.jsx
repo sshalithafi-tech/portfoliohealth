@@ -1,7 +1,18 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, MessageSquare, Download, Building2, User, Calendar } from "lucide-react";
+import { ArrowLeft, MessageSquare, Download, Building2, User, Calendar, Layers, Target } from "lucide-react";
 
-export const ReportHeader = ({ assessmentId, assessment, onDownload, downloading }) => (
+const Chip = ({ icon: Icon, label, value, testId }) => {
+  if (!value) return null;
+  return (
+    <div data-testid={testId} className="flex items-center gap-2">
+      <Icon size={16} className="text-[#C9A84C]" />
+      <span className="text-white/50">{label}:</span>
+      <span className="text-white font-medium capitalize">{value}</span>
+    </div>
+  );
+};
+
+export const ReportHeader = ({ assessmentId, assessment, onDownload, downloading, businessModel, strategicPriority }) => (
   <>
     <div className="flex flex-col gap-4">
       <div className="flex items-start gap-3">
@@ -16,19 +27,21 @@ export const ReportHeader = ({ assessmentId, assessment, onDownload, downloading
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <Link to={`/assessments/${assessmentId}`} className="flex items-center gap-2 px-3 py-2 btn-glass rounded-xl text-sm">
+        <Link to={`/assessments/${assessmentId}`} data-testid="view-chat-btn" className="flex items-center gap-2 px-3 py-2 btn-glass rounded-xl text-sm">
           <MessageSquare size={16} /><span className="hidden sm:inline">View Chat</span>
         </Link>
-        <button onClick={onDownload} disabled={downloading} className="flex items-center gap-2 px-4 py-2 btn-liquid rounded-xl text-sm disabled:opacity-50">
+        <button onClick={onDownload} disabled={downloading} data-testid="export-pdf-btn" className="flex items-center gap-2 px-4 py-2 btn-liquid rounded-xl text-sm disabled:opacity-50">
           <Download size={16} />{downloading ? "..." : "Export PDF"}
         </button>
       </div>
     </div>
 
-    <div className="p-3 sm:p-4 glass-surface-highlight rounded-xl flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-6 text-sm">
-      <div className="flex items-center gap-2"><Building2 size={16} className="text-[#C9A84C]" /><span className="text-white/50">Company:</span><span className="text-white font-medium">{assessment.company_name}</span></div>
-      <div className="flex items-center gap-2"><User size={16} className="text-[#C9A84C]" /><span className="text-white/50">Respondent:</span><span className="text-white">{assessment.respondent_name}</span></div>
-      <div className="flex items-center gap-2"><Calendar size={16} className="text-[#C9A84C]" /><span className="text-white/50">Date:</span><span className="text-white">{new Date(assessment.completed_at || assessment.created_at).toLocaleDateString()}</span></div>
+    <div data-testid="report-context-chips" className="p-3 sm:p-4 glass-surface-highlight rounded-xl flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-6 text-sm">
+      <Chip icon={Building2} label="Company" value={assessment.company_name} testId="chip-company" />
+      <Chip icon={User} label="Respondent" value={assessment.respondent_name} testId="chip-respondent" />
+      <Chip icon={Calendar} label="Date" value={new Date(assessment.completed_at || assessment.created_at).toLocaleDateString()} testId="chip-date" />
+      <Chip icon={Layers} label="Business Model" value={businessModel} testId="chip-business-model" />
+      <Chip icon={Target} label="Strategic Priority" value={strategicPriority} testId="chip-strategic-priority" />
     </div>
   </>
 );

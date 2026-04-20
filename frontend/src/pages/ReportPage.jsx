@@ -13,6 +13,7 @@ import ContributionChart from "../components/report/ContributionChart";
 import ScoreBreakdown from "../components/report/ScoreBreakdown";
 import ScoreMethodology from "../components/report/ScoreMethodology";
 import MaturityLevelsPanel from "../components/report/MaturityLevelsPanel";
+import BottleneckSection from "../components/report/BottleneckSection";
 import { GovernanceObservations, GovernanceOwnership, ManagementCommitment } from "../components/report/GovernanceSections";
 import { FindingsAndGaps, DecisionVulnerability, ImprovementRoadmap } from "../components/report/FindingsAndRoadmap";
 import { BenchmarkAndNote, ClosingStatement, ReportFooter } from "../components/report/BenchmarkAndClosing";
@@ -63,18 +64,38 @@ const ReportPage = () => {
   const scores = report.scores || {};
   const levelNames = report.level_names || {};
   const weightsRaw = report.weights_raw || { people: 5, process: 5, data: 5, technology: 5 };
-  const rawTotal = Object.values(weightsRaw).reduce((a, b) => a + b, 0) || 1;
+  const rawTotal = Object.values(weightsRaw).reduce((a, b) => a + (Number(b) || 0), 0) || 1;
   const weightsNorm = report.weights_normalised || Object.fromEntries(
-    DIMENSIONS.map(d => [d, (weightsRaw[d] || 5) / rawTotal])
+    DIMENSIONS.map(d => [d, (Number(weightsRaw[d]) || 5) / rawTotal])
   );
   const overallLevel = Math.round(scores.overall || 0);
+  const contextualScore = typeof report.contextual_score === "number" ? report.contextual_score : null;
+  const businessModel = report.business_model || assessment.business_model;
+  const strategicPriority = report.strategic_priority || assessment.strategic_priority;
 
   return (
     <Layout>
       <div className="space-y-6 sm:space-y-8">
-        <ReportHeader assessmentId={id} assessment={assessment} onDownload={downloadPDF} downloading={downloading} />
-        <OverallScoreCard scores={scores} levelNames={levelNames} overallLevel={overallLevel} />
+        <ReportHeader
+          assessmentId={id}
+          assessment={assessment}
+          onDownload={downloadPDF}
+          downloading={downloading}
+          businessModel={businessModel}
+          strategicPriority={strategicPriority}
+        />
+        <OverallScoreCard
+          scores={scores}
+          levelNames={levelNames}
+          overallLevel={overallLevel}
+          contextualScore={contextualScore}
+        />
         <DimensionScoreCards scores={scores} levelNames={levelNames} />
+        <BottleneckSection
+          bottleneckPillar={report.bottleneck_pillar}
+          scores={scores}
+          report={report}
+        />
         <ContributionChart scores={scores} weightsNorm={weightsNorm} />
         <ScoreBreakdown scores={scores} weightsRaw={weightsRaw} weightsNorm={weightsNorm} />
         <ScoreMethodology scores={scores} weightsNorm={weightsNorm} />

@@ -123,7 +123,7 @@ def build_pdf_closing(story, styles):
 # FULL ASSESSMENT SECTIONS
 # ============================================================
 
-def build_company_info(story, assessment, body):
+def build_company_info(story, assessment, report, body):
     story.append(Paragraph(f"<b>Company:</b> {assessment.get('company_name', 'N/A')}", body))
     story.append(Paragraph(f"<b>Industry:</b> {assessment.get('company_industry', 'N/A')}", body))
     story.append(Paragraph(
@@ -131,14 +131,29 @@ def build_company_info(story, assessment, body):
         f"({assessment.get('respondent_role', 'N/A')})", body))
     date_str = assessment.get('completed_at', assessment.get('created_at', 'N/A')) or 'N/A'
     story.append(Paragraph(f"<b>Date:</b> {date_str[:10]}", body))
+    bm = report.get('business_model')
+    sp = report.get('strategic_priority')
+    if bm:
+        story.append(Paragraph(f"<b>Business Model:</b> {bm}", body))
+    if sp:
+        story.append(Paragraph(f"<b>Strategic Priority:</b> {sp}", body))
     story.append(Spacer(1, 20))
 
 
-def build_overall_score(story, scores, level_names, heading):
-    overall = scores.get("overall", "N/A")
+def build_overall_score(story, scores, report, level_names, heading, body):
+    equal = scores.get("overall", "N/A")
+    ctx = report.get("contextual_score")
+    lvl_overall = level_names.get('overall', 'N/A')
     story.append(Paragraph(
-        f"<b>OVERALL MATURITY LEVEL:</b> {overall} / 5.0 — {level_names.get('overall', 'N/A')}",
+        "<b>OVERALL MATURITY \u2014 DUAL SCORE</b>",
         heading))
+    story.append(Paragraph(
+        f"<b>Equal-Weighted (primary):</b> {equal} / 5.0 \u2014 {lvl_overall}",
+        body))
+    if isinstance(ctx, (int, float)):
+        story.append(Paragraph(
+            f"<b>Contextual (secondary):</b> {ctx:.1f} / 5.0 \u2014 adjusted for business model + stated priority",
+            body))
     story.append(Spacer(1, 12))
 
 
@@ -207,15 +222,15 @@ def build_governance_sections(story, report, heading, body, gov):
     gov_obs = report.get("governance_observations", {}) or {}
     has_gov = any(v and "N/A" not in str(v) and "below" not in str(v).lower() for v in gov_obs.values())
     if has_gov:
-        story.append(Paragraph("GOVERNANCE INDICATORS (Levels 4–5)", heading))
+        story.append(Paragraph("GOVERNANCE INDICATORS (Levels 4\u20135)", heading))
         for dim in DIMENSIONS:
             obs = gov_obs.get(dim, "")
             if obs and "N/A" not in str(obs) and "below" not in str(obs).lower():
-                story.append(Paragraph(f"<b>{dim.capitalize()} — Governance:</b> {obs}", gov))
+                story.append(Paragraph(f"<b>{dim.capitalize()} \u2014 Governance:</b> {obs}", gov))
                 story.append(Spacer(1, 4))
         story.append(Spacer(1, 12))
 
-    story.append(Paragraph("GOVERNANCE & OWNERSHIP", heading))
+    story.append(Paragraph("GOVERNANCE &amp; OWNERSHIP", heading))
     story.append(Paragraph(
         "Governance is the connective tissue between all four PPDT dimensions. Without clear "
         "ownership and accountability, even high capability produces unreliable portfolio decisions.",
@@ -224,51 +239,118 @@ def build_governance_sections(story, report, heading, body, gov):
         story.append(Paragraph(f"<i>{report['governance_assessment']}</i>", body))
     story.append(Spacer(1, 8))
 
-    story.append(Paragraph("MANAGEMENT COMMITMENT", heading))
+
+def build_bottleneck_section(story, report, scores, heading, body):
+    """Explicit bottleneck pillar with score + interpretation."""
+    bottleneck = report.get("bottleneck_pillar")
+    if not bottleneck:
+        return
+    key = str(bottleneck).lower()
+    score = scores.get(key, "N/A")
+    story.append(Paragraph("BOTTLENECK PILLAR", heading))
     story.append(Paragraph(
-        "Management commitment acts as a multiplier on all capability investments. Without leadership "
-        "buy-in, PPM improvements produce limited, short-lived change.",
+        f"<b>{bottleneck.capitalize()}</b> (score: {score} / 5) is the lowest-scoring pillar and "
+        "caps real-world capability regardless of other scores. The bottleneck is where "
+        "capability investment will deliver the highest marginal return.",
+        body))
+    interp = (report.get("pillar_interpretations") or {}).get(key)
+    if interp:
+        story.append(Paragraph(f"<i>{interp}</i>", body))
+    story.append(Spacer(1, 12))
+
+
+def build_management_commitment_section(story, report, heading, body):
+    """Dedicated management-commitment section with Low/Med/High rating."""
+    story.append(Paragraph("MANAGEMENT COMMITMENT", heading))
+    rating = report.get("management_commitment")
+    if rating:
+        story.append(Paragraph(f"<b>Rating:</b> {rating}", body))
+    story.append(Paragraph(
+        "Management commitment acts as a multiplier on all capability investments. Without "
+        "leadership buy-in, PPM improvements produce limited, short-lived change.",
         body))
     if report.get("management_commitment_assessment"):
         story.append(Paragraph(f"<i>{report['management_commitment_assessment']}</i>", body))
     story.append(Spacer(1, 12))
 
 
+def build_decision_vulnerability_section(story, report, heading, body):
+    """Decision-type vulnerability with the 4 risk ratings as a table."""
+    story.append(Paragraph("DECISION-TYPE VULNERABILITY ANALYSIS", heading))
+    ratings = report.get("decision_vulnerability_ratings") or {}
+    if ratings:
+        data = [["Decision Type", "Risk Level"]]
+        labels = [
+            ("discontinuation", "Discontinuation"),
+            ("new_launch", "New Launch"),
+            ("product_change", "Product Change"),
+            ("portfolio_investment", "Portfolio Investment"),
+        ]
+        for key, label in labels:
+            data.append([label, str(ratings.get(key, "\u2013"))])
+        t = Table(data, colWidths=[200, 120])
+        t.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), NAVY),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 9),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 6),
+            ('TOPPADDING', (0, 0), (-1, 0), 6),
+            ('BOTTOMPADDING', (0, 1), (-1, -1), 5),
+            ('TOPPADDING', (0, 1), (-1, -1), 5),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, ROW_ALT]),
+            ('LINEBELOW', (0, 0), (-1, 0), 1.5, GOLD),
+            ('LINEBELOW', (0, 1), (-1, -1), 0.4, LINE_LIGHT),
+        ]))
+        story.append(t)
+        story.append(Spacer(1, 8))
+    narrative = report.get("decision_vulnerability", "")
+    if narrative:
+        story.append(Paragraph(narrative, body))
+    story.append(Spacer(1, 12))
+
+
 def build_findings_and_gaps(story, report, heading, body):
     story.append(Paragraph("KEY FINDINGS", heading))
     for item in report.get("key_findings", []) or []:
-        story.append(Paragraph(f"• {item}", body))
+        story.append(Paragraph(f"\u2022 {item}", body))
     story.append(Spacer(1, 12))
 
     story.append(Paragraph("CRITICAL CAPABILITY GAPS", heading))
     for item in report.get("critical_gaps", []) or []:
-        story.append(Paragraph(f"• {item}", body))
-    story.append(Spacer(1, 12))
-
-    story.append(Paragraph("DECISION-TYPE VULNERABILITY ANALYSIS", heading))
-    story.append(Paragraph(report.get("decision_vulnerability", "N/A"), body))
+        story.append(Paragraph(f"\u2022 {item}", body))
     story.append(Spacer(1, 12))
 
 
 def build_roadmap(story, roadmap, heading, body):
     story.append(Paragraph("IMPROVEMENT ROADMAP", heading))
     phases = [
-        ("immediate", "PHASE 1 — IMMEDIATE (0–3 months)"),
-        ("short_term", "PHASE 2 — SHORT-TERM (3–12 months)"),
-        ("strategic", "PHASE 3 — STRATEGIC (12+ months)"),
+        ("immediate", "PHASE 1 \u2014 IMMEDIATE (0\u20133 months)"),
+        ("short_term", "PHASE 2 \u2014 SHORT-TERM (3\u201312 months)"),
+        ("strategic", "PHASE 3 \u2014 STRATEGIC (12+ months)"),
     ]
     for key, title in phases:
         phase_data = roadmap.get(key, []) if roadmap else []
         story.append(Paragraph(f"<b>{title}</b>", body))
-        actions = phase_data.get("actions", phase_data) if isinstance(phase_data, dict) else phase_data
+        if isinstance(phase_data, dict):
+            actions = phase_data.get("actions", [])
+        else:
+            actions = phase_data
+        # actions may be a list or a single string
         if isinstance(actions, list):
             for a in actions:
-                story.append(Paragraph(f"  • {a}", body))
+                story.append(Paragraph(f"  \u2022 {a}", body))
+        elif isinstance(actions, str) and actions:
+            story.append(Paragraph(f"  \u2022 {actions}", body))
         if isinstance(phase_data, dict):
+            if phase_data.get("pillar_focus"):
+                story.append(Paragraph(f"  <i>Pillar Focus:</i> {phase_data['pillar_focus']}", body))
             if phase_data.get("governance_milestone"):
                 story.append(Paragraph(f"  <i>Governance Milestone:</i> {phase_data['governance_milestone']}", body))
-            if phase_data.get("management_commitment"):
-                story.append(Paragraph(f"  <i>Management Commitment:</i> {phase_data['management_commitment']}", body))
+            # Support both management_required (new) and management_commitment (old) field names
+            mgmt = phase_data.get("management_required") or phase_data.get("management_commitment")
+            if mgmt:
+                story.append(Paragraph(f"  <i>Management Commitment:</i> {mgmt}", body))
             if phase_data.get("expected_gain"):
                 story.append(Paragraph(f"  <i>Expected Gain:</i> {phase_data['expected_gain']}", body))
         story.append(Spacer(1, 6))
@@ -306,13 +388,16 @@ def build_full_assessment_pdf(assessment: dict) -> BytesIO:
 
     story = []
     build_pdf_header(story, styles, "PPDT CAPABILITY MATURITY ASSESSMENT REPORT")
-    build_company_info(story, assessment, body)
-    build_overall_score(story, scores, report.get("level_names", {}), heading)
+    build_company_info(story, assessment, report, body)
+    build_overall_score(story, scores, report, report.get("level_names", {}), heading, body)
     build_dimension_scores_table(story, scores, report.get("level_names", {}),
                                  report.get("dimension_summaries", {}), heading)
     build_weighted_breakdown(story, scores, weights_raw, weights_norm, heading)
+    build_bottleneck_section(story, report, scores, heading, body)
     build_governance_sections(story, report, heading, body, gov)
+    build_management_commitment_section(story, report, heading, body)
     build_findings_and_gaps(story, report, heading, body)
+    build_decision_vulnerability_section(story, report, heading, body)
     build_roadmap(story, report.get("roadmap", {}), heading, body)
     build_benchmark_and_note(story, report, heading, body)
     build_pdf_closing(story, styles)
