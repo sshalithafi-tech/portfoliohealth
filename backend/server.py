@@ -609,16 +609,19 @@ Current Phase: {assessment.get('current_phase', 'welcome')}
     if not claude_messages:
         claude_messages = [{"role": "user", "content": request.message}]
 
-    # Initialize Claude chat via Anthropic SDK
+    # Initialize Claude chat via Emergent integrations
     try:
-        anthropic_client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
-        message = anthropic_client.messages.create(
-            model="claude-sonnet-4-5",
-            max_tokens=2048,
-            system=full_system,
-            messages=claude_messages
-        )
-        response = message.content[0].text
+        chat = LlmChat(
+            api_key=os.environ.get("EMERGENT_LLM_KEY"),
+            session_id=f"assessment-chat-{assessment_id}",
+            system_message=full_system,
+        ).with_model("anthropic", "claude-sonnet-4-5-20250929")
+        for msg in claude_messages:
+            if msg["role"] == "user":
+                chat.messages.append({"role": "user", "content": msg["content"]})
+            elif msg["role"] == "assistant":
+                chat.messages.append({"role": "assistant", "content": msg["content"]})
+        response = await chat.send_message(UserMessage(text=request.message))
     except Exception as e:
         logging.error(f"LLM error: {e}")
         raise HTTPException(status_code=500, detail="Failed to get AI response. Please try again.")
@@ -727,14 +730,12 @@ Respondent: {assessment.get('respondent_name', 'Unknown')} ({assessment.get('res
     full_system = PPDT_SYSTEM_PROMPT + "\n\nCurrent Assessment Context:\n" + company_context
     
     try:
-        anthropic_client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
-        message = anthropic_client.messages.create(
-            model="claude-sonnet-4-5",
-            max_tokens=2048,
-            system=full_system,
-            messages=[{"role": "user", "content": "Please begin the assessment by introducing yourself and asking the first question."}]
-        )
-        response = message.content[0].text
+        chat = LlmChat(
+            api_key=os.environ.get("EMERGENT_LLM_KEY"),
+            session_id=f"assessment-start-{assessment_id}",
+            system_message=full_system,
+        ).with_model("anthropic", "claude-sonnet-4-5-20250929")
+        response = await chat.send_message(UserMessage(text="Please begin the assessment by introducing yourself and asking the first question."))
     except Exception as e:
         logging.error(f"LLM error: {e}")
         raise HTTPException(status_code=500, detail="Failed to start assessment")
