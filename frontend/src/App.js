@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, createContext, useContext } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
 import axios from "axios";
 import { Toaster } from "sonner";
 
@@ -156,7 +156,7 @@ const LiquidBackground = () => (
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <HashRouter>
         <LiquidBackground />
         <Toaster position="top-right" richColors />
         <div className="relative z-10">
@@ -174,7 +174,7 @@ function App() {
             <Route path="/quick-assessment/:id/results" element={<QuickResultsPage />} />
           </Routes>
         </div>
-      </BrowserRouter>
+      </HashRouter>
     </AuthProvider>
   );
 }
