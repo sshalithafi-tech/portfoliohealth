@@ -1,57 +1,41 @@
-# PortfolioHealth Advisor - Product Requirements Document
-
-## Original Problem Statement
-SaaS application for PPM Capability Maturity Assessment across People, Process, Data, and Technology (PPDT).
+# PortfolioHealth Advisor - PRD
 
 ## Brand Identity
 - **Name**: PortfolioHealth Advisor
-- **Contact Email**: shalitha.samarakoonmudiyanselage@student.oulu.fi
-- **Custom Domain**: portfoliohealth.fi
-- **Theme**: Glassmorphism + Liquid Glass
+- **Theme**: Deep Navy Corporate (#0A1628, gold #C9A84C, silver glass)
+- **Logo**: Gold shield with ascending bar chart (geometric, professional)
+- **Contact**: shalitha.samarakoonmudiyanselage@student.oulu.fi
+- **Domain**: portfoliohealth.fi
 
 ## Architecture
-- Frontend: React + Tailwind CSS + Shadcn/UI
-- Backend: FastAPI (Python)
-- Database: MongoDB
-- AI: Claude Sonnet 4.5 via Emergent LLM Key (emergentintegrations)
-- PDF: ReportLab
+React + Tailwind + FastAPI + MongoDB + Claude Sonnet 4.5 (Emergent LLM Key)
 
-## What's Been Implemented
+## Color Palette
+- Background: #0A1628 (deep navy)
+- Gold accent: #C9A84C
+- Blue: #60A5FA
+- Green: #34D399
+- Red: #EF4444
+- Purple: #A78BFA
 
-### Core Features
-- JWT Auth with Bearer token (localStorage) — works cross-domain
-- Admin seeded account (admin@ppdt.com / Admin123!)
-- Dashboard with stats, radar charts, recent assessments
-- Company management (CRUD + DELETE with confirmation)
-- Full AI Assessment Chat (PPDT phases + governance indicators at L4-5)
-- Quick Assessment (15 questions, no login, instant scoring)
-- PDF Reports with logo header, governance section, closing statement
-- Admin Panel (all assessments, all users, CSV export)
-- In-app Notifications (bell icon, unread count, mark read)
-- Assessment auto-redirect to dashboard on completion
-- Closing statement with contact email in chat + report + PDF
-
-### Design
-- Glassmorphism + Liquid Glass theme across all pages
-- Custom generated logo (shield + pulse + bars)
+## Implemented Features
+- JWT Auth (Bearer token, localStorage)
+- Admin seeded account
+- Dashboard with PPDT radar chart
+- Company CRUD + Delete + Download
+- Full AI Assessment Chat (8 phases incl. strategic weighting)
+- Quick Assessment (15 questions, no login)
+- Report Page (9 sections: chart, breakdown, methodology, maturity levels, governance, management, findings, roadmap, closing)
+- PDF Reports with corporate header
+- Admin Panel (all data, CSV export, PDF download)
+- In-app Notifications
+- HashRouter (page refresh works)
 - Mobile responsive
-- 3D liquid glass auth pages
-
-### Governance Indicators (L4-5)
-- People: Role-based data ownership, accountability frameworks
-- Process: Review cycles, change control, escalation paths, audit trails
-- Data: Governance policies, stewardship roles, data quality SLAs
-- Technology: Access control, integration governance, PLM audit
+- Deep Navy Corporate glassmorphism theme
 
 ## Key API Endpoints
-- Auth: POST /api/auth/register, /api/auth/login, /api/auth/logout, GET /api/auth/me
-- Companies: GET/POST/DELETE /api/companies
-- Assessments: GET/POST /api/assessments, POST /api/assessments/{id}/start, POST /api/assessments/{id}/chat
-- PDF: GET /api/assessments/{id}/pdf, GET /api/quick-assessment/{id}/pdf
-- Notifications: GET /api/notifications, GET /api/notifications/unread-count, PATCH /api/notifications/{id}/read, POST /api/notifications/read-all
-- Admin: GET /api/admin/stats, /api/admin/assessments, /api/admin/quick-assessments, /api/admin/export/*
+Auth, Companies, Assessments, Chat, PDF, Notifications, Admin, Quick Assessment
 
 ## Backlog
-- P2: Email notifications for assessment completions
-- P2: Advanced analytics/benchmarking comparisons
-- P3: Multi-language support
+- P2: Email notifications
+- P2: Advanced analytics/benchmarking
