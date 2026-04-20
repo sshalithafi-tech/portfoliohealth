@@ -47,47 +47,48 @@ export const ContributionChart = ({ scores, weightsNorm }) => {
   }));
 
   return (
-    <div data-testid="contribution-chart" className="p-6 glass-surface-highlight rounded-xl">
-      <h2 className="text-lg font-semibold text-white mb-6 font-['Outfit']">PPDT Maturity Contribution</h2>
-      <div className="h-72 sm:h-80">
+    <div data-testid="contribution-chart" className="p-5 sm:p-6 glass-surface-highlight rounded-xl max-w-3xl mx-auto w-full">
+      <div className="flex items-baseline justify-between mb-4 gap-3 flex-wrap">
+        <h2 className="text-base sm:text-lg font-semibold text-white font-['Outfit']">PPDT Maturity Contribution</h2>
+        <p className="text-[11px] text-white/40 italic">Raw score vs weight × score</p>
+      </div>
+      <div className="h-56 sm:h-64">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData} barGap={6} barCategoryGap="45%">
+          <BarChart data={chartData} barGap={4} barCategoryGap="35%" margin={{ top: 16, right: 8, bottom: 4, left: -16 }}>
             <GlassDefs />
-            <XAxis dataKey="name" tick={{ fill: "rgba(255,255,255,0.6)", fontSize: 13 }} axisLine={{ stroke: "rgba(255,255,255,0.1)" }} tickLine={false} />
-            <YAxis domain={[0, 5]} tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }} axisLine={{ stroke: "rgba(255,255,255,0.1)" }} tickLine={false} />
+            <XAxis dataKey="name" tick={{ fill: "rgba(255,255,255,0.6)", fontSize: 12 }} axisLine={{ stroke: "rgba(255,255,255,0.08)" }} tickLine={false} />
+            <YAxis domain={[0, 5]} tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 10 }} axisLine={{ stroke: "rgba(255,255,255,0.08)" }} tickLine={false} width={32} />
             <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
-            <Legend wrapperStyle={{ color: "rgba(255,255,255,0.6)", fontSize: 12, paddingTop: 12 }} iconType="circle" />
+            <Legend wrapperStyle={{ color: "rgba(255,255,255,0.55)", fontSize: 11, paddingTop: 10 }} iconType="circle" iconSize={8} />
 
-            {/* Raw Score — thin liquid-glass bar */}
             <Bar
               dataKey="rawScore"
               name="Raw Score"
               fill="url(#glass-raw)"
-              stroke="rgba(96,165,250,0.8)"
-              strokeWidth={0.6}
-              radius={[8, 8, 2, 2]}
-              barSize={18}
+              stroke="rgba(96,165,250,0.7)"
+              strokeWidth={0.5}
+              radius={[6, 6, 1, 1]}
+              barSize={14}
               isAnimationActive={true}
               animationDuration={700}
             >
               {chartData.map((_, i) => <Cell key={`raw-${i}`} />)}
-              <LabelList dataKey="rawScore" position="top" fill="rgba(255,255,255,0.85)" fontSize={11} formatter={v => v.toFixed(1)} />
+              <LabelList dataKey="rawScore" position="top" fill="rgba(255,255,255,0.75)" fontSize={10} formatter={v => v.toFixed(1)} />
             </Bar>
 
-            {/* Weighted Contribution — thin liquid-glass bar */}
             <Bar
               dataKey="weightedContribution"
               name="Weighted Contribution"
               fill="url(#glass-weight)"
-              stroke="rgba(126,231,135,0.8)"
-              strokeWidth={0.6}
-              radius={[8, 8, 2, 2]}
-              barSize={18}
+              stroke="rgba(126,231,135,0.7)"
+              strokeWidth={0.5}
+              radius={[6, 6, 1, 1]}
+              barSize={14}
               isAnimationActive={true}
               animationDuration={900}
             >
               {chartData.map((_, i) => <Cell key={`w-${i}`} />)}
-              <LabelList dataKey="weightedContribution" position="top" fill="rgba(255,255,255,0.85)" fontSize={11} formatter={v => v.toFixed(2)} />
+              <LabelList dataKey="weightedContribution" position="top" fill="rgba(255,255,255,0.75)" fontSize={10} formatter={v => v.toFixed(2)} />
             </Bar>
           </BarChart>
         </ResponsiveContainer>
