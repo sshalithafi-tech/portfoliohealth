@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import Layout from "../components/Layout";
 import { useAssessment } from "../hooks/useData";
@@ -45,8 +45,33 @@ const Section = ({ index, title, subtitle, children }) => (
 
 const ReportPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { assessment, loading } = useAssessment(id);
   const [downloading, setDownloading] = useState(false);
+  const [regenerating, setRegenerating] = useState(false);
+
+  const regenerateReport = useCallback(async () => {
+    setRegenerating(true);
+    try {
+      const { data } = await axios.post(`${BACKEND_URL}/api/assessments/${id}/regenerate-report`);
+      if (data?.report_ready) {
+        toast.success(
+          data.status === "salvaged"
+            ? "Report recovered from the last message."
+            : "Report regenerated successfully."
+        );
+        // Full reload so useAssessment refetches cleanly
+        navigate(0);
+      } else {
+        toast.error("Could not regenerate the report.");
+      }
+    } catch (err) {
+      const detail = err?.response?.data?.detail || "Regeneration failed. Please try again.";
+      toast.error(detail);
+    } finally {
+      setRegenerating(false);
+    }
+  }, [id, navigate]);
 
   const downloadPDF = useCallback(async () => {
     setDownloading(true);
@@ -71,13 +96,38 @@ const ReportPage = () => {
   if (loading) return <Layout><LoadingSpinner className="h-64" /></Layout>;
 
   if (!assessment?.report) {
+    const hasHistory = (assessment?.chat_history?.length || 0) >= 2;
     return (
       <Layout>
-        <div className="flex flex-col items-center justify-center py-16">
+        <div className="flex flex-col items-center justify-center py-16 max-w-xl mx-auto text-center">
           <AlertTriangle size={64} className="text-[#C9A84C] mb-4 opacity-50" />
           <h2 className="text-xl font-semibold text-white mb-2 font-['Outfit']">Report Not Ready</h2>
-          <p className="text-white/50 mb-6">This assessment hasn't been completed yet.</p>
-          <Link to={`/assessments/${id}`} className="px-6 py-3 btn-liquid rounded-xl">Continue Assessment</Link>
+          <p className="text-white/50 mb-2">This assessment hasn't been fully scored yet.</p>
+          {hasHistory && (
+            <p className="text-white/40 text-sm mb-6">
+              If the chat already showed "Assessment Complete", the model may have been cut off mid-emission. You can try to regenerate the report from the existing conversation.
+            </p>
+          )}
+          <div className="flex flex-col sm:flex-row gap-3">
+            {hasHistory && (
+              <button
+                onClick={regenerateReport}
+                disabled={regenerating}
+                data-testid="regenerate-report-btn"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 btn-liquid rounded-xl disabled:opacity-50"
+              >
+                <RefreshCw size={16} className={regenerating ? "animate-spin" : ""} />
+                {regenerating ? "Regenerating…" : "Regenerate Report"}
+              </button>
+            )}
+            <Link
+              to={`/assessments/${id}`}
+              data-testid="continue-assessment-btn"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 btn-glass rounded-xl"
+            >
+              Continue Assessment
+            </Link>
+          </div>
         </div>
       </Layout>
     );

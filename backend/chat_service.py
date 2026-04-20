@@ -1,25 +1,96 @@
 """
 Helpers for assessment chat (LLM calls, JSON report parsing).
+
+Dual-path LLM client:
+  - If ANTHROPIC_API_KEY is set (production / Render), use the Anthropic SDK
+    directly with the user's own key.
+  - Otherwise fall back to Emergent Universal Key via `emergentintegrations`
+    so the preview environment keeps working out of the box.
+
 Keeps the route handler in `server.py` focused on orchestration.
 """
 import json
 import logging
 import os
 import re
+from pathlib import Path
 from typing import Optional
 
-import anthropic
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).parent / ".env")
 
 logger = logging.getLogger(__name__)
 
 MODEL_PROVIDER = "anthropic"
 MODEL_NAME = "claude-sonnet-4-5-20250929"
-_client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+MAX_TOKENS = 16000
+
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
+EMERGENT_LLM_KEY = os.environ.get("EMERGENT_LLM_KEY")
 
 VALID_BUSINESS_MODELS = {"Bulk", "Standard", "CTO", "CETO", "ETO"}
 MODEL_COMPLEXITY_ORDER = ["ETO", "CETO", "CTO", "Standard", "Bulk"]
 
 
+# ---------------------------------------------------------------------------
+# Client selection
+# ---------------------------------------------------------------------------
+_anthropic_client = None
+if ANTHROPIC_API_KEY:
+    try:
+        import anthropic  # type: ignore
+        _anthropic_client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+        logger.info("chat_service: using direct Anthropic SDK (production mode)")
+    except Exception as exc:  # pragma: no cover
+        logger.warning("chat_service: anthropic SDK unavailable (%s), falling back to Emergent", exc)
+        _anthropic_client = None
+
+
+def _trim_history(history: list) -> list:
+    return [
+        {"role": m["role"], "content": m["content"]}
+        for m in (history or [])
+        if m.get("role") in ("user", "assistant") and m.get("content")
+    ][-40:]
+
+
+async def _call_anthropic_direct(system_message: str, history: list, user_message: str) -> str:
+    messages = _trim_history(history)
+    messages.append({"role": "user", "content": user_message})
+    # anthropic SDK is sync; run in thread to keep the event loop unblocked.
+    import asyncio
+    def _do():
+        return _anthropic_client.messages.create(
+            model=MODEL_NAME,
+            max_tokens=MAX_TOKENS,
+            system=system_message,
+            messages=messages,
+        )
+    response = await asyncio.to_thread(_do)
+    return response.content[0].text
+
+
+async def _call_emergent(session_id: str, system_message: str, history: list, user_message: str) -> str:
+    from emergentintegrations.llm.chat import LlmChat, UserMessage
+    initial = [{"role": "system", "content": system_message}]
+    initial.extend(_trim_history(history))
+    chat = (
+        LlmChat(
+            api_key=EMERGENT_LLM_KEY,
+            session_id=session_id,
+            system_message=system_message,
+            initial_messages=initial,
+        )
+        .with_model(MODEL_PROVIDER, MODEL_NAME)
+        .with_params(max_tokens=MAX_TOKENS)
+    )
+    return await chat.send_message(UserMessage(text=user_message))
+
+
+# ---------------------------------------------------------------------------
+# Public API
+# ---------------------------------------------------------------------------
 def build_system_prompt(base_prompt: str, assessment: dict) -> str:
     ctx = (
         f"\n\nCurrent Assessment Context:\n"
@@ -32,47 +103,91 @@ def build_system_prompt(base_prompt: str, assessment: dict) -> str:
     return base_prompt + ctx
 
 
-
 async def call_llm_with_history(
     *, session_id: str, system_message: str, history: list, user_message: str
 ) -> str:
-    trimmed = [m for m in history if m.get("role") in ("user", "assistant")][-40:]
-    messages = [{"role": m["role"], "content": m["content"]} for m in trimmed]
-    messages.append({"role": "user", "content": user_message})
-    response = _client.messages.create(
-        model=MODEL_NAME,
-        max_tokens=8096,
-        system=system_message,
-        messages=messages,
-    )
-    return response.content[0].text
+    if _anthropic_client is not None:
+        return await _call_anthropic_direct(system_message, history, user_message)
+    return await _call_emergent(session_id, system_message, history, user_message)
 
 
 async def call_llm_greeting(*, session_id: str, system_message: str) -> str:
-    response = _client.messages.create(
-        model=MODEL_NAME,
-        max_tokens=8096,
-        system=system_message,
-        messages=[{"role": "user", "content": "Please begin the assessment by introducing yourself and asking the first question."}],
+    greeting_prompt = "Please begin the assessment by introducing yourself and asking the first question."
+    return await call_llm_with_history(
+        session_id=session_id,
+        system_message=system_message,
+        history=[],
+        user_message=greeting_prompt,
     )
-    return response.content[0].text
 
 
+# ---------------------------------------------------------------------------
+# Report JSON extraction
+# ---------------------------------------------------------------------------
 def extract_report_json(response_text: str) -> Optional[dict]:
-    if "ready_for_report" not in response_text:
+    """
+    Pull the `ready_for_report: true` JSON block out of the assistant response.
+
+    Tolerant of:
+      - fenced ```json blocks (with or without trailing whitespace)
+      - any-language fenced blocks
+      - un-fenced JSON object after the closing prose
+      - minor trailing chatter after the closing brace
+    """
+    if not response_text or "ready_for_report" not in response_text:
         return None
-    fenced = re.search(r'```json\s*(.*?)\s*```', response_text, re.DOTALL)
+
+    # 1) fenced ```json ... ```
+    fenced = re.search(r"```json\s*(\{[\s\S]*?\})\s*```", response_text, re.DOTALL)
     if fenced:
         try:
             return json.loads(fenced.group(1))
         except json.JSONDecodeError as err:
-            logger.error("JSON parse error in fenced block: %s", err)
-    fallback = re.search(r'\{[\s\S]*"ready_for_report"[\s\S]*\}', response_text)
-    if fallback:
+            logger.error("JSON parse error in fenced json block: %s", err)
+
+    # 2) any fenced block (no language tag)
+    any_fenced = re.search(r"```\s*(\{[\s\S]*?\})\s*```", response_text, re.DOTALL)
+    if any_fenced and "ready_for_report" in any_fenced.group(1):
         try:
-            return json.loads(fallback.group(0))
-        except json.JSONDecodeError:
-            return None
+            return json.loads(any_fenced.group(1))
+        except json.JSONDecodeError as err:
+            logger.error("JSON parse error in untagged fenced block: %s", err)
+
+    # 3) un-fenced — find first '{' preceding 'ready_for_report' and balance braces.
+    idx = response_text.find("ready_for_report")
+    if idx == -1:
+        return None
+    start = response_text.rfind("{", 0, idx)
+    if start == -1:
+        return None
+    depth = 0
+    end = None
+    in_str = False
+    escape = False
+    for i in range(start, len(response_text)):
+        ch = response_text[i]
+        if in_str:
+            if escape:
+                escape = False
+            elif ch == "\\":
+                escape = True
+            elif ch == '"':
+                in_str = False
+            continue
+        if ch == '"':
+            in_str = True
+        elif ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth == 0:
+                end = i + 1
+                break
+    if end:
+        try:
+            return json.loads(response_text[start:end])
+        except json.JSONDecodeError as err:
+            logger.error("JSON parse error in unfenced block: %s", err)
     return None
 
 

@@ -755,6 +755,99 @@ async def send_chat_message(assessment_id: str, request: SendMessageRequest, cur
         "report": report_data,
     }
 
+
+# Regenerate Report — when chat appears completed but backend didn't capture the JSON
+# (e.g. LLM ran out of tokens mid-emission). Asks the LLM for JSON-only output using
+# the existing chat history, then parses + flips status.
+@api_router.post("/assessments/{assessment_id}/regenerate-report")
+async def regenerate_report(assessment_id: str, current_user: dict = Depends(get_current_user)):
+    assessment = await db.assessments.find_one({"_id": ObjectId(assessment_id), "user_id": current_user["id"]})
+    if not assessment:
+        raise HTTPException(status_code=404, detail="Assessment not found")
+    if assessment.get("status") == "completed" and assessment.get("report"):
+        return {"status": "already_completed", "report_ready": True}
+
+    chat_history = assessment.get("chat_history") or []
+    if len(chat_history) < 2:
+        raise HTTPException(status_code=400, detail="Not enough chat history to regenerate the report.")
+
+    # First: try re-parsing the existing last assistant message (cheap path, no LLM call)
+    last_asst = next((m for m in reversed(chat_history) if m.get("role") == "assistant"), None)
+    if last_asst:
+        salvaged = extract_report_json(last_asst.get("content", ""))
+        if salvaged and salvaged.get("ready_for_report"):
+            salvaged = normalise_report_weights(salvaged)
+            scores = salvaged.get("scores")
+            await db.assessments.update_one(
+                {"_id": ObjectId(assessment_id)},
+                {"$set": {
+                    "status": "completed",
+                    "report": salvaged,
+                    "scores": scores,
+                    "weights_raw": salvaged.get("weights_raw"),
+                    "weights_normalised": salvaged.get("weights_normalised"),
+                    "completed_at": datetime.now(timezone.utc).isoformat(),
+                }}
+            )
+            return {"status": "salvaged", "report_ready": True, "report": salvaged}
+
+    # Otherwise: ask the LLM for JSON-only output, giving the existing history as context.
+    regenerate_prompt = (
+        "The previous report response was truncated before the JSON emission completed. "
+        "Do not write any prose. Do not repeat the narrative. Emit ONLY the fenced "
+        "```json ... ``` block exactly as specified in the system prompt, including "
+        "\"ready_for_report\": true and every required field, grounded in the conversation so far."
+    )
+    try:
+        response_text = await call_llm_with_history(
+            session_id=f"assessment-regenerate-{assessment_id}",
+            system_message=build_system_prompt(PPDT_SYSTEM_PROMPT, assessment),
+            history=chat_history,
+            user_message=regenerate_prompt,
+        )
+    except Exception as exc:
+        logging.error(f"LLM regenerate error: {exc}")
+        raise HTTPException(status_code=500, detail="Failed to regenerate report. Please try again.")
+
+    # Persist the JSON-only assistant turn and parse it
+    chat_history.append({
+        "role": "user",
+        "content": regenerate_prompt,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    })
+    chat_history.append({
+        "role": "assistant",
+        "content": response_text,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    })
+
+    report_data = extract_report_json(response_text)
+    if not report_data or not report_data.get("ready_for_report"):
+        await db.assessments.update_one(
+            {"_id": ObjectId(assessment_id)}, {"$set": {"chat_history": chat_history}}
+        )
+        raise HTTPException(
+            status_code=502,
+            detail="The model did not return a valid JSON block. Please try regenerating again.",
+        )
+
+    report_data = normalise_report_weights(report_data)
+    scores = report_data.get("scores")
+    await db.assessments.update_one(
+        {"_id": ObjectId(assessment_id)},
+        {"$set": {
+            "chat_history": chat_history,
+            "status": "completed",
+            "report": report_data,
+            "scores": scores,
+            "weights_raw": report_data.get("weights_raw"),
+            "weights_normalised": report_data.get("weights_normalised"),
+            "completed_at": datetime.now(timezone.utc).isoformat(),
+        }}
+    )
+    return {"status": "regenerated", "report_ready": True, "report": report_data}
+
+
 # Start Assessment (generate initial greeting)
 @api_router.post("/assessments/{assessment_id}/start")
 async def start_assessment(assessment_id: str, current_user: dict = Depends(get_current_user)):
