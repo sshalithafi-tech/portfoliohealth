@@ -84,6 +84,18 @@ Currently active: 5-turn Hannila/PPDT prompt with mandatory JSON emission (ready
   - **New Section 14 — Academic Framework & References** on a dedicated final page: 6 APA-style numbered references (Hannila Vierimaa Salonen 2026; Hannila Kuula Härkönen Haapasalo 2022; Hannila Härkönen Haapasalo Muhos 2022; Hannila Härkönen Haapasalo 2020; Hannila 2019; Wings Härkönen 2023) + grey-boxed italic attribution note crediting Shalitha Samarakoon and the Product Wellbeing research programme.
   - `build_pdf_closing` rewritten as the gold-bordered callout block with the exact academic closing wording + contact email + confidentiality line.
   - PDF grew to 12 pages (cover + 10 content + references), no overlaps, each major section gets its own breathing room.
+- **PPDT System Prompt v2 (2026-04-20)** — replaced the LLM's `PPDT_SYSTEM_PROMPT` with the new consultant-grade spec from the user:
+  - **Framework attribution** updated: operationalises the **Product Wellbeing framework** via Hannila / Härkönen / Haapasalo doctoral research (no more "University of Oulu" ownership claims).
+  - **Multilingual opener** — every conversation begins with "Welcome / Tervetuloa / Välkommen" and locks into English / Finnish / Swedish for the entire session (including pillar-name translations Ihmiset/Prosessit/Data/Teknologia for FI and Människor/Processer/Data/Teknologi for SE).
+  - **Exact 5-level maturity names**: AD HOC · DEVELOPING · DEFINED · MANAGED · PREDICTIVE (no paraphrasing).
+  - **Equal-weighted scoring only** (25% × 4) — contextual / business-model weights explicitly prohibited pending empirical validation.
+  - **DATA-FIRST rule**: Data < 3.0 is a critical blocker regardless of other pillars.
+  - **Bottleneck rule**: if lowest pillar is 1.0+ below overall, narrative is capped at bottleneck level.
+  - **4-phase conversation flow**: Context (5–6 Qs) → Pillar Assessment (2–3 per pillar) → Governance Probe (if any pillar ≥ 3.0) → Confirm & Close.
+  - **Fast Screening Mode** opt-in (8–12 Qs, traffic-light output, no full scored report).
+  - **Strict guardrails** (9 explicit "never do" rules: no tool-name shortcuts, no pure-positive reports, no custom weights, etc.).
+  - **Question formatting rule** — numbered questions must stay on a single line (`1. **Label:** text`) to prevent the broken-rendering bug we fixed in chat.
+  - **Emission contract preserved**: after Phase 4 the LLM still emits the same ```json block the backend parses (`ready_for_report: true`, scores, level_names, roadmap, assessment_reliability, etc.) — so all downstream logic (status-flip, PDF generation, report page) continues to work unchanged.
 - **Final-report streaming progress indicator (2026-04-20)** — new `FinalReportIndicator.jsx` that replaces the generic "Thinking" dots when the user submits the likely-final turn (≥10 messages). Shows a shimmer gradient bar, rotating stage labels (Synthesising… → Scoring pillars… → Identifying bottleneck… → Drafting roadmap… → Finalising consultant's note…), elapsed-seconds counter, and a subtle "taking longer than usual" hint after 60s. New `progress-sweep` keyframe in `index.css`. Paired with the Regenerate button, a token-exhaustion / network hiccup now looks visually distinct from a real completion.
 
 ## Testing
