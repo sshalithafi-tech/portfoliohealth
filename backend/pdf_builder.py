@@ -186,21 +186,29 @@ def build_cover_page(story, assessment, report):
         except (TypeError, ValueError):
             overall_text = str(overall)
 
-    score_badge = Paragraph(
-        f'<font size="8" color="#666666"><b>OVERALL MATURITY SCORE</b></font><br/>'
-        f'<font size="48" color="#0A1628"><b>{overall_text}</b></font>'
-        f'<font size="16" color="#999999"> / 5.00</font><br/>'
-        f'<font size="12" color="#C9A84C"><b>{overall_level}</b></font>',
-        ParagraphStyle("CovScore", leading=52, alignment=1),  # centered
-    )
-    badge_table = Table([[score_badge]], colWidths=[490])
+    score_badge_rows = [
+        [Paragraph(
+            '<font size="8" color="#666666"><b>OVERALL MATURITY SCORE</b></font>',
+            ParagraphStyle("CovScoreLabel", alignment=1, leading=12),
+        )],
+        [Paragraph(
+            f'<font size="52" color="#0A1628"><b>{overall_text}</b></font>'
+            f'<font size="18" color="#999999"> / 5.00</font>',
+            ParagraphStyle("CovScoreValue", alignment=1, leading=60, spaceBefore=8),
+        )],
+        [Paragraph(
+            f'<font size="13" color="#C9A84C"><b>{overall_level}</b></font>',
+            ParagraphStyle("CovScoreLevel", alignment=1, leading=18, spaceBefore=8),
+        )],
+    ]
+    badge_table = Table([[Table(score_badge_rows, colWidths=[440])]], colWidths=[490])
     badge_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, -1), GOLD_BG),
         ('LINEABOVE', (0, 0), (-1, 0), 1.2, GOLD),
         ('LINEBELOW', (0, 0), (-1, -1), 1.2, GOLD),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('TOPPADDING', (0, 0), (-1, -1), 28),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 28),
+        ('TOPPADDING', (0, 0), (-1, -1), 32),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 32),
     ]))
     story.append(badge_table)
     story.append(Spacer(1, 40))
@@ -295,21 +303,103 @@ def build_pdf_header(story, styles, title_text=""):
 
 
 def build_pdf_closing(story, styles):
-    """Professional closing statement for PDF reports."""
+    """Closing callout block — matches the exact wording requested for
+    academic-grounding + contact + confidentiality."""
     story.append(Spacer(1, 16))
+    callout_style = ParagraphStyle(
+        "ClosingCallout", parent=styles["base"]["Normal"],
+        fontSize=9, leading=14, textColor=TEXT_DARK,
+        backColor=GOLD_BG, borderColor=GOLD, borderWidth=1,
+        borderPadding=14, spaceAfter=18,
+    )
     story.append(Paragraph(
-        f"Thank you for completing this assessment. For further analysis, expert input, or tailored "
-        f"recommendations, please contact: <b>{CONTACT_EMAIL}</b>",
-        styles["closing"]
+        'Thank you for completing this <b>PPDT Capability Maturity Assessment</b>. '
+        'This report is based on the <b>Product Wellbeing</b> framework developed at the '
+        'University of Oulu (Hannila, Vierimaa &amp; Salonen, 2026) and supporting peer-reviewed '
+        'research on data-driven Product Portfolio Management. If you would like further analysis, '
+        'expert input, or tailored recommendations based on your results, please reach out to '
+        f'arrange a follow-up consultation: <b>{CONTACT_EMAIL}</b><br/><br/>'
+        '<i>This report is confidential. Distribution without authorisation is not permitted.</i><br/>'
+        '<font color="#666666" size="8">PortfolioHealth Advisor  |  PPM Capability Maturity '
+        'Assessment  |  University of Oulu</font>',
+        callout_style,
     ))
-    story.append(Spacer(1, 16))
-    footer_line = Table([[""]], colWidths=[490], rowHeights=[1])
-    footer_line.setStyle(TableStyle([('LINEBELOW', (0, 0), (-1, -1), 0.5, colors.HexColor('#CCCCCC'))]))
-    story.append(footer_line)
-    story.append(Paragraph("PortfolioHealth Advisor  |  PPM Capability Maturity Assessment  |  University of Oulu",
-                           styles["footer"]))
-    story.append(Paragraph("This report is confidential. Distribution without authorisation is not permitted.",
-                           styles["footer"]))
+
+
+# --- Academic references block -------------------------------------------
+REFERENCES = [
+    ("Hannila, H., Vierimaa, M., &amp; Salonen, N. (2026).",
+     "Product Wellbeing.",
+     "University of Oulu."),
+    ("Hannila, H., Kuula, S., H\u00e4rk\u00f6nen, J., &amp; Haapasalo, H. (2022).",
+     "Digitalisation of a company decision-making system: A concept for data-driven "
+     "and fact-based product portfolio management.",
+     "Journal of Decision Systems, 31(3), 258\u2013279."),
+    ("Hannila, H., H\u00e4rk\u00f6nen, J., Haapasalo, H., &amp; Muhos, M. (2022).",
+     "Data-driven begins with DATA: Preconditions for data-driven product portfolio management.",
+     "University of Oulu."),
+    ("Hannila, H., H\u00e4rk\u00f6nen, J., &amp; Haapasalo, H. (2020).",
+     "Product-level profitability: Current challenges and preconditions for data-driven, "
+     "fact-based Product Portfolio Management.",
+     "University of Oulu."),
+    ("Hannila, H. (2019).",
+     "Towards data-driven decision-making in product portfolio management: "
+     "From company-level to product-level analysis.",
+     "University of Oulu."),
+    ("Wings, J., &amp; H\u00e4rk\u00f6nen, J. (2023).",
+     "Decentralised or centralised management of data and products.",
+     "University of Oulu."),
+]
+
+
+def build_references_section(story, styles):
+    """Academic Framework & References — full-page block following the closing
+    callout. Numbered APA-style list + italic methodology-attribution note."""
+    story.append(PageBreak())
+
+    # Section header
+    story.append(Paragraph(
+        '<font color="#C9A84C"><b>14</b></font>&nbsp;&nbsp;ACADEMIC FRAMEWORK &amp; REFERENCES',
+        ParagraphStyle("RefHeader", fontSize=11, fontName="Helvetica-Bold",
+                       textColor=NAVY, spaceAfter=2, leading=14),
+    ))
+    story.append(Paragraph(
+        "The research foundation underpinning this assessment methodology.",
+        ParagraphStyle("RefSub", fontSize=8, fontName="Helvetica-Oblique",
+                       textColor=TEXT_MUTED, spaceAfter=8, leading=10),
+    ))
+    rule = Table([[""]], colWidths=[490], rowHeights=[1])
+    rule.setStyle(TableStyle([('LINEBELOW', (0, 0), (-1, -1), 0.6, GOLD)]))
+    story.append(rule)
+    story.append(Spacer(1, 14))
+
+    ref_item_style = ParagraphStyle(
+        "RefItem", fontSize=9, leading=13, textColor=TEXT_DARK, spaceAfter=10
+    )
+    for i, (authors, title, venue) in enumerate(REFERENCES, start=1):
+        story.append(Paragraph(
+            f'<font color="#C9A84C"><b>{i}.</b></font>&nbsp; '
+            f'{authors} <i>{title}</i> {venue}',
+            ref_item_style,
+        ))
+
+    # Methodology attribution (italic)
+    story.append(Spacer(1, 14))
+    attribution = Paragraph(
+        '<i>The PortfolioHealth Advisor assessment methodology, maturity framework, '
+        'and scoring rubric are developed by <b>Shalitha Samarakoon</b> as part of '
+        'master\u2019s thesis research at the University of Oulu, Industrial '
+        'Engineering and Management programme. The PPDT framework and five Product '
+        'Journey maturity stages are derived from the Product Wellbeing research '
+        'programme led by Hannila, Vierimaa &amp; Salonen (2026).</i>',
+        ParagraphStyle(
+            "RefAttribution", fontSize=8.5, leading=12, textColor=TEXT_MUTED,
+            backColor=colors.HexColor("#F4F6FA"),
+            borderColor=LINE_LIGHT, borderWidth=0.5, borderPadding=12,
+            spaceBefore=6,
+        ),
+    )
+    story.append(attribution)
 
 
 # ============================================================
@@ -406,39 +496,82 @@ def build_overall_score(story, scores, report, level_names, heading, body):
     equal = scores.get("overall", "N/A")
     ctx = report.get("contextual_score")
     lvl_overall = level_names.get("overall") or _derive_level_name(equal)
-    # Dual-score card as a 2-col table
-    eq_cell = Paragraph(
-        f'<font size="7" color="#C9A84C"><b>EQUAL-WEIGHTED SCORE · PRIMARY</b></font><br/>'
-        f'<font size="22" color="#0A1628"><b>{equal}</b></font>'
-        f'<font size="10" color="#999999"> / 5.00</font><br/>'
-        f'<font size="10"><b>{lvl_overall}</b></font><br/>'
-        f'<font size="7" color="#666666"><i>Academically validated baseline (25% each pillar)</i></font>',
-        body,
-    )
+    # Dual-score card rendered as a stacked Table so that the big (22pt) score
+    # number cannot overlap the adjacent label / level-name lines. Each row owns
+    # its own row-height and leading.
+    score_text = f"{equal}" if not isinstance(equal, (int, float)) else f"{equal}"
+    eq_cell = [
+        [Paragraph(
+            '<font size="7" color="#C9A84C"><b>EQUAL-WEIGHTED SCORE · PRIMARY</b></font>',
+            ParagraphStyle("EqLabel", leading=10),
+        )],
+        [Paragraph(
+            f'<font size="24" color="#0A1628"><b>{score_text}</b></font>'
+            f'<font size="11" color="#999999"> / 5.00</font>',
+            ParagraphStyle("EqScore", leading=30),
+        )],
+        [Paragraph(
+            f'<font size="11" color="#0A1628"><b>{lvl_overall}</b></font>',
+            ParagraphStyle("EqLevel", leading=14, spaceBefore=2),
+        )],
+        [Paragraph(
+            '<font size="7" color="#666666"><i>Academically validated baseline (25% each pillar)</i></font>',
+            ParagraphStyle("EqFoot", leading=10, spaceBefore=6),
+        )],
+    ]
+    eq_tbl = Table(eq_cell, colWidths=[220])
+    eq_tbl.setStyle(TableStyle([
+        ('LEFTPADDING', (0, 0), (-1, -1), 0),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
+        ('TOPPADDING', (0, 0), (-1, -1), 2),
+    ]))
+
     if isinstance(ctx, (int, float)):
-        ctx_cell = Paragraph(
-            f'<font size="7" color="#666666"><b>CONTEXTUAL SCORE · SECONDARY</b></font><br/>'
-            f'<font size="22" color="#0A1628"><b>{ctx:.2f}</b></font>'
-            f'<font size="10" color="#999999"> / 5.00</font><br/>'
-            f'<font size="7" color="#666666"><i>Adjusted for business model + stated priority</i></font>',
-            body,
-        )
+        ctx_rows = [
+            [Paragraph(
+                '<font size="7" color="#666666"><b>CONTEXTUAL SCORE · SECONDARY</b></font>',
+                ParagraphStyle("CtxLabel", leading=10),
+            )],
+            [Paragraph(
+                f'<font size="24" color="#0A1628"><b>{ctx:.2f}</b></font>'
+                f'<font size="11" color="#999999"> / 5.00</font>',
+                ParagraphStyle("CtxScore", leading=30),
+            )],
+            [Paragraph(
+                '<font size="7" color="#666666"><i>Adjusted for business model + stated priority</i></font>',
+                ParagraphStyle("CtxFoot", leading=10, spaceBefore=6),
+            )],
+        ]
     else:
-        ctx_cell = Paragraph(
-            '<font size="7" color="#666666"><b>CONTEXTUAL SCORE · SECONDARY</b></font><br/>'
-            '<font size="10" color="#999999"><i>Not yet calculated for this assessment.</i></font>',
-            body,
-        )
-    card = Table([[eq_cell, ctx_cell]], colWidths=[245, 245])
+        ctx_rows = [
+            [Paragraph(
+                '<font size="7" color="#666666"><b>CONTEXTUAL SCORE · SECONDARY</b></font>',
+                ParagraphStyle("CtxLabel", leading=10),
+            )],
+            [Paragraph(
+                '<font size="11" color="#999999"><i>Not yet calculated for this assessment.</i></font>',
+                ParagraphStyle("CtxEmpty", leading=14, spaceBefore=4),
+            )],
+        ]
+    ctx_tbl = Table(ctx_rows, colWidths=[220])
+    ctx_tbl.setStyle(TableStyle([
+        ('LEFTPADDING', (0, 0), (-1, -1), 0),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
+        ('TOPPADDING', (0, 0), (-1, -1), 2),
+    ]))
+
+    card = Table([[eq_tbl, ctx_tbl]], colWidths=[245, 245])
     card.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, -1), GOLD_BG),
         ('LINEABOVE', (0, 0), (-1, 0), 1, GOLD),
         ('LINEBELOW', (0, -1), (-1, -1), 1, GOLD),
         ('LINEAFTER', (0, 0), (0, 0), 0.5, LINE_LIGHT),
-        ('TOPPADDING', (0, 0), (-1, -1), 12),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
-        ('LEFTPADDING', (0, 0), (-1, -1), 14),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 14),
+        ('TOPPADDING', (0, 0), (-1, -1), 16),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 16),
+        ('LEFTPADDING', (0, 0), (-1, -1), 16),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 16),
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
     ]))
     story.append(card)
@@ -777,15 +910,48 @@ def build_decision_vulnerability_section(story, report, heading, body):
 
 
 def build_findings_and_gaps(story, report, heading, body):
-    # Side-by-side on the web; stacked on the PDF for readability.
-    story.append(Paragraph('<font color="#0A1628"><b>Key Findings</b></font>', body))
+    """Split into two dedicated full-width sections — Critical Capability Gaps
+    is forced onto its own page for readability when delivered to executives."""
+    # --- Key Findings ---
+    story.append(Paragraph(
+        '<font color="#0A1628" size="11"><b>Key Findings</b></font>',
+        ParagraphStyle("FindingsH", spaceAfter=8, leading=14),
+    ))
     for item in report.get("key_findings", []) or []:
-        story.append(Paragraph(f"\u2022 {item}", body))
+        story.append(Paragraph(f"\u2022&nbsp; {item}", body))
+        story.append(Spacer(1, 3))
+
+    # Hard page break — Critical Gaps always starts on a fresh page.
+    story.append(PageBreak())
+
+    # --- Re-render the Section-11 label header on the new page so the reader
+    #    knows they are still in the same section. ---
+    reminder_style = ParagraphStyle(
+        "GapsReminder", fontSize=9, fontName="Helvetica-Oblique",
+        textColor=TEXT_MUTED, spaceAfter=6, leading=12,
+    )
+    story.append(Paragraph(
+        '<font color="#C9A84C"><b>11</b></font>&nbsp;&nbsp;KEY FINDINGS &amp; CRITICAL GAPS  <font color="#888888">(continued)</font>',
+        ParagraphStyle("GapsHeader", fontSize=11, fontName="Helvetica-Bold",
+                       textColor=NAVY, spaceAfter=2, leading=14),
+    ))
+    story.append(Paragraph(
+        "Capability gaps that must be closed to unlock the next maturity level.",
+        reminder_style,
+    ))
+    rule = Table([[""]], colWidths=[490], rowHeights=[1])
+    rule.setStyle(TableStyle([('LINEBELOW', (0, 0), (-1, -1), 0.6, GOLD)]))
+    story.append(rule)
     story.append(Spacer(1, 10))
 
-    story.append(Paragraph('<font color="#C0392B"><b>Critical Capability Gaps</b></font>', body))
+    # --- Critical Capability Gaps ---
+    story.append(Paragraph(
+        '<font color="#C0392B" size="11"><b>Critical Capability Gaps</b></font>',
+        ParagraphStyle("GapsH", spaceAfter=8, leading=14),
+    ))
     for item in report.get("critical_gaps", []) or []:
-        story.append(Paragraph(f"\u2022 {item}", body))
+        story.append(Paragraph(f"\u2022&nbsp; {item}", body))
+        story.append(Spacer(1, 3))
     story.append(Spacer(1, 12))
 
 
@@ -916,14 +1082,17 @@ def build_full_assessment_pdf(assessment: dict) -> BytesIO:
     build_assessment_reliability(story, report, assessment, body)
     story.append(PageBreak())
 
-    # --- Group F: Decision Vulnerability + Key Findings & Gaps ---
+    # --- Group F: Decision Vulnerability (dedicated page) ---
     build_section_label(story, styles, 10, "Decision-Type Vulnerability", "Risk by portfolio decision type")
     build_decision_vulnerability_section(story, report, heading, body)
+    story.append(PageBreak())
+
+    # --- Group G: Key Findings + Critical Gaps (Gaps forced to its own page) ---
     build_section_label(story, styles, 11, "Key Findings & Critical Gaps", "What matters most from this assessment")
     build_findings_and_gaps(story, report, heading, body)
     story.append(PageBreak())
 
-    # --- Group G: Roadmap (dedicated page) ---
+    # --- Group H: Roadmap (dedicated page) ---
     build_section_label(story, styles, 12, "Improvement Roadmap", "Phased plan \u2014 immediate, short-term, strategic")
     build_roadmap(story, report.get("roadmap", {}), heading, body)
     story.append(PageBreak())
@@ -932,6 +1101,9 @@ def build_full_assessment_pdf(assessment: dict) -> BytesIO:
     build_section_label(story, styles, 13, "Benchmark & Consultant's Note", "Context and a direct final take")
     build_benchmark_and_note(story, report, heading, body)
     build_pdf_closing(story, styles)
+
+    # --- References (dedicated page, after the closing callout) ---
+    build_references_section(story, styles)
 
     doc.build(story, onFirstPage=_page_decoration, onLaterPages=_page_decoration)
     buffer.seek(0)

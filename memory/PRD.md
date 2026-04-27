@@ -77,6 +77,13 @@ Currently active: 5-turn Hannila/PPDT prompt with mandatory JSON emission (ready
   - Added `_derive_level_name` fallback so the cover-page and overall-score cards never show "N/A" for level.
   - Added `_page_decoration` onLaterPages canvas callback — slim gold rule + brand + page-number footer on every content page (cover excluded).
   - Verified via rendered PDF: cover (page 1), context+maturity (page 2), ladder (page 3), dimension-scores with full summaries (page 4). 9 pages total, no overlaps.
+- **PDF report — section-level polish + Academic References (2026-04-20)** — addressed specific user feedback:
+  - **Section 02 Overall Maturity dual-score card** rebuilt as a stacked `Table` per column so the 24pt score number no longer overlaps the "Managed" level name or the descriptor line (old bug: single Paragraph with fixed `leading=13` collided with `<font size="22">`). Same fix applied to the cover-page 52pt headline badge.
+  - **Section 11 Key Findings** and **Critical Capability Gaps** now each get a dedicated page with a hard `PageBreak` between them. The Gaps page re-renders a "(continued)" header so the reader keeps context.
+  - **Section 10 Decision-Type Vulnerability** now also gets its own page (previously grouped with Findings).
+  - **New Section 14 — Academic Framework & References** on a dedicated final page: 6 APA-style numbered references (Hannila Vierimaa Salonen 2026; Hannila Kuula Härkönen Haapasalo 2022; Hannila Härkönen Haapasalo Muhos 2022; Hannila Härkönen Haapasalo 2020; Hannila 2019; Wings Härkönen 2023) + grey-boxed italic attribution note crediting Shalitha Samarakoon and the Product Wellbeing research programme.
+  - `build_pdf_closing` rewritten as the gold-bordered callout block with the exact academic closing wording + contact email + confidentiality line.
+  - PDF grew to 12 pages (cover + 10 content + references), no overlaps, each major section gets its own breathing room.
 - **Final-report streaming progress indicator (2026-04-20)** — new `FinalReportIndicator.jsx` that replaces the generic "Thinking" dots when the user submits the likely-final turn (≥10 messages). Shows a shimmer gradient bar, rotating stage labels (Synthesising… → Scoring pillars… → Identifying bottleneck… → Drafting roadmap… → Finalising consultant's note…), elapsed-seconds counter, and a subtle "taking longer than usual" hint after 60s. New `progress-sweep` keyframe in `index.css`. Paired with the Regenerate button, a token-exhaustion / network hiccup now looks visually distinct from a real completion.
 
 ## Testing
