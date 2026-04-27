@@ -7,7 +7,7 @@ export const LEVEL_NAMES = {
   2: "Developing",
   3: "Defined",
   4: "Managed",
-  5: "Optimising"
+  5: "Predictive"
 };
 
 export const DIMENSION_LABELS = {

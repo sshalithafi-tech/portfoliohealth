@@ -38,7 +38,7 @@ MATURITY_LADDER = [
     ("L2", "Developing",  "Some processes are defined but inconsistently applied. Basic data collection exists but lacks integration. A few PPM practices emerging."),
     ("L3", "Defined",     "Structured processes and roles are established. Data is accessible but not fully integrated. A formal PPM discipline is in place."),
     ("L4", "Managed",     "Data-driven decisions are supported by integrated systems. Metrics are defined and tracked. PPM is aligned to strategy."),
-    ("L5", "Optimising",  "Continuous improvement culture is embedded. An end-to-end PPDT discipline is fully aligned. Predictive, evidence-based decisions."),
+    ("L5", "Predictive",  "Continuous improvement culture is embedded. An end-to-end PPDT discipline is fully aligned. Predictive, evidence-based decisions."),
 ]
 
 
@@ -80,9 +80,13 @@ def make_report_styles():
 # ============================================================
 
 def _page_decoration(canvas, doc):
-    """Slim brand strip at the bottom of every content page (not the cover)."""
-    if doc.page == 1:
-        return  # cover owns its own decoration
+    """Slim brand strip at the bottom of every content page.
+
+    Page 1 is the cover, page 2 is the Table of Contents — both of these
+    own their own decoration, so we skip the generic footer for them.
+    """
+    if doc.page <= 2:
+        return
     canvas.saveState()
     page_width = A4[0]
     canvas.setStrokeColor(GOLD)
@@ -92,9 +96,9 @@ def _page_decoration(canvas, doc):
     canvas.setFillColor(colors.HexColor("#888888"))
     canvas.drawString(
         50, 26,
-        "PortfolioHealth Advisor  ·  PPM Capability Maturity Assessment  ·  University of Oulu",
+        "PortfolioHealth Advisor  \u00b7  PPM Capability Maturity Assessment  \u00b7  University of Oulu",
     )
-    canvas.drawRightString(page_width - 50, 26, f"Page {doc.page - 1}")
+    canvas.drawRightString(page_width - 50, 26, f"Page {doc.page - 2}")
     canvas.restoreState()
 
 
@@ -255,6 +259,89 @@ def build_cover_page(story, assessment, report):
         'Distribution without authorisation is not permitted.</i></font>',
         ParagraphStyle("CovConfidential", leading=10, alignment=1),
     ))
+
+    story.append(PageBreak())
+
+
+# ============================================================
+# TABLE OF CONTENTS
+# ============================================================
+
+TOC_ENTRIES = [
+    (1,  "Portfolio Context",             "Who and what this report is about"),
+    (2,  "Overall Maturity",              "Equal-weighted vs contextual score"),
+    (3,  "Pillar Maturity Levels",        "The Hannila L1\u2013L5 ladder"),
+    (4,  "Dimension Scores",              "Raw pillar grades (1\u20135)"),
+    (5,  "Weighted Score Calculation",    "Derivation and methodology"),
+    (6,  "Bottleneck Pillar",             "The weakest pillar caps capability"),
+    (7,  "Governance & Ownership",        "Accountability for portfolio decisions"),
+    (8,  "Management Commitment",         "The multiplier on capability investment"),
+    (9,  "Assessment Reliability",        "Confidence in these results"),
+    (10, "Decision-Type Vulnerability",   "Risk by portfolio decision type"),
+    (11, "Key Findings & Critical Gaps",  "What matters most from this assessment"),
+    (12, "Improvement Roadmap",           "Phased plan \u2014 0\u20133 / 3\u201312 / 12+ months"),
+    (13, "Benchmark & Consultant's Note", "Context and a direct final take"),
+    (14, "Academic Framework & References", "Research foundation and attribution"),
+]
+
+
+def build_toc_page(story):
+    """Dedicated Table-of-Contents page between cover and Section 01.
+
+    Compact layout so all 14 entries fit on a single A4 page.
+    """
+    story.append(Paragraph(
+        '<font color="#C9A84C" size="8"><b>CONTENTS</b></font>',
+        ParagraphStyle("TocEyebrow", leading=10, spaceAfter=2),
+    ))
+    story.append(Paragraph(
+        '<font color="#0A1628" size="20"><b>Table of Contents</b></font>',
+        ParagraphStyle("TocTitle", leading=24, spaceAfter=10),
+    ))
+    rule = Table([[""]], colWidths=[490], rowHeights=[1])
+    rule.setStyle(TableStyle([('LINEBELOW', (0, 0), (-1, -1), 0.8, GOLD)]))
+    story.append(rule)
+    story.append(Spacer(1, 10))
+
+    num_style = ParagraphStyle(
+        "TocNum", fontName="Helvetica-Bold", fontSize=10, leading=12, textColor=GOLD,
+    )
+    title_style = ParagraphStyle(
+        "TocItemTitle", fontName="Helvetica-Bold", fontSize=10, leading=13, textColor=NAVY,
+    )
+    sub_style = ParagraphStyle(
+        "TocItemSub", fontName="Helvetica-Oblique", fontSize=8, leading=10, textColor=TEXT_MUTED,
+    )
+    marker_style = ParagraphStyle(
+        "TocMarker", fontSize=7.5, leading=10, textColor=colors.HexColor("#888888"), alignment=2,
+    )
+
+    combo_style = ParagraphStyle(
+        "TocCombo", fontSize=10, leading=13, textColor=NAVY,
+    )
+
+    data = []
+    for (num, title, sub) in TOC_ENTRIES:
+        combo = (
+            f'<font name="Helvetica-Bold" color="#0A1628" size="10">{title}</font><br/>'
+            f'<font color="#666666" size="8"><i>{sub}</i></font>'
+        )
+        data.append([
+            Paragraph(f"{num:02d}", num_style),
+            Paragraph(combo, combo_style),
+            Paragraph(f"SECTION&nbsp;{num:02d}", marker_style),
+        ])
+
+    toc = Table(data, colWidths=[40, 380, 70])
+    toc.setStyle(TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('LEFTPADDING', (0, 0), (-1, -1), 0),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+        ('TOPPADDING', (0, 0), (-1, -1), 7),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 7),
+        ('LINEBELOW', (0, 0), (-1, -2), 0.3, LINE_LIGHT),
+    ]))
+    story.append(toc)
 
     story.append(PageBreak())
 
@@ -659,7 +746,7 @@ def _derive_level_name(score):
         return "Defined"
     if s < 4.5:
         return "Managed"
-    return "Optimising"
+    return "Predictive"
 
 
 def build_assessment_reliability(story, report, assessment, body):
@@ -1048,6 +1135,9 @@ def build_full_assessment_pdf(assessment: dict) -> BytesIO:
 
     # --- Cover page ---
     build_cover_page(story, assessment, report)
+
+    # --- Table of Contents ---
+    build_toc_page(story)
 
     # --- Group A: Context + Overall Score ---
     build_section_label(story, styles, 1, "Portfolio Context", "Who and what this report is about")

@@ -157,6 +157,8 @@ class CompanyCreate(BaseModel):
     name: str
     industry: str
     portfolio_size: Optional[str] = None
+    company_size: Optional[str] = None  # e.g. "Mid-market · 450 employees"
+    active_products: Optional[str] = None  # e.g. "28 active SKUs"
     primary_challenge: Optional[str] = None
 
 class CompanyResponse(BaseModel):
@@ -164,6 +166,8 @@ class CompanyResponse(BaseModel):
     name: str
     industry: str
     portfolio_size: Optional[str] = None
+    company_size: Optional[str] = None
+    active_products: Optional[str] = None
     primary_challenge: Optional[str] = None
     created_at: str
     user_id: str
@@ -652,6 +656,8 @@ async def create_company(company: CompanyCreate, current_user: dict = Depends(ge
         "name": company.name,
         "industry": company.industry,
         "portfolio_size": company.portfolio_size,
+        "company_size": company.company_size,
+        "active_products": company.active_products,
         "primary_challenge": company.primary_challenge,
         "user_id": current_user["id"],
         "created_at": datetime.now(timezone.utc).isoformat()
@@ -664,7 +670,7 @@ async def create_company(company: CompanyCreate, current_user: dict = Depends(ge
 
 @api_router.get("/companies")
 async def get_companies(current_user: dict = Depends(get_current_user)):
-    companies = await db.companies.find({"user_id": current_user["id"]}, {"_id": 1, "name": 1, "industry": 1, "portfolio_size": 1, "primary_challenge": 1, "created_at": 1, "user_id": 1}).to_list(1000)
+    companies = await db.companies.find({"user_id": current_user["id"]}, {"_id": 1, "name": 1, "industry": 1, "portfolio_size": 1, "company_size": 1, "active_products": 1, "primary_challenge": 1, "created_at": 1, "user_id": 1}).to_list(1000)
     result = []
     for c in companies:
         cid = str(c["_id"])
@@ -728,6 +734,11 @@ async def create_assessment(assessment: AssessmentCreate, current_user: dict = D
         "company_id": assessment.company_id,
         "company_name": company["name"],
         "company_industry": company["industry"],
+        # Snapshot the parent company's descriptor fields so reports remain
+        # self-contained even if the company profile is later edited/deleted.
+        "company_size": company.get("company_size") or company.get("portfolio_size"),
+        "active_products": company.get("active_products"),
+        "portfolio_size": company.get("portfolio_size"),
         "respondent_name": assessment.respondent_name,
         "respondent_role": assessment.respondent_role,
         "user_id": current_user["id"],
@@ -1451,7 +1462,7 @@ LEVEL_NAMES = {
     2: "Developing", 
     3: "Defined",
     4: "Managed",
-    5: "Optimising"
+    5: "Predictive"
 }
 
 LEVEL_GAPS = {

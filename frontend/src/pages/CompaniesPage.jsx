@@ -183,8 +183,12 @@ const CompanyCard = ({ company, onDelete }) => {
         )}
       </div>
 
-      {company.portfolio_size && (
-        <p className="mt-3 text-sm text-white/40">Portfolio: {company.portfolio_size}</p>
+      {(company.portfolio_size || company.company_size || company.active_products) && (
+        <div className="mt-3 space-y-1 text-sm text-white/40">
+          {company.company_size && <p><span className="text-white/30">Size:</span> {company.company_size}</p>}
+          {company.active_products && <p><span className="text-white/30">Products:</span> {company.active_products}</p>}
+          {company.portfolio_size && !company.company_size && <p><span className="text-white/30">Portfolio:</span> {company.portfolio_size}</p>}
+        </div>
       )}
 
       <div className="mt-4 pt-4 border-t border-white/[0.06] flex items-center justify-between">
@@ -210,7 +214,9 @@ const CompaniesPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [formData, setFormData] = useState({
-    name: "", industry: "", portfolio_size: "", primary_challenge: ""
+    name: "", industry: "", portfolio_size: "",
+    company_size: "", active_products: "",
+    primary_challenge: ""
   });
   const [submitting, setSubmitting] = useState(false);
 
@@ -219,7 +225,11 @@ const CompaniesPage = () => {
   }, []);
 
   const resetForm = useCallback(() => {
-    setFormData({ name: "", industry: "", portfolio_size: "", primary_challenge: "" });
+    setFormData({
+      name: "", industry: "", portfolio_size: "",
+      company_size: "", active_products: "",
+      primary_challenge: ""
+    });
   }, []);
 
   const handleSubmit = useCallback(async (e) => {
@@ -320,6 +330,32 @@ const CompaniesPage = () => {
                     className="w-full px-4 py-3 glass-input rounded-xl outline-none"
                     placeholder="e.g., 500 products"
                   />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <label className="text-sm text-white/50">Company Size</label>
+                    <input
+                      type="text"
+                      data-testid="company-size-input"
+                      value={formData.company_size}
+                      onChange={(e) => handleFormChange("company_size", e.target.value)}
+                      className="w-full px-4 py-3 glass-input rounded-xl outline-none"
+                      placeholder="e.g., 450 employees"
+                    />
+                    <p className="text-[11px] text-white/30 italic">Shown on the report cover and Portfolio Context card.</p>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm text-white/50">Active Products</label>
+                    <input
+                      type="text"
+                      data-testid="company-active-products-input"
+                      value={formData.active_products}
+                      onChange={(e) => handleFormChange("active_products", e.target.value)}
+                      className="w-full px-4 py-3 glass-input rounded-xl outline-none"
+                      placeholder="e.g., 28 active SKUs"
+                    />
+                    <p className="text-[11px] text-white/30 italic">Optional \u2014 appears in the PDF Portfolio Context.</p>
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm text-white/50">Primary PPM Challenge</label>
