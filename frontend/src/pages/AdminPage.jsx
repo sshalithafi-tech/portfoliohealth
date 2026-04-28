@@ -16,7 +16,7 @@ const TabButton = ({ active, onClick, testId, children }) => (
     data-testid={testId}
     onClick={onClick}
     className={`px-4 py-3 text-sm font-medium transition-colors border-b-2 -mb-px ${
-      active ? "border-[#C9A84C] text-[#C9A84C]" : "border-transparent text-[#4A5568] hover:text-[#0C1B2A]"
+      active ? "border-[#0891B2] text-[#0891B2]" : "border-transparent text-[#4A5568] hover:text-[#0C1B2A]"
     }`}
   >
     {children}

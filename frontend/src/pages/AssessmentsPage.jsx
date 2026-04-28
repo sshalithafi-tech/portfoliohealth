@@ -90,12 +90,12 @@ const AssessmentCard = ({ assessment, onClick }) => {
     <div
       data-testid={`assessment-card-${assessment.id}`}
       onClick={onClick}
-      className="group relative flex flex-col glass-surface-highlight rounded-2xl p-5 cursor-pointer transition-all duration-300 hover:border-[#C9A84C]/30 hover:-translate-y-0.5 hover:shadow-[0_8px_32px_-8px_rgba(201,168,76,0.25)]"
+      className="group relative flex flex-col glass-surface-highlight rounded-2xl p-5 cursor-pointer transition-all duration-300 hover:border-[#0891B2]/30 hover:-translate-y-0.5 hover:shadow-[0_8px_32px_-8px_rgba(8, 145, 178,0.25)]"
     >
       {/* Top: company + status */}
       <div className="flex items-start justify-between gap-3 mb-4">
         <div className="flex items-start gap-3 min-w-0 flex-1">
-          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#60A5FA]/20 to-[#60A5FA]/5 border border-[#60A5FA]/15 flex items-center justify-center shrink-0">
+          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#0891B2]/20 to-[#60A5FA]/5 border border-[#60A5FA]/15 flex items-center justify-center shrink-0">
             <Building2 size={18} className="text-[#60A5FA]" />
           </div>
           <div className="min-w-0 flex-1">
@@ -146,7 +146,7 @@ const AssessmentCard = ({ assessment, onClick }) => {
           <button
             onClick={downloadPDF}
             data-testid={`download-report-${assessment.id}`}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#C9A84C] bg-[#C9A84C]/10 hover:bg-[#C9A84C]/20 rounded-lg border border-[#C9A84C]/20 transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#0891B2] bg-[#0891B2]/10 hover:bg-[#0891B2]/20 rounded-lg border border-[#0891B2]/20 transition-colors"
           >
             <Download size={12} /> Download PDF
           </button>
@@ -155,7 +155,7 @@ const AssessmentCard = ({ assessment, onClick }) => {
             <FileText size={12} /> Continue
           </span>
         )}
-        <span className="inline-flex items-center gap-1 text-xs text-[#8896A5] group-hover:text-[#C9A84C] transition-colors">
+        <span className="inline-flex items-center gap-1 text-xs text-[#8896A5] group-hover:text-[#0891B2] transition-colors">
           {isComplete ? "View report" : "Resume"}
           <ChevronRight size={14} className="transition-transform group-hover:translate-x-0.5" />
         </span>
@@ -253,7 +253,7 @@ const AssessmentsPage = () => {
             <h1 className="text-2xl sm:text-3xl font-semibold text-[#0C1B2A] font-['Outfit'] tracking-tight">
               Assessments
               {selectedCompany && (
-                <span className="text-[#C9A84C]"> · {selectedCompany.name}</span>
+                <span className="text-[#0891B2]"> · {selectedCompany.name}</span>
               )}
             </h1>
             <p className="text-[#4A5568] mt-1 text-sm sm:text-base">
@@ -267,7 +267,7 @@ const AssessmentsPage = () => {
                   <span className="w-1.5 h-1.5 rounded-full bg-[#34D399]" /> {completedCount} completed
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#C9A84C]" /> {inProgressCount} in progress
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#0891B2]" /> {inProgressCount} in progress
                 </span>
               </div>
             )}
@@ -306,7 +306,7 @@ const AssessmentsPage = () => {
                     ))}
                   </select>
                   {companies.length === 0 && (
-                    <Link to="/companies" className="text-sm text-[#C9A84C] hover:text-[#C9A84C]/80">
+                    <Link to="/companies" className="text-sm text-[#0891B2] hover:text-[#0891B2]/80">
                       + Add a company first
                     </Link>
                   )}
@@ -377,7 +377,7 @@ const AssessmentsPage = () => {
           {companyFilter && (
             <Link
               to="/assessments"
-              className="px-4 py-2.5 text-[#C9A84C] hover:text-[#C9A84C]/80 transition-colors text-sm"
+              className="px-4 py-2.5 text-[#0891B2] hover:text-[#0891B2]/80 transition-colors text-sm"
             >
               Clear company filter
             </Link>

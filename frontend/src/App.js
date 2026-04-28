@@ -15,6 +15,7 @@ import LandingPage from "./pages/LandingPage";
 import QuickAssessmentPage from "./pages/QuickAssessmentPage";
 import QuickResultsPage from "./pages/QuickResultsPage";
 import AdminPage from "./pages/AdminPage";
+import BenchmarksPage from "./pages/BenchmarksPage";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -109,8 +110,8 @@ const ProtectedRoute = ({ children }) => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse-glow w-12 h-12 rounded-full bg-[#C9A84C]/15 flex items-center justify-center">
-          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#60A5FA] to-[#C9A84C]" />
+        <div className="animate-pulse-glow w-12 h-12 rounded-full bg-[#0891B2]/15 flex items-center justify-center">
+          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#60A5FA] to-[#0891B2]" />
         </div>
       </div>
     );
@@ -130,8 +131,8 @@ const PublicRoute = ({ children }) => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse-glow w-12 h-12 rounded-full bg-[#C9A84C]/15 flex items-center justify-center">
-          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#60A5FA] to-[#C9A84C]" />
+        <div className="animate-pulse-glow w-12 h-12 rounded-full bg-[#0891B2]/15 flex items-center justify-center">
+          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#60A5FA] to-[#0891B2]" />
         </div>
       </div>
     );
@@ -169,6 +170,7 @@ function App() {
             <Route path="/assessments/:id" element={<ProtectedRoute><AssessmentChatPage /></ProtectedRoute>} />
             <Route path="/assessments/:id/report" element={<ProtectedRoute><ReportPage /></ProtectedRoute>} />
             <Route path="/companies" element={<ProtectedRoute><CompaniesPage /></ProtectedRoute>} />
+            <Route path="/benchmarks" element={<ProtectedRoute><BenchmarksPage /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
             <Route path="/quick-assessment" element={<QuickAssessmentPage />} />
             <Route path="/quick-assessment/:id/results" element={<QuickResultsPage />} />

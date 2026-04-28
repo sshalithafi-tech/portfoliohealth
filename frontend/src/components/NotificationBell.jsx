@@ -13,7 +13,7 @@ const ICON_MAP = {
 const COLOR_MAP = {
   new_user: "#A78BFA",
   assessment_completed: "#34D399",
-  quick_assessment: "#C9A84C",
+  quick_assessment: "#0891B2",
 };
 
 function timeAgo(dateStr) {
@@ -126,7 +126,7 @@ const NotificationBell = () => {
               <button
                 data-testid="mark-all-read-btn"
                 onClick={markAllRead}
-                className="flex items-center gap-1 text-xs text-[#C9A84C] hover:text-[#C9A84C]/80 transition-colors"
+                className="flex items-center gap-1 text-xs text-[#0891B2] hover:text-[#0891B2]/80 transition-colors"
               >
                 <CheckCheck size={14} />
                 Mark all read
@@ -143,7 +143,7 @@ const NotificationBell = () => {
             ) : (
               notifications.map((n) => {
                 const Icon = ICON_MAP[n.type] || Bell;
-                const color = COLOR_MAP[n.type] || "#C9A84C";
+                const color = COLOR_MAP[n.type] || "#0891B2";
                 return (
                   <div
                     key={n.id}
@@ -165,7 +165,7 @@ const NotificationBell = () => {
                       <p className="text-[10px] text-[#8896A5] mt-1">{timeAgo(n.created_at)}</p>
                     </div>
                     {!n.read && (
-                      <div className="w-2 h-2 rounded-full bg-[#C9A84C] shrink-0 mt-2" />
+                      <div className="w-2 h-2 rounded-full bg-[#0891B2] shrink-0 mt-2" />
                     )}
                   </div>
                 );

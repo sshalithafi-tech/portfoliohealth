@@ -4,6 +4,7 @@ import {
   LayoutDashboard,
   ClipboardCheck,
   Building2,
+  BarChart3,
   LogOut,
   Menu,
   X,
@@ -28,6 +29,7 @@ const Layout = ({ children }) => {
     { path: "/dashboard",  label: "Dashboard",   icon: LayoutDashboard },
     { path: "/assessments",label: "Assessments", icon: ClipboardCheck },
     { path: "/companies",  label: "Companies",   icon: Building2 },
+    { path: "/benchmarks", label: "Benchmarks",  icon: BarChart3 },
     ...(user?.role === "admin" ? [{ path: "/admin", label: "Admin Data", icon: Shield }] : []),
   ];
 
@@ -46,10 +48,12 @@ const Layout = ({ children }) => {
           {sidebarOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
         <div className="flex items-center gap-2">
-          <LogoMark className="w-8 h-8 rounded-lg" radius={14} />
-          <span className="text-[#0C1B2A] font-semibold font-['Outfit'] text-sm">
-            PortfolioHealth
-          </span>
+          <Link to="/dashboard" data-testid="mobile-logo-home" className="flex items-center gap-2">
+            <LogoMark className="w-8 h-8 rounded-lg" radius={14} />
+            <span className="text-[#0C1B2A] font-semibold font-['Outfit'] text-sm">
+              PortfolioHealth
+            </span>
+          </Link>
         </div>
         <div className="w-10" />
       </div>
@@ -74,22 +78,27 @@ const Layout = ({ children }) => {
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
       >
-        {/* Gold left rail */}
-        <div className="absolute top-0 left-0 w-[3px] h-full bg-gradient-to-b from-[#C9A84C] via-[#E8D49A] to-transparent" />
+        {/* Cyan left rail */}
+        <div className="absolute top-0 left-0 w-[3px] h-full bg-gradient-to-b from-[#0891B2] via-[#67E8F9] to-transparent" />
 
         {/* Brand block */}
         <div className="h-20 flex items-center px-6 border-b border-[#EEF1F5]">
-          <div className="flex items-center gap-3">
-            <LogoMark className="w-11 h-11 rounded-xl" radius={20} />
+          <Link
+            to="/dashboard"
+            data-testid="sidebar-logo-home"
+            onClick={() => setSidebarOpen(false)}
+            className="flex items-center gap-3 group"
+          >
+            <LogoMark className="w-11 h-11 rounded-xl transition-transform group-hover:scale-[1.05]" radius={20} />
             <div>
-              <h1 className="text-[#0C1B2A] font-semibold font-['Outfit'] tracking-tight">
+              <h1 className="text-[#0C1B2A] font-semibold font-['Outfit'] tracking-tight group-hover:text-[#0891B2] transition-colors">
                 PortfolioHealth
               </h1>
-              <p className="text-[10px] uppercase tracking-[0.18em] text-[#A88A2E] font-semibold mt-0.5">
+              <p className="text-[10px] uppercase tracking-[0.18em] text-[#0E7490] font-semibold mt-0.5">
                 PPM Assessment
               </p>
             </div>
-          </div>
+          </Link>
         </div>
 
         {/* Eyebrow + nav */}
@@ -109,15 +118,15 @@ const Layout = ({ children }) => {
                   group relative flex items-center gap-3 px-4 py-3 rounded-xl
                   font-medium transition-all duration-200
                   ${active
-                    ? 'bg-gradient-to-r from-[#F7F0DC] to-white text-[#A88A2E] shadow-[inset_0_0_0_1px_rgba(201,168,76,0.30)]'
+                    ? 'bg-gradient-to-r from-[#ECFEFF] to-white text-[#0E7490] shadow-[inset_0_0_0_1px_rgba(8, 145, 178,0.30)]'
                     : 'text-[#4B5563] hover:text-[#0C1B2A] hover:bg-[#F7F8FA]'
                   }
                 `}
               >
                 {active && (
-                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-[#C9A84C]" />
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-[#0891B2]" />
                 )}
-                <Icon size={18} className={active ? "text-[#A88A2E]" : "text-[#6B7280] group-hover:text-[#0C1B2A]"} />
+                <Icon size={18} className={active ? "text-[#0E7490]" : "text-[#6B7280] group-hover:text-[#0C1B2A]"} />
                 <span className="font-['Outfit']">{label}</span>
               </Link>
             );
@@ -127,8 +136,8 @@ const Layout = ({ children }) => {
         {/* User block bottom */}
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-[#EEF1F5] bg-[#F7F8FA]/60">
           <div className="flex items-center gap-3 px-3 py-2 mb-2 rounded-xl bg-white border border-[#EEF1F5]">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#F7F0DC] to-[#E8D49A] border border-[#C9A84C]/40 flex items-center justify-center">
-              <span className="text-[#A88A2E] font-bold font-['Outfit'] text-sm">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#ECFEFF] to-[#67E8F9] border border-[#0891B2]/40 flex items-center justify-center">
+              <span className="text-[#0E7490] font-bold font-['Outfit'] text-sm">
                 {user?.name?.charAt(0)?.toUpperCase() || "U"}
               </span>
             </div>
@@ -161,7 +170,7 @@ const Layout = ({ children }) => {
             <div className="gold-rule w-full max-w-md opacity-80">
               <span className="diamond" />
             </div>
-            <p className="text-[#E8D49A] font-['Outfit'] tracking-wide">
+            <p className="text-[#67E8F9] font-['Outfit'] tracking-wide font-medium">
               Academically grounded in published PPM research · University of Oulu
             </p>
             <p className="text-[10px] sm:text-xs text-white/45 max-w-2xl leading-relaxed">

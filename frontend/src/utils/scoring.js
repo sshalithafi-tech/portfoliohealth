@@ -20,14 +20,14 @@ export const DIMENSION_LABELS = {
 export const getScoreColorClass = (score) => {
   if (score >= 4) return "text-[#60A5FA]";
   if (score >= 3) return "text-[#34D399]";
-  if (score >= 2) return "text-[#C9A84C]";
+  if (score >= 2) return "text-[#0891B2]";
   return "text-[#EF4444]";
 };
 
 export const getScoreColor = (score) => {
   if (score >= 4) return "#60A5FA";
   if (score >= 3) return "#34D399";
-  if (score >= 2) return "#C9A84C";
+  if (score >= 2) return "#0891B2";
   return "#EF4444";
 };
 
@@ -39,7 +39,7 @@ export const getTrafficLight = (score) => {
 
 export const getTrafficLightBgClass = (status) => {
   if (status === "green") return "bg-[#34D399]/10 border-[#34D399]/20";
-  if (status === "amber") return "bg-[#C9A84C]/10 border-[#C9A84C]/20";
+  if (status === "amber") return "bg-[#0891B2]/10 border-[#0891B2]/20";
   return "bg-[#EF4444]/10 border-[#EF4444]/20";
 };
 
@@ -52,7 +52,7 @@ export const getDimensionBadgeClass = (dimension) => {
   const colors = {
     people: "bg-[#60A5FA]/12 text-[#60A5FA] border border-[#60A5FA]/20",
     process: "bg-[#34D399]/12 text-[#34D399] border border-[#34D399]/20",
-    data: "bg-[#C9A84C]/12 text-[#C9A84C] border border-[#C9A84C]/20",
+    data: "bg-[#0891B2]/12 text-[#0891B2] border border-[#0891B2]/20",
     technology: "bg-[#A78BFA]/12 text-[#A78BFA] border border-[#A78BFA]/20",
     qualifier: "bg-white/[0.06] text-white/40 border border-white/10"
   };

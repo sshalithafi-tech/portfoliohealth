@@ -28,13 +28,13 @@ const QuestionOption = ({ option, questionId, optionIndex, isSelected, onSelect 
     onClick={() => onSelect(option.value)}
     className={`w-full p-4 rounded-xl border text-left transition-all flex items-center justify-between group ${
       isSelected
-        ? "bg-[#C9A84C]/10 border-[#C9A84C]/30 text-[#0C1B2A]"
-        : "bg-[#F8F9FA] border-[#E2E8F0] text-[#4A5568] hover:border-[#C9A84C]/20 hover:bg-[#F8F9FA]"
+        ? "bg-[#0891B2]/10 border-[#0891B2]/30 text-[#0C1B2A]"
+        : "bg-[#F8F9FA] border-[#E2E8F0] text-[#4A5568] hover:border-[#0891B2]/20 hover:bg-[#F8F9FA]"
     }`}
   >
     <span className="font-medium">{option.label}</span>
     <ChevronRight size={18} className={`transition-all ${
-      isSelected ? "text-[#C9A84C]" : "text-[#8896A5] group-hover:text-[#4A5568]"
+      isSelected ? "text-[#0891B2]" : "text-[#8896A5] group-hover:text-[#4A5568]"
     }`} />
   </button>
 );
@@ -47,7 +47,7 @@ const ProgressDots = ({ questions, currentQuestion, answers, onDotClick }) => (
         onClick={() => onDotClick(idx)}
         className={`h-2 rounded-full transition-all ${
           idx === currentQuestion
-            ? "bg-[#C9A84C] w-6"
+            ? "bg-[#0891B2] w-6"
             : answers[String(q.id)]
             ? "bg-[#34D399] w-2"
             : "bg-[#F8F9FA] w-2"
@@ -166,7 +166,7 @@ const QuickAssessmentPage = () => {
       {step === "questions" && (
         <div className="h-1 bg-[#F8F9FA] relative z-10">
           <div 
-            className="h-full bg-gradient-to-r from-[#60A5FA] to-[#C9A84C] transition-all duration-300"
+            className="h-full bg-gradient-to-r from-[#0891B2] to-[#0891B2] transition-all duration-300"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -187,7 +187,7 @@ const QuickAssessmentPage = () => {
             <form onSubmit={handleStartAssessment} className="space-y-6">
               <div className="p-6 glass-surface-highlight rounded-xl space-y-4">
                 <div className="flex items-center gap-3 mb-4">
-                  <Building2 size={20} className="text-[#C9A84C]" />
+                  <Building2 size={20} className="text-[#0891B2]" />
                   <h2 className="text-lg font-semibold text-[#0C1B2A] font-['Outfit']">Company Information</h2>
                 </div>
 
@@ -329,7 +329,7 @@ const QuickAssessmentPage = () => {
         {/* Submitting Step */}
         {step === "submitting" && (
           <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
-            <Loader2 size={48} className="text-[#C9A84C] animate-spin mb-6" />
+            <Loader2 size={48} className="text-[#0891B2] animate-spin mb-6" />
             <h2 className="text-xl font-semibold text-[#0C1B2A] mb-2 font-['Outfit']">Calculating Your Scores</h2>
             <p className="text-[#4A5568]">This will only take a moment...</p>
           </div>

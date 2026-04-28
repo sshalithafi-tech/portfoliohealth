@@ -6,7 +6,7 @@ import { getTrafficLightBgClass } from "../utils/scoring";
  */
 export const TrafficLightIcon = ({ status, size = 20 }) => {
   if (status === "green") return <CheckCircle size={size} className="text-[#34D399]" />;
-  if (status === "amber") return <AlertTriangle size={size} className="text-[#C9A84C]" />;
+  if (status === "amber") return <AlertTriangle size={size} className="text-[#0891B2]" />;
   return <AlertCircle size={size} className="text-[#EF4444]" />;
 };
 
@@ -22,7 +22,7 @@ export const StatusBadge = ({ status }) => {
     );
   }
   return (
-    <span className="px-3 py-1 text-xs rounded-full bg-[#C9A84C]/15 text-[#C9A84C] border border-[#C9A84C]/20">
+    <span className="px-3 py-1 text-xs rounded-full bg-[#0891B2]/15 text-[#0891B2] border border-[#0891B2]/20">
       In Progress
     </span>
   );
@@ -45,8 +45,8 @@ export const TrafficLightBadge = ({ status }) => {
  */
 export const LoadingSpinner = ({ className = "" }) => (
   <div className={`flex items-center justify-center ${className}`}>
-    <div className="animate-pulse-glow w-12 h-12 rounded-full bg-[#C9A84C]/15 flex items-center justify-center">
-      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#60A5FA] to-[#C9A84C]" />
+    <div className="animate-pulse-glow w-12 h-12 rounded-full bg-[#0891B2]/15 flex items-center justify-center">
+      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#0891B2] to-[#0891B2]" />
     </div>
   </div>
 );
@@ -56,9 +56,9 @@ export const LoadingSpinner = ({ className = "" }) => (
  */
 export const ScoreDisplay = ({ score, size = "lg", showMax = true }) => {
   const getColorClass = (s) => {
-    if (s >= 4) return "text-[#C9A84C]";
+    if (s >= 4) return "text-[#0891B2]";
     if (s >= 3) return "text-[#34D399]";
-    if (s >= 2) return "text-[#C9A84C]";
+    if (s >= 2) return "text-[#0891B2]";
     return "text-[#EF4444]";
   };
 
@@ -82,7 +82,7 @@ export const ScoreDisplay = ({ score, size = "lg", showMax = true }) => {
 /**
  * Progress bar
  */
-export const ProgressBar = ({ value, max = 100, color = "#C9A84C" }) => {
+export const ProgressBar = ({ value, max = 100, color = "#0891B2" }) => {
   const percentage = (value / max) * 100;
   return (
     <div className="w-full h-2 bg-[#F8F9FA] rounded-full overflow-hidden">
@@ -97,7 +97,7 @@ export const ProgressBar = ({ value, max = 100, color = "#C9A84C" }) => {
 /**
  * Numbered list item
  */
-export const NumberedListItem = ({ index, children, color = "#C9A84C" }) => (
+export const NumberedListItem = ({ index, children, color = "#0891B2" }) => (
   <li className="flex items-start gap-3">
     <span 
       className="w-6 h-6 rounded-full flex items-center justify-center text-xs shrink-0 mt-0.5"
@@ -112,7 +112,7 @@ export const NumberedListItem = ({ index, children, color = "#C9A84C" }) => (
 /**
  * Arrow list item
  */
-export const ArrowListItem = ({ children, color = "#C9A84C" }) => (
+export const ArrowListItem = ({ children, color = "#0891B2" }) => (
   <li className="flex items-start gap-2 text-sm text-[#4A5568]">
     <span style={{ color }}>→</span>
     {children}

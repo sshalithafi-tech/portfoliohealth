@@ -59,7 +59,7 @@ const TableRow = ({ a }) => (
         <button
           onClick={() => downloadPdf(a)}
           data-testid={`admin-download-${a.id}`}
-          className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium text-[#C9A84C] bg-[#C9A84C]/10 hover:bg-[#C9A84C]/20 rounded-md border border-[#C9A84C]/20 transition-colors whitespace-nowrap"
+          className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium text-[#0891B2] bg-[#0891B2]/10 hover:bg-[#0891B2]/20 rounded-md border border-[#0891B2]/20 transition-colors whitespace-nowrap"
         >
           <Download size={10} /> PDF
         </button>

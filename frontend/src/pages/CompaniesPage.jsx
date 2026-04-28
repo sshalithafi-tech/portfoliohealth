@@ -157,7 +157,7 @@ const CompanyCard = ({ company, onDelete }) => {
           <Building2 size={24} className="text-[#60A5FA]" />
         </div>
         <div className="min-w-0">
-          <h3 className="text-lg font-semibold text-[#0C1B2A] group-hover:text-[#C9A84C] transition-colors font-['Outfit'] truncate">
+          <h3 className="text-lg font-semibold text-[#0C1B2A] group-hover:text-[#0891B2] transition-colors font-['Outfit'] truncate">
             {company.name}
           </h3>
           <p className="text-sm text-[#4A5568]">{company.industry}</p>
@@ -172,7 +172,7 @@ const CompanyCard = ({ company, onDelete }) => {
           </span>
         )}
         {(company.assessment_count - (company.completed_count || 0)) > 0 && (
-          <span className="px-2.5 py-1 text-xs rounded-full bg-[#C9A84C]/15 text-[#C9A84C] border border-[#C9A84C]/20">
+          <span className="px-2.5 py-1 text-xs rounded-full bg-[#0891B2]/15 text-[#0891B2] border border-[#0891B2]/20">
             {company.assessment_count - (company.completed_count || 0)} In Progress
           </span>
         )}
@@ -198,7 +198,7 @@ const CompanyCard = ({ company, onDelete }) => {
         </div>
         <Link
           to={`/assessments?company=${company.id}`}
-          className="flex items-center gap-1 text-sm text-[#C9A84C] hover:text-[#C9A84C]/80 transition-colors"
+          className="flex items-center gap-1 text-sm text-[#0891B2] hover:text-[#0891B2]/80 transition-colors"
         >
           <ClipboardCheck size={14} />
           Assessments

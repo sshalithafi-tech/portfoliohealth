@@ -135,8 +135,8 @@ const AssessmentChatPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="animate-pulse-glow w-12 h-12 rounded-full bg-[#F7F0DC] border border-[#E8D49A] flex items-center justify-center">
-          <div className="w-6 h-6 rounded-full bg-[#C9A84C]" />
+        <div className="animate-pulse-glow w-12 h-12 rounded-full bg-[#ECFEFF] border border-[#67E8F9] flex items-center justify-center">
+          <div className="w-6 h-6 rounded-full bg-[#0891B2]" />
         </div>
       </div>
     );

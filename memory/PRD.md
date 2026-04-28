@@ -252,6 +252,28 @@ User feedback: ivory cream looked ugly; pure white looked too plain. Picked opti
 ### Verified via screenshot
 - Dashboard, Chat (with new stepper showing Welcome active + remaining steps numbered), Report all render with cool off-white backdrop, white cards with subtle shadows, and gold accents that read precisely against the cool-gray paper.
 
+## Cyan Accent Pivot + Benchmarks Page (2026-04-28 — current session)
+User feedback: ivory looked ugly; pure white too plain → went **cool off-white** (Linear/Vercel SaaS feel). Then "the gold doesn't feel SaaS enough" → switched primary accent from gold to **deep cyan `#0891B2`** while keeping gold ONLY for the consultant Report doc (R1 cover / score panels) where it adds the premium consultant feel.
+
+### Changes
+- **Cyan accent introduced** in `index.css`: `--accent #0891B2`, `--accent-deep #0E7490`, `--accent-mid #67E8F9`, `--accent-soft #ECFEFF`. Gold variables retained for the Report only.
+- **Shared classes rewritten** to use cyan: `.glass-card` 3px top border, `.btn-liquid` (navy CTA with cyan text), `.btn-glass` hover, `.glass-input` focus halo, `.eyebrow`, `.gold-rule`, `.navy-panel` accent, `.gold-corner`, scrollbar hover, selection, chat assistant left-border, phase badges. `pulse-glow` keyframe re-tinted cyan.
+- **22 internal files migrated** programmatically — gold hex codes (`#C9A84C`/`#A88A2E`/`#E8D49A`/`#F7F0DC`/etc) and matching `rgba(201,168,76,*)` swapped to cyan equivalents. Skipped: `components/report/*`, `pages/ReportPage.jsx`, `LandingPage.jsx`, `lib/reportData.js`, `premium.css` — these intentionally keep gold for the report doc.
+- **LogoMark redesigned** — clean navy tile with smooth cyan ascending curve (cubic Bezier), peak vertex with soft glow, anchored base dot. Modern SaaS aesthetic, no more crowded zigzag pulse + corner bracket.
+- **Logo is clickable** — wrapped LogoMark in `<Link to="/dashboard">` in both desktop sidebar (`data-testid="sidebar-logo-home"`) and mobile header (`data-testid="mobile-logo-home"`). Hover scales the logo and tints the text cyan.
+- **NEW Benchmarks page** (`/benchmarks`) — Lite cross-company benchmarking:
+  - Header stat tiles: Cohort Size · Avg Overall · Strongest Pillar · Most Common Bottleneck
+  - Per-pillar distribution row with cyan gradient bar showing cohort avg + each company as a dot positioned along the 1–5 scale (hover for score tooltip)
+  - "Your Companies vs Cohort" section — each row is a clickable card with mini-bars per pillar (bottleneck shown red), overall score, and ±delta vs cohort badge (green positive / red negative)
+  - Empty state with friendly CTA when no completed assessments yet
+- **Backend `/api/benchmarks` endpoint added** — aggregates `cohort_avg`, `distribution`, `bottleneck_counts`, `common_bottleneck`, `strongest/weakest_pillar`, plus per-assessment summaries scoped to the current user. Tested: returns 3 assessments / cohort_avg `{people:2.5, process:2.33, data:2.67, technology:3.0, overall:2.63}` for the user.
+- **Sidebar nav** — added "Benchmarks" item with `BarChart3` icon between Companies and Admin.
+- **Report toolbar** — Print, Export PDF, View Chat buttons all verified working. Print triggers `window.print()` with the A4 page-break CSS already in `premium.css`.
+- **Account fix** — reset `sshalitha.fi@gmail.com` password to `Welcome2026!` (was invalidated during my earlier screenshot testing). Updated `/app/memory/test_credentials.md`.
+
+### Verified via screenshot
+- Login → Dashboard → Benchmarks (with full cohort + pillar dots + comparison rows) → Report all render with the cool off-white + cyan aesthetic. Logo click → dashboard works. Report still gold-accented (intentional consultant feel).
+
 ## Open / Backlog
 - P1: Real-LLM E2E verification of auto-emission after Turn 5 (pending Emergent LLM Key budget top-up).
 - P1: Hydration could expand to also rewrite R2 callout/bullets, R4 evidence, R7 roadmap actions, R8 decision impact when those exist on `assessment.report` — currently they remain static narrative from the template. Today's hydration covers R1, R5, R6 (the data-driven sections); narrative sections still show the Northpine demo content unless future LLM output populates new keys.

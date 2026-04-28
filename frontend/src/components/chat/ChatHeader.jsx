@@ -40,7 +40,7 @@ export const ChatHeader = ({ assessment, assessmentId }) => {
 
       <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
         <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-          <Building2 size={16} className="text-[#C9A84C] shrink-0" />
+          <Building2 size={16} className="text-[#0891B2] shrink-0" />
           <span className="text-[#0C1B2A] font-medium text-sm sm:text-base truncate">{assessment?.company_name}</span>
         </div>
         <div className="hidden md:flex items-center gap-2 text-[#4A5568]">

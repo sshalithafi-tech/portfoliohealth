@@ -38,7 +38,7 @@ export const PhaseIndicator = ({ currentPhase }) => {
       <div className="max-w-4xl mx-auto">
         {/* Progress meta */}
         <div className="flex items-center justify-between mb-3">
-          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#A88A2E] font-['Outfit']">
+          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#0E7490] font-['Outfit']">
             {currentPhase === "report" ? "Assessment Complete" : "Assessment Progress"}
           </span>
           <span className="text-[11px] text-[#6B7280] font-['Outfit'] font-medium">
@@ -55,7 +55,7 @@ export const PhaseIndicator = ({ currentPhase }) => {
           <div className="absolute top-3.5 left-0 right-0 h-[2px] bg-[#E5E7EB] rounded-full" />
           {/* Filled track */}
           <div
-            className="absolute top-3.5 left-0 h-[2px] rounded-full bg-gradient-to-r from-[#A88A2E] via-[#C9A84C] to-[#E8D49A] transition-all duration-500 ease-out"
+            className="absolute top-3.5 left-0 h-[2px] rounded-full bg-gradient-to-r from-[#0E7490] via-[#0891B2] to-[#67E8F9] transition-all duration-500 ease-out"
             style={{ width: `${progressPct}%` }}
           />
 
@@ -78,9 +78,9 @@ export const PhaseIndicator = ({ currentPhase }) => {
                       relative w-7 h-7 rounded-full flex items-center justify-center
                       font-['Outfit'] text-[11px] font-bold transition-all duration-300
                       ${isCompleted || isReport
-                        ? 'bg-[#C9A84C] text-[#0C1B2A] shadow-[0_2px_8px_rgba(201,168,76,0.40)]'
+                        ? 'bg-[#0891B2] text-[#0C1B2A] shadow-[0_2px_8px_rgba(8, 145, 178,0.40)]'
                         : isCurrent
-                          ? 'bg-white border-2 border-[#C9A84C] text-[#A88A2E] shadow-[0_0_0_4px_rgba(201,168,76,0.15)]'
+                          ? 'bg-white border-2 border-[#0891B2] text-[#0E7490] shadow-[0_0_0_4px_rgba(8, 145, 178,0.15)]'
                           : 'bg-white border-2 border-[#E5E7EB] text-[#9CA3AF]'
                       }
                     `}
@@ -91,7 +91,7 @@ export const PhaseIndicator = ({ currentPhase }) => {
                       <span>{idx + 1}</span>
                     )}
                     {isCurrent && (
-                      <span className="absolute inset-0 rounded-full border-2 border-[#C9A84C] animate-ping opacity-40" />
+                      <span className="absolute inset-0 rounded-full border-2 border-[#0891B2] animate-ping opacity-40" />
                     )}
                   </div>
 

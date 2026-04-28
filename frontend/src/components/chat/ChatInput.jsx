@@ -29,7 +29,7 @@ export const ChatInput = ({ inputRef, inputValue, onChange, onSubmit, disabled, 
       {isCompleted && (
         <p className="text-center text-[#8896A5] text-xs sm:text-sm mt-3">
           This assessment is complete.{" "}
-          <Link to={`/assessments/${assessmentId}/report`} className="text-[#C9A84C] hover:text-[#C9A84C]/80">
+          <Link to={`/assessments/${assessmentId}/report`} className="text-[#0891B2] hover:text-[#0891B2]/80">
             View the report
           </Link>
         </p>

@@ -31,14 +31,14 @@ export const FinalReportIndicator = () => {
   return (
     <div
       data-testid="final-report-indicator"
-      className="animate-fade-in rounded-2xl border border-[#E8D49A] bg-gradient-to-br from-[#F7F0DC] to-white p-4 sm:p-5"
+      className="animate-fade-in rounded-2xl border border-[#67E8F9] bg-gradient-to-br from-[#ECFEFF] to-white p-4 sm:p-5"
     >
       <div className="flex items-start gap-3">
         <LogoMark className="w-9 h-9 rounded-lg shrink-0" radius={14} />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 mb-2">
-            <Sparkles size={13} className="text-[#C9A84C]" />
-            <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] text-[#C9A84C] font-semibold">
+            <Sparkles size={13} className="text-[#0891B2]" />
+            <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] text-[#0891B2] font-semibold">
               Generating final report
             </p>
           </div>
@@ -56,7 +56,7 @@ export const FinalReportIndicator = () => {
             aria-label="Generating final report"
             className="relative h-1.5 w-full rounded-full bg-[#F8F9FA] overflow-hidden"
           >
-            <div className="absolute inset-y-0 w-1/3 rounded-full bg-gradient-to-r from-transparent via-[#C9A84C] to-transparent animate-progress-sweep" />
+            <div className="absolute inset-y-0 w-1/3 rounded-full bg-gradient-to-r from-transparent via-[#0891B2] to-transparent animate-progress-sweep" />
           </div>
 
           <div className="mt-2.5 flex items-center justify-between text-[10px] text-[#8896A5]">
@@ -67,7 +67,7 @@ export const FinalReportIndicator = () => {
               </span>
             </span>
             {slow && (
-              <span data-testid="final-report-slow-hint" className="text-[#C9A84C]/70 italic">
+              <span data-testid="final-report-slow-hint" className="text-[#0891B2]/70 italic">
                 taking longer than usual — hang tight
               </span>
             )}

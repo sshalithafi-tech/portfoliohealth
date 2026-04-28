@@ -35,7 +35,7 @@ const LoginPage = () => {
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              "radial-gradient(ellipse 60% 50% at 25% 30%, rgba(201, 168, 76, 0.18) 0%, transparent 60%)",
+              "radial-gradient(ellipse 60% 50% at 25% 30%, rgba(8, 145, 178, 0.18) 0%, transparent 60%)",
           }}
         />
         <div className="relative z-10 flex flex-col justify-center px-12">
@@ -43,7 +43,7 @@ const LoginPage = () => {
             <LogoMark className="w-14 h-14 rounded-2xl" radius={20} />
             <div>
               <h1 className="text-3xl font-light text-[#0C1B2A] font-['Outfit']">
-                Portfolio<span className="font-semibold text-[#A88A2E]">Health</span>
+                Portfolio<span className="font-semibold text-[#0E7490]">Health</span>
               </h1>
               <p className="text-[#8896A5]">Advisor</p>
             </div>
@@ -52,7 +52,7 @@ const LoginPage = () => {
             Assess your organisation's readiness for data-driven Product Portfolio Management decisions.
           </p>
           <div className="mt-8 flex items-center gap-4">
-            <div className="h-px flex-1 bg-gradient-to-r from-[#C9A84C]/55 to-transparent" />
+            <div className="h-px flex-1 bg-gradient-to-r from-[#0891B2]/55 to-transparent" />
           </div>
           <p className="mt-4 text-sm text-[#8896A5]">
             Academically grounded in published PPM research
@@ -122,7 +122,7 @@ const LoginPage = () => {
               className="w-full py-3 px-6 btn-liquid rounded-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading ? (
-                <div className="w-5 h-5 border-2 border-[#C9A84C]/40 border-t-[#C9A84C] rounded-full animate-spin" />
+                <div className="w-5 h-5 border-2 border-[#0891B2]/40 border-t-[#0891B2] rounded-full animate-spin" />
               ) : (
                 <>
                   <LogIn size={20} />
@@ -134,7 +134,7 @@ const LoginPage = () => {
 
           <p className="mt-8 text-center text-[#4A5568]">
             Don't have an account?{" "}
-            <Link to="/register" className="text-[#A88A2E] font-semibold hover:text-[#0C1B2A] transition-colors">
+            <Link to="/register" className="text-[#0E7490] font-semibold hover:text-[#0C1B2A] transition-colors">
               Create one
             </Link>
           </p>

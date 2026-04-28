@@ -1047,6 +1047,82 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
     }
 
 
+# Cross-Company Benchmarks
+@api_router.get("/benchmarks")
+async def get_benchmarks(current_user: dict = Depends(get_current_user)):
+    """Cross-company maturity comparison across the user's own completed assessments.
+
+    Returns:
+      - cohort: average pillar scores across all completed assessments
+      - distribution: { pillar: [score, ...] }   for sparkline / dot plot
+      - assessments: per-assessment summary with deltas vs cohort
+      - bottleneck_counts: { pillar: count }     of how often each pillar was the bottleneck
+    """
+    completed = await db.assessments.find(
+        {
+            "user_id": current_user["id"],
+            "status": "completed",
+            "scores": {"$ne": None},
+        },
+        {
+            "_id": 1, "company_id": 1, "company_name": 1, "company_industry": 1,
+            "company_size": 1, "business_model": 1, "respondent_role": 1,
+            "scores": 1, "report": 1, "completed_at": 1, "created_at": 1,
+        },
+    ).sort("completed_at", -1).to_list(500)
+
+    pillars = ["people", "process", "data", "technology", "overall"]
+    distribution = {p: [] for p in pillars}
+    bottleneck_counts = {"people": 0, "process": 0, "data": 0, "technology": 0}
+
+    items: list[dict] = []
+    for a in completed:
+        sc = a.get("scores", {}) or {}
+        for p in pillars:
+            v = sc.get(p)
+            if isinstance(v, (int, float)):
+                distribution[p].append(round(float(v), 2))
+        report = a.get("report") or {}
+        bn = (report.get("bottleneck_pillar") or "").strip().lower()
+        if bn in bottleneck_counts:
+            bottleneck_counts[bn] += 1
+
+        items.append({
+            "id": str(a["_id"]),
+            "company_id": a.get("company_id"),
+            "company_name": a.get("company_name"),
+            "company_industry": a.get("company_industry"),
+            "company_size": a.get("company_size"),
+            "business_model": a.get("business_model"),
+            "respondent_role": a.get("respondent_role"),
+            "scores": {p: float(sc.get(p)) if isinstance(sc.get(p), (int, float)) else None for p in pillars},
+            "bottleneck_pillar": bn or None,
+            "completed_at": a.get("completed_at") or a.get("created_at"),
+        })
+
+    cohort = {p: (round(sum(distribution[p]) / len(distribution[p]), 2) if distribution[p] else None) for p in pillars}
+    cohort_count = len(completed)
+
+    # Strongest / weakest pillar across the cohort (excluding overall)
+    pillar_only = {k: v for k, v in cohort.items() if k != "overall" and v is not None}
+    strongest = max(pillar_only, key=pillar_only.get) if pillar_only else None
+    weakest   = min(pillar_only, key=pillar_only.get) if pillar_only else None
+
+    # Most common bottleneck
+    common_bn = max(bottleneck_counts, key=bottleneck_counts.get) if max(bottleneck_counts.values(), default=0) > 0 else None
+
+    return {
+        "cohort_size": cohort_count,
+        "cohort_avg": cohort,
+        "distribution": distribution,
+        "bottleneck_counts": bottleneck_counts,
+        "common_bottleneck": common_bn,
+        "strongest_pillar": strongest,
+        "weakest_pillar": weakest,
+        "assessments": items,
+    }
+
+
 # ============================================
 # NOTIFICATION ENDPOINTS
 # ============================================

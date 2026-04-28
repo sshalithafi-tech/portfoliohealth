@@ -132,7 +132,7 @@ const QuickResultsPage = () => {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
         <p className="text-[#4A5568] mb-4">Assessment not found</p>
-        <Link to="/quick-assessment" className="text-[#C9A84C] hover:text-[#C9A84C]/80">
+        <Link to="/quick-assessment" className="text-[#0891B2] hover:text-[#0891B2]/80">
           Start a new assessment
         </Link>
       </div>
@@ -240,7 +240,7 @@ const QuickResultsPage = () => {
         </div>
 
         {/* CTA Box */}
-        <div className="p-6 sm:p-8 glass-card rounded-2xl animate-fade-in hover:border-[#C9A84C]/20">
+        <div className="p-6 sm:p-8 glass-card rounded-2xl animate-fade-in hover:border-[#0891B2]/20">
           <h2 className="text-lg sm:text-xl font-semibold text-[#0C1B2A] mb-3 sm:mb-4 font-['Outfit']">
             Ready for a Deeper Assessment?
           </h2>

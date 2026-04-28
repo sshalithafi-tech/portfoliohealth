@@ -24,7 +24,7 @@ const DIMENSION_CONFIG = [
   { icon: Monitor, label: "Technology", key: "technology" },
 ];
 
-const StatCard = ({ icon: Icon, label, value, color = "#C9A84C" }) => (
+const StatCard = ({ icon: Icon, label, value, color = "#0891B2" }) => (
   <div className="p-4 sm:p-5 glass-card rounded-xl">
     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
       <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${color}12` }}>
@@ -80,10 +80,10 @@ const DashboardPage = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 stagger-children">
-          <StatCard icon={ClipboardCheck} label="Total Assessments" value={stats?.total_assessments || 0} color="#C9A84C" />
+          <StatCard icon={ClipboardCheck} label="Total Assessments" value={stats?.total_assessments || 0} color="#0891B2" />
           <StatCard icon={TrendingUp} label="Completed" value={stats?.completed_assessments || 0} color="#27AE60" />
-          <StatCard icon={Zap} label="Quick Screenings" value={stats?.total_quick_assessments || 0} color="#E8D49A" />
-          <StatCard icon={Building2} label="Companies" value={stats?.total_companies || 0} color="#C9A84C" />
+          <StatCard icon={Zap} label="Quick Screenings" value={stats?.total_quick_assessments || 0} color="#67E8F9" />
+          <StatCard icon={Building2} label="Companies" value={stats?.total_companies || 0} color="#0891B2" />
         </div>
 
         {/* Main Content */}
@@ -114,7 +114,7 @@ const DashboardPage = () => {
           <div className="lg:col-span-2 p-5 glass-surface-highlight rounded-xl">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-base font-semibold text-[#0C1B2A] font-['Outfit']">Recent Assessments</h2>
-              <Link to="/assessments" className="text-[#C9A84C] hover:text-[#C9A84C]/80 text-sm transition-colors">View all</Link>
+              <Link to="/assessments" className="text-[#0891B2] hover:text-[#0891B2]/80 text-sm transition-colors">View all</Link>
             </div>
             {recentAssessments.length > 0 ? (
               <div className="space-y-2.5">
@@ -123,9 +123,9 @@ const DashboardPage = () => {
                     key={a.id}
                     onClick={() => handleRowClick(a)}
                     data-testid={`assessment-row-${a.id}`}
-                    className="group flex items-center gap-4 p-3.5 rounded-xl bg-[#F8F9FA] hover:bg-[#F8F9FA] border border-[#E2E8F0] hover:border-[#C9A84C]/20 cursor-pointer transition-all duration-200"
+                    className="group flex items-center gap-4 p-3.5 rounded-xl bg-[#F8F9FA] hover:bg-[#F8F9FA] border border-[#E2E8F0] hover:border-[#0891B2]/20 cursor-pointer transition-all duration-200"
                   >
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#60A5FA]/20 to-[#60A5FA]/5 border border-[#60A5FA]/15 flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#0891B2]/20 to-[#60A5FA]/5 border border-[#60A5FA]/15 flex items-center justify-center shrink-0">
                       <Building2 size={16} className="text-[#60A5FA]" />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -148,21 +148,21 @@ const DashboardPage = () => {
                         <span className="text-[#8896A5] text-sm">–</span>
                       )}
                     </div>
-                    <ChevronRight size={16} className="text-[#8896A5] group-hover:text-[#C9A84C] group-hover:translate-x-0.5 transition-all shrink-0" />
+                    <ChevronRight size={16} className="text-[#8896A5] group-hover:text-[#0891B2] group-hover:translate-x-0.5 transition-all shrink-0" />
                   </div>
                 ))}
               </div>
             ) : (
-              <EmptyState icon={ClipboardCheck} title="No assessments yet" action={<Link to="/assessments" className="text-[#C9A84C]">Start your first assessment</Link>} />
+              <EmptyState icon={ClipboardCheck} title="No assessments yet" action={<Link to="/assessments" className="text-[#0891B2]">Start your first assessment</Link>} />
             )}
           </div>
         </div>
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Link to="/quick-assessment" data-testid="quick-assessment-btn" className="p-5 glass-card rounded-xl group hover:border-[#C9A84C]/15">
-            <Zap size={28} className="text-[#C9A84C] mb-3" />
-            <h3 className="text-base font-semibold text-[#0C1B2A] mb-1 group-hover:text-[#C9A84C] transition-colors font-['Outfit']">Quick Check</h3>
+          <Link to="/quick-assessment" data-testid="quick-assessment-btn" className="p-5 glass-card rounded-xl group hover:border-[#0891B2]/15">
+            <Zap size={28} className="text-[#0891B2] mb-3" />
+            <h3 className="text-base font-semibold text-[#0C1B2A] mb-1 group-hover:text-[#0891B2] transition-colors font-['Outfit']">Quick Check</h3>
             <p className="text-[#8896A5] text-sm">10-minute rapid screening</p>
           </Link>
           <Link to="/companies" data-testid="manage-companies-btn" className="p-5 glass-card rounded-xl group hover:border-[#A78BFA]/15">

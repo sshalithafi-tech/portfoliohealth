@@ -46,20 +46,20 @@ const AssistantBubble = ({ content, timestamp }) => (
     <div className="flex items-start gap-3">
       <LogoMark className="w-8 h-8 rounded-full shrink-0 mt-1" radius={50} />
       <div className="flex-1 min-w-0">
-        <p className="text-xs text-[#C9A84C] font-medium mb-2">PortfolioHealth Advisor</p>
+        <p className="text-xs text-[#0891B2] font-medium mb-2">PortfolioHealth Advisor</p>
         <div className="text-[#0C1B2A] prose prose-sm max-w-none">
           <ReactMarkdown
             components={{
               p: ({ children }) => <p className="mb-3 last:mb-0 leading-relaxed">{children}</p>,
               strong: ({ children }) => <strong className="text-[#0C1B2A] font-semibold">{children}</strong>,
-              ul: ({ children }) => <ul className="list-disc pl-5 mb-3 space-y-2 marker:text-[#C9A84C]/70">{children}</ul>,
+              ul: ({ children }) => <ul className="list-disc pl-5 mb-3 space-y-2 marker:text-[#0891B2]/70">{children}</ul>,
               ol: ({ children }) => (
-                <ol className="list-decimal pl-6 mb-3 space-y-3 marker:text-[#C9A84C] marker:font-semibold">
+                <ol className="list-decimal pl-6 mb-3 space-y-3 marker:text-[#0891B2] marker:font-semibold">
                   {children}
                 </ol>
               ),
               li: ({ children }) => <li className="pl-1 leading-relaxed">{children}</li>,
-              code: ({ children }) => <code className="bg-[#F8F9FA] px-1 py-0.5 rounded text-[#C9A84C]">{children}</code>,
+              code: ({ children }) => <code className="bg-[#F8F9FA] px-1 py-0.5 rounded text-[#0891B2]">{children}</code>,
               pre: ({ children }) => <pre className="bg-[#F8F9FA] p-3 rounded-lg overflow-x-auto text-sm">{children}</pre>
             }}
           >
@@ -82,15 +82,15 @@ const UserBubble = ({ content, timestamp }) => (
 const TypingIndicator = () => (
   <div className="chat-message-assistant animate-fade-in">
     <div className="flex items-start gap-3">
-      <div className="w-8 h-8 rounded-full bg-[#C9A84C]/15 flex items-center justify-center shrink-0">
-        <Loader2 size={16} className="text-[#C9A84C] animate-spin" />
+      <div className="w-8 h-8 rounded-full bg-[#0891B2]/15 flex items-center justify-center shrink-0">
+        <Loader2 size={16} className="text-[#0891B2] animate-spin" />
       </div>
       <div className="flex items-center gap-2 text-[#4A5568]">
         <span>Thinking</span>
         <span className="flex gap-1">
-          <span className="w-1.5 h-1.5 bg-[#C9A84C] rounded-full animate-bounce" style={{ animationDelay: "0s" }} />
-          <span className="w-1.5 h-1.5 bg-[#C9A84C] rounded-full animate-bounce" style={{ animationDelay: "0.1s" }} />
-          <span className="w-1.5 h-1.5 bg-[#C9A84C] rounded-full animate-bounce" style={{ animationDelay: "0.2s" }} />
+          <span className="w-1.5 h-1.5 bg-[#0891B2] rounded-full animate-bounce" style={{ animationDelay: "0s" }} />
+          <span className="w-1.5 h-1.5 bg-[#0891B2] rounded-full animate-bounce" style={{ animationDelay: "0.1s" }} />
+          <span className="w-1.5 h-1.5 bg-[#0891B2] rounded-full animate-bounce" style={{ animationDelay: "0.2s" }} />
         </span>
       </div>
     </div>
@@ -100,12 +100,12 @@ const TypingIndicator = () => (
 const ClosingCard = ({ assessmentId }) => (
   <div
     data-testid="closing-statement-card"
-    className="animate-fade-in p-4 sm:p-6 rounded-2xl border border-[#E8D49A] bg-gradient-to-br from-[#F7F0DC] to-white"
+    className="animate-fade-in p-4 sm:p-6 rounded-2xl border border-[#67E8F9] bg-gradient-to-br from-[#ECFEFF] to-white"
   >
     <div className="flex items-center gap-3 mb-4">
       <LogoMark className="w-9 h-9 rounded-lg shrink-0" radius={14} />
       <div className="min-w-0">
-        <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] text-[#C9A84C]">Assessment Complete</p>
+        <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] text-[#0891B2]">Assessment Complete</p>
         <p className="text-sm text-[#4A5568]">Your report is ready on the dashboard.</p>
       </div>
     </div>
@@ -120,7 +120,7 @@ const ClosingCard = ({ assessmentId }) => (
       </p>
       <p className="break-words">
         If you would like further analysis or tailored recommendations based on your results, please contact:{" "}
-        <a href={`mailto:${CONTACT_EMAIL}`} className="text-[#C9A84C] hover:text-[#D4B85C] font-medium break-all">
+        <a href={`mailto:${CONTACT_EMAIL}`} className="text-[#0891B2] hover:text-[#22D3EE] font-medium break-all">
           {CONTACT_EMAIL}
         </a>
       </p>
