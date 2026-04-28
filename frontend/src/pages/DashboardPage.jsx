@@ -80,10 +80,10 @@ const DashboardPage = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 stagger-children">
-          <StatCard icon={ClipboardCheck} label="Total Assessments" value={stats?.total_assessments || 0} color="#60A5FA" />
-          <StatCard icon={TrendingUp} label="Completed" value={stats?.completed_assessments || 0} color="#34D399" />
-          <StatCard icon={Zap} label="Quick Screenings" value={stats?.total_quick_assessments || 0} color="#C9A84C" />
-          <StatCard icon={Building2} label="Companies" value={stats?.total_companies || 0} color="#A78BFA" />
+          <StatCard icon={ClipboardCheck} label="Total Assessments" value={stats?.total_assessments || 0} color="#C9A84C" />
+          <StatCard icon={TrendingUp} label="Completed" value={stats?.completed_assessments || 0} color="#27AE60" />
+          <StatCard icon={Zap} label="Quick Screenings" value={stats?.total_quick_assessments || 0} color="#E8D49A" />
+          <StatCard icon={Building2} label="Companies" value={stats?.total_companies || 0} color="#C9A84C" />
         </div>
 
         {/* Main Content */}
