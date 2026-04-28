@@ -1843,7 +1843,110 @@ function scoreToLevel(s){ if(s<2)return 1;if(s<3)return 2;if(s<4)return 3;if(s<4
      `Fixing ${bnPillarName} alone adds +${fixDelta.toFixed(1)} to your overall score. Fixing all pillars to 3.5 adds +${allDelta.toFixed(1)}. Address ${bnPillarName} first — it unlocks the greatest gain per unit of effort.`;
  })();
 
+})(); // close outer chart wrapper
+
+/* ============================================================
+   HYDRATION — rewrite the static R1 cover / R5 overall / R6
+   bottleneck content from window.REPORT_DATA so the same
+   template can be served per-assessment. Runs after the chart
+   IIFE so it has the final DOM in place.
+   ============================================================ */
+(function hydrate(){
+  const D = window.REPORT_DATA;
+  if(!D) return;
+  const pillarLevel = (s) => (s<2?1:s<3?2:s<4?3:s<4.5?4:5);
+  const fmt1 = (n) => Number(n||0).toFixed(1);
+  const cleanLevel = (s) => {
+    if(!s) return "";
+    // Strip "LEVEL X:" / "LEVEL X-Y:" prefix
+    let t = String(s).replace(/^LEVEL\s+[\d\-–]+\s*:?\s*/i, "").trim();
+    // Title-case
+    return t.split(/\s+/).map(w => w ? w.charAt(0).toUpperCase()+w.slice(1).toLowerCase() : w).join(" ");
+  };
+  const cap = cleanLevel;
+  const lvlIdxOf = (name, score) => {
+    const m = {"AD HOC":1,"DEVELOPING":2,"AWARE":2,"DEFINED":3,"MANAGED":4,"PREDICTIVE":5,"OPTIMISING":5,"OPTIMIZING":5};
+    if(name && m[name.toUpperCase()]) return m[name.toUpperCase()];
+    return pillarLevel(score||0);
+  };
+  const lvlColor = (i) => ({1:"#E53E3E",2:"#D69E2E",3:"#ECC94B",4:"#38A169",5:"#2B6CB0"})[i] || "#D69E2E";
+  const lvlTextColor = (i) => i===3 ? "#744210" : lvlColor(i);
+
+  // ---- R1 Cover ----
+  const ovIdx = lvlIdxOf(D.levels?.overall, D.scores?.overall);
+  const elCompany = document.querySelector('.r1-company'); if(elCompany) elCompany.textContent = D.company || "";
+  const meta = document.querySelector('.r1-meta');
+  if(meta){
+    const items = [D.industry, D.business_model, D.role, D.date].filter(Boolean);
+    meta.innerHTML = items.map((t,i) =>
+      `<span>${t}</span>${i<items.length-1?'<span class="sep">·</span>':''}`
+    ).join('');
+  }
+  const elScore = document.querySelector('.r1-score');
+  if(elScore){ elScore.textContent = fmt1(D.scores?.overall); elScore.style.color = lvlTextColor(ovIdx); }
+  const elLevelName = document.querySelector('.r1-level-name');
+  if(elLevelName) elLevelName.textContent = cap(D.levels?.overall || "");
+  const elBcap = document.querySelector('.r1-bcap');
+  if(elBcap) elBcap.style.display = D.bottleneck_capped ? '' : 'none';
+
+  // 4 pillar tiles in cover strip
+  const tiles = document.querySelectorAll('.r1-strip .r1-tile');
+  const tilePillars = ['people','process','data','technology'];
+  const tileLetters = {'people':'P','process':'P','data':'D','technology':'T'};
+  tiles.forEach((tile, i) => {
+    const key = tilePillars[i]; if(!key) return;
+    const sc = D.scores?.[key]; const lvl = lvlIdxOf(D.levels?.[key], sc);
+    tile.classList.toggle('bottleneck', (D.bottleneck||'').toLowerCase() === key);
+    tile.querySelector('.r1-tile-badge').textContent = tileLetters[key];
+    tile.querySelector('.r1-tile-label').textContent = key.charAt(0).toUpperCase()+key.slice(1);
+    const sEl = tile.querySelector('.r1-tile-score');
+    sEl.textContent = fmt1(sc);
+    if(tile.classList.contains('bottleneck')) sEl.style.color = '';
+    else sEl.style.color = lvlTextColor(lvl);
+    tile.querySelector('.r1-tile-level').textContent = cap(D.levels?.[key] || "");
+  });
+
+  // ---- R5 Overall Score Summary ----
+  const r5 = document.querySelector('.r5-card');
+  if(r5){
+    r5.querySelector('.r5-score').textContent = fmt1(D.scores?.overall);
+    r5.querySelector('.r5-score').style.color = lvlTextColor(ovIdx);
+    r5.querySelector('.r5-level').textContent = cap(D.levels?.overall || "");
+    const cap5 = r5.querySelector('.r5-cap');
+    if(D.bottleneck_capped){
+      cap5.style.display = '';
+      const bnSc = D.scores?.[(D.bottleneck||'').toLowerCase()];
+      cap5.lastChild.textContent = ` Capped by ${D.bottleneck} bottleneck (${fmt1(bnSc)} / 5.0)`;
+    } else {
+      cap5.style.display = 'none';
+    }
+    const calcRows = r5.querySelectorAll('.r5-calc-row');
+    const order = ['people','process','data','technology'];
+    order.forEach((k, i) => {
+      const sc = D.scores?.[k] || 0;
+      const row = calcRows[i];
+      if(!row) return;
+      const labels = {people:'People    ',process:'Process   ',data:'Data      ',technology:'Technology'};
+      row.children[0].textContent = `${labels[k]} × 0.25`;
+      row.children[1].textContent = `= ${(sc*0.25).toFixed(2)}`;
+    });
+    const total = r5.querySelector('.r5-calc-row.tot');
+    if(total) total.children[1].textContent = `= ${fmt1(D.scores?.overall)}`;
+  }
+
+  // ---- R6 Bottleneck visibility + content ----
+  const r6Section = document.querySelector('section.r6');
+  const showR6 = !!D.bottleneck || (D.scores && Math.min(
+    D.scores.people, D.scores.process, D.scores.data, D.scores.technology) <= 2.0);
+  if(r6Section){
+    r6Section.style.display = showR6 ? '' : 'none';
+    if(showR6 && D.bottleneck){
+      const t = r6Section.querySelector('.r6-title');
+      if(t) t.textContent = `⚠ BOTTLENECK IDENTIFIED — ${D.bottleneck}`;
+    }
+  }
 })();
+
 </script>
 
 </body>

@@ -107,19 +107,34 @@ Currently active: 5-turn Hannila/PPDT prompt with mandatory JSON emission (ready
 - `backend/tests/test_trimmed_prompt_e2e.py` / `test_completion_e2e_clear.py` — real-LLM E2E tests. Deferred pending LLM budget top-up.
 - `backend/tests/test_completion_flow_e2e.py` — ambiguous-answer E2E. Deferred (budget).
 
-## Open / Backlog
-- P1: Real-LLM E2E verification of auto-emission after Turn 5 (pending Emergent LLM Key budget top-up).
-- P2: Email notifications on completion (Resend/SendGrid).
-- P2: Advanced analytics / benchmarking across companies.
-- P3: Revisit token storage (localStorage → httpOnly cookies) once CORS supports it.
-- P3: Admin panel could show new fields (`business_model`, `management_commitment`) in the full-assessments table.
-
-## Standalone HTML Deliverables (2026-04-28)
+## Standalone HTML Deliverables + Backend Wiring (2026-04-28)
 Two self-contained, brand-consistent HTML files generated outside the React app, per user's 5-Block spec (design system + dashboard charts + report layout). No external dependencies beyond Google Fonts (Inter). Inline SVG / Vanilla JS Canvas only — no charting libraries.
 
-- **`/app/portfoliohealth-site.html`** (1,043 lines) — Marketing site: Home page (hero + 3-step process + 4-pillar dark section + bottleneck callout + maturity track + How-It-Works + CTA) and Theory page (Hannila/Silvola research strip, gap analysis, bridge-callout, quote grid). Single-file SPA with `showPage(id)` JS tab switcher. Follows Block 1 design system (deep navy + blue + glass-morphism + Inter, all CSS variables; no purple gradients, no emoji icons).
-- **`/app/portfoliohealth-report.html`** (1,850 lines) — Standalone Assessment Report Template. Editable `window.REPORT_DATA` object at top drives all sections. Implements all R1–R10 sections (Cover, Executive Summary, Org Profile, 4 Pillar Cards, Overall Score Summary, Bottleneck Analysis, Roadmap, Decision Impact, Dashboard, Research Basis) plus all 10 charts: C1 KPI Tiles, C2 Gauge SVG (animated arc), C3 Maturity Track ("You Are Here" + bottleneck cap), C4 Bar Chart (animated fills + AVG marker), C5 Radar (with bottleneck-axis dashed danger), C6 Capability Matrix (4×5 cells, ✓/◐/—, dashed bn-column outline), C7 Roadmap Gantt (3 phase zones, milestone dots, stepped trajectory), C8 Industry Benchmark (typical-range bands per business model), C9 Evidence Confidence (3-segment bars), C10 What-If Simulator (3 donut scenarios, dynamic insight). Includes print-mode `@media print` overrides (interactive label hidden, charts stack, matrix forced visible, sticky → fixed footer). Pre-populated with realistic Northpine Industries (ETO) sample data; visually verified end-to-end via Playwright (gauge 2 SVG paths, 4 bar rows, radar 9 circles + 1 polygon, matrix 20 cells, benchmark 4 rows, confidence 4 rows, simulator 3 cols — zero console errors).
-- **Bug squashed during build**: `const REPORT_DATA` doesn't attach to `window` so the `defer`'d chart script saw `undefined` — fixed by promoting to `window.REPORT_DATA = {...}`.
+- **`/app/portfoliohealth-site.html`** (1,043 lines) — Marketing site (single-file SPA, Home + Theory tabs).
+- **`/app/portfoliohealth-report.html`** (1,950+ lines) — Standalone Assessment Report Template with all R1–R10 sections + 10 dashboard charts (KPI tiles, gauge SVG, maturity track, bar chart, radar, capability matrix, Gantt with stepped trajectory, benchmark, confidence bars, what-if simulator). Editable `window.REPORT_DATA` drives all sections. Includes hydration script that rewrites R1 cover (company, meta, score, pillar tiles), R5 overall calc, R6 bottleneck visibility from REPORT_DATA so the same template can be served per-assessment.
+
+### Backend (P0 — wired up)
+- **NEW** `GET /api/assessments/{id}/report.html` (`?download=1` to force download). Reads the static template, deep-replaces `window.REPORT_DATA` with the assessment-specific payload via `_build_report_data()`, also rewrites the `<title>` with company + date.
+- New module `/app/backend/html_report.py` builds the REPORT_DATA shape: maps assessment.report → scores/levels/bottleneck/evidence/confidence/roadmap; cleans up "LEVEL 3: DEFINED" → "DEFINED" prefixes; computes bottleneck-capped flag; projects Phase-1 score; falls back to safe defaults when fields are missing.
+- `_TEMPLATE_CACHE` caches the file in memory for performance.
+- Verified end-to-end against a real Meridian Controls assessment: title shows the company, cover hydrates correctly (Meridian Controls · Industrial Equipment · STD · Director · 2026-04-20 · score 2.4/5.0 Developing), 4 pillar tiles per real scores (P 2.0 / Pr 1.5 / D 3.0 / T 3.0), overall calc reflects pillar values, all 10 charts render zero-error, R6 bottleneck-capped panel shows/hides based on data.
+
+### Frontend (P0)
+- `ChatHeader.jsx` — when assessment status is `completed`, header shows three actions: HTML (opens interactive HTML report in new tab via Blob URL), PDF (downloads the PDF), View Report (existing dashboard).
+- `ReportHeader.jsx` — same HTML + PDF buttons on the dashboard report page header.
+
+### Website Revamp (P1 — done)
+Applied the Block 1/2/3 design system to the public-facing site. The internal app pages (chat, companies, admin, login) keep their existing dark-navy theme — design tokens are scoped via `.ph-site` so nothing else is affected.
+
+- **NEW** `/app/frontend/src/components/landing/landing.css` — full Block 1 design system as scoped CSS variables + component classes (`.ph-glass-card`, `.ph-dark-card`, `.ph-btn-primary`, `.ph-btn-secondary`, `.ph-section-label`, `.ph-section-footer`, `.ph-hero-badge`, `.ph-pulse-dot`, `.ph-level-pill`, `.ph-animate-in`, `.ph-hero-bg`, `.ph-nav`, etc.).
+- **REWRITTEN** `/app/frontend/src/pages/LandingPage.jsx` — Block 2 (Home: H1 hero, H2 What You Receive, H3 Four Pillars on navy, H4 Maturity Levels with 5-step track, H5 How It Works, H6 CTA) and Block 3 (Theory: T1 hero, T2 What This Measures, T3 Academic Foundation on navy, T4 Research Gap, T5 Decision Impact, T6 Thesis Contribution, T7 Bottom CTA) plus shared footer with citation strip + disclaimer. Tab switching via React state. All Lucide icons (no emoji). All copy follows the spec verbatim — never "Product Wellbeing", never "quick assessment", always "Full Assessment · 45–60 minutes".
+
+## Open / Backlog
+- P1: Real-LLM E2E verification of auto-emission after Turn 5 (pending Emergent LLM Key budget top-up).
+- P1: Hydration could expand to also rewrite R2 callout/bullets, R4 evidence, R7 roadmap actions, R8 decision impact when those exist on `assessment.report` — currently they remain static narrative from the template. Today's hydration covers R1, R5, R6 (the data-driven sections); narrative sections still show the Northpine demo content unless future LLM output populates new keys.
+- P2: Email notifications on completion (Resend/SendGrid).
+- P2: Advanced analytics / benchmarking dashboard across all companies.
+- P3: Revisit token storage (localStorage → httpOnly cookies) once CORS supports it.
 
 ## Known Issue (recurring)
 Testing agent has historically replaced `from emergentintegrations.llm.chat import ...` with direct `import anthropic` in `chat_service.py` — ALWAYS check after running testing agent and revert if needed. App uses Emergent Universal Key, not a raw Anthropic SDK key.

@@ -1014,6 +1014,38 @@ async def generate_pdf_report(assessment_id: str, current_user: dict = Depends(g
         headers={"Content-Disposition": f"attachment; filename={filename}"}
     )
 
+
+@api_router.get("/assessments/{assessment_id}/report.html")
+async def generate_html_report(
+    assessment_id: str,
+    download: int = 0,
+    current_user: dict = Depends(get_current_user),
+):
+    """Render the standalone HTML report with this assessment's data injected.
+    Pass ?download=1 to force download instead of inline view."""
+    from html_report import build_html_report
+
+    assessment = await db.assessments.find_one(
+        {"_id": ObjectId(assessment_id), "user_id": current_user["id"]}
+    )
+    if not assessment:
+        raise HTTPException(status_code=404, detail="Assessment not found")
+    if not assessment.get("report"):
+        raise HTTPException(status_code=400, detail="Assessment report not yet generated")
+
+    html = build_html_report(assessment)
+    filename = (
+        f"PortfolioHealth_Assessment_"
+        f"{(assessment.get('company_name') or 'Report').replace(' ', '_')}_"
+        f"{assessment_id[:8]}.html"
+    )
+    disposition = "attachment" if download else "inline"
+    return Response(
+        content=html,
+        media_type="text/html; charset=utf-8",
+        headers={"Content-Disposition": f"{disposition}; filename=\"{filename}\""},
+    )
+
 # Dashboard Stats
 @api_router.get("/dashboard/stats")
 async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
