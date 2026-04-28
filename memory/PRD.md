@@ -225,6 +225,33 @@ User feedback: "the dashboard still has navy bg, chat looks ugly during assessme
 ### Verified via screenshot
 - Login, Dashboard, Assessments, Companies, Chat (active assessment), Report — all rendering as a clean white app with gold accents and navy CTAs. Identical premium feel to the public landing page. Lint passes across `/app/frontend/src/`.
 
+## Cool Off-White Theme + Premium Stepper (2026-04-28 — current session)
+User feedback: ivory cream looked ugly; pure white looked too plain. Picked option (b) **cool off-white (Linear/Vercel/Stripe SaaS premium)**. Also fixed the chat phase indicator which was visually broken and didn't reflect the actual assessment status.
+
+### Changes
+- **Palette flipped to cool off-white** in `index.css`:
+  - `--paper: #F7F8FA` body (was `#F5F1E8` ivory) · `--surface: #FFFFFF` cards
+  - `--border-soft: #E5E7EB` cool gray (was `#E8E2D2` warm beige)
+  - `--text-secondary: #4B5563`, `--text-muted: #6B7280`
+  - Removed paper-grain SVG noise overlay; replaced with subtle gold + violet-blue radial blooms
+  - Refined shadows tinted with `rgba(15, 23, 42, ...)` for crisper depth
+  - Shadcn HSL tokens updated to match
+- **Layout sidebar** hex codes migrated from warm beige (`#E8E2D2`/`#FAF8F1`) to cool gray (`#E5E7EB`/`#F7F8FA`).
+- **`PhaseIndicator.jsx` rewritten** as a premium segmented stepper:
+  - Reduced from 8 → 7 phases (combined "Decision Types" + "Benchmark" into single "Governance" matching the protocol)
+  - Numbered circles with gold gradient progress bar between them
+  - Active step has white circle with gold border + ping animation + 4px gold halo
+  - Completed steps show gold circle with check icon
+  - Eyebrow shows "Assessment Progress · 3 / 7 · People" so user always knows where they are
+- **`AssessmentChatPage.jsx` phase logic fixed**:
+  - `phaseFromMessageCount` rewritten to match Hannila's real 6-turn protocol (~12 messages):
+    msgs 1: welcome · 2-3: people · 4-5: process · 6-7: data · 8-9: technology · 10-11: governance · 12+: report
+  - On fetch, phase is now derived from `chat_history.length` directly (truthful state), not from a possibly stale `current_phase` field
+  - When `status === "completed"` the phase jumps straight to "Report"
+
+### Verified via screenshot
+- Dashboard, Chat (with new stepper showing Welcome active + remaining steps numbered), Report all render with cool off-white backdrop, white cards with subtle shadows, and gold accents that read precisely against the cool-gray paper.
+
 ## Open / Backlog
 - P1: Real-LLM E2E verification of auto-emission after Turn 5 (pending Emergent LLM Key budget top-up).
 - P1: Hydration could expand to also rewrite R2 callout/bullets, R4 evidence, R7 roadmap actions, R8 decision impact when those exist on `assessment.report` — currently they remain static narrative from the template. Today's hydration covers R1, R5, R6 (the data-driven sections); narrative sections still show the Northpine demo content unless future LLM output populates new keys.

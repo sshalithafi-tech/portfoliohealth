@@ -5,14 +5,14 @@
 @tailwind utilities;
 
 :root {
-    /* Premium Paper + Navy + Gold Palette */
-    --paper:        #F5F1E8;   /* warm ivory body — the "consultant document" paper feel */
-    --paper-soft:   #FAF8F1;
-    --paper-deep:   #EBE5D2;   /* subtle alt section bg */
-    --surface:      #FFFFFF;   /* cards lift off the cream paper */
-    --surface-hover:#FBFAF5;
-    --background:   #F5F1E8;   /* alias for tailwind */
-    --bg-alt:       #FAF8F1;
+    /* Premium Cool Off-White (Linear / Vercel / Stripe style) */
+    --paper:        #F7F8FA;   /* cool off-white body — modern SaaS premium */
+    --paper-soft:   #FBFCFD;
+    --paper-deep:   #EEF1F5;   /* subtle alt section bg */
+    --surface:      #FFFFFF;   /* cards lift cleanly off cool gray */
+    --surface-hover:#FAFBFC;
+    --background:   #F7F8FA;
+    --bg-alt:       #FBFCFD;
 
     --navy:         #0C1B2A;
     --navy-mid:     #162333;
@@ -27,11 +27,11 @@
     --accent:       #C9A84C;
 
     --text-primary:   #0C1B2A;
-    --text-secondary: #3D4A5C;
-    --text-muted:     #7B8694;
+    --text-secondary: #4B5563;
+    --text-muted:     #6B7280;
 
-    --border-soft:        #E8E2D2;   /* warm beige border, not stark gray */
-    --border-faint:       #EFEAD8;
+    --border-soft:        #E5E7EB;   /* cool gray, not warm beige */
+    --border-faint:       #EEF1F5;
     --border-gold:        rgba(201, 168, 76, 0.30);
     --border-gold-strong: rgba(201, 168, 76, 0.55);
 
@@ -39,11 +39,11 @@
     --warning: #D4850A;
     --error:   #B23C2A;
 
-    /* Premium shadows — warm, subtle, layered */
-    --shadow-sm:  0 1px 2px rgba(20, 16, 8, 0.04);
-    --shadow-md:  0 4px 16px rgba(20, 16, 8, 0.06), 0 1px 3px rgba(20, 16, 8, 0.04);
-    --shadow-lg:  0 12px 32px rgba(20, 16, 8, 0.08), 0 2px 6px rgba(20, 16, 8, 0.05);
-    --shadow-xl:  0 24px 56px rgba(20, 16, 8, 0.12), 0 4px 12px rgba(20, 16, 8, 0.06);
+    /* Premium shadows — crisp, subtle */
+    --shadow-sm:  0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow-md:  0 4px 12px rgba(15, 23, 42, 0.05), 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow-lg:  0 12px 28px rgba(15, 23, 42, 0.08), 0 2px 4px rgba(15, 23, 42, 0.05);
+    --shadow-xl:  0 24px 48px rgba(15, 23, 42, 0.12), 0 4px 10px rgba(15, 23, 42, 0.06);
     --shadow-gold: 0 8px 24px rgba(201, 168, 76, 0.18);
 }
 
@@ -60,11 +60,10 @@ body {
     -moz-osx-font-smoothing: grayscale;
     min-height: 100vh;
     font-feature-settings: "ss01", "cv11";
-    /* Ultra-subtle paper grain */
+    /* Subtle ambient — cool gray with faint gold flicker */
     background-image:
-        radial-gradient(ellipse 70% 40% at 12% -5%, rgba(201, 168, 76, 0.07) 0%, transparent 60%),
-        radial-gradient(ellipse 50% 35% at 90% 105%, rgba(201, 168, 76, 0.05) 0%, transparent 60%),
-        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.79 0 0 0 0 0.66 0 0 0 0 0.30 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        radial-gradient(ellipse 70% 40% at 8% -5%, rgba(201, 168, 76, 0.05) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 35% at 92% 105%, rgba(99, 102, 241, 0.03) 0%, transparent 60%);
     background-attachment: fixed;
 }
 
@@ -81,8 +80,8 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
 
 @layer base {
     :root {
-        /* shadcn HSL tokens — premium paper */
-        --background: 41 39% 93%;                 /* paper #F5F1E8 */
+        /* shadcn HSL tokens — cool off-white */
+        --background: 220 20% 97%;                /* #F7F8FA */
         --foreground: 211 56% 11%;                /* navy */
         --card: 0 0% 100%;
         --card-foreground: 211 56% 11%;
@@ -90,16 +89,16 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
         --popover-foreground: 211 56% 11%;
         --primary: 211 56% 11%;
         --primary-foreground: 43 50% 54%;
-        --secondary: 41 30% 88%;
+        --secondary: 220 14% 93%;
         --secondary-foreground: 211 56% 11%;
-        --muted: 41 30% 90%;
-        --muted-foreground: 213 19% 35%;
+        --muted: 220 14% 95%;
+        --muted-foreground: 220 9% 46%;
         --accent: 43 78% 92%;
         --accent-foreground: 211 56% 11%;
         --destructive: 7 62% 43%;
         --destructive-foreground: 0 0% 100%;
-        --border: 41 25% 86%;
-        --input: 41 25% 86%;
+        --border: 220 13% 91%;
+        --input: 220 13% 91%;
         --ring: 43 50% 54%;
         --radius: 0.875rem;
         --chart-1: 43 50% 54%;

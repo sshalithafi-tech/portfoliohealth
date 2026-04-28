@@ -9,14 +9,23 @@ import ChatInput from "../components/chat/ChatInput";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
+// Hannila's 6-turn protocol: ~12 chat messages alternating user/assistant.
+// Map current message count → conceptual phase the user is currently engaging with.
+//   Msg 1   : assistant intro + context questions
+//   Msg 2   : user answers context (industry, business model, strategic priority) → entering People
+//   Msg 3-4 : People questions / answers
+//   Msg 5-6 : Process questions / answers
+//   Msg 7-8 : Data questions / answers
+//   Msg 9-10: Technology questions / answers
+//   Msg 11-12: Governance / decision-types questions / answers
+//   Msg 13+ : Report emission
 const phaseFromMessageCount = (count) => {
-  if (count <= 4) return "welcome";
-  if (count <= 14) return "people";
-  if (count <= 24) return "process";
-  if (count <= 38) return "data";
-  if (count <= 48) return "technology";
-  if (count <= 54) return "decision";
-  if (count <= 58) return "benchmark";
+  if (count <= 1)  return "welcome";   // first assistant message arrived
+  if (count <= 3)  return "people";    // user has provided context, AI asks People
+  if (count <= 5)  return "process";
+  if (count <= 7)  return "data";
+  if (count <= 9)  return "technology";
+  if (count <= 11) return "governance";
   return "report";
 };
 
@@ -61,8 +70,15 @@ const AssessmentChatPage = () => {
       const response = await axios.get(`${BACKEND_URL}/api/assessments/${id}`);
       setAssessment(response.data);
       setMessages(response.data.chat_history || []);
-      setCurrentPhase(response.data.current_phase || "welcome");
-      if (!response.data.chat_history || response.data.chat_history.length === 0) {
+      // Drive phase from the actual chat history length so the indicator stays
+      // in sync with the conversation regardless of what the backend reports.
+      const msgs = response.data.chat_history || [];
+      if (response.data.status === "completed") {
+        setCurrentPhase("report");
+      } else {
+        setCurrentPhase(phaseFromMessageCount(msgs.length));
+      }
+      if (!msgs.length) {
         startAssessment();
       }
     } catch (err) {
@@ -99,10 +115,12 @@ const AssessmentChatPage = () => {
       if (response.data.report_ready) {
         toast.success("Assessment complete! Redirecting to dashboard...");
         setAssessment(prev => ({ ...prev, status: "completed" }));
+        setCurrentPhase("report");
         setTimeout(() => navigate("/dashboard"), 3000);
+      } else {
+        // After this exchange the chat now has 2 more messages
+        setCurrentPhase(phaseFromMessageCount(messages.length + 2));
       }
-
-      setCurrentPhase(phaseFromMessageCount(messages.length + 2));
     } catch (err) {
       console.error("Failed to send message:", err);
       toast.error("Failed to send message. Please try again.");
