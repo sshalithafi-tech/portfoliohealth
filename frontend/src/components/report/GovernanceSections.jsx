@@ -11,10 +11,10 @@ export const GovernanceObservations = ({ report }) => {
     <div data-testid="governance-indicators" className="p-6 glass-surface-highlight rounded-xl border-l-4 border-[#C9A84C]">
       <div className="flex items-center gap-2 mb-2">
         <Shield size={20} className="text-[#C9A84C]" />
-        <h2 className="text-lg font-semibold text-white font-['Outfit']">Governance Indicators</h2>
+        <h2 className="text-lg font-semibold text-[#0C1B2A] font-['Outfit']">Governance Indicators</h2>
       </div>
       {assessment && (
-        <p className="text-white/70 text-sm italic leading-relaxed mb-4 p-3 bg-white/[0.03] rounded-lg border border-white/[0.06]">
+        <p className="text-[#4A5568] text-sm italic leading-relaxed mb-4 p-3 bg-[#F8F9FA] rounded-lg border border-[#E2E8F0]">
           {assessment}
         </p>
       )}
@@ -26,7 +26,7 @@ export const GovernanceObservations = ({ report }) => {
             return (
               <div key={`gov-${dim}`} className="p-3 bg-[#C9A84C]/5 rounded-lg border border-[#C9A84C]/10">
                 <span className="text-xs font-semibold text-[#C9A84C] uppercase tracking-wider">{dim}</span>
-                <p className="text-white/70 text-sm mt-1">{v}</p>
+                <p className="text-[#4A5568] text-sm mt-1">{v}</p>
               </div>
             );
           })}
@@ -47,20 +47,20 @@ export const GovernanceOwnership = ({ report }) => (
   <div className="p-6 glass-surface-highlight rounded-xl">
     <div className="flex items-center gap-3 mb-4">
       <div className="w-10 h-10 rounded-lg bg-[#A78BFA]/15 flex items-center justify-center"><Shield size={22} className="text-[#A78BFA]" /></div>
-      <h2 className="text-lg font-semibold text-white font-['Outfit']">Governance & Ownership</h2>
+      <h2 className="text-lg font-semibold text-[#0C1B2A] font-['Outfit']">Governance & Ownership</h2>
     </div>
-    <p className="text-white/60 text-sm mb-4 leading-relaxed">
+    <p className="text-[#4A5568] text-sm mb-4 leading-relaxed">
       Governance is the connective tissue between all four PPDT dimensions. High capability in People, Process, Data, or Technology without clear ownership and accountability still produces unreliable, inconsistent portfolio decisions.
     </p>
     <ul className="space-y-2 mb-4">
       {GOVERNANCE_QUESTIONS.map((q, i) => (
-        <li key={i} className="flex items-start gap-2 text-sm text-white/50">
+        <li key={i} className="flex items-start gap-2 text-sm text-[#4A5568]">
           <span className="text-[#A78BFA] mt-0.5">-</span>{q}
         </li>
       ))}
     </ul>
     {report.governance_assessment && (
-      <p className="text-white/70 text-sm italic leading-relaxed p-3 bg-white/[0.03] rounded-lg border border-white/[0.06]">
+      <p className="text-[#4A5568] text-sm italic leading-relaxed p-3 bg-[#F8F9FA] rounded-lg border border-[#E2E8F0]">
         {report.governance_assessment}
       </p>
     )}
@@ -94,8 +94,8 @@ export const ManagementCommitment = ({ report }) => {
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-[#34D399]/15 flex items-center justify-center"><ArrowUpRight size={22} className="text-[#34D399]" /></div>
           <div>
-            <h2 className="text-lg font-semibold text-white font-['Outfit']">Management Commitment</h2>
-            <p className="text-xs text-white/40 italic">The multiplier effect on all capability investments</p>
+            <h2 className="text-lg font-semibold text-[#0C1B2A] font-['Outfit']">Management Commitment</h2>
+            <p className="text-xs text-[#8896A5] italic">The multiplier effect on all capability investments</p>
           </div>
         </div>
         {rating && (
@@ -109,16 +109,16 @@ export const ManagementCommitment = ({ report }) => {
           </div>
         )}
       </div>
-      <p className="text-white/60 text-sm mb-4 leading-relaxed">
+      <p className="text-[#4A5568] text-sm mb-4 leading-relaxed">
         Management commitment acts as a multiplier on all capability investments. Without leadership buy-in, investments in People training and Process redesign produce limited, short-lived change. With it, even modest interventions can rapidly elevate maturity across all four PPDT dimensions.
       </p>
       <ul className="space-y-2 mb-4">
         {MANAGEMENT_POINTS.map((p, i) => (
-          <li key={i} className="flex items-start gap-2 text-sm text-white/50"><span className="text-[#34D399] mt-0.5">-</span>{p}</li>
+          <li key={i} className="flex items-start gap-2 text-sm text-[#4A5568]"><span className="text-[#34D399] mt-0.5">-</span>{p}</li>
         ))}
       </ul>
       {report.management_commitment_assessment && (
-        <p className="text-white/70 text-sm italic leading-relaxed p-3 bg-white/[0.03] rounded-lg border border-white/[0.06]">
+        <p className="text-[#4A5568] text-sm italic leading-relaxed p-3 bg-[#F8F9FA] rounded-lg border border-[#E2E8F0]">
           {report.management_commitment_assessment}
         </p>
       )}

@@ -18,8 +18,8 @@ export const BottleneckSection = ({ bottleneckPillar, scores, report }) => {
           <AlertOctagon size={22} style={{ color }} />
         </div>
         <div>
-          <h2 className="text-lg font-semibold text-white font-['Outfit']">Bottleneck Pillar</h2>
-          <p className="text-xs text-white/40 italic">The weakest pillar caps real-world capability regardless of other scores.</p>
+          <h2 className="text-lg font-semibold text-[#0C1B2A] font-['Outfit']">Bottleneck Pillar</h2>
+          <p className="text-xs text-[#8896A5] italic">The weakest pillar caps real-world capability regardless of other scores.</p>
         </div>
       </div>
 
@@ -28,7 +28,7 @@ export const BottleneckSection = ({ bottleneckPillar, scores, report }) => {
           <Icon size={20} style={{ color }} />
           <div>
             <p className="text-[11px] uppercase tracking-wider" style={{ color }}>Bottleneck</p>
-            <p className="text-lg font-semibold text-white capitalize font-['Outfit']">{bottleneckPillar}</p>
+            <p className="text-lg font-semibold text-[#0C1B2A] capitalize font-['Outfit']">{bottleneckPillar}</p>
           </div>
           {typeof score === "number" && (
             <span className="ml-2 font-['JetBrains_Mono'] font-bold text-xl" style={{ color }}>
@@ -39,7 +39,7 @@ export const BottleneckSection = ({ bottleneckPillar, scores, report }) => {
       </div>
 
       {interp && (
-        <p className="text-white/70 text-sm leading-relaxed mt-4 p-3 rounded-lg bg-white/[0.03] border border-white/[0.06]">
+        <p className="text-[#4A5568] text-sm leading-relaxed mt-4 p-3 rounded-lg bg-[#F8F9FA] border border-[#E2E8F0]">
           {interp}
         </p>
       )}

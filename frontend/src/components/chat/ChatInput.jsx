@@ -27,7 +27,7 @@ export const ChatInput = ({ inputRef, inputValue, onChange, onSubmit, disabled, 
         </button>
       </div>
       {isCompleted && (
-        <p className="text-center text-white/40 text-xs sm:text-sm mt-3">
+        <p className="text-center text-[#8896A5] text-xs sm:text-sm mt-3">
           This assessment is complete.{" "}
           <Link to={`/assessments/${assessmentId}/report`} className="text-[#C9A84C] hover:text-[#C9A84C]/80">
             View the report

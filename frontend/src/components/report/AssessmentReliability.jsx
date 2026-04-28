@@ -118,14 +118,14 @@ export const AssessmentReliability = ({ report, assessment }) => {
     >
       <div className="flex items-start justify-between gap-4 flex-wrap mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-white/[0.04] border border-white/[0.08] flex items-center justify-center shrink-0">
-            <ShieldCheck size={16} className="text-white/60" />
+          <div className="w-9 h-9 rounded-lg bg-[#F8F9FA] border border-[#E2E8F0] flex items-center justify-center shrink-0">
+            <ShieldCheck size={16} className="text-[#4A5568]" />
           </div>
           <div>
-            <h2 className="text-base font-semibold text-white font-['Outfit'] leading-tight">
+            <h2 className="text-base font-semibold text-[#0C1B2A] font-['Outfit'] leading-tight">
               Assessment Reliability
             </h2>
-            <p className="text-[11px] text-white/40 italic mt-0.5">
+            <p className="text-[11px] text-[#8896A5] italic mt-0.5">
               How much to rely on these results for decisions
             </p>
           </div>
@@ -139,26 +139,26 @@ export const AssessmentReliability = ({ report, assessment }) => {
           }}
         >
           <ToneIcon size={14} style={{ color: tone.color }} />
-          <span className="text-[10px] uppercase tracking-[0.15em] text-white/50">Confidence</span>
+          <span className="text-[10px] uppercase tracking-[0.15em] text-[#4A5568]">Confidence</span>
           <span className="text-xs font-bold font-['Outfit']" style={{ color: tone.color }}>
             {tone.label}
           </span>
         </div>
       </div>
 
-      <p className="text-sm text-white/60 mb-4 leading-relaxed">{tone.blurb}</p>
+      <p className="text-sm text-[#4A5568] mb-4 leading-relaxed">{tone.blurb}</p>
 
       <div className="space-y-2">
         {factors.map((f, i) => (
           <div
             key={i}
             data-testid={`reliability-factor-${i}`}
-            className="flex items-start gap-3 p-3 rounded-lg bg-white/[0.025] border border-white/[0.05]"
+            className="flex items-start gap-3 p-3 rounded-lg bg-white/[0.025] border border-[#E2E8F0]"
           >
             <span className={`w-1.5 h-1.5 rounded-full mt-2 shrink-0 ${TONE_DOT[f.tone] || TONE_DOT.medium}`} />
             <div className="min-w-0">
-              <p className="text-xs font-semibold text-white font-['Outfit']">{f.label}</p>
-              <p className="text-xs text-white/55 leading-relaxed mt-0.5">{f.detail}</p>
+              <p className="text-xs font-semibold text-[#0C1B2A] font-['Outfit']">{f.label}</p>
+              <p className="text-xs text-[#4A5568] leading-relaxed mt-0.5">{f.detail}</p>
             </div>
           </div>
         ))}

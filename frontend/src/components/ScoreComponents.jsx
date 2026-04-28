@@ -35,7 +35,7 @@ export const TrafficLightBadge = ({ status }) => {
   return (
     <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border ${getTrafficLightBgClass(status)}`}>
       <TrafficLightIcon status={status} size={16} />
-      <span className="text-sm font-medium text-white capitalize">{status} Status</span>
+      <span className="text-sm font-medium text-[#0C1B2A] capitalize">{status} Status</span>
     </div>
   );
 };
@@ -74,7 +74,7 @@ export const ScoreDisplay = ({ score, size = "lg", showMax = true }) => {
       <span className={`font-bold font-['JetBrains_Mono'] ${sizeClasses[size]} ${getColorClass(score)}`}>
         {typeof score === 'number' ? score.toFixed(1) : score}
       </span>
-      {showMax && <span className="text-white/40">/ 5</span>}
+      {showMax && <span className="text-[#8896A5]">/ 5</span>}
     </div>
   );
 };
@@ -85,7 +85,7 @@ export const ScoreDisplay = ({ score, size = "lg", showMax = true }) => {
 export const ProgressBar = ({ value, max = 100, color = "#C9A84C" }) => {
   const percentage = (value / max) * 100;
   return (
-    <div className="w-full h-2 bg-white/[0.06] rounded-full overflow-hidden">
+    <div className="w-full h-2 bg-[#F8F9FA] rounded-full overflow-hidden">
       <div 
         className="h-full rounded-full transition-all duration-500"
         style={{ width: `${percentage}%`, backgroundColor: color }}
@@ -105,7 +105,7 @@ export const NumberedListItem = ({ index, children, color = "#C9A84C" }) => (
     >
       {index + 1}
     </span>
-    <p className="text-white/60 text-sm">{children}</p>
+    <p className="text-[#4A5568] text-sm">{children}</p>
   </li>
 );
 
@@ -113,7 +113,7 @@ export const NumberedListItem = ({ index, children, color = "#C9A84C" }) => (
  * Arrow list item
  */
 export const ArrowListItem = ({ children, color = "#C9A84C" }) => (
-  <li className="flex items-start gap-2 text-sm text-white/60">
+  <li className="flex items-start gap-2 text-sm text-[#4A5568]">
     <span style={{ color }}>→</span>
     {children}
   </li>
@@ -127,7 +127,7 @@ export const AlertListItem = ({ children }) => (
     <span className="w-6 h-6 rounded-full bg-[#EF4444]/15 text-[#EF4444] flex items-center justify-center text-xs shrink-0 mt-0.5">
       !
     </span>
-    <p className="text-white/60 text-sm">{children}</p>
+    <p className="text-[#4A5568] text-sm">{children}</p>
   </li>
 );
 
@@ -135,10 +135,10 @@ export const AlertListItem = ({ children }) => (
  * Empty state
  */
 export const EmptyState = ({ icon: Icon, title, description, action }) => (
-  <div className="flex flex-col items-center justify-center py-16 text-white/40">
+  <div className="flex flex-col items-center justify-center py-16 text-[#8896A5]">
     {Icon && <Icon size={64} className="mb-4 opacity-30" />}
     <p className="text-lg">{title}</p>
-    {description && <p className="text-sm mt-2 text-white/30">{description}</p>}
+    {description && <p className="text-sm mt-2 text-[#8896A5]">{description}</p>}
     {action && <div className="mt-6">{action}</div>}
   </div>
 );

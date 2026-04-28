@@ -198,6 +198,33 @@ User feedback: "the dashboard and the rest still have that old navy theme — ch
 ### Verified via screenshot
 - Dashboard cards, stat tiles, Recent Assessments rows, Quick Check / Companies / Assessments tiles, sidebar active state, "New Assessment" CTA — all now mirror the premium home-page aesthetic. No blue accents remain.
 
+## Internal App Light-Theme Flip (2026-04-28 — current session)
+User feedback: "the dashboard still has navy bg, chat looks ugly during assessment — I want the whole system like the front page, white background, premium feel". Action: flipped the entire internal app from dark navy to the same light Navy+Gold theme as the public landing page.
+
+### Changes
+- **`index.css` rewritten** — `:root` and shadcn HSL tokens flipped to light: `--background: #FFFFFF`, `--foreground: #0C1B2A` navy, `--card: #FFFFFF`, `--muted-foreground: #4A5568` slate, `--border: #E2E8F0`. Body bg is now white. Component classes:
+  - `glass-surface` / `glass-surface-highlight` / `glass-heavy` → solid white with `#E2E8F0` borders
+  - `glass-card` → white with 3px gold top border (matches landing `.ph-glass-card`)
+  - `btn-liquid` (primary CTA) → solid navy `#0C1B2A` with gold `#C9A84C` text (matches landing `.ph-btn-primary`)
+  - `btn-glass` (secondary) → white with light border, gold-soft hover
+  - `glass-input` → white with gold focus ring
+  - `chat-message-user` → solid navy bubble with white text
+  - `chat-message-assistant` → white card with 3px gold left border
+  - Killed all dark `liquid-blob` animations; replaced with subtle gold-on-white radial glows
+  - Scrollbar reskinned to navy-tint
+- **`Layout.jsx` rewritten** — sidebar is now white with gold-soft active pill, navy text, light borders. Mobile header white. Footer light gray with navy text.
+- **`LoginPage.jsx` & `RegisterPage.jsx` rewritten** — both panes are now white with soft gold ambient bloom on the left. Navy CTA with gold text. Light error banners (`bg-red-50` / `border-red-200`).
+- **`ChatMessages.jsx`** — UserBubble switched to white-on-navy text, AssistantBubble switched to navy-on-white prose, code/pre backgrounds light gray, ClosingCard switched to gold-soft gradient with navy text.
+- **`ChatHeader.jsx`** (already light from auto-migration) — back button hover updated.
+- **`FinalReportIndicator.jsx`** — light gold-cream bg with navy text.
+- **`AssessmentChatPage.jsx`** — page wrapper bg-white, loading spinner re-themed.
+- **`PhaseIndicator.jsx`** — connector lines updated for white bg visibility.
+- **`ReportPage.jsx`** toolbar — back button + headings use navy/slate.
+- **Bulk migration** — programmatic regex pass over 28 files in `pages/`, `components/admin/`, `components/chat/`, `components/companies/`, `components/dashboard/`, `components/assessments/`, `components/report/` → all `text-white/X` → slate/navy, `bg-white/[0.0X]` → `bg-[#F8F9FA]`, `border-white/[0.0X]` → `border-[#E2E8F0]`.
+
+### Verified via screenshot
+- Login, Dashboard, Assessments, Companies, Chat (active assessment), Report — all rendering as a clean white app with gold accents and navy CTAs. Identical premium feel to the public landing page. Lint passes across `/app/frontend/src/`.
+
 ## Open / Backlog
 - P1: Real-LLM E2E verification of auto-emission after Turn 5 (pending Emergent LLM Key budget top-up).
 - P1: Hydration could expand to also rewrite R2 callout/bullets, R4 evidence, R7 roadmap actions, R8 decision impact when those exist on `assessment.report` — currently they remain static narrative from the template. Today's hydration covers R1, R5, R6 (the data-driven sections); narrative sections still show the Northpine demo content unless future LLM output populates new keys.

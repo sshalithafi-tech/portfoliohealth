@@ -50,7 +50,7 @@ const DimensionCard = ({ dimension, score, traffic, level }) => {
       </div>
       <div className="flex-1">
         <div className="flex items-center justify-between mb-1">
-          <h3 className="font-semibold text-white capitalize font-['Outfit']">{dimension}</h3>
+          <h3 className="font-semibold text-[#0C1B2A] capitalize font-['Outfit']">{dimension}</h3>
           <TrafficLightIcon status={traffic} size={20} />
         </div>
         <div className="flex items-baseline gap-2">
@@ -60,8 +60,8 @@ const DimensionCard = ({ dimension, score, traffic, level }) => {
           >
             {score}
           </span>
-          <span className="text-white/30">/ 5</span>
-          <span className="text-sm text-white/40 ml-2">· {level}</span>
+          <span className="text-[#8896A5]">/ 5</span>
+          <span className="text-sm text-[#8896A5] ml-2">· {level}</span>
         </div>
       </div>
     </div>
@@ -131,7 +131,7 @@ const QuickResultsPage = () => {
   if (!result) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
-        <p className="text-white/50 mb-4">Assessment not found</p>
+        <p className="text-[#4A5568] mb-4">Assessment not found</p>
         <Link to="/quick-assessment" className="text-[#C9A84C] hover:text-[#C9A84C]/80">
           Start a new assessment
         </Link>
@@ -149,7 +149,7 @@ const QuickResultsPage = () => {
       <header className="h-14 sm:h-16 glass-surface flex items-center px-4 sm:px-6 relative z-10">
         <Link to="/" className="flex items-center gap-2 sm:gap-3">
           <LogoMark className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg" radius={14} />
-          <span className="text-white font-semibold font-['Outfit'] text-sm sm:text-base">PortfolioHealth</span>
+          <span className="text-[#0C1B2A] font-semibold font-['Outfit'] text-sm sm:text-base">PortfolioHealth</span>
         </Link>
         
         <div className="flex-1" />
@@ -188,24 +188,24 @@ const QuickResultsPage = () => {
       <div className="max-w-4xl mx-auto px-6 py-12 relative z-10">
         {/* Title */}
         <div className="text-center mb-12 animate-fade-in">
-          <h1 className="text-3xl font-semibold text-white font-['Outfit'] tracking-tight mb-2">
+          <h1 className="text-3xl font-semibold text-[#0C1B2A] font-['Outfit'] tracking-tight mb-2">
             PPDT Quick Health Check Results
           </h1>
-          <p className="text-white/50">{result.company_name} · {result.industry}</p>
+          <p className="text-[#4A5568]">{result.company_name} · {result.industry}</p>
         </div>
 
         {/* Overall Score */}
         <div className="p-6 sm:p-8 glass-surface-highlight rounded-2xl mb-8 animate-fade-in">
           <div className="text-center mb-6">
-            <p className="text-xs uppercase tracking-[0.2em] text-white/40 mb-2">Overall Maturity</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-[#8896A5] mb-2">Overall Maturity</p>
             <span data-testid="quick-overall-score" className="text-5xl sm:text-6xl font-bold font-['JetBrains_Mono']" style={{ color: getScoreColor(scores.overall) }}>
               {scores.overall?.toFixed(1) || "–"}
             </span>
-            <span className="text-xl text-white/30 ml-2">/ 5.0</span>
-            <p className="text-lg font-semibold text-white mt-2 font-['Outfit']">{levelNames.overall || "–"}</p>
+            <span className="text-xl text-[#8896A5] ml-2">/ 5.0</span>
+            <p className="text-lg font-semibold text-[#0C1B2A] mt-2 font-['Outfit']">{levelNames.overall || "–"}</p>
             <div className={`inline-flex items-center gap-2 mt-3 px-4 py-1.5 rounded-full border ${getTrafficLightBgClass(trafficLights.overall)}`}>
               <TrafficLightIcon status={trafficLights.overall} size={14} />
-              <span className="text-sm text-white capitalize">{trafficLights.overall} Status</span>
+              <span className="text-sm text-[#0C1B2A] capitalize">{trafficLights.overall} Status</span>
             </div>
           </div>
           {/* Dimension bars */}
@@ -215,8 +215,8 @@ const QuickResultsPage = () => {
               const color = getScoreColor(s);
               return (
                 <div key={`bar-${dim}`} className="flex items-center gap-3">
-                  <span className="text-sm text-white/50 w-24 capitalize">{dim}</span>
-                  <div className="flex-1 h-2.5 bg-white/[0.06] rounded-full overflow-hidden">
+                  <span className="text-sm text-[#4A5568] w-24 capitalize">{dim}</span>
+                  <div className="flex-1 h-2.5 bg-[#F8F9FA] rounded-full overflow-hidden">
                     <div className="h-full rounded-full transition-all duration-700" style={{ width: `${(s / 5) * 100}%`, backgroundColor: color }} />
                   </div>
                   <span className={`font-['JetBrains_Mono'] font-semibold text-sm w-8 text-right ${getScoreColorClass(s)}`}>{s.toFixed(1)}</span>
@@ -241,10 +241,10 @@ const QuickResultsPage = () => {
 
         {/* CTA Box */}
         <div className="p-6 sm:p-8 glass-card rounded-2xl animate-fade-in hover:border-[#C9A84C]/20">
-          <h2 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4 font-['Outfit']">
+          <h2 className="text-lg sm:text-xl font-semibold text-[#0C1B2A] mb-3 sm:mb-4 font-['Outfit']">
             Ready for a Deeper Assessment?
           </h2>
-          <p className="text-white/60 mb-6">
+          <p className="text-[#4A5568] mb-6">
             {result.cta_message}
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
@@ -266,8 +266,8 @@ const QuickResultsPage = () => {
         </div>
 
         {/* Footer */}
-        <div className="text-center py-8 mt-8 border-t border-white/[0.06]">
-          <p className="text-sm text-white/30">
+        <div className="text-center py-8 mt-8 border-t border-[#E2E8F0]">
+          <p className="text-sm text-[#8896A5]">
             Based on: PPM Capability Maturity Research · University of Oulu (2026)
           </p>
         </div>

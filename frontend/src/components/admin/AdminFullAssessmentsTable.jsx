@@ -28,18 +28,18 @@ const downloadPdf = async (assessment) => {
 };
 
 const TableRow = ({ a }) => (
-  <tr className="border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors" data-testid={`admin-assessment-row-${a.id}`}>
+  <tr className="border-b border-[#E2E8F0] hover:bg-[#F8F9FA] transition-colors" data-testid={`admin-assessment-row-${a.id}`}>
     <td className="px-4 sm:px-6 py-3">
-      <p className="text-white font-medium">{a.company_name}</p>
-      <p className="text-xs text-white/30">{a.company_industry}</p>
+      <p className="text-[#0C1B2A] font-medium">{a.company_name}</p>
+      <p className="text-xs text-[#8896A5]">{a.company_industry}</p>
     </td>
     <td className="px-4 sm:px-6 py-3">
-      <p className="text-white/60">{a.respondent_name}</p>
-      <p className="text-xs text-white/30">{a.respondent_role}</p>
+      <p className="text-[#4A5568]">{a.respondent_name}</p>
+      <p className="text-xs text-[#8896A5]">{a.respondent_role}</p>
     </td>
     <td className="px-4 sm:px-6 py-3">
-      <p className="text-white/60">{a.consultant_name}</p>
-      <p className="text-xs text-white/30">{a.consultant_email}</p>
+      <p className="text-[#4A5568]">{a.consultant_name}</p>
+      <p className="text-xs text-[#8896A5]">{a.consultant_email}</p>
     </td>
     <td className="px-4 sm:px-6 py-3"><StatusBadge status={a.status} /></td>
     <td className="px-4 sm:px-6 py-3"><ScoreCell value={a.scores?.people} /></td>
@@ -49,9 +49,9 @@ const TableRow = ({ a }) => (
     <td className="px-4 sm:px-6 py-3">
       {a.scores?.overall
         ? <span className={`font-['JetBrains_Mono'] font-bold ${getScoreColorClass(a.scores.overall)}`}>{a.scores.overall.toFixed(1)}</span>
-        : <span className="text-white/30">–</span>}
+        : <span className="text-[#8896A5]">–</span>}
     </td>
-    <td className="px-4 sm:px-6 py-3 text-white/40 text-xs whitespace-nowrap">
+    <td className="px-4 sm:px-6 py-3 text-[#8896A5] text-xs whitespace-nowrap">
       {new Date(a.created_at).toLocaleDateString()}
     </td>
     <td className="px-4 sm:px-6 py-3">
@@ -63,7 +63,7 @@ const TableRow = ({ a }) => (
         >
           <Download size={10} /> PDF
         </button>
-      ) : <span className="text-white/20 text-xs">–</span>}
+      ) : <span className="text-[#8896A5] text-xs">–</span>}
     </td>
   </tr>
 );
@@ -82,7 +82,7 @@ export const AdminFullAssessmentsTable = ({ assessments }) => {
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="text-left text-xs uppercase tracking-wider text-white/40 border-b border-white/[0.08]">
+            <tr className="text-left text-xs uppercase tracking-wider text-[#8896A5] border-b border-[#E2E8F0]">
               <th className="px-4 sm:px-6 py-3">Company</th>
               <th className="px-4 sm:px-6 py-3">Respondent</th>
               <th className="px-4 sm:px-6 py-3">Consultant</th>

@@ -105,11 +105,11 @@ const NotificationBell = () => {
       <button
         data-testid="notification-bell"
         onClick={() => setOpen(!open)}
-        className="relative p-2 rounded-xl text-white/50 hover:text-white hover:bg-white/[0.04] transition-all"
+        className="relative p-2 rounded-xl text-[#4A5568] hover:text-[#0C1B2A] hover:bg-[#F8F9FA] transition-all"
       >
         <Bell size={20} />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-[#EF4444] text-[10px] font-bold text-white">
+          <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-[#EF4444] text-[10px] font-bold text-[#0C1B2A]">
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
@@ -120,8 +120,8 @@ const NotificationBell = () => {
           data-testid="notification-dropdown"
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
-            <h3 className="text-sm font-semibold text-white font-['Outfit']">Notifications</h3>
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[#E2E8F0]">
+            <h3 className="text-sm font-semibold text-[#0C1B2A] font-['Outfit']">Notifications</h3>
             {unreadCount > 0 && (
               <button
                 data-testid="mark-all-read-btn"
@@ -137,9 +137,9 @@ const NotificationBell = () => {
           {/* List */}
           <div className="max-h-80 overflow-y-auto">
             {loading && notifications.length === 0 ? (
-              <div className="py-8 text-center text-white/30 text-sm">Loading...</div>
+              <div className="py-8 text-center text-[#8896A5] text-sm">Loading...</div>
             ) : notifications.length === 0 ? (
-              <div className="py-8 text-center text-white/30 text-sm">No notifications yet</div>
+              <div className="py-8 text-center text-[#8896A5] text-sm">No notifications yet</div>
             ) : (
               notifications.map((n) => {
                 const Icon = ICON_MAP[n.type] || Bell;
@@ -148,8 +148,8 @@ const NotificationBell = () => {
                   <div
                     key={n.id}
                     data-testid={`notification-item-${n.id}`}
-                    className={`flex items-start gap-3 px-4 py-3 border-b border-white/[0.04] transition-colors cursor-pointer ${
-                      n.read ? "opacity-60" : "hover:bg-white/[0.03]"
+                    className={`flex items-start gap-3 px-4 py-3 border-b border-[#E2E8F0] transition-colors cursor-pointer ${
+                      n.read ? "opacity-60" : "hover:bg-[#F8F9FA]"
                     }`}
                     onClick={() => !n.read && markRead(n.id)}
                   >
@@ -160,9 +160,9 @@ const NotificationBell = () => {
                       <Icon size={16} style={{ color }} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-white leading-snug">{n.title}</p>
-                      <p className="text-[11px] text-white/50 mt-0.5 leading-snug">{n.message}</p>
-                      <p className="text-[10px] text-white/30 mt-1">{timeAgo(n.created_at)}</p>
+                      <p className="text-xs font-medium text-[#0C1B2A] leading-snug">{n.title}</p>
+                      <p className="text-[11px] text-[#4A5568] mt-0.5 leading-snug">{n.message}</p>
+                      <p className="text-[10px] text-[#8896A5] mt-1">{timeAgo(n.created_at)}</p>
                     </div>
                     {!n.read && (
                       <div className="w-2 h-2 rounded-full bg-[#C9A84C] shrink-0 mt-2" />

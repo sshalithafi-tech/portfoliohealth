@@ -32,7 +32,7 @@ export const ChatHeader = ({ assessment, assessmentId }) => {
       <Link
         to="/assessments"
         data-testid="back-to-assessments"
-        className="flex items-center gap-1 sm:gap-2 text-white/50 hover:text-white transition-colors mr-3 sm:mr-6"
+        className="flex items-center gap-1 sm:gap-2 text-[#4A5568] hover:text-[#0C1B2A] transition-colors mr-3 sm:mr-6"
       >
         <ArrowLeft size={18} />
         <span className="hidden sm:inline">Back</span>
@@ -41,9 +41,9 @@ export const ChatHeader = ({ assessment, assessmentId }) => {
       <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
         <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
           <Building2 size={16} className="text-[#C9A84C] shrink-0" />
-          <span className="text-white font-medium text-sm sm:text-base truncate">{assessment?.company_name}</span>
+          <span className="text-[#0C1B2A] font-medium text-sm sm:text-base truncate">{assessment?.company_name}</span>
         </div>
-        <div className="hidden md:flex items-center gap-2 text-white/50">
+        <div className="hidden md:flex items-center gap-2 text-[#4A5568]">
           <User size={14} />
           <span className="text-sm">{assessment?.respondent_name} · {assessment?.respondent_role}</span>
         </div>
@@ -63,7 +63,7 @@ export const ChatHeader = ({ assessment, assessmentId }) => {
           <Link
             to={`/assessments/${assessmentId}/report`}
             data-testid="view-report-btn"
-            className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 bg-[#34D399] text-white rounded-xl hover:bg-[#34D399]/80 transition-colors text-xs sm:text-sm"
+            className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 bg-[#34D399] text-[#0C1B2A] rounded-xl hover:bg-[#34D399]/80 transition-colors text-xs sm:text-sm"
           >
             <FileText size={14} />
             <span className="hidden sm:inline">View Report</span>

@@ -5,13 +5,13 @@ export const FindingsAndGaps = ({ report }) => (
     <div className="p-6 glass-surface-highlight rounded-xl">
       <div className="flex items-center gap-2 mb-4">
         <Target size={20} className="text-[#C9A84C]" />
-        <h2 className="text-lg font-semibold text-white font-['Outfit']">Key Findings</h2>
+        <h2 className="text-lg font-semibold text-[#0C1B2A] font-['Outfit']">Key Findings</h2>
       </div>
       <ul className="space-y-3">
         {(report.key_findings || []).map((f, i) => (
           <li key={i} className="flex items-start gap-3">
             <span className="w-5 h-5 rounded-full bg-[#C9A84C]/15 text-[#C9A84C] flex items-center justify-center text-[10px] shrink-0 mt-0.5">{i + 1}</span>
-            <p className="text-white/60 text-sm">{f}</p>
+            <p className="text-[#4A5568] text-sm">{f}</p>
           </li>
         ))}
       </ul>
@@ -19,13 +19,13 @@ export const FindingsAndGaps = ({ report }) => (
     <div className="p-6 glass-surface-highlight rounded-xl">
       <div className="flex items-center gap-2 mb-4">
         <AlertTriangle size={20} className="text-[#EF4444]" />
-        <h2 className="text-lg font-semibold text-white font-['Outfit']">Critical Capability Gaps</h2>
+        <h2 className="text-lg font-semibold text-[#0C1B2A] font-['Outfit']">Critical Capability Gaps</h2>
       </div>
       <ul className="space-y-3">
         {(report.critical_gaps || []).map((g, i) => (
           <li key={i} className="flex items-start gap-3">
             <span className="w-5 h-5 rounded-full bg-[#EF4444]/15 text-[#EF4444] flex items-center justify-center text-[10px] shrink-0 mt-0.5">!</span>
-            <p className="text-white/60 text-sm">{g}</p>
+            <p className="text-[#4A5568] text-sm">{g}</p>
           </li>
         ))}
       </ul>
@@ -51,7 +51,7 @@ const RiskBadge = ({ risk }) => {
   const key = String(risk || "").toLowerCase();
   const tone = RISK_TONE[key];
   if (!tone) {
-    return <span className="text-xs text-white/30 font-medium">–</span>;
+    return <span className="text-xs text-[#8896A5] font-medium">–</span>;
   }
   return (
     <span
@@ -70,19 +70,19 @@ export const DecisionVulnerability = ({ report }) => {
     <div data-testid="decision-vulnerability-section" className="p-6 glass-surface-highlight rounded-xl">
       <div className="flex items-center gap-2 mb-4">
         <AlertTriangle size={20} className="text-[#C9A84C]" />
-        <h2 className="text-lg font-semibold text-white font-['Outfit']">Decision-Type Vulnerability Analysis</h2>
+        <h2 className="text-lg font-semibold text-[#0C1B2A] font-['Outfit']">Decision-Type Vulnerability Analysis</h2>
       </div>
       {hasRatings && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mb-4">
           {DECISION_TYPES.map(({ key, label }) => (
-            <div key={key} data-testid={`decision-${key}`} className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-              <p className="text-[11px] text-white/50 mb-1.5">{label}</p>
+            <div key={key} data-testid={`decision-${key}`} className="p-3 rounded-xl bg-[#F8F9FA] border border-[#E2E8F0]">
+              <p className="text-[11px] text-[#4A5568] mb-1.5">{label}</p>
               <RiskBadge risk={ratings[key]} />
             </div>
           ))}
         </div>
       )}
-      <p className="text-white/60 text-sm leading-relaxed">{report.decision_vulnerability || "No narrative available."}</p>
+      <p className="text-[#4A5568] text-sm leading-relaxed">{report.decision_vulnerability || "No narrative available."}</p>
     </div>
   );
 };
@@ -108,7 +108,7 @@ export const ImprovementRoadmap = ({ report }) => (
   <div data-testid="improvement-roadmap" className="p-6 glass-surface-highlight rounded-xl">
     <div className="flex items-center gap-2 mb-6">
       <TrendingUp size={20} className="text-[#34D399]" />
-      <h2 className="text-lg font-semibold text-white font-['Outfit']">Improvement Roadmap</h2>
+      <h2 className="text-lg font-semibold text-[#0C1B2A] font-['Outfit']">Improvement Roadmap</h2>
     </div>
     <div className="space-y-4">
       {PHASES.map(phase => {
@@ -122,21 +122,21 @@ export const ImprovementRoadmap = ({ report }) => (
             <div className="flex flex-wrap items-baseline gap-2 mb-1">
               <h3 className="text-sm font-semibold font-['Outfit']" style={{ color: phase.color }}>{phase.title}</h3>
               {isObj && data.timeframe && (
-                <span className="text-[10px] uppercase tracking-wider text-white/40">{data.timeframe}</span>
+                <span className="text-[10px] uppercase tracking-wider text-[#8896A5]">{data.timeframe}</span>
               )}
             </div>
-            <p className="text-xs text-white/40 mb-3 italic">{phase.subtitle}</p>
+            <p className="text-xs text-[#8896A5] mb-3 italic">{phase.subtitle}</p>
             <ul className="space-y-1.5 mb-3">
               {actions.map((a, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-white/60"><span style={{ color: phase.color }}>-</span>{a}</li>
+                <li key={i} className="flex items-start gap-2 text-sm text-[#4A5568]"><span style={{ color: phase.color }}>-</span>{a}</li>
               ))}
             </ul>
             {isObj && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
-                {data.pillar_focus && <div className="text-white/40"><span className="text-white/60 font-medium">Pillar Focus:</span> {data.pillar_focus}</div>}
-                {data.governance_milestone && <div className="text-white/40"><span className="text-white/60 font-medium">Governance:</span> {data.governance_milestone}</div>}
-                {mgmt && <div className="text-white/40"><span className="text-white/60 font-medium">Management:</span> {mgmt}</div>}
-                {data.expected_gain && <div className="text-white/40"><span className="text-white/60 font-medium">Expected Gain:</span> {data.expected_gain}</div>}
+                {data.pillar_focus && <div className="text-[#8896A5]"><span className="text-[#4A5568] font-medium">Pillar Focus:</span> {data.pillar_focus}</div>}
+                {data.governance_milestone && <div className="text-[#8896A5]"><span className="text-[#4A5568] font-medium">Governance:</span> {data.governance_milestone}</div>}
+                {mgmt && <div className="text-[#8896A5]"><span className="text-[#4A5568] font-medium">Management:</span> {mgmt}</div>}
+                {data.expected_gain && <div className="text-[#8896A5]"><span className="text-[#4A5568] font-medium">Expected Gain:</span> {data.expected_gain}</div>}
               </div>
             )}
           </div>

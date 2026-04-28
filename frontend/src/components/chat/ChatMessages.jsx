@@ -47,11 +47,11 @@ const AssistantBubble = ({ content, timestamp }) => (
       <LogoMark className="w-8 h-8 rounded-full shrink-0 mt-1" radius={50} />
       <div className="flex-1 min-w-0">
         <p className="text-xs text-[#C9A84C] font-medium mb-2">PortfolioHealth Advisor</p>
-        <div className="text-white/80 prose prose-invert prose-sm max-w-none">
+        <div className="text-[#0C1B2A] prose prose-sm max-w-none">
           <ReactMarkdown
             components={{
               p: ({ children }) => <p className="mb-3 last:mb-0 leading-relaxed">{children}</p>,
-              strong: ({ children }) => <strong className="text-white font-semibold">{children}</strong>,
+              strong: ({ children }) => <strong className="text-[#0C1B2A] font-semibold">{children}</strong>,
               ul: ({ children }) => <ul className="list-disc pl-5 mb-3 space-y-2 marker:text-[#C9A84C]/70">{children}</ul>,
               ol: ({ children }) => (
                 <ol className="list-decimal pl-6 mb-3 space-y-3 marker:text-[#C9A84C] marker:font-semibold">
@@ -59,14 +59,14 @@ const AssistantBubble = ({ content, timestamp }) => (
                 </ol>
               ),
               li: ({ children }) => <li className="pl-1 leading-relaxed">{children}</li>,
-              code: ({ children }) => <code className="bg-white/[0.08] px-1 py-0.5 rounded text-[#C9A84C]">{children}</code>,
-              pre: ({ children }) => <pre className="bg-white/[0.05] p-3 rounded-lg overflow-x-auto text-sm">{children}</pre>
+              code: ({ children }) => <code className="bg-[#F8F9FA] px-1 py-0.5 rounded text-[#C9A84C]">{children}</code>,
+              pre: ({ children }) => <pre className="bg-[#F8F9FA] p-3 rounded-lg overflow-x-auto text-sm">{children}</pre>
             }}
           >
             {cleanContent(content)}
           </ReactMarkdown>
         </div>
-        <p className="text-xs text-white/25 mt-2">{new Date(timestamp).toLocaleTimeString()}</p>
+        <p className="text-xs text-[#8896A5] mt-2">{new Date(timestamp).toLocaleTimeString()}</p>
       </div>
     </div>
   </div>
@@ -75,7 +75,7 @@ const AssistantBubble = ({ content, timestamp }) => (
 const UserBubble = ({ content, timestamp }) => (
   <div className="chat-message-user max-w-[80%] px-4 py-3">
     <p className="text-white whitespace-pre-wrap">{content}</p>
-    <p className="text-xs text-white/30 mt-2">{new Date(timestamp).toLocaleTimeString()}</p>
+    <p className="text-xs text-white/55 mt-2">{new Date(timestamp).toLocaleTimeString()}</p>
   </div>
 );
 
@@ -85,7 +85,7 @@ const TypingIndicator = () => (
       <div className="w-8 h-8 rounded-full bg-[#C9A84C]/15 flex items-center justify-center shrink-0">
         <Loader2 size={16} className="text-[#C9A84C] animate-spin" />
       </div>
-      <div className="flex items-center gap-2 text-white/50">
+      <div className="flex items-center gap-2 text-[#4A5568]">
         <span>Thinking</span>
         <span className="flex gap-1">
           <span className="w-1.5 h-1.5 bg-[#C9A84C] rounded-full animate-bounce" style={{ animationDelay: "0s" }} />
@@ -100,21 +100,21 @@ const TypingIndicator = () => (
 const ClosingCard = ({ assessmentId }) => (
   <div
     data-testid="closing-statement-card"
-    className="animate-fade-in p-4 sm:p-6 rounded-2xl border border-[#C9A84C]/30 bg-gradient-to-br from-[#C9A84C]/10 to-transparent backdrop-blur-xl"
+    className="animate-fade-in p-4 sm:p-6 rounded-2xl border border-[#E8D49A] bg-gradient-to-br from-[#F7F0DC] to-white"
   >
     <div className="flex items-center gap-3 mb-4">
       <LogoMark className="w-9 h-9 rounded-lg shrink-0" radius={14} />
       <div className="min-w-0">
         <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] text-[#C9A84C]">Assessment Complete</p>
-        <p className="text-sm text-white/60">Your report is ready on the dashboard.</p>
+        <p className="text-sm text-[#4A5568]">Your report is ready on the dashboard.</p>
       </div>
     </div>
 
-    <h3 className="text-base sm:text-lg font-semibold text-white font-['Outfit'] mb-3 leading-snug">
+    <h3 className="text-base sm:text-lg font-semibold text-[#0C1B2A] font-['Outfit'] mb-3 leading-snug">
       Thank you for completing this PPDT Capability Maturity Assessment.
     </h3>
 
-    <div className="space-y-3 text-sm text-white/70 leading-relaxed">
+    <div className="space-y-3 text-sm text-[#4A5568] leading-relaxed">
       <p>
         This assessment is part of a Master's thesis at the University of Oulu: <em>"To develop and validate a PPM Decision-Making Capability Assessment Framework grounded in Hannila's Product Wellbeing PPDT model — identifying which organizational capability gaps most critically impair product portfolio decisions."</em> It is based on the doctoral research of Hannu Hannila and related peer-reviewed studies from the Industrial Engineering and Management department, under the supervision of Professor Janne Härkönen.
       </p>
@@ -124,10 +124,10 @@ const ClosingCard = ({ assessmentId }) => (
           {CONTACT_EMAIL}
         </a>
       </p>
-      <p className="text-xs text-white/45 italic">
+      <p className="text-xs text-[#8896A5] italic">
         This report is confidential. Distribution without authorisation is not permitted.
       </p>
-      <p className="text-[10px] sm:text-[11px] uppercase tracking-wider text-white/35 pt-1">
+      <p className="text-[10px] sm:text-[11px] uppercase tracking-wider text-[#8896A5] pt-1">
         PortfolioHealth Advisor · PPM Capability Maturity Assessment · University of Oulu
       </p>
     </div>

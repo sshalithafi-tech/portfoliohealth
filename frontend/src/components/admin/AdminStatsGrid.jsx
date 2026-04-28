@@ -7,8 +7,8 @@ const AdminStatCard = ({ icon: Icon, label, value, color = "#C9A84C" }) => (
         <Icon size={20} style={{ color }} />
       </div>
       <div>
-        <p className="text-white/50 text-xs">{label}</p>
-        <p className="text-xl font-semibold text-white font-['JetBrains_Mono']">{value}</p>
+        <p className="text-[#4A5568] text-xs">{label}</p>
+        <p className="text-xl font-semibold text-[#0C1B2A] font-['JetBrains_Mono']">{value}</p>
       </div>
     </div>
   </div>

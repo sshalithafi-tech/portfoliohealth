@@ -58,7 +58,7 @@ const ScoreRing = ({ score }) => {
             {score.toFixed(1)}
           </span>
         ) : (
-          <span className="text-white/25 text-sm font-['JetBrains_Mono']">–</span>
+          <span className="text-[#8896A5] text-sm font-['JetBrains_Mono']">–</span>
         )}
       </div>
     </div>
@@ -99,10 +99,10 @@ const AssessmentCard = ({ assessment, onClick }) => {
             <Building2 size={18} className="text-[#60A5FA]" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-white font-semibold font-['Outfit'] truncate leading-tight">
+            <p className="text-[#0C1B2A] font-semibold font-['Outfit'] truncate leading-tight">
               {assessment.company_name}
             </p>
-            <p className="text-xs text-white/35 mt-0.5 truncate">
+            <p className="text-xs text-[#8896A5] mt-0.5 truncate">
               {assessment.company_industry || "—"}
             </p>
           </div>
@@ -111,13 +111,13 @@ const AssessmentCard = ({ assessment, onClick }) => {
       </div>
 
       {/* Middle: score + level */}
-      <div className="flex items-center gap-4 py-4 px-4 rounded-xl bg-white/[0.02] border border-white/[0.04] mb-4">
+      <div className="flex items-center gap-4 py-4 px-4 rounded-xl bg-[#F8F9FA] border border-[#E2E8F0] mb-4">
         <ScoreRing score={overall} />
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] uppercase tracking-wider text-white/30 font-semibold">
+          <p className="text-[10px] uppercase tracking-wider text-[#8896A5] font-semibold">
             Overall Maturity
           </p>
-          <p className={`text-base font-semibold font-['Outfit'] truncate ${overall ? "text-white" : "text-white/40"}`}>
+          <p className={`text-base font-semibold font-['Outfit'] truncate ${overall ? "text-[#0C1B2A]" : "text-[#8896A5]"}`}>
             {levelName || "Not yet scored"}
           </p>
         </div>
@@ -125,23 +125,23 @@ const AssessmentCard = ({ assessment, onClick }) => {
 
       {/* Meta rows */}
       <div className="space-y-2 text-sm">
-        <div className="flex items-center gap-2.5 text-white/55">
-          <UserRound size={13} className="text-white/30 shrink-0" />
+        <div className="flex items-center gap-2.5 text-[#4A5568]">
+          <UserRound size={13} className="text-[#8896A5] shrink-0" />
           <span className="truncate">
             {assessment.respondent_name}
             {assessment.respondent_role && (
-              <span className="text-white/30"> · {assessment.respondent_role}</span>
+              <span className="text-[#8896A5]"> · {assessment.respondent_role}</span>
             )}
           </span>
         </div>
-        <div className="flex items-center gap-2.5 text-white/55">
-          <Calendar size={13} className="text-white/30 shrink-0" />
+        <div className="flex items-center gap-2.5 text-[#4A5568]">
+          <Calendar size={13} className="text-[#8896A5] shrink-0" />
           <span>{new Date(assessment.created_at).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}</span>
         </div>
       </div>
 
       {/* Footer action */}
-      <div className="mt-5 pt-4 border-t border-white/[0.05] flex items-center justify-between">
+      <div className="mt-5 pt-4 border-t border-[#E2E8F0] flex items-center justify-between">
         {isComplete ? (
           <button
             onClick={downloadPDF}
@@ -151,11 +151,11 @@ const AssessmentCard = ({ assessment, onClick }) => {
             <Download size={12} /> Download PDF
           </button>
         ) : (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white/50 bg-white/[0.03] rounded-lg border border-white/[0.06]">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#4A5568] bg-[#F8F9FA] rounded-lg border border-[#E2E8F0]">
             <FileText size={12} /> Continue
           </span>
         )}
-        <span className="inline-flex items-center gap-1 text-xs text-white/35 group-hover:text-[#C9A84C] transition-colors">
+        <span className="inline-flex items-center gap-1 text-xs text-[#8896A5] group-hover:text-[#C9A84C] transition-colors">
           {isComplete ? "View report" : "Resume"}
           <ChevronRight size={14} className="transition-transform group-hover:translate-x-0.5" />
         </span>
@@ -250,19 +250,19 @@ const AssessmentsPage = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-semibold text-white font-['Outfit'] tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-semibold text-[#0C1B2A] font-['Outfit'] tracking-tight">
               Assessments
               {selectedCompany && (
                 <span className="text-[#C9A84C]"> · {selectedCompany.name}</span>
               )}
             </h1>
-            <p className="text-white/50 mt-1 text-sm sm:text-base">
+            <p className="text-[#4A5568] mt-1 text-sm sm:text-base">
               {selectedCompany
                 ? `Viewing assessments for ${selectedCompany.name}`
                 : "Manage and review PPDT capability assessments"}
             </p>
             {filteredAssessments.length > 0 && (
-              <div className="flex items-center gap-4 mt-3 text-xs text-white/45">
+              <div className="flex items-center gap-4 mt-3 text-xs text-[#8896A5]">
                 <span className="inline-flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#34D399]" /> {completedCount} completed
                 </span>
@@ -282,7 +282,7 @@ const AssessmentsPage = () => {
                 New Assessment
               </button>
             </DialogTrigger>
-            <DialogContent className="glass-heavy border-white/10 text-white max-w-md rounded-2xl">
+            <DialogContent className="glass-heavy border-[#E2E8F0] text-[#0C1B2A] max-w-md rounded-2xl">
               <DialogHeader>
                 <DialogTitle className="text-xl font-semibold font-['Outfit']">
                   Start New Assessment
@@ -290,7 +290,7 @@ const AssessmentsPage = () => {
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4 mt-4">
                 <div className="space-y-2">
-                  <label className="text-sm text-white/50">Company *</label>
+                  <label className="text-sm text-[#4A5568]">Company *</label>
                   <select
                     data-testid="assessment-company-select"
                     value={formData.company_id}
@@ -312,7 +312,7 @@ const AssessmentsPage = () => {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm text-white/50">Respondent Name *</label>
+                  <label className="text-sm text-[#4A5568]">Respondent Name *</label>
                   <input
                     type="text"
                     data-testid="respondent-name-input"
@@ -324,7 +324,7 @@ const AssessmentsPage = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm text-white/50">Respondent Role *</label>
+                  <label className="text-sm text-[#4A5568]">Respondent Role *</label>
                   <input
                     type="text"
                     data-testid="respondent-role-input"
@@ -351,7 +351,7 @@ const AssessmentsPage = () => {
         {/* Filters */}
         <div className="flex flex-col md:flex-row gap-3">
           <div className="relative flex-1 max-w-md">
-            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
+            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8896A5]" />
             <input
               type="text"
               data-testid="assessment-search-input"
@@ -362,7 +362,7 @@ const AssessmentsPage = () => {
             />
           </div>
           <div className="flex items-center gap-2">
-            <Filter size={16} className="text-white/40" />
+            <Filter size={16} className="text-[#8896A5]" />
             <select
               data-testid="status-filter-select"
               value={statusFilter}

@@ -12,7 +12,7 @@ export const AdminFilters = ({
 }) => (
   <div className="flex flex-col sm:flex-row gap-3">
     <div className="relative flex-1 max-w-md">
-      <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
+      <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8896A5]" />
       <input
         type="text"
         data-testid="admin-search-input"
@@ -24,7 +24,7 @@ export const AdminFilters = ({
     </div>
     {showStatusFilter && (
       <div className="flex items-center gap-2">
-        <Filter size={16} className="text-white/40" />
+        <Filter size={16} className="text-[#8896A5]" />
         <select
           data-testid="admin-status-filter"
           value={statusFilter}

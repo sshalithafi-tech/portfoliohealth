@@ -31,7 +31,7 @@ export const FinalReportIndicator = () => {
   return (
     <div
       data-testid="final-report-indicator"
-      className="animate-fade-in rounded-2xl border border-[#C9A84C]/25 bg-gradient-to-br from-[#C9A84C]/10 via-[#0A1628]/40 to-transparent p-4 sm:p-5 backdrop-blur-xl"
+      className="animate-fade-in rounded-2xl border border-[#E8D49A] bg-gradient-to-br from-[#F7F0DC] to-white p-4 sm:p-5"
     >
       <div className="flex items-start gap-3">
         <LogoMark className="w-9 h-9 rounded-lg shrink-0" radius={14} />
@@ -45,7 +45,7 @@ export const FinalReportIndicator = () => {
 
           <p
             key={stage}
-            className="text-sm text-white/75 font-['Outfit'] animate-fade-in mb-3"
+            className="text-sm text-[#4A5568] font-['Outfit'] animate-fade-in mb-3"
           >
             {STAGES[stage]}
           </p>
@@ -54,12 +54,12 @@ export const FinalReportIndicator = () => {
           <div
             role="progressbar"
             aria-label="Generating final report"
-            className="relative h-1.5 w-full rounded-full bg-white/[0.05] overflow-hidden"
+            className="relative h-1.5 w-full rounded-full bg-[#F8F9FA] overflow-hidden"
           >
             <div className="absolute inset-y-0 w-1/3 rounded-full bg-gradient-to-r from-transparent via-[#C9A84C] to-transparent animate-progress-sweep" />
           </div>
 
-          <div className="mt-2.5 flex items-center justify-between text-[10px] text-white/40">
+          <div className="mt-2.5 flex items-center justify-between text-[10px] text-[#8896A5]">
             <span className="flex items-center gap-1.5">
               <Clock size={10} />
               <span>

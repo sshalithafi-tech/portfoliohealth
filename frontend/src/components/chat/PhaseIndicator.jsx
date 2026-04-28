@@ -26,7 +26,7 @@ export const PhaseIndicator = ({ currentPhase }) => {
               <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm transition-all ${
                 isCompleted ? 'bg-[#34D399]/15 text-[#34D399] border border-[#34D399]/20' :
                 isCurrent ? 'bg-[#C9A84C]/15 text-[#C9A84C] border border-[#C9A84C]/30' :
-                'bg-white/[0.03] text-white/30 border border-white/[0.05]'
+                'bg-[#F8F9FA] text-[#8896A5] border border-[#E2E8F0]'
               }`}>
                 {isCompleted ? <CheckCircle2 size={14} /> :
                  isCurrent ? <div className="w-3.5 h-3.5 rounded-full bg-[#C9A84C] animate-pulse" /> :
@@ -34,7 +34,7 @@ export const PhaseIndicator = ({ currentPhase }) => {
                 <span className="hidden sm:inline whitespace-nowrap">{phase.label}</span>
               </div>
               {idx < PHASES.length - 1 && (
-                <div className={`w-8 h-0.5 mx-1 ${idx < currentIdx ? 'bg-[#34D399]/50' : 'bg-white/[0.06]'}`} />
+                <div className={`w-8 h-0.5 mx-1 ${idx < currentIdx ? 'bg-[#34D399]/60' : 'bg-[#E2E8F0]'}`} />
               )}
             </div>
           );

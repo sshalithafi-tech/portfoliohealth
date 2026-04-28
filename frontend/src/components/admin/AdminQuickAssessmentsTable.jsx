@@ -9,12 +9,12 @@ const ScoreCell = ({ value }) => (
 );
 
 const QuickRow = ({ q }) => (
-  <tr className="border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors" data-testid={`admin-quick-row-${q.id}`}>
-    <td className="px-4 sm:px-6 py-3 text-white font-medium">{q.company_name}</td>
-    <td className="px-4 sm:px-6 py-3 text-white/50">{q.industry}</td>
+  <tr className="border-b border-[#E2E8F0] hover:bg-[#F8F9FA] transition-colors" data-testid={`admin-quick-row-${q.id}`}>
+    <td className="px-4 sm:px-6 py-3 text-[#0C1B2A] font-medium">{q.company_name}</td>
+    <td className="px-4 sm:px-6 py-3 text-[#4A5568]">{q.industry}</td>
     <td className="px-4 sm:px-6 py-3">
-      <p className="text-white/60">{q.respondent_name || "Anonymous"}</p>
-      <p className="text-xs text-white/30">{q.respondent_email || ""}</p>
+      <p className="text-[#4A5568]">{q.respondent_name || "Anonymous"}</p>
+      <p className="text-xs text-[#8896A5]">{q.respondent_email || ""}</p>
     </td>
     <td className="px-4 sm:px-6 py-3"><ScoreCell value={q.scores?.people} /></td>
     <td className="px-4 sm:px-6 py-3"><ScoreCell value={q.scores?.process} /></td>
@@ -23,9 +23,9 @@ const QuickRow = ({ q }) => (
     <td className="px-4 sm:px-6 py-3">
       {q.scores?.overall
         ? <span className={`font-['JetBrains_Mono'] font-bold ${getScoreColorClass(q.scores.overall)}`}>{q.scores.overall.toFixed(1)}</span>
-        : <span className="text-white/30">–</span>}
+        : <span className="text-[#8896A5]">–</span>}
     </td>
-    <td className="px-4 sm:px-6 py-3 text-white/40 text-xs whitespace-nowrap">
+    <td className="px-4 sm:px-6 py-3 text-[#8896A5] text-xs whitespace-nowrap">
       {new Date(q.created_at).toLocaleDateString()}
     </td>
   </tr>
@@ -45,7 +45,7 @@ export const AdminQuickAssessmentsTable = ({ quickAssessments }) => {
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="text-left text-xs uppercase tracking-wider text-white/40 border-b border-white/[0.08]">
+            <tr className="text-left text-xs uppercase tracking-wider text-[#8896A5] border-b border-[#E2E8F0]">
               <th className="px-4 sm:px-6 py-3">Company</th>
               <th className="px-4 sm:px-6 py-3">Industry</th>
               <th className="px-4 sm:px-6 py-3">Respondent</th>

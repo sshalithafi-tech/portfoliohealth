@@ -116,9 +116,9 @@ const AssessmentChatPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse-glow w-12 h-12 rounded-full bg-[#C9A84C]/15 flex items-center justify-center">
-          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#60A5FA] to-[#C9A84C]" />
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="animate-pulse-glow w-12 h-12 rounded-full bg-[#F7F0DC] border border-[#E8D49A] flex items-center justify-center">
+          <div className="w-6 h-6 rounded-full bg-[#C9A84C]" />
         </div>
       </div>
     );
@@ -132,7 +132,7 @@ const AssessmentChatPage = () => {
   const isFinalTurn = sending && messages.length >= 10;
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-white">
       <ChatHeader assessment={assessment} assessmentId={id} />
       <PhaseIndicator currentPhase={currentPhase} />
       <ChatMessages

@@ -28,13 +28,13 @@ const QuestionOption = ({ option, questionId, optionIndex, isSelected, onSelect 
     onClick={() => onSelect(option.value)}
     className={`w-full p-4 rounded-xl border text-left transition-all flex items-center justify-between group ${
       isSelected
-        ? "bg-[#C9A84C]/10 border-[#C9A84C]/30 text-white"
-        : "bg-white/[0.03] border-white/[0.08] text-white/70 hover:border-[#C9A84C]/20 hover:bg-white/[0.05]"
+        ? "bg-[#C9A84C]/10 border-[#C9A84C]/30 text-[#0C1B2A]"
+        : "bg-[#F8F9FA] border-[#E2E8F0] text-[#4A5568] hover:border-[#C9A84C]/20 hover:bg-[#F8F9FA]"
     }`}
   >
     <span className="font-medium">{option.label}</span>
     <ChevronRight size={18} className={`transition-all ${
-      isSelected ? "text-[#C9A84C]" : "text-white/30 group-hover:text-white/50"
+      isSelected ? "text-[#C9A84C]" : "text-[#8896A5] group-hover:text-[#4A5568]"
     }`} />
   </button>
 );
@@ -50,7 +50,7 @@ const ProgressDots = ({ questions, currentQuestion, answers, onDotClick }) => (
             ? "bg-[#C9A84C] w-6"
             : answers[String(q.id)]
             ? "bg-[#34D399] w-2"
-            : "bg-white/[0.15] w-2"
+            : "bg-[#F8F9FA] w-2"
         }`}
       />
     ))}
@@ -144,7 +144,7 @@ const QuickAssessmentPage = () => {
         <button
           onClick={handleBack}
           data-testid="back-btn"
-          className="flex items-center gap-2 text-white/50 hover:text-white transition-colors mr-6"
+          className="flex items-center gap-2 text-[#4A5568] hover:text-[#0C1B2A] transition-colors mr-6"
         >
           <ArrowLeft size={20} />
           <span className="hidden sm:inline">Back</span>
@@ -152,11 +152,11 @@ const QuickAssessmentPage = () => {
         
         <div className="flex items-center gap-3 flex-1">
           <LogoMark className="w-8 h-8 rounded-lg" radius={14} />
-          <span className="text-white font-semibold font-['Outfit']">PortfolioHealth</span>
+          <span className="text-[#0C1B2A] font-semibold font-['Outfit']">PortfolioHealth</span>
         </div>
 
         {step === "questions" && (
-          <span className="text-white/50 text-sm">
+          <span className="text-[#4A5568] text-sm">
             {currentQuestion + 1} of {questions.length}
           </span>
         )}
@@ -164,7 +164,7 @@ const QuickAssessmentPage = () => {
 
       {/* Progress Bar */}
       {step === "questions" && (
-        <div className="h-1 bg-white/[0.06] relative z-10">
+        <div className="h-1 bg-[#F8F9FA] relative z-10">
           <div 
             className="h-full bg-gradient-to-r from-[#60A5FA] to-[#C9A84C] transition-all duration-300"
             style={{ width: `${progress}%` }}
@@ -176,10 +176,10 @@ const QuickAssessmentPage = () => {
         {/* Intro Step */}
         {step === "intro" && (
           <div className="animate-fade-in">
-            <h1 className="text-3xl font-semibold text-white font-['Outfit'] tracking-tight mb-4">
+            <h1 className="text-3xl font-semibold text-[#0C1B2A] font-['Outfit'] tracking-tight mb-4">
               Quick PPDT Health Check
             </h1>
-            <p className="text-white/50 mb-8">
+            <p className="text-[#4A5568] mb-8">
               Answer 15 questions to get an instant assessment of your organisation's 
               PPM capability maturity across People, Process, Data, and Technology dimensions.
             </p>
@@ -188,11 +188,11 @@ const QuickAssessmentPage = () => {
               <div className="p-6 glass-surface-highlight rounded-xl space-y-4">
                 <div className="flex items-center gap-3 mb-4">
                   <Building2 size={20} className="text-[#C9A84C]" />
-                  <h2 className="text-lg font-semibold text-white font-['Outfit']">Company Information</h2>
+                  <h2 className="text-lg font-semibold text-[#0C1B2A] font-['Outfit']">Company Information</h2>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm text-white/50">Company Name *</label>
+                  <label className="text-sm text-[#4A5568]">Company Name *</label>
                   <input
                     type="text"
                     data-testid="quick-company-name"
@@ -205,7 +205,7 @@ const QuickAssessmentPage = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm text-white/50">Industry *</label>
+                  <label className="text-sm text-[#4A5568]">Industry *</label>
                   <select
                     data-testid="quick-industry"
                     value={companyInfo.industry}
@@ -222,7 +222,7 @@ const QuickAssessmentPage = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-sm text-white/50">Your Name (optional)</label>
+                    <label className="text-sm text-[#4A5568]">Your Name (optional)</label>
                     <input
                       type="text"
                       data-testid="quick-respondent-name"
@@ -233,7 +233,7 @@ const QuickAssessmentPage = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm text-white/50">Email (optional)</label>
+                    <label className="text-sm text-[#4A5568]">Email (optional)</label>
                     <input
                       type="email"
                       data-testid="quick-respondent-email"
@@ -267,7 +267,7 @@ const QuickAssessmentPage = () => {
               </span>
             </div>
 
-            <h2 className="text-2xl font-semibold text-white mb-8 font-['Outfit']">
+            <h2 className="text-2xl font-semibold text-[#0C1B2A] mb-8 font-['Outfit']">
               {currentQ.question}
             </h2>
 
@@ -285,11 +285,11 @@ const QuickAssessmentPage = () => {
             </div>
 
             {/* Navigation */}
-            <div className="flex items-center justify-between mt-8 pt-8 border-t border-white/[0.06]">
+            <div className="flex items-center justify-between mt-8 pt-8 border-t border-[#E2E8F0]">
               <button
                 onClick={() => setCurrentQuestion(prev => Math.max(0, prev - 1))}
                 disabled={currentQuestion === 0}
-                className="flex items-center gap-2 text-white/50 hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 text-[#4A5568] hover:text-[#0C1B2A] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <ArrowLeft size={18} />
                 Previous
@@ -309,7 +309,7 @@ const QuickAssessmentPage = () => {
                   onClick={handleSubmit}
                   disabled={Object.keys(answers).length < questions.length}
                   data-testid="submit-quick-assessment-btn"
-                  className="flex items-center gap-2 px-6 py-2 bg-[#34D399] text-white rounded-xl hover:bg-[#34D399]/80 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 px-6 py-2 bg-[#34D399] text-[#0C1B2A] rounded-xl hover:bg-[#34D399]/80 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   Get Results
                   <ArrowRight size={18} />
@@ -330,8 +330,8 @@ const QuickAssessmentPage = () => {
         {step === "submitting" && (
           <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
             <Loader2 size={48} className="text-[#C9A84C] animate-spin mb-6" />
-            <h2 className="text-xl font-semibold text-white mb-2 font-['Outfit']">Calculating Your Scores</h2>
-            <p className="text-white/50">This will only take a moment...</p>
+            <h2 className="text-xl font-semibold text-[#0C1B2A] mb-2 font-['Outfit']">Calculating Your Scores</h2>
+            <p className="text-[#4A5568]">This will only take a moment...</p>
           </div>
         )}
       </div>

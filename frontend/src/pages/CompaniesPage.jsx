@@ -88,30 +88,30 @@ const CompanyCard = ({ company, onDelete }) => {
         <button
           data-testid={`company-actions-${company.id}`}
           onClick={() => setShowActions(!showActions)}
-          className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/[0.06] transition-all"
+          className="p-1.5 rounded-lg text-[#8896A5] hover:text-[#0C1B2A] hover:bg-[#F8F9FA] transition-all"
         >
           <MoreVertical size={18} />
         </button>
         {showActions && (
           <>
             <div className="fixed inset-0 z-40" onClick={() => setShowActions(false)} />
-            <div className="absolute right-0 top-10 w-48 rounded-xl shadow-2xl z-50 py-1 animate-fade-in border border-white/10"
+            <div className="absolute right-0 top-10 w-48 rounded-xl shadow-2xl z-50 py-1 animate-fade-in border border-[#E2E8F0]"
                  style={{ background: 'rgba(13,17,23,0.95)', backdropFilter: 'blur(20px)' }}>
               <button
                 data-testid={`download-full-${company.id}`}
                 onClick={() => downloadPDF("full")}
-                className="w-full flex items-center gap-2 px-3 py-2 text-xs text-white/70 hover:text-white hover:bg-white/[0.08] transition-colors"
+                className="w-full flex items-center gap-2 px-3 py-2 text-xs text-[#4A5568] hover:text-[#0C1B2A] hover:bg-[#F8F9FA] transition-colors"
               >
                 <Download size={13} /> Download Report
               </button>
               <Link
                 to={`/assessments?company=${company.id}`}
-                className="w-full flex items-center gap-2 px-3 py-2 text-xs text-white/70 hover:text-white hover:bg-white/[0.08] transition-colors"
+                className="w-full flex items-center gap-2 px-3 py-2 text-xs text-[#4A5568] hover:text-[#0C1B2A] hover:bg-[#F8F9FA] transition-colors"
                 onClick={() => setShowActions(false)}
               >
                 <ClipboardCheck size={13} /> View Assessments
               </Link>
-              <hr className="border-white/[0.08] my-0.5" />
+              <hr className="border-[#E2E8F0] my-0.5" />
               <button
                 data-testid={`delete-company-${company.id}`}
                 onClick={() => { setShowConfirm(true); setShowActions(false); }}
@@ -128,9 +128,9 @@ const CompanyCard = ({ company, onDelete }) => {
       {showConfirm && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4" onClick={() => setShowConfirm(false)}>
           <div className="glass-heavy rounded-2xl p-6 max-w-sm w-full animate-fade-in" onClick={e => e.stopPropagation()} data-testid="delete-confirm-dialog">
-            <h3 className="text-lg font-semibold text-white font-['Outfit'] mb-3">Delete Company?</h3>
-            <p className="text-white/60 text-sm mb-6">
-              Are you sure you want to delete <strong className="text-white">{company.name}</strong> and all associated assessments? This cannot be undone.
+            <h3 className="text-lg font-semibold text-[#0C1B2A] font-['Outfit'] mb-3">Delete Company?</h3>
+            <p className="text-[#4A5568] text-sm mb-6">
+              Are you sure you want to delete <strong className="text-[#0C1B2A]">{company.name}</strong> and all associated assessments? This cannot be undone.
             </p>
             <div className="flex gap-3">
               <button
@@ -143,7 +143,7 @@ const CompanyCard = ({ company, onDelete }) => {
                 data-testid="confirm-delete-btn"
                 onClick={handleDelete}
                 disabled={deleting}
-                className="flex-1 py-2.5 bg-[#EF4444] text-white rounded-xl text-sm hover:bg-[#EF4444]/80 transition-colors disabled:opacity-50"
+                className="flex-1 py-2.5 bg-[#EF4444] text-[#0C1B2A] rounded-xl text-sm hover:bg-[#EF4444]/80 transition-colors disabled:opacity-50"
               >
                 {deleting ? "Deleting..." : "Delete"}
               </button>
@@ -157,10 +157,10 @@ const CompanyCard = ({ company, onDelete }) => {
           <Building2 size={24} className="text-[#60A5FA]" />
         </div>
         <div className="min-w-0">
-          <h3 className="text-lg font-semibold text-white group-hover:text-[#C9A84C] transition-colors font-['Outfit'] truncate">
+          <h3 className="text-lg font-semibold text-[#0C1B2A] group-hover:text-[#C9A84C] transition-colors font-['Outfit'] truncate">
             {company.name}
           </h3>
-          <p className="text-sm text-white/50">{company.industry}</p>
+          <p className="text-sm text-[#4A5568]">{company.industry}</p>
         </div>
       </div>
 
@@ -177,22 +177,22 @@ const CompanyCard = ({ company, onDelete }) => {
           </span>
         )}
         {company.latest_score && (
-          <span className={`px-2.5 py-1 text-xs rounded-full font-['JetBrains_Mono'] font-semibold ${getScoreColorClass(company.latest_score)} bg-white/[0.05] border border-white/10`}>
+          <span className={`px-2.5 py-1 text-xs rounded-full font-['JetBrains_Mono'] font-semibold ${getScoreColorClass(company.latest_score)} bg-[#F8F9FA] border border-[#E2E8F0]`}>
             Score: {company.latest_score.toFixed(1)}
           </span>
         )}
       </div>
 
       {(company.portfolio_size || company.company_size || company.active_products) && (
-        <div className="mt-3 space-y-1 text-sm text-white/40">
-          {company.company_size && <p><span className="text-white/30">Size:</span> {company.company_size}</p>}
-          {company.active_products && <p><span className="text-white/30">Products:</span> {company.active_products}</p>}
-          {company.portfolio_size && !company.company_size && <p><span className="text-white/30">Portfolio:</span> {company.portfolio_size}</p>}
+        <div className="mt-3 space-y-1 text-sm text-[#8896A5]">
+          {company.company_size && <p><span className="text-[#8896A5]">Size:</span> {company.company_size}</p>}
+          {company.active_products && <p><span className="text-[#8896A5]">Products:</span> {company.active_products}</p>}
+          {company.portfolio_size && !company.company_size && <p><span className="text-[#8896A5]">Portfolio:</span> {company.portfolio_size}</p>}
         </div>
       )}
 
-      <div className="mt-4 pt-4 border-t border-white/[0.06] flex items-center justify-between">
-        <div className="flex items-center gap-2 text-sm text-white/40">
+      <div className="mt-4 pt-4 border-t border-[#E2E8F0] flex items-center justify-between">
+        <div className="flex items-center gap-2 text-sm text-[#8896A5]">
           <Calendar size={14} />
           {new Date(company.created_at).toLocaleDateString()}
         </div>
@@ -271,10 +271,10 @@ const CompaniesPage = () => {
         {/* Header */}
         <div className="flex flex-col gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-semibold text-white font-['Outfit'] tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-semibold text-[#0C1B2A] font-['Outfit'] tracking-tight">
               Companies
             </h1>
-            <p className="text-white/50 mt-1 text-sm sm:text-base">Manage client companies for longitudinal tracking</p>
+            <p className="text-[#4A5568] mt-1 text-sm sm:text-base">Manage client companies for longitudinal tracking</p>
           </div>
           <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
             <DialogTrigger asChild>
@@ -286,7 +286,7 @@ const CompaniesPage = () => {
                 Add Company
               </button>
             </DialogTrigger>
-            <DialogContent className="glass-heavy border-white/10 text-white max-w-md rounded-2xl">
+            <DialogContent className="glass-heavy border-[#E2E8F0] text-[#0C1B2A] max-w-md rounded-2xl">
               <DialogHeader>
                 <DialogTitle className="text-xl font-semibold font-['Outfit']">
                   Add New Company
@@ -294,7 +294,7 @@ const CompaniesPage = () => {
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4 mt-4">
                 <div className="space-y-2">
-                  <label className="text-sm text-white/50">Company Name *</label>
+                  <label className="text-sm text-[#4A5568]">Company Name *</label>
                   <input
                     type="text"
                     data-testid="company-name-input"
@@ -306,7 +306,7 @@ const CompaniesPage = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm text-white/50">Industry *</label>
+                  <label className="text-sm text-[#4A5568]">Industry *</label>
                   <select
                     data-testid="company-industry-select"
                     value={formData.industry}
@@ -321,7 +321,7 @@ const CompaniesPage = () => {
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm text-white/50">Portfolio Size (approx.)</label>
+                  <label className="text-sm text-[#4A5568]">Portfolio Size (approx.)</label>
                   <input
                     type="text"
                     data-testid="company-portfolio-input"
@@ -333,7 +333,7 @@ const CompaniesPage = () => {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-2">
-                    <label className="text-sm text-white/50">Company Size</label>
+                    <label className="text-sm text-[#4A5568]">Company Size</label>
                     <input
                       type="text"
                       data-testid="company-size-input"
@@ -342,10 +342,10 @@ const CompaniesPage = () => {
                       className="w-full px-4 py-3 glass-input rounded-xl outline-none"
                       placeholder="e.g., 450 employees"
                     />
-                    <p className="text-[11px] text-white/30 italic">Shown on the report cover and Portfolio Context card.</p>
+                    <p className="text-[11px] text-[#8896A5] italic">Shown on the report cover and Portfolio Context card.</p>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm text-white/50">Active Products</label>
+                    <label className="text-sm text-[#4A5568]">Active Products</label>
                     <input
                       type="text"
                       data-testid="company-active-products-input"
@@ -354,11 +354,11 @@ const CompaniesPage = () => {
                       className="w-full px-4 py-3 glass-input rounded-xl outline-none"
                       placeholder="e.g., 28 active SKUs"
                     />
-                    <p className="text-[11px] text-white/30 italic">Optional \u2014 appears in the PDF Portfolio Context.</p>
+                    <p className="text-[11px] text-[#8896A5] italic">Optional \u2014 appears in the PDF Portfolio Context.</p>
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm text-white/50">Primary PPM Challenge</label>
+                  <label className="text-sm text-[#4A5568]">Primary PPM Challenge</label>
                   <textarea
                     data-testid="company-challenge-input"
                     value={formData.primary_challenge}
@@ -383,7 +383,7 @@ const CompaniesPage = () => {
 
         {/* Search */}
         <div className="relative max-w-md">
-          <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
+          <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8896A5]" />
           <input
             type="text"
             data-testid="company-search-input"

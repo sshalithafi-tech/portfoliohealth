@@ -7,8 +7,8 @@ import { DIMENSIONS } from "./constants";
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="glass-heavy rounded-lg px-3 py-2 text-xs border border-white/10 backdrop-blur-xl">
-      <p className="text-white font-medium mb-1">{label}</p>
+    <div className="glass-heavy rounded-lg px-3 py-2 text-xs border border-[#E2E8F0] backdrop-blur-xl">
+      <p className="text-[#0C1B2A] font-medium mb-1">{label}</p>
       {payload.map((p, i) => (
         <p key={i} style={{ color: p.color }}>{p.name}: {p.value.toFixed(2)}</p>
       ))}
@@ -49,8 +49,8 @@ export const ContributionChart = ({ scores, weightsNorm }) => {
   return (
     <div data-testid="contribution-chart" className="p-5 sm:p-6 glass-surface-highlight rounded-xl max-w-3xl mx-auto w-full">
       <div className="flex items-baseline justify-between mb-4 gap-3 flex-wrap">
-        <h2 className="text-base sm:text-lg font-semibold text-white font-['Outfit']">PPDT Maturity Contribution</h2>
-        <p className="text-[11px] text-white/40 italic">Raw score vs weight × score</p>
+        <h2 className="text-base sm:text-lg font-semibold text-[#0C1B2A] font-['Outfit']">PPDT Maturity Contribution</h2>
+        <p className="text-[11px] text-[#8896A5] italic">Raw score vs weight × score</p>
       </div>
       <div className="h-56 sm:h-64">
         <ResponsiveContainer width="100%" height="100%">

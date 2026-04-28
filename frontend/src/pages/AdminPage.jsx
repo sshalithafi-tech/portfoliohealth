@@ -16,7 +16,7 @@ const TabButton = ({ active, onClick, testId, children }) => (
     data-testid={testId}
     onClick={onClick}
     className={`px-4 py-3 text-sm font-medium transition-colors border-b-2 -mb-px ${
-      active ? "border-[#C9A84C] text-[#C9A84C]" : "border-transparent text-white/50 hover:text-white"
+      active ? "border-[#C9A84C] text-[#C9A84C]" : "border-transparent text-[#4A5568] hover:text-[#0C1B2A]"
     }`}
   >
     {children}
@@ -102,14 +102,14 @@ const AdminPage = () => {
         <div className="flex items-center gap-3">
           <LogoMark className="w-11 h-11 rounded-xl shrink-0" radius={18} />
           <div>
-            <h1 className="text-2xl sm:text-3xl font-semibold text-white font-['Outfit'] tracking-tight">Admin Panel</h1>
-            <p className="text-white/50 text-sm">All assessment data across all users</p>
+            <h1 className="text-2xl sm:text-3xl font-semibold text-[#0C1B2A] font-['Outfit'] tracking-tight">Admin Panel</h1>
+            <p className="text-[#4A5568] text-sm">All assessment data across all users</p>
           </div>
         </div>
 
         <AdminStatsGrid stats={stats} />
 
-        <div className="flex items-center gap-2 border-b border-white/[0.06] pb-0">
+        <div className="flex items-center gap-2 border-b border-[#E2E8F0] pb-0">
           <TabButton active={activeTab === "full"} onClick={() => { setActiveTab("full"); setSearchQuery(""); }} testId="tab-full-assessments">
             Full Assessments ({assessments.length})
           </TabButton>

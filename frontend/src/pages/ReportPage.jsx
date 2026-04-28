@@ -675,22 +675,22 @@ const ReportFooter = ({ data }) => (
   </footer>
 );
 
-/* ============ Top toolbar (sits above the report doc, in dark app shell) ============ */
+/* ============ Top toolbar (sits above the report doc, in the light app shell) ============ */
 const ReportToolbar = ({ id, onDownload, downloading, companyName }) => (
   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
     <div className="flex items-center gap-3">
       <Link
         to="/assessments"
         data-testid="report-back-btn"
-        className="p-2 rounded-xl glass-surface text-white/50 hover:text-white transition-all"
+        className="p-2 rounded-xl bg-white border border-[#E2E8F0] text-[#4A5568] hover:text-[#0C1B2A] hover:border-[#E8D49A] transition-all"
       >
         <ArrowLeft size={18} />
       </Link>
       <div>
-        <h1 className="text-lg sm:text-xl font-semibold text-white font-['Outfit'] tracking-tight">
+        <h1 className="text-lg sm:text-xl font-semibold text-[#0C1B2A] font-['Outfit'] tracking-tight">
           PPDT Assessment Report
         </h1>
-        <p className="text-white/40 text-xs">
+        <p className="text-[#8896A5] text-xs">
           {companyName} · Premium consultant report
         </p>
       </div>
@@ -773,11 +773,11 @@ const ReportPage = () => {
     return (
       <Layout>
         <div className="flex flex-col items-center justify-center py-16 max-w-xl mx-auto text-center">
-          <AlertTriangle size={64} className="text-[#C9A84C] mb-4 opacity-50" />
-          <h2 className="text-xl font-semibold text-white mb-2 font-['Outfit']">Report Not Ready</h2>
-          <p className="text-white/50 mb-2">This assessment hasn't been fully scored yet.</p>
+          <AlertTriangle size={64} className="text-[#C9A84C] mb-4 opacity-70" />
+          <h2 className="text-xl font-semibold text-[#0C1B2A] mb-2 font-['Outfit']">Report Not Ready</h2>
+          <p className="text-[#4A5568] mb-2">This assessment hasn't been fully scored yet.</p>
           {hasHistory && (
-            <p className="text-white/40 text-sm mb-6">
+            <p className="text-[#8896A5] text-sm mb-6">
               If the chat already showed "Assessment Complete", the model may have been cut off mid-emission. You can try to regenerate the report from the existing conversation.
             </p>
           )}

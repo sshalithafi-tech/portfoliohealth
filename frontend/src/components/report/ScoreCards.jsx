@@ -41,17 +41,17 @@ export const OverallScoreCard = ({ scores, levelNames, overallLevel, contextualS
             <span className={`text-5xl sm:text-6xl font-bold font-['JetBrains_Mono'] ${getScoreColorClass(equal)}`}>
               {equal?.toFixed(2) || "–"}
             </span>
-            <span className="text-xl text-white/30">/ 5.00</span>
+            <span className="text-xl text-[#8896A5]">/ 5.00</span>
           </div>
-          <p className="text-base sm:text-lg font-semibold text-white mt-1 font-['Outfit']">{equalLevelName}</p>
-          <p className="text-[11px] text-white/40 mt-1 italic">Academically validated baseline (25% each pillar)</p>
+          <p className="text-base sm:text-lg font-semibold text-[#0C1B2A] mt-1 font-['Outfit']">{equalLevelName}</p>
+          <p className="text-[11px] text-[#8896A5] mt-1 italic">Academically validated baseline (25% each pillar)</p>
         </div>
 
         {/* Contextual — secondary */}
-        <div data-testid="contextual-score" className="md:border-l md:border-white/[0.08] md:pl-6 lg:pl-8">
+        <div data-testid="contextual-score" className="md:border-l md:border-[#E2E8F0] md:pl-6 lg:pl-8">
           <div className="flex items-center gap-2 mb-2">
-            <p className="text-xs uppercase tracking-[0.2em] text-white/50">Contextual Score</p>
-            <span className="text-[10px] px-2 py-0.5 rounded bg-white/[0.05] text-white/60 border border-white/[0.08] uppercase tracking-wider">Secondary</span>
+            <p className="text-xs uppercase tracking-[0.2em] text-[#4A5568]">Contextual Score</p>
+            <span className="text-[10px] px-2 py-0.5 rounded bg-[#F8F9FA] text-[#4A5568] border border-[#E2E8F0] uppercase tracking-wider">Secondary</span>
           </div>
           {hasContextual ? (
             <>
@@ -59,13 +59,13 @@ export const OverallScoreCard = ({ scores, levelNames, overallLevel, contextualS
                 <span className={`text-5xl sm:text-6xl font-bold font-['JetBrains_Mono'] ${getScoreColorClass(contextualScore)}`}>
                   {contextualScore.toFixed(2)}
                 </span>
-                <span className="text-xl text-white/30">/ 5.00</span>
+                <span className="text-xl text-[#8896A5]">/ 5.00</span>
               </div>
-              <p className="text-base sm:text-lg font-semibold text-white mt-1 font-['Outfit']">{contextualLevelName}</p>
-              <p className="text-[11px] text-white/40 mt-1 italic">Adjusted for business model + stated priority</p>
+              <p className="text-base sm:text-lg font-semibold text-[#0C1B2A] mt-1 font-['Outfit']">{contextualLevelName}</p>
+              <p className="text-[11px] text-[#8896A5] mt-1 italic">Adjusted for business model + stated priority</p>
             </>
           ) : (
-            <p className="text-white/40 text-sm italic pt-2">Not yet calculated for this assessment.</p>
+            <p className="text-[#8896A5] text-sm italic pt-2">Not yet calculated for this assessment.</p>
           )}
         </div>
       </div>
@@ -86,15 +86,15 @@ export const DimensionScoreCards = ({ scores, levelNames }) => (
               <Icon size={16} style={{ color }} />
             </div>
             <div className="min-w-0">
-              <h3 className="text-sm font-semibold text-white capitalize font-['Outfit'] truncate">{dim}</h3>
-              <p className="text-[10px] text-white/40 truncate">{levelNames[dim] || ""}</p>
+              <h3 className="text-sm font-semibold text-[#0C1B2A] capitalize font-['Outfit'] truncate">{dim}</h3>
+              <p className="text-[10px] text-[#8896A5] truncate">{levelNames[dim] || ""}</p>
             </div>
           </div>
           <div className="flex items-baseline gap-1 mb-2">
             <span className={`text-2xl font-bold font-['JetBrains_Mono'] ${getScoreColorClass(score)}`}>{score}</span>
-            <span className="text-white/30 text-xs">/ 5</span>
+            <span className="text-[#8896A5] text-xs">/ 5</span>
           </div>
-          <div className="w-full h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+          <div className="w-full h-1.5 bg-[#F8F9FA] rounded-full overflow-hidden">
             <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(score / 5) * 100}%`, backgroundColor: color }} />
           </div>
         </div>

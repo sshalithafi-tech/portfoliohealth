@@ -31,8 +31,8 @@ const StatCard = ({ icon: Icon, label, value, color = "#C9A84C" }) => (
         <Icon size={20} style={{ color }} />
       </div>
       <div>
-        <p className="text-white/45 text-xs">{label}</p>
-        <p className="text-xl sm:text-2xl font-semibold text-white font-['JetBrains_Mono']">{value}</p>
+        <p className="text-[#8896A5] text-xs">{label}</p>
+        <p className="text-xl sm:text-2xl font-semibold text-[#0C1B2A] font-['JetBrains_Mono']">{value}</p>
       </div>
     </div>
   </div>
@@ -40,9 +40,9 @@ const StatCard = ({ icon: Icon, label, value, color = "#C9A84C" }) => (
 
 const DimensionBar = ({ icon: Icon, label, score, color }) => (
   <div className="flex items-center gap-3 py-2.5">
-    <Icon size={16} className="text-white/40 shrink-0" />
-    <span className="text-sm text-white/60 w-20">{label}</span>
-    <div className="flex-1 h-2 bg-white/[0.06] rounded-full overflow-hidden">
+    <Icon size={16} className="text-[#8896A5] shrink-0" />
+    <span className="text-sm text-[#4A5568] w-20">{label}</span>
+    <div className="flex-1 h-2 bg-[#F8F9FA] rounded-full overflow-hidden">
       <div className="h-full rounded-full transition-all duration-700" style={{ width: `${(score / 5) * 100}%`, backgroundColor: color }} />
     </div>
     <span className={`font-['JetBrains_Mono'] font-semibold text-sm w-8 text-right ${getScoreColorClass(score)}`}>
@@ -68,10 +68,10 @@ const DashboardPage = () => {
         {/* Header */}
         <div className="flex flex-col gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-semibold text-white font-['Outfit'] tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-semibold text-[#0C1B2A] font-['Outfit'] tracking-tight">
               Welcome back, {user?.name?.split(" ")[0]}
             </h1>
-            <p className="text-white/45 mt-1 text-sm">Overview of your PPDT assessments</p>
+            <p className="text-[#8896A5] mt-1 text-sm">Overview of your PPDT assessments</p>
           </div>
           <Link to="/assessments" data-testid="start-assessment-btn" className="inline-flex items-center justify-center gap-2 px-6 py-3 btn-liquid rounded-xl w-full sm:w-auto sm:self-start">
             <Play size={18} /> New Assessment
@@ -90,14 +90,14 @@ const DashboardPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Average PPDT Scores */}
           <div className="lg:col-span-1 p-5 glass-surface-highlight rounded-xl">
-            <h2 className="text-base font-semibold text-white mb-4 font-['Outfit']">Average PPDT Scores</h2>
+            <h2 className="text-base font-semibold text-[#0C1B2A] mb-4 font-['Outfit']">Average PPDT Scores</h2>
             {stats?.completed_assessments > 0 ? (
               <div className="space-y-1">
                 {DIMENSION_CONFIG.map(({ icon, label, key }) => (
                   <DimensionBar key={key} icon={icon} label={label} score={stats?.average_scores?.[key] || 0} color={getScoreColor(stats?.average_scores?.[key] || 0)} />
                 ))}
-                <div className="pt-3 mt-3 border-t border-white/[0.06] flex items-center justify-between">
-                  <span className="text-sm text-white/60">Overall Average</span>
+                <div className="pt-3 mt-3 border-t border-[#E2E8F0] flex items-center justify-between">
+                  <span className="text-sm text-[#4A5568]">Overall Average</span>
                   <span className={`font-['JetBrains_Mono'] font-bold text-lg ${getScoreColorClass(
                     ((stats?.average_scores?.people || 0) + (stats?.average_scores?.process || 0) + (stats?.average_scores?.data || 0) + (stats?.average_scores?.technology || 0)) / 4
                   )}`}>
@@ -106,14 +106,14 @@ const DashboardPage = () => {
                 </div>
               </div>
             ) : (
-              <div className="py-12 text-center text-white/25 text-sm">Complete assessments to see scores</div>
+              <div className="py-12 text-center text-[#8896A5] text-sm">Complete assessments to see scores</div>
             )}
           </div>
 
           {/* Recent Assessments */}
           <div className="lg:col-span-2 p-5 glass-surface-highlight rounded-xl">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-semibold text-white font-['Outfit']">Recent Assessments</h2>
+              <h2 className="text-base font-semibold text-[#0C1B2A] font-['Outfit']">Recent Assessments</h2>
               <Link to="/assessments" className="text-[#C9A84C] hover:text-[#C9A84C]/80 text-sm transition-colors">View all</Link>
             </div>
             {recentAssessments.length > 0 ? (
@@ -123,16 +123,16 @@ const DashboardPage = () => {
                     key={a.id}
                     onClick={() => handleRowClick(a)}
                     data-testid={`assessment-row-${a.id}`}
-                    className="group flex items-center gap-4 p-3.5 rounded-xl bg-white/[0.02] hover:bg-white/[0.04] border border-white/[0.04] hover:border-[#C9A84C]/20 cursor-pointer transition-all duration-200"
+                    className="group flex items-center gap-4 p-3.5 rounded-xl bg-[#F8F9FA] hover:bg-[#F8F9FA] border border-[#E2E8F0] hover:border-[#C9A84C]/20 cursor-pointer transition-all duration-200"
                   >
                     <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#60A5FA]/20 to-[#60A5FA]/5 border border-[#60A5FA]/15 flex items-center justify-center shrink-0">
                       <Building2 size={16} className="text-[#60A5FA]" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-white font-medium text-sm truncate leading-tight">{a.company_name}</p>
-                      <p className="text-xs text-white/40 mt-0.5 truncate">{a.respondent_name}</p>
+                      <p className="text-[#0C1B2A] font-medium text-sm truncate leading-tight">{a.company_name}</p>
+                      <p className="text-xs text-[#8896A5] mt-0.5 truncate">{a.respondent_name}</p>
                     </div>
-                    <div className="hidden sm:flex items-center gap-1.5 text-xs text-white/35 shrink-0">
+                    <div className="hidden sm:flex items-center gap-1.5 text-xs text-[#8896A5] shrink-0">
                       <Calendar size={12} />
                       <span>{new Date(a.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span>
                     </div>
@@ -145,10 +145,10 @@ const DashboardPage = () => {
                           {a.scores.overall.toFixed(1)}
                         </span>
                       ) : (
-                        <span className="text-white/25 text-sm">–</span>
+                        <span className="text-[#8896A5] text-sm">–</span>
                       )}
                     </div>
-                    <ChevronRight size={16} className="text-white/25 group-hover:text-[#C9A84C] group-hover:translate-x-0.5 transition-all shrink-0" />
+                    <ChevronRight size={16} className="text-[#8896A5] group-hover:text-[#C9A84C] group-hover:translate-x-0.5 transition-all shrink-0" />
                   </div>
                 ))}
               </div>
@@ -162,18 +162,18 @@ const DashboardPage = () => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Link to="/quick-assessment" data-testid="quick-assessment-btn" className="p-5 glass-card rounded-xl group hover:border-[#C9A84C]/15">
             <Zap size={28} className="text-[#C9A84C] mb-3" />
-            <h3 className="text-base font-semibold text-white mb-1 group-hover:text-[#C9A84C] transition-colors font-['Outfit']">Quick Check</h3>
-            <p className="text-white/40 text-sm">10-minute rapid screening</p>
+            <h3 className="text-base font-semibold text-[#0C1B2A] mb-1 group-hover:text-[#C9A84C] transition-colors font-['Outfit']">Quick Check</h3>
+            <p className="text-[#8896A5] text-sm">10-minute rapid screening</p>
           </Link>
           <Link to="/companies" data-testid="manage-companies-btn" className="p-5 glass-card rounded-xl group hover:border-[#A78BFA]/15">
             <Building2 size={28} className="text-[#A78BFA] mb-3" />
-            <h3 className="text-base font-semibold text-white mb-1 group-hover:text-[#A78BFA] transition-colors font-['Outfit']">Companies</h3>
-            <p className="text-white/40 text-sm">Manage client companies</p>
+            <h3 className="text-base font-semibold text-[#0C1B2A] mb-1 group-hover:text-[#A78BFA] transition-colors font-['Outfit']">Companies</h3>
+            <p className="text-[#8896A5] text-sm">Manage client companies</p>
           </Link>
           <Link to="/assessments" data-testid="view-assessments-btn" className="p-5 glass-card rounded-xl group hover:border-[#34D399]/15">
             <ClipboardCheck size={28} className="text-[#34D399] mb-3" />
-            <h3 className="text-base font-semibold text-white mb-1 group-hover:text-[#34D399] transition-colors font-['Outfit']">Assessments</h3>
-            <p className="text-white/40 text-sm">Review past assessments</p>
+            <h3 className="text-base font-semibold text-[#0C1B2A] mb-1 group-hover:text-[#34D399] transition-colors font-['Outfit']">Assessments</h3>
+            <p className="text-[#8896A5] text-sm">Review past assessments</p>
           </Link>
         </div>
       </div>
