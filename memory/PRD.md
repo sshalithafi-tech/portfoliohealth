@@ -274,6 +274,35 @@ User feedback: ivory looked ugly; pure white too plain → went **cool off-white
 ### Verified via screenshot
 - Login → Dashboard → Benchmarks (with full cohort + pillar dots + comparison rows) → Report all render with the cool off-white + cyan aesthetic. Logo click → dashboard works. Report still gold-accented (intentional consultant feel).
 
+## Report Redesign + Home Page Cyan + Pillar Accordion (2026-04-28 — current session)
+User feedback in two waves:
+1. "PPDT Maturity Assessment looks ugly, long pillar cards aren't premium — make them clickable to read more"
+2. "Home page logo broken + still missing cyan accent across home & some pages"
+
+### Changes
+- **R1 Cover refined** in `ReportPage.jsx` + `premium.css`:
+  - Single-line eyebrow ("PPDT Maturity Assessment", was wrapping to 2 lines as "...· Full Report")
+  - Tighter proportions: padding `56/64/36`, score panel reduced from 72→64px and centered, level pill upper-cased
+  - Gold radial bloom moved to top-right corner
+  - 4-pillar dark strip: smaller tiles (badge 26px, score 26px), bottleneck mark inline next to label
+- **R4 Pillar Cards → Accordion** in `ReportPage.jsx` + `premium.css`:
+  - Click anywhere on the card header to expand/collapse (chevron rotates 180°)
+  - Default: bottleneck pillar open; all others collapsed
+  - Collapsed state shows a quote-styled summary line + "CLICK TO READ FULL EVIDENCE →" hint
+  - Expanded state shows full evidence bullets + maturity-gap callout (L→L+1) + footer citation
+  - Smooth grid-template-rows animation (no JS height calc)
+  - Bottleneck card has subtle red gradient background
+  - Score badge now compact pill (18px number + "/ 5.0" suffix)
+  - Always-visible compact bar with maturity scale (1–5)
+- **Home page logo fixed**: replaced the CSS-only `<div class="ph-logo">PH</div>` with the proper `<LogoMark>` SVG component (now consistent with sidebar). New `.ph-logo-mark` selector adds 36px sizing + box shadow + scale-on-hover.
+- **Home page cyan accent applied**: redefined `--gold`, `--gold-soft`, `--gold-mid`, `--gold-deep`, `--blue*`, `--info` tokens **inside `.ph-site` scope** to map directly to the cyan palette (`#0891B2`, `#ECFEFF`, `#67E8F9`, `#0E7490`). One change flips the entire landing page navigation, hero, badges, card top borders, CTAs, "product portfolio" highlight, and footer accents to cyan in lock-step with the rest of the app.
+- **Inline `rgba(201,168,76,*)`** references in `landing.css` (18 occurrences in shadows/glows) batch-migrated to `rgba(8,145,178,*)`.
+
+### Verified via screenshot
+- Home page: clean cyan logo, cyan "Grounded in peer-reviewed IEM research" pill, cyan "product portfolio" highlight, cyan card top borders, cyan numbered "What you receive" cards.
+- Report: refined R1 cover renders with tight typography. R4 People card opens cleanly with full evidence; Process card collapses to a single quote line with cyan-tinted "click to expand" hint.
+- Logo click navigates to dashboard from any internal page.
+
 ## Open / Backlog
 - P1: Real-LLM E2E verification of auto-emission after Turn 5 (pending Emergent LLM Key budget top-up).
 - P1: Hydration could expand to also rewrite R2 callout/bullets, R4 evidence, R7 roadmap actions, R8 decision impact when those exist on `assessment.report` — currently they remain static narrative from the template. Today's hydration covers R1, R5, R6 (the data-driven sections); narrative sections still show the Northpine demo content unless future LLM output populates new keys.

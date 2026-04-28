@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../App";
+import LogoMark from "../components/LogoMark";
 import {
   ClipboardCheck,
   Target,
@@ -828,8 +829,15 @@ const LandingPage = () => {
   return (
     <div className="ph-site">
       <nav className="ph-nav" aria-label="Primary">
-        <div className="ph-brand" onClick={showHome} role="button" style={{ cursor: "pointer" }}>
-          <div className="ph-logo" data-testid="brand-logo">PH</div>
+        <div
+          className="ph-brand"
+          onClick={showHome}
+          role="button"
+          tabIndex={0}
+          style={{ cursor: "pointer" }}
+          data-testid="brand-logo"
+        >
+          <LogoMark className="ph-logo-mark" radius={18} />
           <span className="ph-name">PortfolioHealth Advisor</span>
         </div>
         <div className="ph-nav-tabs">

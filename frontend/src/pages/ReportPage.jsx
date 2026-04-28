@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
-  AlertTriangle, RefreshCw, Clock, ArrowLeft, ArrowRight,
+  AlertTriangle, RefreshCw, Clock, ArrowLeft, ArrowRight, ChevronDown,
   MessageSquare, Download, Info, GraduationCap, Printer,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -35,34 +35,34 @@ const R1Cover = ({ data }) => {
     <section className="r1-cover" data-testid="report-r1-cover">
       <div className="r1-inner">
         <div className="r1-top">
-          <div>
-            <span className="r1-tag">PPDT Maturity Assessment · Full Report</span>
+          <div className="r1-left">
+            <span className="r1-tag">PPDT Maturity Assessment</span>
             <h1 className="r1-company">{company}</h1>
             <div className="r1-meta">
               {metaParts.map((m, i) => (
-                <span key={i} style={{ display: "inline-flex", alignItems: "center" }}>
+                <span key={i} className="r1-meta-item">
                   <span>{m}</span>
                   {i < metaParts.length - 1 && <span className="sep">·</span>}
                 </span>
               ))}
             </div>
             <div className="r1-complete">
-              <span className="ico"><Clock size={14} /></span>
+              <span className="ico"><Clock size={13} /></span>
               Full Assessment · 45–60 minutes
             </div>
           </div>
           <div className="r1-right">
+            <span className="r1-score-label">Overall Maturity</span>
             <div className="r1-score-block">
               <span className="r1-score" data-testid="report-overall-score">{overallScore.toFixed(1)}</span>
-              <span className="r1-score-suffix">/5.0</span>
+              <span className="r1-score-suffix">/ 5.0</span>
             </div>
-            <span className="r1-score-label">Overall Maturity</span>
             <span className="r1-level-name" data-testid="report-overall-level">
               {LEVEL_TITLES[overallLvl] || "—"}
             </span>
             {bottleneck_capped && (
               <div className="r1-bcap" data-testid="report-bottleneck-capped">
-                <AlertTriangle size={12} />
+                <AlertTriangle size={11} />
                 Bottleneck-capped
               </div>
             )}
@@ -81,12 +81,10 @@ const R1Cover = ({ data }) => {
               <div className="r1-tile-top">
                 <div className="r1-tile-badge">{p.letter}</div>
                 <span className="r1-tile-label">{p.name}</span>
+                {isBn && <span className="r1-tile-bn-mark" title="Bottleneck">⚠</span>}
               </div>
               <span className="r1-tile-score">{p.score.toFixed(1)}</span>
-              <span className="r1-tile-level">
-                {isBn && "⚠ "}
-                {LEVEL_TITLES[p.level]}
-              </span>
+              <span className="r1-tile-level">{LEVEL_TITLES[p.level]}</span>
             </div>
           );
         })}
@@ -194,32 +192,49 @@ const R3OrgProfile = ({ data }) => (
   </section>
 );
 
-/* ============ R4 Pillar Cards ============ */
-const PillarCard = ({ pillar, data, idx }) => {
+/* ============ R4 Pillar Cards (clickable accordion) ============ */
+const PillarCard = ({ pillar, data, idx, isOpen, onToggle }) => {
   const { key, letter, name, score, level } = pillar;
   const lvl = lvlClass(level);
   const isBn = data.bottleneck === key;
   const bullets = data.evidence[key] || [];
   const nextLvl = Math.min(5, level + 1);
+  const summary = bullets[0] || "";
 
   return (
-    <div className={`glass-card r4-card ${lvl}`} data-testid={`report-pillar-${key}`}>
-      <div className="r4-head">
+    <div
+      className={`glass-card r4-card ${lvl}${isOpen ? " is-open" : ""}${isBn ? " is-bottleneck" : ""}`}
+      data-testid={`report-pillar-${key}`}
+    >
+      <button
+        type="button"
+        className="r4-head"
+        onClick={onToggle}
+        aria-expanded={isOpen}
+        data-testid={`report-pillar-toggle-${key}`}
+      >
         <div className="r4-head-left">
           <div className="r4-letter">{letter}</div>
-          <div>
+          <div className="r4-head-info">
             <div className="r4-title-row">
               <span className="r4-title">{name}</span>
               {isBn && <span className="r4-bn-tag">⚠ Bottleneck</span>}
             </div>
-            <div className="r4-sub">Dimension {idx + 1} of 4</div>
+            <div className="r4-sub">Dimension {idx + 1} of 4 · {LEVEL_TITLES[level]}</div>
           </div>
         </div>
         <div className="r4-head-right">
-          <div className={`r4-score-badge ${lvl}`}>{score.toFixed(1)} / 5.0</div>
-          <div className={`r4-level-name ${lvl}`}>{LEVEL_TITLES[level]}</div>
+          <div className={`r4-score-badge ${lvl}`}>
+            <span className="r4-score-num">{score.toFixed(1)}</span>
+            <span className="r4-score-suffix">/ 5.0</span>
+          </div>
+          <span className={`r4-chevron ${isOpen ? "open" : ""}`} aria-hidden="true">
+            <ChevronDown size={18} />
+          </span>
         </div>
-      </div>
+      </button>
+
+      {/* Always-visible compact bar (gives at-a-glance status even when collapsed) */}
       <div className="r4-bar">
         <div className="r4-track">
           <div
@@ -231,41 +246,72 @@ const PillarCard = ({ pillar, data, idx }) => {
           <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
         </div>
       </div>
-      <span className="section-label">Evidence from Assessment</span>
-      <div className="r4-evidence">
-        {bullets.map((b, i) => (
-          <div key={i} className="r4-bullet">
-            <span className="dash">—</span>
-            <p>{b}</p>
-          </div>
-        ))}
-      </div>
-      {level < 5 && (
-        <div className="r4-gap">
-          <div className="r4-gap-head">
-            <span className={`level-pill ${lvl}`}>{LEVEL_TITLES[level]}</span>
-            <span className="r4-gap-arrow"><ArrowRight size={14} /></span>
-            <span className={`level-pill l${nextLvl}`}>{LEVEL_TITLES[nextLvl]}</span>
-          </div>
-          <p className="r4-gap-desc">
-            To reach {LEVEL_TITLES[nextLvl]}, the {name.toLowerCase()} pillar needs the practices described in the roadmap (Phases 1–2) to be operational and consistently applied.
-          </p>
+
+      {/* Compact one-liner shown only when collapsed */}
+      {!isOpen && summary && (
+        <div className="r4-summary">
+          <span className="r4-summary-quote">“</span>
+          <p>{summary}</p>
+          <span className="r4-expand-hint">Click to read full evidence →</span>
         </div>
       )}
-      <div className="section-footer">
-        PPDT pillar definitions: Hannila (2019) · Hannila, Härkönen &amp; Haapasalo (2022), Journal of Decision Systems, 31(3), 258–279.
+
+      {/* Expanded body */}
+      <div className={`r4-body ${isOpen ? "open" : ""}`}>
+        <div className="r4-body-inner">
+          <span className="section-label">Evidence from Assessment</span>
+          <div className="r4-evidence">
+            {bullets.map((b, i) => (
+              <div key={i} className="r4-bullet">
+                <span className="dash">—</span>
+                <p>{b}</p>
+              </div>
+            ))}
+          </div>
+          {level < 5 && (
+            <div className="r4-gap">
+              <div className="r4-gap-head">
+                <span className={`level-pill ${lvl}`}>{LEVEL_TITLES[level]}</span>
+                <span className="r4-gap-arrow"><ArrowRight size={14} /></span>
+                <span className={`level-pill l${nextLvl}`}>{LEVEL_TITLES[nextLvl]}</span>
+              </div>
+              <p className="r4-gap-desc">
+                To reach {LEVEL_TITLES[nextLvl]}, the {name.toLowerCase()} pillar needs the practices described in the roadmap (Phases 1–2) to be operational and consistently applied.
+              </p>
+            </div>
+          )}
+          <div className="section-footer">
+            PPDT pillar definitions: Hannila (2019) · Hannila, Härkönen &amp; Haapasalo (2022), Journal of Decision Systems, 31(3), 258–279.
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
-const R4PillarSection = ({ data }) => (
-  <section className="r4" data-testid="report-r4">
-    {data.kpi.pillars.map((p, i) => (
-      <PillarCard key={p.key} pillar={p} data={data} idx={i} />
-    ))}
-  </section>
-);
+const R4PillarSection = ({ data }) => {
+  // Default: bottleneck pillar open, all others closed
+  const [openKey, setOpenKey] = useState(data.bottleneck || data.kpi.pillars[0]?.key);
+  return (
+    <section className="r4" data-testid="report-r4">
+      <span className="section-label" style={{ marginBottom: 4 }}>The Four Pillars</span>
+      <p className="r4-intro">
+        Click a pillar to read the evidence behind its score.
+        {data.bottleneck && " The bottleneck pillar is expanded by default."}
+      </p>
+      {data.kpi.pillars.map((p, i) => (
+        <PillarCard
+          key={p.key}
+          pillar={p}
+          data={data}
+          idx={i}
+          isOpen={openKey === p.key}
+          onToggle={() => setOpenKey(openKey === p.key ? null : p.key)}
+        />
+      ))}
+    </section>
+  );
+};
 
 /* ============ R5 Overall Score Calculation ============ */
 const R5Calculation = ({ data }) => {

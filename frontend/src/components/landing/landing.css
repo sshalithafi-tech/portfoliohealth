@@ -22,29 +22,31 @@
   --ls-normal: -0.3px;
   --ls-label: 1.2px;
 
-  /* PortfolioHealth Advisor — premium navy + gold tokens */
+  /* PortfolioHealth Advisor — premium navy + cyan tokens
+     (gold variable names retained for backwards-compat with this file's class
+     selectors; they now resolve to cyan to match the rest of the app)        */
   --navy: #0C1B2A;
   --navy-mid: #162333;
   --navy-deep: #091622;
-  --gold: #C9A84C;
-  --gold-soft: #F7F0DC;
-  --gold-mid: #E8D49A;
-  --gold-deep: #A88A2E;
+  --gold: #0891B2;            /* primary brand accent — cyan */
+  --gold-soft: #ECFEFF;       /* accent-soft */
+  --gold-mid: #67E8F9;        /* accent-mid */
+  --gold-deep: #0E7490;       /* accent-deep */
   /* Backwards-compat aliases used elsewhere in this file */
-  --blue: #C9A84C;
-  --blue-light: #E8D49A;
-  --blue-soft: #F7F0DC;
+  --blue: #0891B2;
+  --blue-light: #67E8F9;
+  --blue-soft: #ECFEFF;
   --slate: #4A5568;
   --text-mid: #4A5568;
   --muted: #8896A5;
   --text-muted: #8896A5;
   --bg: #FFFFFF;
-  --bg-alt: #F8F9FA;
+  --bg-alt: #F7F8FA;
   --white: #FFFFFF;
-  --off-white: #F8F9FA;
+  --off-white: #F7F8FA;
 
-  --border: #E2E8F0;
-  --border-dark: rgba(201, 168, 76, 0.18);
+  --border: #E5E7EB;
+  --border-dark: rgba(8, 145, 178, 0.18);
   --overlay: rgba(12, 27, 42, 0.95);
   --grid-line: rgba(12, 27, 42, 0.06);
 
@@ -54,7 +56,7 @@
   --danger: #C0392B;
   --warning: #D4850A;
   --success: #27AE60;
-  --info: #C9A84C;
+  --info: #0891B2;
 
   --l1: #C0392B; --l1-bg: #FBE9E7; --l1-bd: #F2C2BB;
   --l2: #D4850A; --l2-bg: #FCF1DC; --l2-bd: #F2D399;
@@ -110,13 +112,13 @@
 }
 .ph-site .ph-dark-card {
   background: var(--navy-mid);
-  border: 1px solid rgba(201, 168, 76, 0.14);
+  border: 1px solid rgba(8, 145, 178, 0.14);
   border-radius: var(--radius);
   transition: transform .22s ease, background .22s ease;
 }
 .ph-site .ph-dark-card:hover {
   background: #1a2a3d;
-  border-color: rgba(201, 168, 76, 0.28);
+  border-color: rgba(8, 145, 178, 0.28);
   transform: translateY(-4px);
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.30);
 }
@@ -183,7 +185,7 @@
   line-height: var(--lh-loose);
 }
 .ph-site .ph-section-footer.dark {
-  border-top-color: rgba(201, 168, 76, 0.10);
+  border-top-color: rgba(8, 145, 178, 0.10);
   color: #4A5568;
 }
 
@@ -239,7 +241,7 @@
   inset: 0;
   z-index: 0;
   background:
-    radial-gradient(ellipse 80% 50% at 65% 20%, rgba(201, 168, 76, 0.10) 0%, transparent 70%),
+    radial-gradient(ellipse 80% 50% at 65% 20%, rgba(8, 145, 178, 0.10) 0%, transparent 70%),
     radial-gradient(ellipse 50% 60% at 5% 80%, rgba(12, 27, 42, 0.04) 0%, transparent 60%),
     var(--bg);
 }
@@ -258,6 +260,15 @@
   justify-content: space-between;
 }
 .ph-site .ph-brand { display: flex; align-items: center; gap: 12px; }
+.ph-site .ph-brand .ph-logo-mark {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 9px;
+  box-shadow: 0 4px 12px rgba(12, 27, 42, 0.18);
+  transition: transform 0.22s ease;
+}
+.ph-site .ph-brand:hover .ph-logo-mark { transform: scale(1.05); }
 .ph-site .ph-brand .ph-logo {
   width: 36px; height: 36px; border-radius: 9px;
   background: var(--navy);
@@ -265,7 +276,7 @@
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 3px 10px rgba(12, 27, 42, 0.20);
   letter-spacing: -.4px;
-  border: 1px solid rgba(201, 168, 76, 0.35);
+  border: 1px solid rgba(8, 145, 178, 0.35);
 }
 .ph-site .ph-brand .ph-name { font-weight: 700; font-size: 15px; color: var(--navy); letter-spacing: -0.2px; }
 .ph-site .ph-nav-tabs { display: flex; gap: 4px; }
@@ -379,8 +390,8 @@
 .ph-site .ph-pillar-card { padding: 30px 24px; }
 .ph-site .ph-pillar-card .ph-badge {
   width: 44px; height: 44px; border-radius: 12px;
-  background: rgba(201, 168, 76, 0.12);
-  border: 1px solid rgba(201, 168, 76, 0.28);
+  background: rgba(8, 145, 178, 0.12);
+  border: 1px solid rgba(8, 145, 178, 0.28);
   display: flex; align-items: center; justify-content: center;
   font: 800 20px 'Inter'; color: var(--gold); margin-bottom: 14px;
 }
@@ -403,8 +414,8 @@
 .ph-site .ph-pillar-card li.active .ph-li-dot { background: var(--gold); }
 
 .ph-site .ph-bottleneck-callout {
-  background: rgba(201, 168, 76, 0.08);
-  border: 1px solid rgba(201, 168, 76, 0.22);
+  background: rgba(8, 145, 178, 0.08);
+  border: 1px solid rgba(8, 145, 178, 0.22);
   border-left: 4px solid var(--gold);
   border-radius: var(--radius-sm);
   padding: 24px 28px;
@@ -476,7 +487,7 @@
 .ph-site .ph-phase-card { padding: 30px 24px; }
 .ph-site .ph-phase-card .ph-num {
   font: 800 40px 'Inter'; letter-spacing: -2px;
-  color: rgba(201, 168, 76, 0.18); line-height: 1; margin-bottom: 12px;
+  color: rgba(8, 145, 178, 0.18); line-height: 1; margin-bottom: 12px;
 }
 .ph-site .ph-phase-card h3 { font: 700 15px 'Inter'; color: var(--navy); margin-bottom: 8px; }
 .ph-site .ph-phase-card p {
@@ -506,7 +517,7 @@
   content: "";
   position: absolute; top: 0; right: 10%;
   width: 360px; height: 360px;
-  background: radial-gradient(circle, rgba(201, 168, 76, 0.12) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(8, 145, 178, 0.12) 0%, transparent 70%);
   pointer-events: none;
 }
 .ph-site .ph-cta-section .ph-inner { max-width: 680px; margin: 0 auto; position: relative; }
@@ -525,7 +536,7 @@
 }
 .ph-site .ph-cta-section .ph-btn-primary:hover {
   background: var(--gold-mid); border-color: var(--gold-mid); color: var(--navy);
-  box-shadow: 0 8px 24px rgba(201, 168, 76, 0.30);
+  box-shadow: 0 8px 24px rgba(8, 145, 178, 0.30);
 }
 .ph-site .ph-cta-section .ph-meta {
   display: flex; justify-content: center; gap: 28px;
@@ -579,7 +590,7 @@
 .ph-site .ph-research-card p { font: 400 13.5px 'Inter'; color: #A8B5C5; line-height: 1.65; }
 .ph-site .ph-research-card .ph-cite {
   font: 500 11.5px 'Inter'; color: var(--gold);
-  border-top: 1px solid rgba(201, 168, 76, 0.12);
+  border-top: 1px solid rgba(8, 145, 178, 0.12);
   padding-top: 12px; margin-top: 14px;
 }
 .ph-site .ph-connecting-callout {
@@ -666,7 +677,7 @@
 /* Thesis featured card */
 .ph-site .ph-thesis-card {
   background: var(--navy-mid);
-  border: 1px solid rgba(201, 168, 76, 0.18);
+  border: 1px solid rgba(8, 145, 178, 0.18);
   border-radius: var(--radius-lg);
   padding: 44px 48px;
 }
@@ -676,8 +687,8 @@
 }
 .ph-site .ph-thesis-head h3 { font: 700 21px 'Inter'; color: #fff; }
 .ph-site .ph-thesis-pill {
-  background: rgba(201, 168, 76, 0.12);
-  border: 1px solid rgba(201, 168, 76, 0.32);
+  background: rgba(8, 145, 178, 0.12);
+  border: 1px solid rgba(8, 145, 178, 0.32);
   border-radius: var(--radius-pill);
   padding: 8px 18px;
   font: 600 12px 'Inter'; color: var(--gold);
@@ -711,7 +722,7 @@
 .ph-site .ph-footer {
   background: var(--navy);
   padding: 52px 5% 32px;
-  border-top: 1px solid rgba(201, 168, 76, 0.10);
+  border-top: 1px solid rgba(8, 145, 178, 0.10);
 }
 .ph-site .ph-footer .ph-inner-f {
   max-width: 1180px; margin: 0 auto;
@@ -740,7 +751,7 @@
 .ph-site .ph-footer a.ph-flink:hover { color: var(--gold); }
 .ph-site .ph-footer .ph-fbottom {
   max-width: 1180px; margin: 32px auto 0;
-  border-top: 1px solid rgba(201, 168, 76, 0.10);
+  border-top: 1px solid rgba(8, 145, 178, 0.10);
   padding-top: 28px;
   display: flex; justify-content: space-between; gap: 40px; flex-wrap: wrap;
 }
