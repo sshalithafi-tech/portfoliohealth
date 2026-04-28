@@ -889,12 +889,58 @@
   .ph-report .report-footer { padding: 16px 20px; }
 }
 
-/* ============ Print ============ */
+/* ============ Print — A4 Board-Room Ready ============ */
 @media print {
-  .ph-report { box-shadow: none; border-radius: 0; }
+  @page { size: A4; margin: 12mm 14mm; }
+
+  .ph-report {
+    box-shadow: none;
+    border-radius: 0;
+    background: #FFFFFF;
+  }
+
+  /* Hide app chrome */
+  .print-hide { display: none !important; }
+
+  /* Each major section on its own page; cards never break across */
+  .ph-report .r1-cover { page-break-after: always; break-after: page; }
+  .ph-report .r2,
+  .ph-report .r3,
+  .ph-report .r4,
+  .ph-report .r5,
+  .ph-report .r6,
+  .ph-report .r7,
+  .ph-report .r8,
+  .ph-report .r9,
+  .ph-report .r10 {
+    page-break-before: always;
+    break-before: page;
+  }
+
   .ph-report .glass-card,
   .ph-report .chart-container,
   .ph-report .rb-phase,
-  .ph-report .r10-cite { box-shadow: none; page-break-inside: avoid; }
-  .ph-report .r1-cover { page-break-after: always; }
+  .ph-report .r10-cite,
+  .ph-report .r4-card,
+  .ph-report .r6-card,
+  .ph-report .r8-card,
+  .ph-report .r2-card {
+    box-shadow: none !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Crisper colors in print */
+  .ph-report .r1-cover {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    color-adjust: exact;
+  }
+  .ph-report .r5-card,
+  .ph-report .navy-panel,
+  .ph-report .r1-strip {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    color-adjust: exact;
+  }
 }

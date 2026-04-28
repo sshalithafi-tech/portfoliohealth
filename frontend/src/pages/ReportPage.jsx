@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
   AlertTriangle, RefreshCw, Clock, ArrowLeft, ArrowRight,
-  MessageSquare, Download, Info, BookOpen, GraduationCap,
+  MessageSquare, Download, Info, GraduationCap, Printer,
 } from "lucide-react";
 import { toast } from "sonner";
 import Layout from "../components/Layout";
@@ -676,39 +676,47 @@ const ReportFooter = ({ data }) => (
 );
 
 /* ============ Top toolbar (sits above the report doc, in the light app shell) ============ */
-const ReportToolbar = ({ id, onDownload, downloading, companyName }) => (
-  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+const ReportToolbar = ({ id, onDownload, onPrint, downloading, companyName }) => (
+  <div className="print-hide flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
     <div className="flex items-center gap-3">
       <Link
         to="/assessments"
         data-testid="report-back-btn"
-        className="p-2 rounded-xl bg-white border border-[#E2E8F0] text-[#4A5568] hover:text-[#0C1B2A] hover:border-[#E8D49A] transition-all"
+        className="p-2.5 rounded-xl bg-white border border-[#E8E2D2] text-[#3D4A5C] hover:text-[#0C1B2A] hover:border-[#E8D49A] transition-all shadow-sm"
       >
         <ArrowLeft size={18} />
       </Link>
       <div>
-        <h1 className="text-lg sm:text-xl font-semibold text-[#0C1B2A] font-['Outfit'] tracking-tight">
-          PPDT Assessment Report
+        <span className="eyebrow">Consultant Report</span>
+        <h1 className="text-xl sm:text-2xl font-semibold text-[#0C1B2A] font-display tracking-tight mt-1">
+          PPDT Maturity Assessment
         </h1>
-        <p className="text-[#8896A5] text-xs">
-          {companyName} · Premium consultant report
-        </p>
+        <p className="text-[#7B8694] text-xs mt-0.5">{companyName}</p>
       </div>
     </div>
     <div className="flex items-center gap-2 flex-wrap">
       <Link
         to={`/assessments/${id}`}
         data-testid="view-chat-btn"
-        className="flex items-center gap-2 px-3 py-2 btn-glass rounded-xl text-sm"
+        className="flex items-center gap-2 px-3.5 py-2.5 btn-glass rounded-xl text-sm"
       >
         <MessageSquare size={16} />
         <span className="hidden sm:inline">View Chat</span>
       </Link>
       <button
+        onClick={onPrint}
+        data-testid="print-report-btn"
+        title="Print / Save as PDF (A4, board-room ready)"
+        className="flex items-center gap-2 px-3.5 py-2.5 btn-glass rounded-xl text-sm"
+      >
+        <Printer size={16} />
+        <span className="hidden sm:inline">Print</span>
+      </button>
+      <button
         onClick={onDownload}
         disabled={downloading}
         data-testid="export-pdf-btn"
-        className="flex items-center gap-2 px-4 py-2 btn-liquid rounded-xl text-sm disabled:opacity-50"
+        className="flex items-center gap-2 px-4 py-2.5 btn-liquid rounded-xl text-sm disabled:opacity-50"
       >
         <Download size={16} />
         {downloading ? "..." : "Export PDF"}
@@ -766,6 +774,12 @@ const ReportPage = () => {
     }
   }, [id, assessment?.company_name]);
 
+  const printReport = useCallback(() => {
+    // Slight delay so toast can appear before browser print dialog grabs focus
+    toast.success("Opening print preview · choose 'Save as PDF' for board-room ready output", { duration: 2200 });
+    setTimeout(() => window.print(), 250);
+  }, []);
+
   if (loading) return <Layout><LoadingSpinner className="h-64" /></Layout>;
 
   if (!assessment?.report) {
@@ -813,6 +827,7 @@ const ReportPage = () => {
       <ReportToolbar
         id={id}
         onDownload={downloadPDF}
+        onPrint={printReport}
         downloading={downloading}
         companyName={data.company}
       />
