@@ -38,11 +38,11 @@ const Layout = ({ children }) => {
 
   return (
     <div className="min-h-screen" style={{ background: "transparent" }}>
-      {/* Mobile Header */}
-      <div className="print-hide lg:hidden h-14 bg-white border-b border-[#E5E7EB] flex items-center justify-between px-3 relative z-50">
+      {/* Mobile Header — navy */}
+      <div className="print-hide lg:hidden h-14 bg-[#0C1B2A] border-b border-white/10 flex items-center justify-between px-3 relative z-50">
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="p-2 text-[#4B5563] hover:text-[#0C1B2A] transition-colors"
+          className="p-2 text-white/60 hover:text-white transition-colors"
           data-testid="mobile-sidebar-toggle"
         >
           {sidebarOpen ? <X size={22} /> : <Menu size={22} />}
@@ -50,7 +50,7 @@ const Layout = ({ children }) => {
         <div className="flex items-center gap-2">
           <Link to="/dashboard" data-testid="mobile-logo-home" className="flex items-center gap-2">
             <LogoMark className="w-8 h-8 rounded-lg" radius={14} />
-            <span className="text-[#0C1B2A] font-semibold font-['Outfit'] text-sm">
+            <span className="text-white font-semibold font-['Outfit'] text-sm">
               PortfolioHealth
             </span>
           </Link>
@@ -61,28 +61,32 @@ const Layout = ({ children }) => {
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
-          className="print-hide fixed inset-0 bg-[#0C1B2A]/30 backdrop-blur-sm z-40 lg:hidden"
+          className="print-hide fixed inset-0 bg-[#0C1B2A]/60 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* Sidebar — paper-cream surface with gold left accent rail */}
+      {/* Sidebar — DARK NAVY with cyan accents */}
       <aside
         className={`
           print-hide fixed top-0 left-0 h-full w-64 z-50
           lg:top-5 lg:left-5 lg:h-[calc(100vh-2.5rem)] lg:rounded-2xl
-          bg-white border border-[#E5E7EB]
-          shadow-[0_12px_32px_rgba(20,16,8,0.08),0_2px_6px_rgba(20,16,8,0.05)]
+          bg-[#0C1B2A] border border-white/[0.08]
+          shadow-[0_16px_40px_rgba(0,0,0,0.32),0_2px_6px_rgba(0,0,0,0.18)]
           transform transition-transform duration-300 ease-in-out
           lg:translate-x-0 overflow-hidden
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
+        style={{
+          backgroundImage:
+            "radial-gradient(ellipse 70% 30% at 0% 0%, rgba(8, 145, 178, 0.12) 0%, transparent 60%)",
+        }}
       >
         {/* Cyan left rail */}
-        <div className="absolute top-0 left-0 w-[3px] h-full bg-gradient-to-b from-[#0891B2] via-[#67E8F9] to-transparent" />
+        <div className="absolute top-0 left-0 w-[3px] h-full bg-gradient-to-b from-[#0891B2] via-[#67E8F9] to-transparent opacity-90" />
 
         {/* Brand block */}
-        <div className="h-20 flex items-center px-6 border-b border-[#EEF1F5]">
+        <div className="h-20 flex items-center px-6 border-b border-white/[0.08]">
           <Link
             to="/dashboard"
             data-testid="sidebar-logo-home"
@@ -91,20 +95,24 @@ const Layout = ({ children }) => {
           >
             <LogoMark className="w-11 h-11 rounded-xl transition-transform group-hover:scale-[1.05]" radius={20} />
             <div>
-              <h1 className="text-[#0C1B2A] font-semibold font-['Outfit'] tracking-tight group-hover:text-[#0891B2] transition-colors">
+              <h1 className="text-white font-semibold font-['Outfit'] tracking-tight group-hover:text-[#67E8F9] transition-colors">
                 PortfolioHealth
               </h1>
-              <p className="text-[10px] uppercase tracking-[0.18em] text-[#0E7490] font-semibold mt-0.5">
+              <p className="text-[10px] uppercase tracking-[0.18em] text-[#67E8F9] font-semibold mt-0.5">
                 PPM Assessment
               </p>
             </div>
           </Link>
         </div>
 
-        {/* Eyebrow + nav */}
-        <div className="px-6 pt-5 pb-2">
-          <span className="eyebrow">Workspace</span>
+        {/* Eyebrow */}
+        <div className="px-6 pt-5 pb-2 flex items-center gap-2">
+          <span className="w-7 h-px bg-[#67E8F9]/55" />
+          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#67E8F9]/85 font-['Outfit']">
+            Workspace
+          </span>
         </div>
+
         <nav className="px-4 space-y-1">
           {navItems.map(({ path, label, icon: Icon }) => {
             const active = isActive(path);
@@ -118,15 +126,15 @@ const Layout = ({ children }) => {
                   group relative flex items-center gap-3 px-4 py-3 rounded-xl
                   font-medium transition-all duration-200
                   ${active
-                    ? 'bg-gradient-to-r from-[#ECFEFF] to-white text-[#0E7490] shadow-[inset_0_0_0_1px_rgba(8, 145, 178,0.30)]'
-                    : 'text-[#4B5563] hover:text-[#0C1B2A] hover:bg-[#F7F8FA]'
+                    ? 'bg-[rgba(8,145,178,0.16)] text-[#67E8F9] shadow-[inset_0_0_0_1px_rgba(103,232,249,0.30)]'
+                    : 'text-white/65 hover:text-white hover:bg-white/[0.05]'
                   }
                 `}
               >
                 {active && (
-                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-[#0891B2]" />
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-[#67E8F9] shadow-[0_0_10px_rgba(103,232,249,0.55)]" />
                 )}
-                <Icon size={18} className={active ? "text-[#0E7490]" : "text-[#6B7280] group-hover:text-[#0C1B2A]"} />
+                <Icon size={18} className={active ? "text-[#67E8F9]" : "text-white/55 group-hover:text-white"} />
                 <span className="font-['Outfit']">{label}</span>
               </Link>
             );
@@ -134,23 +142,23 @@ const Layout = ({ children }) => {
         </nav>
 
         {/* User block bottom */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-[#EEF1F5] bg-[#F7F8FA]/60">
-          <div className="flex items-center gap-3 px-3 py-2 mb-2 rounded-xl bg-white border border-[#EEF1F5]">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#ECFEFF] to-[#67E8F9] border border-[#0891B2]/40 flex items-center justify-center">
-              <span className="text-[#0E7490] font-bold font-['Outfit'] text-sm">
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/[0.08] bg-[#091622]/60">
+          <div className="flex items-center gap-3 px-3 py-2 mb-2 rounded-xl bg-white/[0.04] border border-white/[0.08]">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#0891B2] to-[#0E7490] border border-[#67E8F9]/35 flex items-center justify-center shadow-[0_0_12px_rgba(8,145,178,0.30)]">
+              <span className="text-white font-bold font-['Outfit'] text-sm">
                 {user?.name?.charAt(0)?.toUpperCase() || "U"}
               </span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-[#0C1B2A] font-medium truncate font-['Outfit']">{user?.name}</p>
-              <p className="text-[11px] text-[#6B7280] truncate">{user?.email}</p>
+              <p className="text-sm text-white font-medium truncate font-['Outfit']">{user?.name}</p>
+              <p className="text-[11px] text-white/50 truncate">{user?.email}</p>
             </div>
             <NotificationBell />
           </div>
           <button
             onClick={handleLogout}
             data-testid="logout-btn"
-            className="flex items-center gap-3 w-full px-4 py-2.5 text-[#4B5563] hover:text-[#B23C2A] hover:bg-white rounded-xl transition-all font-['Outfit'] font-medium text-sm"
+            className="flex items-center gap-3 w-full px-4 py-2.5 text-white/65 hover:text-[#FCA5A5] hover:bg-white/[0.04] rounded-xl transition-all font-['Outfit'] font-medium text-sm"
           >
             <LogOut size={16} />
             <span>Sign Out</span>
