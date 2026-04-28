@@ -110,7 +110,7 @@
   background: linear-gradient(180deg, var(--gold), var(--gold-mid) 50%, transparent);
 }
 .ph-report .r1-inner {
-  padding: 48px 56px 32px;
+  padding: 48px 56px 44px;
   position: relative;
   z-index: 1;
 }

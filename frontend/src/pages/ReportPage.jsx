@@ -25,7 +25,7 @@ const lvlClass = (n) => `l${n}`;
 
 /* ============ R1 Cover ============ */
 const R1Cover = ({ data }) => {
-  const { company, industry, business_model, role, date, kpi, bottleneck_capped, bottleneck } = data;
+  const { company, industry, business_model, role, date, kpi, bottleneck_capped } = data;
   const overallLvl = kpi.overall.level_index;
   const overallScore = kpi.overall.score;
 
@@ -68,26 +68,6 @@ const R1Cover = ({ data }) => {
             )}
           </div>
         </div>
-      </div>
-      <div className="r1-strip">
-        {kpi.pillars.map((p) => {
-          const isBn = bottleneck && p.key === bottleneck;
-          return (
-            <div
-              key={p.key}
-              className={`r1-tile${isBn ? " bottleneck" : ""}`}
-              data-testid={`report-tile-${p.key}`}
-            >
-              <div className="r1-tile-top">
-                <div className="r1-tile-badge">{p.letter}</div>
-                <span className="r1-tile-label">{p.name}</span>
-                {isBn && <span className="r1-tile-bn-mark" title="Bottleneck">⚠</span>}
-              </div>
-              <span className="r1-tile-score">{p.score.toFixed(1)}</span>
-              <span className="r1-tile-level">{LEVEL_TITLES[p.level]}</span>
-            </div>
-          );
-        })}
       </div>
     </section>
   );
