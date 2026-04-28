@@ -1,0 +1,1850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>PPDT Report — Northpine Industries — April 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+ --text-xs:11px;--text-sm:13px;--text-base:14px;--text-md:16px;--text-lg:20px;
+ --text-xl:clamp(26px,3.5vw,40px);--text-hero:clamp(34px,5vw,60px);
+ --lh-tight:1.15;--lh-normal:1.65;--lh-loose:1.75;
+ --ls-tight:-1.5px;--ls-normal:-0.3px;--ls-label:1.2px;
+ --navy:#0C1B33;--blue:#2563EB;--blue-light:#3B82F6;--blue-soft:#EFF6FF;
+ --slate:#4A5568;--muted:#8896A5;--bg:#F4F7FB;--bg-alt:#F0F4F8;--white:#FFFFFF;
+ --border:rgba(37,99,235,0.13);--border-dark:rgba(255,255,255,0.10);
+ --overlay:rgba(12,27,51,0.92);--grid-line:rgba(37,99,235,0.06);
+ --glass-bg:rgba(255,255,255,0.72);--glass-dark:rgba(255,255,255,0.06);
+ --danger:#E53E3E;--warning:#D69E2E;--success:#38A169;--info:#2563EB;
+ --l1:#E53E3E;--l1-bg:#FFF5F5;--l1-bd:#FED7D7;
+ --l2:#D69E2E;--l2-bg:#FFFFF0;--l2-bd:#FAF089;
+ --l3:#ECC94B;--l3-bg:#FEFCE8;--l3-bd:#FEF08A;--l3-text:#744210;
+ --l4:#38A169;--l4-bg:#F0FFF4;--l4-bd:#C6F6D5;
+ --l5:#2B6CB0;--l5-bg:#EBF8FF;--l5-bd:#BEE3F8;
+ --space-xs:8px;--space-sm:16px;--space-md:24px;--space-lg:32px;
+ --space-xl:48px;--space-2xl:64px;--space-3xl:90px;
+ --radius-sm:10px;--radius:18px;--radius-lg:28px;--radius-pill:50px;
+ --shadow-sm:0 4px 16px rgba(12,27,51,0.07);
+ --shadow-md:0 10px 36px rgba(12,27,51,0.10);
+ --shadow-lg:0 24px 64px rgba(12,27,51,0.13);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',system-ui,sans-serif;font-size:var(--text-base);
+ line-height:var(--lh-normal);color:var(--slate);background:var(--bg);
+ -webkit-font-smoothing:antialiased}
+img,svg{max-width:100%;display:block}
+button{font-family:inherit}
+h1,h2,h3,h4,h5{color:var(--navy);line-height:var(--lh-tight);font-weight:800}
+
+/* ============ Components (Block 1) ============ */
+.glass-card{background:var(--glass-bg);backdrop-filter:blur(18px);
+ -webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,0.55);
+ border-radius:var(--radius);box-shadow:var(--shadow-sm);
+ transition:transform .22s ease,box-shadow .22s ease}
+.dark-card{background:var(--glass-dark);backdrop-filter:blur(12px);
+ -webkit-backdrop-filter:blur(12px);border:1px solid var(--border-dark);
+ border-radius:var(--radius)}
+.btn-secondary{background:var(--glass-bg);backdrop-filter:blur(18px);
+ color:var(--navy);border:1.5px solid var(--border);padding:7px 16px;
+ border-radius:var(--radius-pill);font-weight:600;font-size:12px;
+ cursor:pointer;box-shadow:var(--shadow-sm);transition:all .2s ease;
+ display:inline-flex;align-items:center;gap:6px}
+.btn-secondary:hover{border-color:var(--blue-light);color:var(--blue)}
+.section-label{font-size:var(--text-xs);font-weight:700;
+ letter-spacing:var(--ls-label);text-transform:uppercase;
+ color:var(--blue);margin-bottom:12px;display:block}
+.section-footer{margin-top:var(--space-xl);padding-top:20px;
+ border-top:1px solid rgba(37,99,235,0.10);font-size:var(--text-xs);
+ color:var(--muted);line-height:var(--lh-loose);display:flex;
+ gap:10px;align-items:flex-start;font-style:italic}
+.level-pill{padding:3px 10px;border-radius:var(--radius-pill);
+ font-size:var(--text-xs);font-weight:600;letter-spacing:.5px;
+ text-transform:uppercase;border:1px solid;display:inline-block}
+.level-pill.l1{background:var(--l1-bg);color:var(--l1);border-color:var(--l1-bd)}
+.level-pill.l2{background:var(--l2-bg);color:var(--l2);border-color:var(--l2-bd)}
+.level-pill.l3{background:var(--l3-bg);color:var(--l3-text);border-color:var(--l3-bd)}
+.level-pill.l4{background:var(--l4-bg);color:var(--l4);border-color:var(--l4-bd)}
+.level-pill.l5{background:var(--l5-bg);color:var(--l5);border-color:var(--l5-bd)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}
+ to{opacity:1;transform:translateY(0)}}
+.animate-in{animation:fadeUp .5s ease-out both;
+ animation-delay:calc(0.08s * var(--i,1))}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}
+ 50%{opacity:.6;transform:scale(1.3)}}
+@keyframes hereBob{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}
+
+/* ============ Report wrapper ============ */
+.report-wrapper{max-width:900px;margin:0 auto;background:var(--bg);min-height:100vh}
+.report-wrapper > section{page-break-inside:avoid}
+
+/* ============ R1 Cover ============ */
+.r1-cover{background:var(--navy);padding:52px 56px;page-break-after:always;
+ display:flex;flex-direction:column;gap:36px}
+.r1-top{display:flex;justify-content:space-between;align-items:flex-start;
+ gap:var(--space-xl);flex-wrap:wrap}
+.r1-left{flex:1;min-width:260px}
+.r1-tag{font:700 11px 'Inter';color:#60A5FA;text-transform:uppercase;
+ letter-spacing:1.2px;display:block;margin-bottom:20px}
+.r1-company{font:800 34px/1.15 'Inter';color:#fff;letter-spacing:-0.5px;
+ margin-bottom:10px}
+.r1-meta{display:flex;flex-wrap:wrap;font:400 14px 'Inter';
+ color:#64748B;margin-bottom:16px;align-items:center}
+.r1-meta .sep{color:#334155;margin:0 10px}
+.r1-complete{display:flex;align-items:center;gap:8px;
+ font:500 12px 'Inter';color:#334155}
+.r1-complete svg{color:#60A5FA}
+.r1-right{text-align:right;align-self:center;display:flex;flex-direction:column;
+ align-items:flex-end;min-width:200px}
+.r1-score{font:800 72px/1 'Inter';letter-spacing:-3px}
+.r1-score-suffix{font:400 28px 'Inter';color:#475569;vertical-align:middle;
+ margin-left:4px}
+.r1-score-label{font:400 13px 'Inter';color:#64748B;margin-top:8px;display:block}
+.r1-level-name{font:700 20px 'Inter';color:#fff;margin-top:6px;display:block}
+.r1-bcap{display:flex;align-items:center;justify-content:flex-end;gap:6px;
+ margin-top:6px;font:600 13px 'Inter';color:var(--danger)}
+.r1-strip{border-top:1px solid rgba(255,255,255,0.08);padding-top:20px;
+ margin-top:36px;display:flex;justify-content:space-between;
+ align-items:flex-start;gap:16px;flex-wrap:wrap}
+.r1-tile{display:flex;flex-direction:column;gap:4px;flex:1;min-width:130px}
+.r1-tile-top{display:flex;align-items:center;gap:8px}
+.r1-tile-badge{width:28px;height:28px;border-radius:8px;
+ background:rgba(255,255,255,0.08);font:800 13px 'Inter';color:#93C5FD;
+ display:flex;align-items:center;justify-content:center}
+.r1-tile-label{font:600 11px 'Inter';text-transform:uppercase;color:#64748B}
+.r1-tile-score{font:700 18px 'Inter'}
+.r1-tile-level{font:500 10px 'Inter';text-transform:uppercase;color:#475569}
+.r1-tile.bottleneck .r1-tile-badge{background:rgba(229,62,62,0.18)}
+.r1-tile.bottleneck .r1-tile-score{color:var(--danger)}
+.r1-tile.bottleneck .r1-tile-label::before{content:"⚠ ";color:var(--danger)}
+
+/* ============ R2 Executive Summary ============ */
+.r2{padding:var(--space-xl) var(--space-xl);background:var(--bg)}
+.r2-card{padding:36px 40px}
+.r2-open{font:400 var(--text-md) 'Inter';color:var(--slate);
+ line-height:var(--lh-loose);margin-bottom:var(--space-md)}
+.r2-callout{background:var(--blue-soft);border-left:4px solid var(--blue);
+ border-radius:var(--radius-sm);padding:16px 20px;margin:20px 0;
+ font:500 var(--text-base) 'Inter';color:var(--navy);line-height:1.65}
+.r2-bullets{display:flex;flex-direction:column;gap:10px;margin-top:var(--space-md)}
+.r2-bullet{display:flex;gap:10px;align-items:flex-start}
+.r2-bullet .dot{width:8px;height:8px;border-radius:50%;background:var(--blue);
+ margin-top:6px;flex-shrink:0}
+.r2-bullet p{font:400 var(--text-base) 'Inter';color:var(--slate);line-height:1.6}
+
+/* ============ R3 Organisation Profile ============ */
+.r3{padding:var(--space-lg) var(--space-xl);display:grid;
+ grid-template-columns:1fr 1.2fr;gap:var(--space-md)}
+.r3-card{padding:24px 26px}
+.r3-row{display:flex;justify-content:space-between;align-items:center;
+ padding:10px 0;border-bottom:1px solid rgba(37,99,235,0.07)}
+.r3-row:last-of-type{border-bottom:none}
+.r3-row .lbl{font:600 12px 'Inter';color:var(--muted);text-transform:uppercase}
+.r3-row .val{font:500 14px 'Inter';color:var(--navy);text-align:right;max-width:65%}
+.r3-badge{background:var(--blue-soft);border:1px solid var(--border);
+ border-radius:var(--radius-pill);padding:5px 14px;
+ font:700 12px 'Inter';color:var(--blue);display:inline-block;margin-bottom:14px}
+.r3-body{font:400 var(--text-base) 'Inter';color:var(--slate);line-height:1.7}
+.r3-note{margin-top:12px;font:italic 400 var(--text-xs) 'Inter';color:var(--muted)}
+
+/* ============ R4 Pillar Cards ============ */
+.r4{padding:var(--space-lg) var(--space-xl);display:flex;flex-direction:column;
+ gap:var(--space-md)}
+.r4-card{padding:32px 36px;border-left:5px solid;page-break-inside:avoid}
+.r4-card.l1{border-left-color:var(--l1)}
+.r4-card.l2{border-left-color:var(--l2)}
+.r4-card.l3{border-left-color:var(--l3)}
+.r4-card.l4{border-left-color:var(--l4)}
+.r4-card.l5{border-left-color:var(--l5)}
+.r4-head{display:flex;justify-content:space-between;align-items:center;
+ margin-bottom:20px;gap:14px;flex-wrap:wrap}
+.r4-head-left{display:flex;align-items:center;gap:14px}
+.r4-letter{width:44px;height:44px;border-radius:12px;background:var(--blue-soft);
+ border:1px solid var(--border);font:800 20px 'Inter';color:var(--blue);
+ display:flex;align-items:center;justify-content:center}
+.r4-title-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.r4-title{font:700 20px 'Inter';color:var(--navy)}
+.r4-sub{font:400 12px 'Inter';color:var(--muted);margin-top:3px}
+.r4-bn-tag{background:rgba(229,62,62,0.08);border:1px solid var(--l1-bd);
+ border-radius:var(--radius-pill);padding:2px 10px;
+ font:600 11px 'Inter';color:var(--danger)}
+.r4-head-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.r4-score-badge{color:#fff;border-radius:var(--radius-sm);padding:10px 20px;
+ font:700 22px/1 'Inter'}
+.r4-score-badge.l1{background:var(--l1)}
+.r4-score-badge.l2{background:var(--l2)}
+.r4-score-badge.l3{background:var(--l3);color:var(--l3-text)}
+.r4-score-badge.l4{background:var(--l4)}
+.r4-score-badge.l5{background:var(--l5)}
+.r4-level-name{font:700 13px 'Inter';text-transform:uppercase}
+.r4-level-name.l1{color:var(--l1)}
+.r4-level-name.l2{color:var(--l2)}
+.r4-level-name.l3{color:var(--l3-text)}
+.r4-level-name.l4{color:var(--l4)}
+.r4-level-name.l5{color:var(--l5)}
+
+.r4-bar{margin-top:4px;margin-bottom:20px}
+.r4-track{width:100%;height:10px;border-radius:5px;background:#E2E8F0;
+ position:relative}
+.r4-fill{height:10px;border-radius:5px;position:absolute;left:0;top:0;width:0;
+ transition:width .7s ease-out .1s}
+.r4-fill.l1{background:linear-gradient(90deg,var(--l1),rgba(229,62,62,0.75))}
+.r4-fill.l2{background:linear-gradient(90deg,var(--l2),rgba(214,158,46,0.75))}
+.r4-fill.l3{background:linear-gradient(90deg,var(--l3),rgba(236,201,75,0.75))}
+.r4-fill.l4{background:linear-gradient(90deg,var(--l4),rgba(56,161,105,0.75))}
+.r4-fill.l5{background:linear-gradient(90deg,var(--l5),rgba(43,108,176,0.75))}
+.r4-scale{display:flex;justify-content:space-between;margin-top:6px;
+ font:500 10px 'Inter';color:var(--muted)}
+
+.r4-evidence{display:flex;flex-direction:column;gap:8px}
+.r4-bullet{display:flex;gap:10px;align-items:flex-start}
+.r4-bullet .dash{font:700 14px 'Inter';color:var(--blue);flex-shrink:0;margin-top:1px}
+.r4-bullet p{font:400 var(--text-base) 'Inter';color:var(--slate);line-height:1.6}
+.r4-means{font:400 var(--text-base) 'Inter';color:var(--slate);line-height:1.7}
+.r4-gap{background:var(--bg-alt);border-radius:var(--radius-sm);
+ padding:16px 18px;margin-top:16px}
+.r4-gap-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.r4-gap-arrow{color:var(--muted)}
+.r4-gap-desc{font:400 12px 'Inter';color:var(--slate);line-height:1.6}
+
+/* ============ R5 Overall Score Summary ============ */
+.r5{padding:var(--space-lg) var(--space-xl)}
+.r5-card{background:var(--navy);border-radius:var(--radius);padding:32px 40px;
+ display:flex;justify-content:space-between;align-items:center;gap:32px;
+ flex-wrap:wrap}
+.r5-left{flex:1;min-width:240px}
+.r5-label{font:700 11px 'Inter';text-transform:uppercase;letter-spacing:1.2px;
+ color:#64748B;margin-bottom:10px;display:block}
+.r5-score{font:800 54px/1 'Inter';letter-spacing:-2px;display:inline}
+.r5-score-suffix{font:400 22px 'Inter';color:#475569;margin-left:4px}
+.r5-level{font:700 22px 'Inter';color:#fff;margin-top:8px;display:block}
+.r5-cap{display:flex;align-items:center;gap:6px;margin-top:8px;
+ font:400 13px 'Inter';color:#94A3B8}
+.r5-cap svg{color:var(--danger);flex-shrink:0}
+.r5-right{flex:1;min-width:280px}
+.r5-calc{background:rgba(255,255,255,0.05);border-radius:var(--radius-sm);
+ padding:20px 24px}
+.r5-calc-row{display:flex;justify-content:space-between;margin-bottom:8px;
+ font:400 13px ui-monospace,Menlo,monospace;color:#94A3B8}
+.r5-calc-row.tot{font:700 14px ui-monospace,Menlo,monospace;color:#fff;margin-bottom:0}
+.r5-calc-div{height:1px;background:rgba(255,255,255,0.08);margin:10px 0}
+.r5-research{font:italic 400 11px 'Inter';color:#475569;margin-top:10px}
+
+/* ============ R6 Bottleneck ============ */
+.r6{padding:var(--space-lg) var(--space-xl)}
+.r6-card{background:#FFF5F5;border:1px solid #FED7D7;
+ border-left:5px solid var(--danger);border-radius:var(--radius);
+ padding:30px 36px;page-break-inside:avoid}
+.r6-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.r6-head svg{color:var(--danger);flex-shrink:0}
+.r6-title{font:700 18px 'Inter';color:#C53030}
+.r6-body{font:400 var(--text-base) 'Inter';color:var(--slate);
+ line-height:var(--lh-normal);margin-bottom:var(--space-md)}
+.r6-risk{background:rgba(229,62,62,0.06);border-radius:var(--radius-sm);
+ padding:16px 18px;margin-top:4px}
+.r6-risk-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.r6-risk-label{font:700 11px 'Inter';text-transform:uppercase;color:var(--danger)}
+.r6-risk-body{font:400 var(--text-base) 'Inter';color:#742A2A;line-height:1.6}
+
+/* ============ R7 Roadmap ============ */
+.r7{padding:var(--space-lg) var(--space-xl)}
+.r7-intro{font:400 var(--text-base) 'Inter';color:var(--slate);
+ margin-bottom:var(--space-md);line-height:1.65}
+.r7-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.r7-phase{border-radius:var(--radius);padding:22px 20px;page-break-inside:avoid}
+.r7-phase.p1,.r7-phase.p3{background:var(--l5-bg);border:1px solid var(--l5-bd)}
+.r7-phase.p2{background:var(--l4-bg);border:1px solid var(--l4-bd)}
+.r7-phase-tag{font:700 10.5px 'Inter';text-transform:uppercase;margin-bottom:4px;
+ display:block}
+.r7-phase.p1 .r7-phase-tag,.r7-phase.p3 .r7-phase-tag{color:var(--l5)}
+.r7-phase.p2 .r7-phase-tag{color:var(--l4)}
+.r7-phase-title{font:700 15px 'Inter';color:var(--navy);margin-bottom:12px}
+.r7-action{display:flex;gap:8px;margin-bottom:8px;align-items:flex-start}
+.r7-action .dash{font:700 14px 'Inter';flex-shrink:0}
+.r7-phase.p1 .r7-action .dash,.r7-phase.p3 .r7-action .dash{color:var(--l5)}
+.r7-phase.p2 .r7-action .dash{color:var(--l4)}
+.r7-action span{font:400 var(--text-sm) 'Inter';color:var(--slate);line-height:1.6}
+.r7-outcome{margin-top:14px;padding-top:14px;border-top:1px solid;
+ font:italic 600 12px 'Inter'}
+.r7-phase.p1 .r7-outcome,.r7-phase.p3 .r7-outcome{
+ border-top-color:var(--l5-bd);color:var(--l5)}
+.r7-phase.p2 .r7-outcome{border-top-color:var(--l4-bd);color:var(--l4)}
+.r7-gov{margin-top:16px;padding:16px 20px;display:flex;gap:12px;
+ align-items:flex-start}
+.r7-gov svg{color:var(--blue);flex-shrink:0}
+.r7-gov p{font:400 var(--text-sm) 'Inter';color:var(--slate);line-height:1.6}
+
+/* ============ R8 Decision Impact ============ */
+.r8{padding:var(--space-lg) var(--space-xl)}
+.r8-card{padding:32px 36px}
+.r8-sub{padding-bottom:20px;margin-bottom:20px;
+ border-bottom:1px solid rgba(37,99,235,0.08)}
+.r8-sub:last-of-type{border-bottom:none;padding-bottom:0;margin-bottom:0}
+.r8-sub-label{font:700 11px 'Inter';text-transform:uppercase;letter-spacing:1px;
+ color:var(--blue);margin-bottom:8px;display:block}
+.r8-sub-body{font:400 var(--text-base) 'Inter';color:var(--slate);
+ line-height:var(--lh-normal)}
+
+/* ============ R9 Dashboard ============ */
+.r9{padding:var(--space-lg) var(--space-xl)}
+.dashboard-grid{display:flex;flex-direction:column;gap:var(--space-md);
+ max-width:900px;margin:0 auto;padding:var(--space-lg) 0}
+.chart-container{padding:28px 28px 20px;background:var(--glass-bg);
+ backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+ border:1px solid rgba(255,255,255,0.55);border-radius:var(--radius);
+ box-shadow:var(--shadow-sm)}
+.chart-head{display:flex;justify-content:space-between;align-items:flex-start;
+ margin-bottom:20px;gap:12px;flex-wrap:wrap}
+.chart-title{font:700 15px 'Inter';color:var(--navy);letter-spacing:-0.3px}
+.chart-sub{font:400 12px 'Inter';color:var(--muted);margin-top:3px}
+.chart-foot{border-top:1px solid rgba(37,99,235,0.07);padding-top:10px;
+ margin-top:16px;font:italic 400 var(--text-xs) 'Inter';color:var(--muted)}
+
+/* Row 1 KPI */
+.dashboard-row-1{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.kpi-tile{padding:16px 18px;border-radius:var(--radius);
+ background:var(--glass-bg);backdrop-filter:blur(18px);
+ -webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,0.55);
+ box-shadow:var(--shadow-sm);border-top:4px solid;
+ transition:transform .22s ease,box-shadow .22s ease}
+.kpi-tile:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
+.kpi-tile.l1{border-top-color:var(--l1)}
+.kpi-tile.l2{border-top-color:var(--l2)}
+.kpi-tile.l3{border-top-color:var(--l3)}
+.kpi-tile.l4{border-top-color:var(--l4)}
+.kpi-tile.l5{border-top-color:var(--l5)}
+.kpi-tile.bottleneck{background:rgba(229,62,62,0.04);
+ border:1px dashed rgba(229,62,62,0.35);border-top:4px solid var(--danger)}
+.kpi-r1{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.kpi-letter{width:24px;height:24px;border-radius:8px;background:var(--blue-soft);
+ font:800 12px 'Inter';color:var(--blue);display:flex;align-items:center;
+ justify-content:center}
+.kpi-name{font:700 13px 'Inter';color:var(--navy)}
+.kpi-warn{font:700 13px 'Inter';color:var(--danger);margin-left:4px}
+.kpi-r2 .v{font:800 28px 'Inter'}
+.kpi-r2 .s{font:400 14px 'Inter';color:var(--muted);margin-left:2px}
+.kpi-r3{margin-top:6px}
+
+/* Row 2 Gauge + Track */
+.dashboard-row-2{display:flex;flex-direction:row;gap:var(--space-md);
+ align-items:stretch}
+.gauge-container{width:260px;flex-shrink:0;display:flex;flex-direction:column}
+.gauge-body{display:flex;justify-content:center;flex:1}
+.track-container{flex:1;min-width:0;display:flex;flex-direction:column}
+.track-body{position:relative;display:flex;align-items:center;height:130px;
+ width:100%;flex:1}
+.track-spine{position:absolute;top:50%;left:0;right:0;height:3px;z-index:0;
+ transform:translateY(-50%);
+ background:linear-gradient(90deg,var(--l1),var(--l2),var(--l3),var(--l4),var(--l5))}
+.level-segment{flex:1;display:flex;flex-direction:column;align-items:center;
+ justify-content:center;position:relative;z-index:1}
+.lvl-num{width:26px;height:26px;border-radius:50%;position:absolute;top:-20px;
+ font:800 13px 'Inter';display:flex;align-items:center;justify-content:center}
+.lvl-num.current{background:#fff;border:3px solid;box-shadow:var(--shadow-sm)}
+.lvl-num.past{color:#fff;opacity:.5}
+.lvl-num.future{background:#F0F4F8;border:2px solid #E2E8F0;color:var(--muted)}
+.lvl-box{width:85%;height:56px;border-radius:var(--radius-sm);
+ display:flex;flex-direction:column;align-items:center;justify-content:center;
+ transition:all .22s ease}
+.lvl-box.current{box-shadow:var(--shadow-md);transform:scale(1.06)}
+.lvl-box.past{opacity:.30}
+.lvl-box.future{background:#F0F4F8;opacity:.55}
+.lvl-name-inner{font:700 11px 'Inter';text-transform:uppercase}
+.lvl-box.current .lvl-name-inner{color:#fff}
+.lvl-box.past .lvl-name-inner{color:#fff;opacity:.7}
+.lvl-box.future .lvl-name-inner{color:var(--muted)}
+.you-here{position:absolute;top:-42px;left:50%;transform:translateX(-50%);
+ display:flex;flex-direction:column;align-items:center;gap:2px;
+ animation:hereBob 1.5s ease-in-out infinite}
+.you-here-lbl{font:600 9px 'Inter';color:var(--muted);text-transform:uppercase;
+ white-space:nowrap}
+.you-here-arrow{font:700 12px 'Inter';color:var(--navy)}
+.bn-pill{background:var(--l1-bg);border:1px solid var(--l1-bd);
+ border-radius:var(--radius-pill);padding:5px 14px;margin:12px auto 0;
+ display:inline-flex;align-items:center;gap:6px;
+ font:600 11px 'Inter';color:var(--danger)}
+.bn-pill svg{color:var(--danger)}
+
+/* Row 3 Bar + Radar */
+.dashboard-row-3{display:grid;grid-template-columns:1.4fr 1fr;
+ gap:var(--space-md);align-items:start}
+.bar-row{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.bar-row.bottleneck{padding:10px 12px;background:rgba(229,62,62,0.04);
+ border:1px dashed rgba(229,62,62,0.28);border-radius:var(--radius-sm)}
+.bar-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-letter{width:32px;height:32px;border-radius:8px;background:var(--blue-soft);
+ font:800 15px 'Inter';color:var(--blue);display:flex;align-items:center;
+ justify-content:center}
+.bar-name{font:700 14px 'Inter';color:var(--navy)}
+.bar-value{font:800 18px 'Inter';display:inline}
+.bar-value-suffix{font:400 13px 'Inter';color:var(--muted);margin-left:2px}
+.bar-track{width:100%;height:10px;border-radius:5px;background:#E2E8F0;
+ position:relative;overflow:visible}
+.bar-fill{height:10px;border-radius:5px;position:absolute;left:0;top:0;width:0;
+ transition:width .7s ease-out}
+.bar-avg{position:absolute;top:-4px;bottom:-4px;width:1.5px;
+ background:rgba(37,99,235,0.40);border-right:1.5px dashed rgba(37,99,235,0.40);
+ z-index:2}
+.bar-avg-lbl{position:absolute;top:-18px;left:50%;transform:translateX(-50%);
+ font:600 10px 'Inter';color:var(--blue);white-space:nowrap}
+.bar-scale{display:flex;justify-content:space-between;margin-top:4px;
+ font:500 10px 'Inter';color:var(--muted)}
+
+.radar-body{display:flex;flex-direction:column;align-items:center}
+.radar-legend{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;
+ margin-top:12px}
+.radar-leg-item{display:flex;align-items:center;gap:6px;
+ font:500 11px 'Inter';color:var(--slate)}
+.radar-leg-dot{width:8px;height:8px;border-radius:50%}
+
+/* Row 3b Capability matrix */
+.dashboard-row-3b{width:100%}
+.matrix-toggle{margin-bottom:8px}
+.matrix-grid{display:grid;gap:0;width:fit-content;max-width:100%;overflow-x:auto}
+.matrix-row{display:flex}
+.matrix-rh{width:110px;font:700 11px 'Inter';text-transform:uppercase;
+ text-align:right;padding:0 12px;display:flex;align-items:center;
+ justify-content:flex-end;height:52px;flex-shrink:0}
+.matrix-corner{width:110px;height:40px;flex-shrink:0}
+.matrix-ch{width:60px;height:40px;font:700 11px 'Inter';text-transform:uppercase;
+ color:var(--navy);text-align:center;padding:8px 4px;flex-shrink:0;
+ display:flex;align-items:center;justify-content:center}
+.matrix-cell{width:60px;height:52px;display:flex;align-items:center;
+ justify-content:center;position:relative;transition:transform .15s,box-shadow .15s;
+ flex-shrink:0;font-weight:700;font-size:14px;font-family:'Inter'}
+.matrix-cell:hover{transform:scale(1.06);box-shadow:var(--shadow-sm);z-index:3}
+.matrix-cell.met{color:#fff}
+.matrix-cell.partial{color:inherit}
+.matrix-cell.notmet{background:#F0F4F8;color:var(--muted)}
+.matrix-cell.current-cell{box-shadow:inset 0 0 0 2px #fff;transform:scale(1.04);z-index:2}
+.matrix-row.current-row{border-top:2px solid var(--navy)}
+.matrix-bn-col{outline:1.5px dashed rgba(229,62,62,0.45);outline-offset:-1px}
+
+/* Row divider */
+.row-divider{width:100%;height:1px;background:rgba(37,99,235,0.10);
+ margin:var(--space-sm) 0;position:relative}
+.row-divider::before{content:"IMPROVEMENT PATH";position:absolute;left:50%;top:50%;
+ transform:translate(-50%,-50%);background:var(--bg);padding:0 16px;
+ font:700 11px/1 'Inter';letter-spacing:1.2px;text-transform:uppercase;
+ color:var(--blue)}
+
+/* Row 4 Gantt */
+.dashboard-row-4{width:100%}
+.gantt-outer{position:relative;height:200px;overflow:hidden;display:flex;
+ border-radius:var(--radius)}
+.gantt-zone{height:100%;position:relative}
+.gantt-zone.p1{flex:1;background:var(--l5-bg);border-radius:var(--radius) 0 0 var(--radius)}
+.gantt-zone.p2{flex:2.5;background:var(--l4-bg)}
+.gantt-zone.p3{flex:2;background:var(--l5-bg);border-radius:0 var(--radius) var(--radius) 0}
+.gantt-zone-label{position:absolute;top:12px;left:14px;
+ font:700 10px 'Inter';text-transform:uppercase}
+.gantt-zone.p1 .gantt-zone-label,.gantt-zone.p3 .gantt-zone-label{color:var(--l5)}
+.gantt-zone.p2 .gantt-zone-label{color:var(--l4)}
+.gantt-spine{position:absolute;top:52%;left:16px;right:16px;height:4px;
+ border-radius:2px;z-index:2;
+ background:linear-gradient(90deg,var(--blue-light),var(--l5));
+ clip-path:inset(0 100% 0 0);transition:clip-path .8s ease-out}
+.gantt-divider{position:absolute;top:0;bottom:0;width:1px;
+ background:rgba(37,99,235,0.20);
+ border-right:1px dashed rgba(37,99,235,0.20)}
+.gantt-axis{position:absolute;bottom:8px;left:16px;right:16px;display:flex;
+ justify-content:space-between;font:500 10px 'Inter';color:var(--muted)}
+.gantt-dot{position:absolute;width:16px;height:16px;border-radius:50%;
+ border:2px solid #fff;box-shadow:var(--shadow-sm);z-index:3;
+ top:calc(52% - 8px);transform:translateX(-50%) scale(0);
+ transition:transform .2s ease-out}
+.gantt-dot.show{transform:translateX(-50%) scale(1)}
+.gantt-dot-lbl{position:absolute;font:500 11px 'Inter';color:var(--slate);
+ max-width:120px;text-align:center;line-height:1.3;
+ transform:translateX(-50%);z-index:3}
+.gantt-traj{position:absolute;top:0;left:0;right:0;bottom:0;z-index:4;
+ pointer-events:none}
+
+/* Row 5 Benchmark + Confidence */
+.dashboard-row-5{display:grid;grid-template-columns:1fr 1fr;
+ gap:var(--space-md);align-items:start}
+.bm-row{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.bm-row:last-child{margin-bottom:0}
+.bm-label{width:90px;font:700 13px 'Inter';color:var(--navy);flex-shrink:0}
+.bm-track-area{flex:1;position:relative;height:34px}
+.bm-track{position:absolute;top:11px;left:0;right:0;height:12px;
+ background:#E2E8F0;border-radius:6px}
+.bm-band{position:absolute;top:11px;height:12px;border-radius:6px;
+ background:rgba(37,99,235,0.14)}
+.bm-dot{position:absolute;top:50%;transform:translate(-50%,-50%);
+ width:20px;height:20px;border-radius:50%;border:3px solid #fff;
+ box-shadow:var(--shadow-sm);z-index:2;transition:transform .2s ease}
+.bm-dot:hover{transform:translate(-50%,-50%) scale(1.2)}
+.bm-range{position:absolute;left:0;right:0;bottom:-4px;
+ font:400 11px 'Inter';color:var(--muted)}
+.bm-score{width:40px;font:700 13px 'Inter';text-align:right;flex-shrink:0}
+.bm-disclaimer{margin-top:14px;font:italic 400 var(--text-xs) 'Inter';
+ color:var(--muted);line-height:1.6}
+
+.conf-row{display:flex;flex-direction:column;gap:6px;margin-bottom:20px;
+ position:relative}
+.conf-row:last-of-type{margin-bottom:0}
+.conf-lbl-row{display:flex;justify-content:space-between;align-items:center}
+.conf-lbl{font:600 11px 'Inter';color:var(--navy)}
+.conf-strong-pct{font:500 10px 'Inter';color:var(--success)}
+.conf-track{width:100%;height:12px;border-radius:6px;background:#E2E8F0;
+ display:flex;overflow:hidden;position:relative}
+.conf-seg-strong{background:var(--blue);height:100%}
+.conf-seg-inferred{background:var(--blue);opacity:.40;height:100%}
+.conf-seg-assumed{background:#CBD5E0;height:100%}
+.conf-pill{display:inline-flex;align-items:center;gap:6px;
+ background:var(--l4-bg);border:1px solid var(--l4-bd);
+ border-radius:var(--radius-pill);padding:5px 14px;
+ font:600 11px 'Inter';color:var(--success);align-self:flex-start}
+.conf-legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:8px}
+.conf-leg-item{display:flex;align-items:center;gap:6px;
+ font:500 11px 'Inter';color:var(--muted)}
+.conf-leg-sw{width:12px;height:8px;border-radius:2px}
+
+/* Interactive label + Row 6 What-If */
+.interactive-label{display:flex;align-items:center;gap:8px;
+ margin-bottom:var(--space-sm);font:600 11px/1 'Inter';
+ letter-spacing:1.2px;text-transform:uppercase;color:var(--blue)}
+.interactive-label::before{content:"";width:8px;height:8px;border-radius:50%;
+ background:var(--blue);animation:pulse 2s infinite}
+.dashboard-row-6{width:100%}
+.simulator-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.sim-col{display:flex;flex-direction:column;align-items:center;text-align:center;
+ border-radius:var(--radius);padding:22px 18px}
+.sim-col.cur{background:#F4F7FB}
+.sim-col.fix{background:var(--l4-bg);border:1px solid var(--l4-bd)}
+.sim-col.all{background:var(--l5-bg);border:1px solid var(--l5-bd)}
+.sim-label{font:700 11px 'Inter';text-transform:uppercase;letter-spacing:1px;
+ margin-bottom:12px}
+.sim-col.cur .sim-label{color:var(--navy)}
+.sim-col.fix .sim-label{color:#276749}
+.sim-col.all .sim-label{color:#2B6CB0}
+.sim-delta{font:700 16px 'Inter';margin-top:8px}
+.sim-score-lbl{font:400 13px 'Inter';color:var(--muted)}
+.sim-name{font:500 11px 'Inter';color:var(--muted);margin-top:6px}
+.insight-box{background:var(--blue-soft);border-left:4px solid var(--blue);
+ border-radius:var(--radius-sm);padding:14px 18px;margin-top:16px;
+ display:flex;gap:10px;align-items:flex-start}
+.insight-box svg{color:var(--blue);flex-shrink:0;margin-top:2px}
+.insight-box p{font:500 13px 'Inter';color:var(--navy);line-height:1.6}
+
+/* Tooltip */
+.chart-tooltip{position:fixed;z-index:200;background:rgba(12,27,51,0.92);
+ backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+ border:1px solid rgba(255,255,255,0.12);border-radius:var(--radius-sm);
+ padding:10px 14px;max-width:240px;pointer-events:none;opacity:0;
+ transition:opacity .15s;will-change:transform}
+.chart-tooltip .tt-title{font:700 13px 'Inter';color:#fff}
+.chart-tooltip .tt-body{font:400 12px 'Inter';color:#94A3B8;margin-top:4px}
+.chart-tooltip .tt-score{font:700 14px 'Inter';margin-top:4px}
+
+/* ============ R10 Research Basis ============ */
+.r10{padding:var(--space-lg) var(--space-xl)}
+.r10-wrap{background:var(--bg-alt);border-radius:var(--radius);padding:32px 36px}
+.r10-sub{font:400 var(--text-base) 'Inter';color:var(--slate);
+ margin-bottom:20px;line-height:var(--lh-loose)}
+.r10-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.r10-cite{background:#fff;border-radius:var(--radius-sm);padding:20px 22px;
+ border-top:3px solid var(--blue);page-break-inside:avoid}
+.r10-cite-tag{font:700 10px 'Inter';text-transform:uppercase;color:var(--blue);
+ margin-bottom:8px;display:block}
+.r10-cite-title{font:700 14px 'Inter';color:var(--navy);margin-bottom:6px;line-height:1.4}
+.r10-cite-auth{font:italic 400 12px 'Inter';color:var(--muted);line-height:1.5}
+.r10-cite-rel{margin-top:8px;font:400 12.5px 'Inter';color:var(--slate);line-height:1.5}
+.r10-cite-rel b{font-weight:600;color:var(--navy)}
+.r10-thesis{background:var(--blue-soft);border-radius:var(--radius-sm);
+ border-left:4px solid var(--blue);padding:20px 24px;margin-top:16px}
+.r10-thesis-head{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.r10-thesis-head svg{color:var(--blue);flex-shrink:0}
+.r10-thesis-title{font:700 13px 'Inter';color:var(--navy)}
+.r10-thesis-pill{background:var(--blue-soft);border:1px solid var(--border);
+ border-radius:var(--radius-pill);padding:4px 12px;
+ font:600 11px 'Inter';color:var(--blue);margin-left:auto}
+.r10-thesis-body{font:400 var(--text-sm) 'Inter';color:var(--slate);line-height:1.65}
+
+/* ============ Report footer ============ */
+.report-footer{background:var(--navy);padding:16px 52px;
+ border-top:1px solid rgba(255,255,255,0.06);
+ display:flex;justify-content:space-between;align-items:center;gap:12px;
+ flex-wrap:wrap;position:sticky;bottom:0;z-index:50}
+.report-footer .l{font:400 12px 'Inter';color:#475569}
+.report-footer .c{text-align:center}
+.report-footer .c .a{font:400 11px 'Inter';color:#334155;display:block}
+.report-footer .c .b{font:400 10px 'Inter';color:#1E293B;display:block;margin-top:2px}
+.report-footer .r{text-align:right}
+.report-footer .r .a{font:400 12px 'Inter';color:#475569;display:block}
+.report-footer .r .b{font:400 11px 'Inter';color:#334155;display:block;margin-top:2px}
+
+/* ============ Responsive ============ */
+@media(max-width:899px){
+ .dashboard-row-2{flex-direction:column}
+ .gauge-container{width:100%}
+ .dashboard-row-3,.dashboard-row-5{grid-template-columns:1fr}
+ .dashboard-row-1{grid-template-columns:repeat(2,1fr)}
+ .r3{grid-template-columns:1fr}
+ .r7-grid,.r10-grid{grid-template-columns:1fr}
+ .simulator-grid{grid-template-columns:1fr}
+}
+@media(max-width:640px){
+ .r1-cover{padding:32px 24px}
+ .r2,.r3,.r4,.r5,.r6,.r7,.r8,.r9,.r10{padding:24px 18px}
+ .r1-score{font-size:54px}
+}
+
+/* ============ Print ============ */
+@media print{
+ *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ body{background:#fff}
+ .dashboard-row-6,.interactive-label{display:none}
+ .dashboard-row-3b{display:block !important}
+ .dashboard-row-2,.dashboard-row-3,.dashboard-row-5{
+  display:flex;flex-direction:column}
+ .dashboard-row-1{grid-template-columns:repeat(2,1fr)}
+ .chart-container{backdrop-filter:none;-webkit-backdrop-filter:none;
+  background:#fff;box-shadow:none;border:1px solid #E2E8F0;
+  page-break-inside:avoid}
+ .glass-card,.r4-card,.r2-card,.r3-card,.r6-card,.r8-card,.r10-cite,.kpi-tile{
+  backdrop-filter:none;-webkit-backdrop-filter:none;background:#fff;
+  border:1px solid #E2E8F0;box-shadow:none;page-break-inside:avoid}
+ .report-footer{position:fixed;bottom:0;left:0;right:0;width:100%}
+ .gauge-container{width:100%}
+ .r1-cover{page-break-after:always}
+ .matrix-grid{overflow:visible}
+}
+</style>
+</head>
+<body>
+
+<!-- Generation gate confirmation:
+     Assessment complete. Generating full PPDT report for Northpine Industries.
+     Overall score: 2.3 (Aware). Bottleneck: Data. -->
+
+<script>
+/* ============================================================
+   REPORT_DATA — replace this object with backend-injected
+   values per assessment. All charts and sections read from it.
+   ============================================================ */
+window.REPORT_DATA = {
+  company: "Northpine Industries",
+  industry: "Industrial Manufacturing",
+  business_model: "ETO",
+  size: "Mid-Market (450 FTE)",
+  role: "Director of Product Portfolio Management",
+  date: "April 2026",
+  scores:{ people:2.8, process:2.4, data:1.5, technology:2.6, overall:2.3 },
+  levels:{ people:"AWARE", process:"AWARE", data:"AD HOC", technology:"AWARE", overall:"AWARE" },
+  bottleneck: "DATA",
+  bottleneck_capped: true,
+  evidence:{
+    people:[
+      "A dedicated portfolio steering committee meets monthly, but ownership of cross-product decisions is split between Engineering and Sales leadership without a single accountable role.",
+      "Three of five product line managers were promoted from engineering — none have formal portfolio management training; decisions are made on tribal product knowledge rather than disciplined frameworks.",
+      "Capability gaps in data literacy are openly acknowledged by the leadership team; an internal upskilling effort was started in Q3 2025 but has not yet reached portfolio decision-makers."
+    ],
+    process:[
+      "A documented stage-gate process exists for new product introduction, but portfolio review (rationalisation, retirement, investment reallocation) has no equivalent governance cadence.",
+      "Renewal decisions for the 60+ active SKUs happen annually in budget season — there is no continuous portfolio review mechanism.",
+      "Process compliance is high inside engineering but drops sharply at the commercial interface; sales-led custom requests routinely bypass the documented gate criteria."
+    ],
+    data:[
+      "Product profitability data requires 3–4 days of manual assembly across three disconnected systems (ERP, CRM, custom Excel) before leadership can review it.",
+      "There is no single product master — the same SKU appears with different attribute definitions in engineering BOMs, ERP item masters and the configurator.",
+      "No formal data ownership exists for product master data; the team interviewed could not name the accountable function for SKU integrity.",
+      "Manual reconciliation effort consumes an estimated 0.5 FTE per quarter and delays month-end portfolio reporting by 4–6 working days."
+    ],
+    technology:[
+      "ERP (Infor M3) is well-adopted across engineering and operations and serves as the system of record for production data.",
+      "A configurator was deployed in 2023 but is not integrated with master data — engineering changes do not propagate automatically.",
+      "BI tooling (Power BI) is in place at the corporate level but is not connected to product-level profitability data; portfolio dashboards are built manually each quarter."
+    ]
+  },
+  confidence:{
+    people:{ strong:70, inferred:20, assumed:10 },
+    process:{ strong:80, inferred:15, assumed:5 },
+    data:{ strong:60, inferred:30, assumed:10 },
+    technology:{ strong:75, inferred:25, assumed:0 }
+  },
+  roadmap:{
+    score_now:2.3,
+    score_phase1:2.8,
+    score_phase3:4.0,
+    phase1_actions:[
+      "Appoint a single accountable Data Owner for product master data, reporting to the COO, with a 90-day mandate.",
+      "Consolidate the three profitability data sources into a unified product-level view; target weekly refresh by month 3.",
+      "Define and enforce one canonical SKU attribute schema across ERP, configurator and BOMs."
+    ],
+    phase2_actions:[
+      "Establish a continuous portfolio review cadence (quarterly) with documented retirement and investment-reallocation criteria.",
+      "Roll out portfolio decision training for all product line managers and commercial leadership (8 individuals identified).",
+      "Integrate the configurator with the product master so engineering changes propagate automatically — eliminating the manual reconciliation FTE."
+    ],
+    phase3_actions:[
+      "Connect Power BI directly to the unified product master to deliver real-time portfolio profitability dashboards to leadership.",
+      "Introduce predictive analytics on portfolio mix decisions using historical margin and configuration-complexity data.",
+      "Consolidate governance under a Portfolio Council with a published charter, KPIs, and quarterly board reporting."
+    ]
+  },
+  kpi: {
+    overall:{ score:2.3, level_name:"AWARE", level_index:2 },
+    pillars:[
+      { key:"people",     letter:"P", name:"People",     score:2.8, level:2 },
+      { key:"process",    letter:"P", name:"Process",    score:2.4, level:2 },
+      { key:"data",       letter:"D", name:"Data",       score:1.5, level:1 },
+      { key:"technology", letter:"T", name:"Technology", score:2.6, level:2 }
+    ]
+  }
+};
+const LEVEL_NAMES = ["","AD HOC","AWARE","DEFINED","MANAGED","PREDICTIVE"];
+const LEVEL_COLORS = {1:"#E53E3E",2:"#D69E2E",3:"#ECC94B",4:"#38A169",5:"#2B6CB0"};
+const LEVEL_TEXT_COLORS = {1:"#E53E3E",2:"#D69E2E",3:"#744210",4:"#38A169",5:"#2B6CB0"};
+function scoreToLevel(s){ if(s<2)return 1;if(s<3)return 2;if(s<4)return 3;if(s<4.5)return 4;return 5;}
+</script>
+
+<div class="report-wrapper">
+
+<!-- ============================================================ R1 COVER ============================================================ -->
+<section class="r1-cover">
+ <div class="r1-top">
+  <div class="r1-left">
+   <span class="r1-tag">PPDT MATURITY ASSESSMENT · FULL REPORT</span>
+   <h1 class="r1-company">Northpine Industries</h1>
+   <div class="r1-meta">
+    <span>Industrial Manufacturing</span><span class="sep">·</span>
+    <span>ETO</span><span class="sep">·</span>
+    <span>Director of Product Portfolio Management</span><span class="sep">·</span>
+    <span>April 2026</span>
+   </div>
+   <div class="r1-complete">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+    Full Assessment · 45–60 minutes
+   </div>
+  </div>
+  <div class="r1-right">
+   <div>
+    <span class="r1-score" style="color:#D69E2E">2.3</span><span class="r1-score-suffix">/5.0</span>
+   </div>
+   <span class="r1-score-label">Overall Maturity Score</span>
+   <span class="r1-level-name">Aware</span>
+   <div class="r1-bcap">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    (Bottleneck-capped)
+   </div>
+  </div>
+ </div>
+ <div class="r1-strip">
+  <div class="r1-tile">
+   <div class="r1-tile-top"><div class="r1-tile-badge">P</div><span class="r1-tile-label">People</span></div>
+   <span class="r1-tile-score" style="color:#D69E2E">2.8</span>
+   <span class="r1-tile-level">Aware</span>
+  </div>
+  <div class="r1-tile">
+   <div class="r1-tile-top"><div class="r1-tile-badge">P</div><span class="r1-tile-label">Process</span></div>
+   <span class="r1-tile-score" style="color:#D69E2E">2.4</span>
+   <span class="r1-tile-level">Aware</span>
+  </div>
+  <div class="r1-tile bottleneck">
+   <div class="r1-tile-top"><div class="r1-tile-badge">D</div><span class="r1-tile-label">Data</span></div>
+   <span class="r1-tile-score">1.5</span>
+   <span class="r1-tile-level">Ad Hoc</span>
+  </div>
+  <div class="r1-tile">
+   <div class="r1-tile-top"><div class="r1-tile-badge">T</div><span class="r1-tile-label">Technology</span></div>
+   <span class="r1-tile-score" style="color:#D69E2E">2.6</span>
+   <span class="r1-tile-level">Aware</span>
+  </div>
+ </div>
+</section>
+
+<!-- ============================================================ R2 EXECUTIVE SUMMARY ============================================================ -->
+<section class="r2">
+ <div class="glass-card r2-card animate-in" style="--i:1">
+  <span class="section-label">Executive Summary</span>
+  <p class="r2-open">Northpine Industries operates as an engineer-to-order industrial manufacturer and scores 2.3/5.0 (Aware) on the PPDT maturity baseline. The Data pillar at 1.5 is capping the full system — no matter how strong People, Process, or Technology score, portfolio decisions cannot become data-driven until product master data integrity is resolved.</p>
+  <div class="r2-callout">Product portfolio renewal decisions are currently made without verified product-level profitability data, exposing the business to retaining low-margin SKUs and under-investing in genuine high-margin opportunities.</div>
+  <div class="r2-bullets">
+   <div class="r2-bullet"><span class="dot"></span><p><b>Strongest pillar — People (2.8):</b> A dedicated portfolio steering committee exists and leadership openly acknowledges its capability gaps; the willingness to act is a real asset.</p></div>
+   <div class="r2-bullet"><span class="dot" style="background:var(--danger)"></span><p><b>Critical bottleneck — Data (1.5):</b> Three days of manual reconciliation are required before leadership can review profitability; no single product master exists; no accountable data owner is named.</p></div>
+   <div class="r2-bullet"><span class="dot"></span><p><b>Immediate priority:</b> Appoint a single Data Owner for product master data with a 90-day mandate to consolidate the three profitability sources into one verified view.</p></div>
+  </div>
+  <div class="section-footer">Assessment grounded in Hannila (2019) doctoral dissertation, IEM, University of Oulu.</div>
+ </div>
+</section>
+
+<!-- ============================================================ R3 ORGANISATION PROFILE ============================================================ -->
+<section class="r3">
+ <div class="glass-card r3-card animate-in" style="--i:1">
+  <span class="section-label">Organisation</span>
+  <div class="r3-row"><span class="lbl">Company</span><span class="val">Northpine Industries</span></div>
+  <div class="r3-row"><span class="lbl">Industry</span><span class="val">Industrial Manufacturing</span></div>
+  <div class="r3-row"><span class="lbl">Business Model</span><span class="val">ETO (Engineer-to-Order)</span></div>
+  <div class="r3-row"><span class="lbl">Company Size</span><span class="val">Mid-Market · 450 FTE</span></div>
+  <div class="r3-row"><span class="lbl">Respondent</span><span class="val">Director of Product Portfolio</span></div>
+  <div class="r3-row"><span class="lbl">Assessment Date</span><span class="val">April 2026</span></div>
+ </div>
+ <div class="glass-card r3-card animate-in" style="--i:2">
+  <span class="section-label">Business Model Context</span>
+  <div class="r3-badge">ETO · Engineer-to-Order</div>
+  <p class="r3-body">Engineer-to-order delivery creates structural pressure on both Data and Process pillars. High product complexity and project-by-project variation make data standardisation disproportionately difficult to achieve. Scores in these pillars are interpreted with this structural context in mind — but context does not erase the bottleneck. The Data score still caps overall maturity.</p>
+  <p class="r3-note">Business model context informs interpretation only. Equal-weight scoring baseline is not adjusted.</p>
+  <div class="section-footer">Business model classification: Hannila (2019) and Hannila et al. (2020) product type frameworks.</div>
+ </div>
+</section>
+
+<!-- ============================================================ R4 PILLAR SCORES ============================================================ -->
+<section class="r4">
+
+ <!-- People -->
+ <div class="glass-card r4-card l2 animate-in" style="--i:1">
+  <div class="r4-head">
+   <div class="r4-head-left">
+    <div class="r4-letter">P</div>
+    <div>
+     <div class="r4-title-row"><span class="r4-title">People</span></div>
+     <div class="r4-sub">Dimension 1 of 4</div>
+    </div>
+   </div>
+   <div class="r4-head-right">
+    <div class="r4-score-badge l2">2.8 / 5.0</div>
+    <div class="r4-level-name l2">Aware</div>
+   </div>
+  </div>
+  <div class="r4-bar">
+   <div class="r4-track"><div class="r4-fill l2" data-w="56"></div></div>
+   <div class="r4-scale"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+  </div>
+  <span class="section-label">Evidence from Assessment</span>
+  <div class="r4-evidence">
+   <div class="r4-bullet"><span class="dash">—</span><p>A dedicated portfolio steering committee meets monthly, but ownership of cross-product decisions is split between Engineering and Sales leadership without a single accountable role.</p></div>
+   <div class="r4-bullet"><span class="dash">—</span><p>Three of five product line managers were promoted from engineering — none have formal portfolio management training; decisions are made on tribal product knowledge rather than disciplined frameworks.</p></div>
+   <div class="r4-bullet"><span class="dash">—</span><p>Capability gaps in data literacy are openly acknowledged; an internal upskilling effort started in Q3 2025 has not yet reached portfolio decision-makers.</p></div>
+  </div>
+  <span class="section-label" style="margin-top:20px">What This Means</span>
+  <p class="r4-means">Decision quality is currently dependent on individual experience rather than role-based competence. The committee structure is in place, but split ownership creates ambiguity at the moment a contested portfolio choice must be made — exactly when accountability matters most.</p>
+  <div class="r4-gap">
+   <div class="r4-gap-head">
+    <span class="level-pill l2">Aware</span>
+    <svg class="r4-gap-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    <span class="level-pill l3">Defined</span>
+   </div>
+   <p class="r4-gap-desc">To reach Defined, Northpine must collapse the dual-ownership structure into a single accountable portfolio role and fund formal portfolio-management training for the existing steering committee.</p>
+  </div>
+  <div class="section-footer">PPDT pillar definitions: Hannila (2019) · Hannila, Härkönen &amp; Haapasalo (2022), Journal of Decision Systems, 31(3), 258–279.</div>
+ </div>
+
+ <!-- Process -->
+ <div class="glass-card r4-card l2 animate-in" style="--i:2">
+  <div class="r4-head">
+   <div class="r4-head-left">
+    <div class="r4-letter">P</div>
+    <div>
+     <div class="r4-title-row"><span class="r4-title">Process</span></div>
+     <div class="r4-sub">Dimension 2 of 4</div>
+    </div>
+   </div>
+   <div class="r4-head-right">
+    <div class="r4-score-badge l2">2.4 / 5.0</div>
+    <div class="r4-level-name l2">Aware</div>
+   </div>
+  </div>
+  <div class="r4-bar">
+   <div class="r4-track"><div class="r4-fill l2" data-w="48"></div></div>
+   <div class="r4-scale"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+  </div>
+  <span class="section-label">Evidence from Assessment</span>
+  <div class="r4-evidence">
+   <div class="r4-bullet"><span class="dash">—</span><p>A documented stage-gate process exists for new product introduction, but portfolio review (rationalisation, retirement, investment reallocation) has no equivalent governance cadence.</p></div>
+   <div class="r4-bullet"><span class="dash">—</span><p>Renewal decisions for the 60+ active SKUs happen annually in budget season — there is no continuous portfolio review mechanism.</p></div>
+   <div class="r4-bullet"><span class="dash">—</span><p>Process compliance is high inside engineering but drops sharply at the commercial interface; sales-led custom requests routinely bypass documented gate criteria.</p></div>
+  </div>
+  <span class="section-label" style="margin-top:20px">What This Means</span>
+  <p class="r4-means">Northpine has the discipline to introduce products well, but no equivalent discipline to retire or reallocate them. This means SKU count grows with every project, none exit, and the portfolio drifts further from its profitability optimum each year — silently.</p>
+  <div class="r4-gap">
+   <div class="r4-gap-head">
+    <span class="level-pill l2">Aware</span>
+    <svg class="r4-gap-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    <span class="level-pill l3">Defined</span>
+   </div>
+   <p class="r4-gap-desc">Defined requires a published quarterly portfolio review cadence with explicit retirement and reallocation criteria — symmetric with the existing stage-gate.</p>
+  </div>
+  <div class="section-footer">PPDT pillar definitions: Hannila (2019) · Hannila, Härkönen &amp; Haapasalo (2022), Journal of Decision Systems, 31(3), 258–279.</div>
+ </div>
+
+ <!-- Data (Bottleneck) -->
+ <div class="glass-card r4-card l1 animate-in" style="--i:3">
+  <div class="r4-head">
+   <div class="r4-head-left">
+    <div class="r4-letter">D</div>
+    <div>
+     <div class="r4-title-row"><span class="r4-title">Data</span><span class="r4-bn-tag">⚠ BOTTLENECK</span></div>
+     <div class="r4-sub">Dimension 3 of 4</div>
+    </div>
+   </div>
+   <div class="r4-head-right">
+    <div class="r4-score-badge l1">1.5 / 5.0</div>
+    <div class="r4-level-name l1">Ad Hoc</div>
+   </div>
+  </div>
+  <div class="r4-bar">
+   <div class="r4-track"><div class="r4-fill l1" data-w="30"></div></div>
+   <div class="r4-scale"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+  </div>
+  <span class="section-label">Evidence from Assessment</span>
+  <div class="r4-evidence">
+   <div class="r4-bullet"><span class="dash">—</span><p>Product profitability data requires 3–4 days of manual assembly across three disconnected systems (ERP, CRM, custom Excel) before leadership can review it.</p></div>
+   <div class="r4-bullet"><span class="dash">—</span><p>There is no single product master — the same SKU appears with different attribute definitions in engineering BOMs, ERP item masters and the configurator.</p></div>
+   <div class="r4-bullet"><span class="dash">—</span><p>No formal data ownership exists for product master data; the team interviewed could not name the accountable function for SKU integrity.</p></div>
+   <div class="r4-bullet"><span class="dash">—</span><p>Manual reconciliation effort consumes an estimated 0.5 FTE per quarter and delays month-end portfolio reporting by 4–6 working days.</p></div>
+  </div>
+  <span class="section-label" style="margin-top:20px">What This Means</span>
+  <p class="r4-means">Data is the binding constraint. Until product master integrity and a verified profitability view exist, no investment in People, Process, or Technology will lift the overall maturity score. This pillar caps the system.</p>
+  <div class="section-footer">PPDT pillar definitions: Hannila (2019) · Hannila, Härkönen &amp; Haapasalo (2022), Journal of Decision Systems, 31(3), 258–279.</div>
+ </div>
+
+ <!-- Technology -->
+ <div class="glass-card r4-card l2 animate-in" style="--i:4">
+  <div class="r4-head">
+   <div class="r4-head-left">
+    <div class="r4-letter">T</div>
+    <div>
+     <div class="r4-title-row"><span class="r4-title">Technology</span></div>
+     <div class="r4-sub">Dimension 4 of 4</div>
+    </div>
+   </div>
+   <div class="r4-head-right">
+    <div class="r4-score-badge l2">2.6 / 5.0</div>
+    <div class="r4-level-name l2">Aware</div>
+   </div>
+  </div>
+  <div class="r4-bar">
+   <div class="r4-track"><div class="r4-fill l2" data-w="52"></div></div>
+   <div class="r4-scale"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+  </div>
+  <span class="section-label">Evidence from Assessment</span>
+  <div class="r4-evidence">
+   <div class="r4-bullet"><span class="dash">—</span><p>ERP (Infor M3) is well-adopted across engineering and operations and serves as the system of record for production data.</p></div>
+   <div class="r4-bullet"><span class="dash">—</span><p>A configurator was deployed in 2023 but is not integrated with master data — engineering changes do not propagate automatically.</p></div>
+   <div class="r4-bullet"><span class="dash">—</span><p>BI tooling (Power BI) is in place at corporate level but is not connected to product-level profitability data; portfolio dashboards are built manually each quarter.</p></div>
+  </div>
+  <span class="section-label" style="margin-top:20px">What This Means</span>
+  <p class="r4-means">The platforms are present and capable. The gap is integration — specifically the link between configurator, master data and BI. Investing in additional tools before this integration is closed will not improve maturity.</p>
+  <div class="r4-gap">
+   <div class="r4-gap-head">
+    <span class="level-pill l2">Aware</span>
+    <svg class="r4-gap-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    <span class="level-pill l3">Defined</span>
+   </div>
+   <p class="r4-gap-desc">Defined requires the configurator and Power BI to read from a single product master with automated propagation — eliminating the manual reconciliation.</p>
+  </div>
+  <div class="section-footer">PPDT pillar definitions: Hannila (2019) · Hannila, Härkönen &amp; Haapasalo (2022), Journal of Decision Systems, 31(3), 258–279.</div>
+ </div>
+
+</section>
+
+<!-- ============================================================ R5 OVERALL SCORE SUMMARY ============================================================ -->
+<section class="r5">
+ <div class="r5-card animate-in" style="--i:1">
+  <div class="r5-left">
+   <span class="r5-label">Overall Maturity Score</span>
+   <div>
+    <span class="r5-score" style="color:#D69E2E">2.3</span><span class="r5-score-suffix">/5.0</span>
+   </div>
+   <span class="r5-level">Aware</span>
+   <div class="r5-cap">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    Capped by DATA bottleneck (1.5 / 5.0)
+   </div>
+  </div>
+  <div class="r5-right">
+   <div class="r5-calc">
+    <div class="r5-calc-row"><span>People     × 0.25</span><span>= 0.70</span></div>
+    <div class="r5-calc-row"><span>Process    × 0.25</span><span>= 0.60</span></div>
+    <div class="r5-calc-row"><span>Data       × 0.25</span><span>= 0.38</span></div>
+    <div class="r5-calc-row"><span>Technology × 0.25</span><span>= 0.65</span></div>
+    <div class="r5-calc-div"></div>
+    <div class="r5-calc-row tot"><span>Overall Score</span><span>= 2.33</span></div>
+   </div>
+   <p class="r5-research">Equal weights: validated IEM baseline. Business-model weighting is open research (RQ5).</p>
+  </div>
+ </div>
+</section>
+
+<!-- ============================================================ R6 BOTTLENECK ANALYSIS ============================================================ -->
+<section class="r6">
+ <div class="r6-card animate-in" style="--i:1">
+  <div class="r6-head">
+   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+   <span class="r6-title">⚠ BOTTLENECK IDENTIFIED — DATA</span>
+  </div>
+  <p class="r6-body">The Data pillar scores 1.5/5.0 (Ad Hoc) and is the binding constraint on overall maturity. It caps People, Process and Technology because every portfolio decision ultimately requires a verified profitability view — and that view does not currently exist as a single source. The day-to-day impact is concrete: leadership reviews profitability four to six working days after month-end, on figures assembled manually across three systems, with no agreed product-master schema underneath. This means renewal, retirement and investment-reallocation decisions are made on numbers that nobody owns and nobody trusts. The single highest-leverage corrective action is to appoint a named Data Owner for product master data with a 90-day mandate to consolidate the three sources into one verified view.</p>
+  <div class="r6-risk">
+   <div class="r6-risk-head">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span class="r6-risk-label">Decision Risk</span>
+   </div>
+   <p class="r6-risk-body">Portfolio renewal decisions are currently being made without product-level profitability data, meaning low-margin SKUs may be retained in the catalogue while genuine high-margin opportunities are under-invested due to incomplete visibility — and the gap will widen with every new project Northpine accepts.</p>
+  </div>
+  <div class="section-footer">Bottleneck principle: Hannila et al. (2022) — five preconditions that must all function together for data-driven PPM to be possible.</div>
+ </div>
+</section>
+
+<!-- ============================================================ R7 IMPROVEMENT ROADMAP ============================================================ -->
+<section class="r7">
+ <span class="section-label">Improvement Roadmap</span>
+ <p class="r7-intro">Actions are sequenced bottleneck-first. Phase 2 work will not improve overall maturity until the Phase 1 Data bottleneck is resolved.</p>
+ <div class="r7-grid">
+  <div class="r7-phase p1 animate-in" style="--i:1">
+   <span class="r7-phase-tag">Phase 1 · 0–3 Months</span>
+   <h3 class="r7-phase-title">Resolve the Bottleneck</h3>
+   <div class="r7-action"><span class="dash">—</span><span>Appoint a named Data Owner for product master data, reporting to the COO, with a 90-day mandate.</span></div>
+   <div class="r7-action"><span class="dash">—</span><span>Consolidate the three profitability data sources (ERP, CRM, Excel) into a unified product-level view — weekly refresh by month 3.</span></div>
+   <div class="r7-action"><span class="dash">—</span><span>Define and enforce one canonical SKU attribute schema across ERP, configurator and BOMs.</span></div>
+   <div class="r7-outcome">Projected: DATA score 1.5 → 2.8</div>
+  </div>
+  <div class="r7-phase p2 animate-in" style="--i:2">
+   <span class="r7-phase-tag">Phase 2 · 3–12 Months</span>
+   <h3 class="r7-phase-title">Systemic Improvement</h3>
+   <div class="r7-action"><span class="dash">—</span><span>Establish a quarterly portfolio review cadence with documented retirement and reallocation criteria (governance).</span></div>
+   <div class="r7-action"><span class="dash">—</span><span>Roll out portfolio decision training for all eight product line and commercial leads.</span></div>
+   <div class="r7-action"><span class="dash">—</span><span>Integrate the configurator with the product master so engineering changes propagate automatically — eliminate the manual reconciliation FTE (data ownership).</span></div>
+   <div class="r7-outcome">Projected overall: 2.3 → 3.4</div>
+  </div>
+  <div class="r7-phase p3 animate-in" style="--i:3">
+   <span class="r7-phase-tag">Phase 3 · 12+ Months</span>
+   <h3 class="r7-phase-title">Sustained Capability</h3>
+   <div class="r7-action"><span class="dash">—</span><span>Connect Power BI directly to the unified product master for real-time portfolio profitability dashboards.</span></div>
+   <div class="r7-action"><span class="dash">—</span><span>Introduce predictive analytics on portfolio mix using historical margin and configuration-complexity data.</span></div>
+   <div class="r7-action"><span class="dash">—</span><span>Consolidate governance under a Portfolio Council with charter, KPIs and quarterly board reporting.</span></div>
+   <div class="r7-outcome">Target maturity: Managed (4.0 / 5.0)</div>
+  </div>
+ </div>
+ <div class="glass-card r7-gov animate-in" style="--i:4">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+  <p>Each phase action must have a named governance owner. Investing in Phase 3 tools before the Phase 1 bottleneck is resolved will not improve overall portfolio maturity. Sequence matters.</p>
+ </div>
+ <div class="section-footer">Roadmap logic: Hannila et al. (2020), Journal of Enterprise Information Management, 33(1), 214–237. Bottleneck-first sequencing principle.</div>
+</section>
+
+<!-- ============================================================ R8 PORTFOLIO DECISION IMPACT ============================================================ -->
+<section class="r8">
+ <div class="glass-card r8-card animate-in" style="--i:1">
+  <span class="section-label">Portfolio Decision Impact</span>
+  <div class="r8-sub">
+   <span class="r8-sub-label">Current Decision Quality</span>
+   <p class="r8-sub-body">Portfolio renewal and SKU rationalisation decisions are currently possible only at annual budget cadence and rely on profitability figures assembled manually across three systems. Customer revenue data exists; product cost data exists; the link between them — at SKU level — does not. Northpine is therefore unknowingly carrying low-margin SKUs in the catalogue and under-investing in genuine high-margin opportunities.</p>
+  </div>
+  <div class="r8-sub">
+   <span class="r8-sub-label">At Next Maturity Level</span>
+   <p class="r8-sub-body">Once Phase 1 is complete and one verified product master exists, leadership will be able to review SKU-level profitability monthly rather than annually. Retirement decisions become evidence-based rather than political. The 0.5-FTE manual reconciliation effort is freed for analytical work, and month-end portfolio reporting cycle time drops from 6 days to under 2.</p>
+  </div>
+  <div class="r8-sub">
+   <span class="r8-sub-label">At Full Maturity (Level 4–5)</span>
+   <p class="r8-sub-body">For an ETO industrial manufacturer of Northpine's profile, full maturity routinely supports continuous portfolio optimisation: live margin dashboards by product family, predictive flags for SKUs trending below threshold, and integrated configuration-complexity scoring at the moment of quote. The Portfolio Council reviews exception cases weekly rather than the entire portfolio annually.</p>
+  </div>
+  <div class="section-footer">Decision quality framing: Hannila (2019) and Hannila et al. (2022).</div>
+ </div>
+</section>
+
+<!-- ============================================================ R9 DASHBOARD CHARTS ============================================================ -->
+<section class="r9">
+ <span class="section-label">Assessment Dashboard</span>
+ <div class="dashboard-grid">
+
+  <!-- Row 1: KPI Tiles (C1) -->
+  <div class="dashboard-row-1">
+   <div class="kpi-tile l2 animate-in" style="--i:1">
+    <div class="kpi-r1"><div class="kpi-letter">P</div><span class="kpi-name">People</span></div>
+    <div class="kpi-r2"><span class="v" style="color:#D69E2E">2.8</span><span class="s">/5</span></div>
+    <div class="kpi-r3"><span class="level-pill l2">Aware</span></div>
+   </div>
+   <div class="kpi-tile l2 animate-in" style="--i:2">
+    <div class="kpi-r1"><div class="kpi-letter">P</div><span class="kpi-name">Process</span></div>
+    <div class="kpi-r2"><span class="v" style="color:#D69E2E">2.4</span><span class="s">/5</span></div>
+    <div class="kpi-r3"><span class="level-pill l2">Aware</span></div>
+   </div>
+   <div class="kpi-tile l1 bottleneck animate-in" style="--i:3">
+    <div class="kpi-r1"><div class="kpi-letter">D</div><span class="kpi-name">Data</span><span class="kpi-warn">⚠</span></div>
+    <div class="kpi-r2"><span class="v" style="color:#E53E3E">1.5</span><span class="s">/5</span></div>
+    <div class="kpi-r3"><span class="level-pill l1">Ad Hoc</span></div>
+   </div>
+   <div class="kpi-tile l2 animate-in" style="--i:4">
+    <div class="kpi-r1"><div class="kpi-letter">T</div><span class="kpi-name">Technology</span></div>
+    <div class="kpi-r2"><span class="v" style="color:#D69E2E">2.6</span><span class="s">/5</span></div>
+    <div class="kpi-r3"><span class="level-pill l2">Aware</span></div>
+   </div>
+  </div>
+
+  <!-- Row 2: Gauge (C2) + Maturity Track (C3) -->
+  <div class="dashboard-row-2">
+   <div class="chart-container gauge-container animate-in" style="--i:5">
+    <div class="chart-head">
+     <div><div class="chart-title">Overall Score</div><div class="chart-sub">Aware · April 2026</div></div>
+    </div>
+    <div class="gauge-body">
+     <svg id="gaugeSvg" width="200" height="200" viewBox="0 0 200 200" aria-label="Overall score gauge"></svg>
+    </div>
+    <div class="chart-foot">Equal-weight scoring: Hannila (2019) PPDT baseline</div>
+   </div>
+   <div class="chart-container track-container animate-in" style="--i:6">
+    <div class="chart-head">
+     <div><div class="chart-title">Maturity Journey</div><div class="chart-sub">Current: Aware · 2.3 / 5.0</div></div>
+    </div>
+    <div class="track-body">
+     <div class="track-spine"></div>
+     <div class="level-segment">
+      <div class="lvl-num past" style="background:var(--l1)">1</div>
+      <div class="lvl-box past" style="background:var(--l1)"><span class="lvl-name-inner">Ad Hoc</span></div>
+     </div>
+     <div class="level-segment">
+      <div class="you-here"><span class="you-here-lbl">You Are Here</span><span class="you-here-arrow">▼</span></div>
+      <div class="lvl-num current" style="border-color:var(--l2);color:var(--l2)">2</div>
+      <div class="lvl-box current" style="background:var(--l2)"><span class="lvl-name-inner">Aware</span></div>
+     </div>
+     <div class="level-segment">
+      <div class="lvl-num future">3</div>
+      <div class="lvl-box future"><span class="lvl-name-inner">Defined</span></div>
+     </div>
+     <div class="level-segment">
+      <div class="lvl-num future">4</div>
+      <div class="lvl-box future"><span class="lvl-name-inner">Managed</span></div>
+     </div>
+     <div class="level-segment">
+      <div class="lvl-num future">5</div>
+      <div class="lvl-box future"><span class="lvl-name-inner">Predictive</span></div>
+     </div>
+    </div>
+    <div style="text-align:center">
+     <span class="bn-pill">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Overall capped at AWARE — DATA bottleneck
+     </span>
+    </div>
+    <div class="chart-foot">5-level model from IEM doctoral research, Univ. of Oulu</div>
+   </div>
+  </div>
+
+  <!-- Row 3: Bar Chart (C4) + Radar (C5) -->
+  <div class="dashboard-row-3">
+   <div class="chart-container animate-in" style="--i:7">
+    <div class="chart-head">
+     <div><div class="chart-title">Pillar Scores</div><div class="chart-sub">Scored against IEM maturity criteria</div></div>
+    </div>
+    <div id="barRows"></div>
+    <div class="chart-foot">Criteria: Hannila et al. (2022, 2020) · Silvola (2018)</div>
+   </div>
+   <div class="chart-container animate-in" style="--i:8">
+    <div class="chart-head">
+     <div><div class="chart-title">PPDT Pillar Overview</div><div class="chart-sub">Balance view · Equal weights</div></div>
+    </div>
+    <div class="radar-body">
+     <svg id="radarSvg" width="280" height="280" viewBox="0 0 280 280" aria-label="PPDT radar chart"></svg>
+     <div class="radar-legend">
+      <div class="radar-leg-item"><span class="radar-leg-dot" style="background:var(--l2)"></span>People · 2.8</div>
+      <div class="radar-leg-item"><span class="radar-leg-dot" style="background:var(--l2)"></span>Process · 2.4</div>
+      <div class="radar-leg-item"><span class="radar-leg-dot" style="background:var(--l1)"></span>Data · 1.5</div>
+      <div class="radar-leg-item"><span class="radar-leg-dot" style="background:var(--l2)"></span>Technology · 2.6</div>
+     </div>
+    </div>
+    <div class="chart-foot">PPDT framework: Hannila (2019) · IEM, University of Oulu</div>
+   </div>
+  </div>
+
+  <!-- Row 3b: Capability Matrix (C6) -->
+  <div class="dashboard-row-3b">
+   <button class="btn-secondary matrix-toggle" id="matrixToggle" type="button">Show Capability Matrix ▾</button>
+   <div class="chart-container animate-in" id="matrixContainer" style="--i:9;display:none">
+    <div class="chart-head">
+     <div><div class="chart-title">Capability Matrix</div><div class="chart-sub">✓ Met &nbsp; ◐ Partial &nbsp; — Not demonstrated</div></div>
+    </div>
+    <div id="matrixGrid"></div>
+    <div class="chart-foot">Capability criteria: Hannila et al. (2022) 5 preconditions</div>
+   </div>
+  </div>
+
+  <!-- Divider -->
+  <div class="row-divider" role="separator"></div>
+
+  <!-- Row 4: Roadmap Gantt (C7) -->
+  <div class="dashboard-row-4">
+   <div class="chart-container animate-in" style="--i:10">
+    <div class="chart-head">
+     <div><div class="chart-title">Improvement Roadmap</div><div class="chart-sub">Bottleneck-first sequencing · 3 phases</div></div>
+    </div>
+    <div class="gantt-outer" id="ganttOuter">
+     <div class="gantt-zone p1"><span class="gantt-zone-label">Phase 1 · 0–3 Months</span></div>
+     <div class="gantt-zone p2"><span class="gantt-zone-label">Phase 2 · 3–12 Months</span></div>
+     <div class="gantt-zone p3"><span class="gantt-zone-label">Phase 3 · 12+ Months</span></div>
+     <div class="gantt-divider" style="left:18.18%"></div>
+     <div class="gantt-divider" style="left:63.63%"></div>
+     <div class="gantt-spine" id="ganttSpine"></div>
+     <svg class="gantt-traj" id="ganttTraj" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+     <div class="gantt-axis">
+      <span>Now</span><span>3 Months</span><span>12 Months</span><span>12+ Months</span>
+     </div>
+     <div class="gantt-dot" id="dot1" style="left:9%;background:var(--l5)"></div>
+     <div class="gantt-dot-lbl" style="left:9%;top:calc(52% + 16px)">Data Owner appointed</div>
+     <div class="gantt-dot" id="dot2" style="left:40%;background:var(--l4)"></div>
+     <div class="gantt-dot-lbl" style="left:40%;top:calc(52% - 32px)">Quarterly portfolio cadence</div>
+     <div class="gantt-dot" id="dot3" style="left:80%;background:var(--l5)"></div>
+     <div class="gantt-dot-lbl" style="left:80%;top:calc(52% + 16px)">Portfolio Council live</div>
+    </div>
+    <div class="chart-foot">Hannila et al. (2020) · JEIM 33(1) · bottleneck-first logic</div>
+   </div>
+  </div>
+
+  <!-- Row 5: Benchmark (C8) + Confidence (C9) -->
+  <div class="dashboard-row-5">
+   <div class="chart-container animate-in" style="--i:11">
+    <div class="chart-head">
+     <div><div class="chart-title">Benchmark Context</div><div class="chart-sub">Typical range for ETO organisations</div></div>
+    </div>
+    <div id="benchmarkRows"></div>
+    <p class="bm-disclaimer">Ranges derived from Hannila et al. (2020) 8-company study. Directional context only — not statistically validated.</p>
+    <div class="chart-foot">Hannila, Koskinen, Härkönen &amp; Haapasalo (2020), JEIM</div>
+   </div>
+   <div class="chart-container animate-in" style="--i:12">
+    <div class="chart-head">
+     <div><div class="chart-title">Score Confidence</div><div class="chart-sub">Evidence quality behind each pillar score</div></div>
+    </div>
+    <div id="confidenceRows"></div>
+    <div class="conf-legend">
+     <div class="conf-leg-item"><span class="conf-leg-sw" style="background:var(--blue)"></span>Strong</div>
+     <div class="conf-leg-item"><span class="conf-leg-sw" style="background:var(--blue);opacity:.4"></span>Inferred</div>
+     <div class="conf-leg-item"><span class="conf-leg-sw" style="background:#CBD5E0"></span>Assumed</div>
+    </div>
+    <div class="chart-foot">Evidence-based scoring: IEM empirical methodology</div>
+   </div>
+  </div>
+
+  <!-- Row 6: What-If Simulator (C10, screen-only) -->
+  <div class="interactive-label">Interactive · Hidden in PDF export</div>
+  <div class="dashboard-row-6">
+   <div class="chart-container animate-in" style="--i:13">
+    <div class="chart-head">
+     <div><div class="chart-title">Impact Simulator</div><div class="chart-sub">See how fixing specific pillars changes your score</div></div>
+    </div>
+    <div class="simulator-grid" id="simGrid"></div>
+    <div class="insight-box">
+     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-7 7c0 3 2 5 3 7h8c1-2 3-4 3-7a7 7 0 0 0-7-7z"/></svg>
+     <p id="simInsight">Fixing DATA alone adds +0.4 to your overall score. Fixing all pillars to 3.5 adds +1.2. Address DATA first — it unlocks the greatest gain per unit of effort.</p>
+    </div>
+   </div>
+  </div>
+
+ </div>
+</section>
+
+<!-- ============================================================ R10 RESEARCH BASIS ============================================================ -->
+<section class="r10">
+ <div class="r10-wrap">
+  <span class="section-label">Academic Foundation</span>
+  <p class="r10-sub">Every dimension, maturity level, and improvement principle in this report has a published academic source. This section documents those sources.</p>
+  <div class="r10-grid">
+   <div class="r10-cite animate-in" style="--i:1">
+    <span class="r10-cite-tag">Doctoral Dissertation</span>
+    <h4 class="r10-cite-title">Towards data-driven decision-making in product portfolio management</h4>
+    <p class="r10-cite-auth">Hannila, H. (2019). University of Oulu, Finland.</p>
+    <p class="r10-cite-rel"><b>Relevance:</b> Provides the PPDT framework, five preconditions, and identifies the core research gap this tool addresses.</p>
+   </div>
+   <div class="r10-cite animate-in" style="--i:2">
+    <span class="r10-cite-tag">Peer-Reviewed Article</span>
+    <h4 class="r10-cite-title">Digitalisation of a company decision-making system</h4>
+    <p class="r10-cite-auth">Hannila, H., Härkönen, J. &amp; Haapasalo, H. (2022). Journal of Decision Systems, 31(3), 258–279.</p>
+    <p class="r10-cite-rel"><b>Relevance:</b> Five preconditions that form the backbone of pillar assessment and bottleneck logic.</p>
+   </div>
+   <div class="r10-cite animate-in" style="--i:3">
+    <span class="r10-cite-tag">Peer-Reviewed Article</span>
+    <h4 class="r10-cite-title">Product-level profitability: Preconditions for data-driven PPM</h4>
+    <p class="r10-cite-auth">Hannila, H., Koskinen, J., Härkönen, J. &amp; Haapasalo, H. (2020). Journal of Enterprise Information Management, 33(1), 214–237.</p>
+    <p class="r10-cite-rel"><b>Relevance:</b> Empirical 8-company study confirming maturity variation and identifying the assessment gap.</p>
+   </div>
+   <div class="r10-cite animate-in" style="--i:4">
+    <span class="r10-cite-tag">Doctoral Dissertation + Article</span>
+    <h4 class="r10-cite-title">One product data for integrated business processes</h4>
+    <p class="r10-cite-auth">Silvola, R. (2018). University of Oulu, Finland. Also: Hannila et al. (2022). Data-driven begins with DATA. JCIS, 62(1), 29–38.</p>
+    <p class="r10-cite-rel"><b>Relevance:</b> Defines Level 5 benchmark and the data-first principle underpinning the Data pillar.</p>
+   </div>
+  </div>
+  <div class="r10-thesis">
+   <div class="r10-thesis-head">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+    <span class="r10-thesis-title">Master's Thesis Contribution</span>
+    <span class="r10-thesis-pill">IEM · University of Oulu · 2026</span>
+   </div>
+   <p class="r10-thesis-body">This assessment instrument was developed as original Master's thesis research in Industrial Engineering and Management at the University of Oulu (IPIC programme, 2026). The instrument operationalizes the research gap identified across Hannila (2019), Hannila et al. (2020, 2022) and Silvola (2018) — bridging the gap between published academic framework and practitioner-facing assessment tool.</p>
+  </div>
+  <div class="section-footer">Academic sources are publicly available through the University of Oulu repository and respective journal publishers.</div>
+ </div>
+</section>
+
+</div><!-- /report-wrapper -->
+
+<!-- Sticky / fixed report footer -->
+<footer class="report-footer">
+ <div class="l">PortfolioHealth Advisor · PPDT Maturity Assessment</div>
+ <div class="c">
+  <span class="a">IEM research-grounded · University of Oulu</span>
+  <span class="b">Hannila (2019) · Hannila et al. (2020, 2022) · Silvola (2018)</span>
+ </div>
+ <div class="r">
+  <span class="a">Full Assessment Report · April 2026</span>
+  <span class="b">Prepared for: Northpine Industries</span>
+ </div>
+</footer>
+
+<div class="chart-tooltip" id="tt" role="tooltip">
+ <div class="tt-title" id="ttTitle"></div>
+ <div class="tt-body" id="ttBody"></div>
+ <div class="tt-score" id="ttScore"></div>
+</div>
+
+<!-- ============================================================ CHART RENDERING JS ============================================================ -->
+<script defer>
+(function(){
+ const D = window.REPORT_DATA;
+
+ /* ---------- Animate R4 score bars ---------- */
+ setTimeout(()=>{
+   document.querySelectorAll('.r4-fill').forEach(el=>{
+     el.style.width = el.dataset.w + '%';
+   });
+ }, 120);
+
+ /* ---------- Tooltip helpers ---------- */
+ const tt = document.getElementById('tt');
+ function showTip(x,y,title,body,score,color){
+   document.getElementById('ttTitle').textContent = title;
+   document.getElementById('ttBody').textContent = body;
+   const sc = document.getElementById('ttScore');
+   sc.textContent = score || '';
+   sc.style.color = color || '#fff';
+   tt.style.opacity = 1;
+   const w = tt.offsetWidth, h = tt.offsetHeight;
+   let nx = x + 14, ny = y + 14;
+   if (nx + w > window.innerWidth - 8) nx = x - w - 14;
+   if (ny + h > window.innerHeight - 8) ny = y - h - 14;
+   tt.style.transform = `translate(${nx}px,${ny}px)`;
+ }
+ function hideTip(){ tt.style.opacity = 0; }
+
+ /* ---------- C2 Gauge ---------- */
+ (function gauge(){
+   const svg = document.getElementById('gaugeSvg');
+   if(!svg) return;
+   const cx = 100, cy = 100, r = 78, sw = 22;
+   const startA = 135, sweep = 270;
+   const score = D.scores.overall;
+   const lvl = scoreToLevel(score);
+   const color = LEVEL_COLORS[lvl];
+
+   function polar(angle, rad){
+     const a = (angle - 90) * Math.PI/180;
+     return [cx + rad*Math.cos(a), cy + rad*Math.sin(a)];
+   }
+   function arcPath(start, end, rad){
+     const [x1,y1] = polar(start, rad);
+     const [x2,y2] = polar(end, rad);
+     const large = (end-start) > 180 ? 1 : 0;
+     return `M ${x1} ${y1} A ${rad} ${rad} 0 ${large} 1 ${x2} ${y2}`;
+   }
+
+   // gradient
+   const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
+   const grad = document.createElementNS('http://www.w3.org/2000/svg','linearGradient');
+   grad.setAttribute('id','gaugeGrad');
+   grad.setAttribute('x1','0%');grad.setAttribute('y1','0%');
+   grad.setAttribute('x2','100%');grad.setAttribute('y2','0%');
+   grad.innerHTML = `<stop offset="0%" stop-color="${color}"/><stop offset="100%" stop-color="#3B82F6"/>`;
+   defs.appendChild(grad);
+   svg.appendChild(defs);
+
+   // bg arc
+   const bg = document.createElementNS('http://www.w3.org/2000/svg','path');
+   bg.setAttribute('d', arcPath(startA, startA+sweep, r));
+   bg.setAttribute('stroke','#E2E8F0');
+   bg.setAttribute('stroke-width', sw);
+   bg.setAttribute('fill','none');
+   bg.setAttribute('stroke-linecap','round');
+   svg.appendChild(bg);
+
+   // score arc
+   const scoreSweep = (score/5)*sweep;
+   const fg = document.createElementNS('http://www.w3.org/2000/svg','path');
+   fg.setAttribute('d', arcPath(startA, startA+sweep, r));
+   fg.setAttribute('stroke','url(#gaugeGrad)');
+   fg.setAttribute('stroke-width', sw);
+   fg.setAttribute('fill','none');
+   fg.setAttribute('stroke-linecap','round');
+   const len = fg.getTotalLength();
+   const visible = len * (scoreSweep/sweep);
+   fg.setAttribute('stroke-dasharray', `${visible} ${len}`);
+   fg.setAttribute('stroke-dashoffset', visible);
+   fg.style.transition = 'stroke-dashoffset 1.2s ease-in-out';
+   svg.appendChild(fg);
+   requestAnimationFrame(()=>{ fg.setAttribute('stroke-dashoffset', 0); });
+
+   // ticks
+   for(let i=1;i<=5;i++){
+     const angle = startA + (i/5)*sweep;
+     const [ix,iy] = polar(angle, r-sw/2-2);
+     const [ox,oy] = polar(angle, r-sw/2-8);
+     const t = document.createElementNS('http://www.w3.org/2000/svg','line');
+     t.setAttribute('x1',ix);t.setAttribute('y1',iy);
+     t.setAttribute('x2',ox);t.setAttribute('y2',oy);
+     t.setAttribute('stroke','#8896A5');t.setAttribute('stroke-width','1.5');
+     svg.appendChild(t);
+     const [lx,ly] = polar(angle, r+sw/2+10);
+     const lab = document.createElementNS('http://www.w3.org/2000/svg','text');
+     lab.setAttribute('x',lx);lab.setAttribute('y',ly+3);
+     lab.setAttribute('text-anchor','middle');
+     lab.setAttribute('font','500 10px Inter');
+     lab.setAttribute('fill','#8896A5');
+     lab.style.font = '500 10px Inter,sans-serif';
+     lab.textContent = i;
+     svg.appendChild(lab);
+   }
+
+   // center text
+   const sc = document.createElementNS('http://www.w3.org/2000/svg','text');
+   sc.setAttribute('x',cx);sc.setAttribute('y',cy+2);
+   sc.setAttribute('text-anchor','middle');
+   sc.setAttribute('fill',color);
+   sc.style.font = '800 38px Inter,sans-serif';
+   sc.innerHTML = `${score.toFixed(1)}<tspan font-size="16" fill="#8896A5" font-weight="400">/5.0</tspan>`;
+   svg.appendChild(sc);
+   const ln = document.createElementNS('http://www.w3.org/2000/svg','text');
+   ln.setAttribute('x',cx);ln.setAttribute('y',cy+24);
+   ln.setAttribute('text-anchor','middle');
+   ln.setAttribute('fill','#0C1B33');
+   ln.style.font = '700 12px Inter,sans-serif';
+   ln.textContent = D.levels.overall;
+   svg.appendChild(ln);
+   const ov = document.createElementNS('http://www.w3.org/2000/svg','text');
+   ov.setAttribute('x',cx);ov.setAttribute('y',cy+38);
+   ov.setAttribute('text-anchor','middle');
+   ov.setAttribute('fill','#8896A5');
+   ov.style.font = '600 9px Inter,sans-serif';
+   ov.style.letterSpacing = '1px';
+   ov.textContent = 'OVERALL';
+   svg.appendChild(ov);
+ })();
+
+ /* ---------- C4 Bar Chart ---------- */
+ (function bars(){
+   const host = document.getElementById('barRows');
+   if(!host) return;
+   const pillars = D.kpi.pillars;
+   const avg = D.scores.overall;
+   pillars.forEach((p,i)=>{
+     const lvl = p.level;
+     const isBn = D.bottleneck && p.name.toUpperCase() === D.bottleneck;
+     const color = LEVEL_COLORS[lvl];
+     const textColor = LEVEL_TEXT_COLORS[lvl];
+     const wrap = document.createElement('div');
+     wrap.className = 'bar-row' + (isBn?' bottleneck':'');
+     wrap.innerHTML = `
+       <div class="bar-top">
+        <div class="bar-left">
+         <div class="bar-letter">${p.letter}</div>
+         <div><span class="bar-name">${p.name}${isBn?' <span style="color:#E53E3E;font-weight:700">⚠</span>':''}</span>
+         <span class="level-pill l${lvl}" style="margin-left:8px">${LEVEL_NAMES[lvl]}</span></div>
+        </div>
+        <div><span class="bar-value" style="color:${textColor}">${p.score.toFixed(1)}</span><span class="bar-value-suffix">/5</span></div>
+       </div>
+       <div class="bar-track">
+        <div class="bar-fill" data-w="${(p.score/5)*100}" style="background:linear-gradient(90deg,${color},${color}BF)"></div>
+        <div class="bar-avg" style="left:${(avg/5)*100}%"><span class="bar-avg-lbl">AVG</span></div>
+       </div>
+       <div class="bar-scale"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+     `;
+     host.appendChild(wrap);
+   });
+   setTimeout(()=>{
+     host.querySelectorAll('.bar-fill').forEach((el,i)=>{
+       el.style.transitionDuration = (0.7 + i*0.08) + 's';
+       el.style.width = el.dataset.w + '%';
+     });
+   }, 80);
+ })();
+
+ /* ---------- C5 Radar ---------- */
+ (function radar(){
+   const svg = document.getElementById('radarSvg');
+   if(!svg) return;
+   const cx = 140, cy = 140, R = 100;
+   // rings
+   [20,40,60,80,100].forEach((r,i)=>{
+     const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+     c.setAttribute('cx',cx);c.setAttribute('cy',cy);c.setAttribute('r',r);
+     c.setAttribute('fill','none');
+     c.setAttribute('stroke','rgba(37,99,235,0.08)');
+     c.setAttribute('stroke-width','1');
+     svg.appendChild(c);
+     const lab = document.createElementNS('http://www.w3.org/2000/svg','text');
+     lab.setAttribute('x', cx + r + 4);
+     lab.setAttribute('y', cy - 2);
+     lab.setAttribute('fill','#8896A5');
+     lab.style.font = '600 9px Inter,sans-serif';
+     lab.textContent = i+1;
+     svg.appendChild(lab);
+   });
+   const axes = [
+     { key:'people',     name:'PEOPLE',     angle:0,   score:D.scores.people     },
+     { key:'process',    name:'PROCESS',    angle:90,  score:D.scores.process    },
+     { key:'technology', name:'TECHNOLOGY', angle:180, score:D.scores.technology },
+     { key:'data',       name:'DATA',       angle:270, score:D.scores.data       }
+   ];
+   const bn = D.bottleneck ? D.bottleneck.toLowerCase() : null;
+   axes.forEach(a=>{
+     const rad = a.angle * Math.PI/180;
+     const ex = cx + Math.sin(rad)*R;
+     const ey = cy - Math.cos(rad)*R;
+     const ln = document.createElementNS('http://www.w3.org/2000/svg','line');
+     ln.setAttribute('x1',cx);ln.setAttribute('y1',cy);
+     ln.setAttribute('x2',ex);ln.setAttribute('y2',ey);
+     const isBn = a.key === bn;
+     ln.setAttribute('stroke', isBn ? '#E53E3E' : 'rgba(37,99,235,0.15)');
+     ln.setAttribute('stroke-width', isBn ? 1.5 : 1);
+     if(isBn) ln.setAttribute('stroke-dasharray','4,3');
+     svg.appendChild(ln);
+   });
+   // polygon
+   const pts = axes.map(a=>{
+     const rad = a.angle * Math.PI/180;
+     const dist = (a.score/5)*R;
+     return [cx + Math.sin(rad)*dist, cy - Math.cos(rad)*dist];
+   });
+   const poly = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+   poly.setAttribute('points', pts.map(p=>p.join(',')).join(' '));
+   poly.setAttribute('fill','rgba(37,99,235,0.12)');
+   poly.setAttribute('stroke','#2563EB');
+   poly.setAttribute('stroke-width','2');
+   poly.style.transformOrigin = `${cx}px ${cy}px`;
+   poly.style.transform = 'scale(0)';
+   poly.style.transition = 'transform .9s ease-out';
+   svg.appendChild(poly);
+   requestAnimationFrame(()=>{ poly.style.transform = 'scale(1)'; });
+
+   // points + tooltip
+   axes.forEach((a,i)=>{
+     const lvl = scoreToLevel(a.score);
+     const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+     c.setAttribute('cx', pts[i][0]);
+     c.setAttribute('cy', pts[i][1]);
+     c.setAttribute('r', 6);
+     c.setAttribute('fill', LEVEL_COLORS[lvl]);
+     c.setAttribute('stroke','#fff');
+     c.setAttribute('stroke-width','2');
+     c.style.cursor = 'pointer';
+     c.addEventListener('mouseenter',e=>{
+       c.setAttribute('r', 9);
+       showTip(e.clientX,e.clientY, a.name, LEVEL_NAMES[lvl], a.score.toFixed(1)+' / 5.0', LEVEL_COLORS[lvl]);
+     });
+     c.addEventListener('mousemove',e=>showTip(e.clientX,e.clientY,a.name,LEVEL_NAMES[lvl],a.score.toFixed(1)+' / 5.0',LEVEL_COLORS[lvl]));
+     c.addEventListener('mouseleave',()=>{c.setAttribute('r',6);hideTip();});
+     svg.appendChild(c);
+   });
+   // axis labels
+   axes.forEach(a=>{
+     const rad = a.angle * Math.PI/180;
+     const lx = cx + Math.sin(rad)*(R+18);
+     const ly = cy - Math.cos(rad)*(R+18);
+     const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+     t.setAttribute('x',lx);t.setAttribute('y',ly+4);
+     t.setAttribute('text-anchor','middle');
+     const lvl = scoreToLevel(a.score);
+     const isBn = a.key === bn;
+     t.setAttribute('fill', isBn ? '#E53E3E' : LEVEL_COLORS[lvl]);
+     t.style.font = '700 10px Inter,sans-serif';
+     t.style.letterSpacing = '0.8px';
+     t.textContent = (isBn?'⚠ ':'') + a.name;
+     svg.appendChild(t);
+   });
+   // center
+   const c1 = document.createElementNS('http://www.w3.org/2000/svg','text');
+   c1.setAttribute('x',cx);c1.setAttribute('y',cy);
+   c1.setAttribute('text-anchor','middle');
+   c1.setAttribute('fill','#0C1B33');
+   c1.style.font = '800 24px Inter,sans-serif';
+   c1.textContent = D.scores.overall.toFixed(1);
+   svg.appendChild(c1);
+   const c2 = document.createElementNS('http://www.w3.org/2000/svg','text');
+   c2.setAttribute('x',cx);c2.setAttribute('y',cy+14);
+   c2.setAttribute('text-anchor','middle');
+   c2.setAttribute('fill','#8896A5');
+   c2.style.font = '600 9px Inter,sans-serif';
+   c2.style.letterSpacing = '1px';
+   c2.textContent = 'OVERALL';
+   svg.appendChild(c2);
+ })();
+
+ /* ---------- C6 Capability Matrix ---------- */
+ (function matrix(){
+   const grid = document.getElementById('matrixGrid');
+   const toggle = document.getElementById('matrixToggle');
+   const cont = document.getElementById('matrixContainer');
+   if(!grid) return;
+
+   const cols = [
+     { key:'people', name:'People',     score:D.scores.people     },
+     { key:'process',name:'Process',    score:D.scores.process    },
+     { key:'data',   name:'Data',       score:D.scores.data       },
+     { key:'technology',name:'Technology', score:D.scores.technology }
+   ];
+   const bnIdx = cols.findIndex(c=>c.key === (D.bottleneck||'').toLowerCase());
+
+   // build header row
+   let html = '<div class="matrix-row"><div class="matrix-corner"></div>';
+   cols.forEach(c=>{ html += `<div class="matrix-ch">${c.name}</div>`; });
+   html += '</div>';
+
+   for(let lvl=5; lvl>=1; lvl--){
+     const isCurrent = scoreToLevel(D.scores.overall) === lvl;
+     html += `<div class="matrix-row${isCurrent?' current-row':''}">
+       <div class="matrix-rh" style="color:${LEVEL_TEXT_COLORS[lvl]}">L${lvl} ${LEVEL_NAMES[lvl]}</div>`;
+     cols.forEach((c,ci)=>{
+       const cl = scoreToLevel(c.score);
+       let state, icon, bg, color = '';
+       if (lvl < cl) { state='met'; icon='✓'; bg=LEVEL_COLORS[lvl]; }
+       else if (lvl === cl) {
+         // partial vs met based on score fraction
+         const frac = c.score - cl + (cl===1 ? 1 : 0);
+         if (Math.abs(c.score - cl) < 0.01 || c.score >= cl + 0.5) { state='met'; icon='✓'; bg=LEVEL_COLORS[lvl]; }
+         else { state='partial'; icon='◐'; bg=LEVEL_COLORS[lvl]+'4D'; color=LEVEL_TEXT_COLORS[lvl]; }
+       } else { state='notmet'; icon='—'; bg=''; }
+       const isCur = (lvl === cl);
+       const style = bg ? (state==='partial' ? `background:${bg};color:${color}` : `background:${bg}`) : '';
+       html += `<div class="matrix-cell ${state}${isCur?' current-cell':''}" style="${style}" data-pillar="${c.name}" data-level="${LEVEL_NAMES[lvl]}" data-state="${state}">${icon}</div>`;
+     });
+     html += '</div>';
+   }
+   grid.innerHTML = html;
+
+   // bottleneck column outline
+   if(bnIdx >= 0){
+     // Wrap by adding outline class to all bn cells
+     grid.querySelectorAll('.matrix-row').forEach(row=>{
+       const cells = row.querySelectorAll('.matrix-cell');
+       if(cells[bnIdx]) cells[bnIdx].classList.add('matrix-bn-col');
+     });
+   }
+
+   // hover tooltip
+   grid.querySelectorAll('.matrix-cell').forEach(c=>{
+     c.addEventListener('mouseenter',e=>{
+       const obs = c.dataset.state === 'met'
+         ? 'Capability demonstrated based on assessment evidence.'
+         : c.dataset.state === 'partial'
+           ? 'Partial capability: foundations exist but not yet operating at this level.'
+           : 'Capability not demonstrated at this maturity level.';
+       showTip(e.clientX,e.clientY, c.dataset.pillar+' at '+c.dataset.level, obs, '', '#fff');
+     });
+     c.addEventListener('mousemove',e=>{
+       tt.style.transform = `translate(${e.clientX+14}px,${e.clientY+14}px)`;
+     });
+     c.addEventListener('mouseleave',hideTip);
+   });
+
+   // toggle
+   toggle.addEventListener('click',()=>{
+     const open = cont.style.display !== 'none';
+     cont.style.display = open ? 'none' : '';
+     toggle.textContent = open ? 'Show Capability Matrix ▾' : 'Hide Capability Matrix ▴';
+   });
+
+   // animate cells
+   const rows = grid.querySelectorAll('.matrix-row');
+   rows.forEach((r,i)=>{
+     r.style.opacity = 0;
+     r.style.transform = 'translateY(4px)';
+     r.style.transition = 'opacity .3s ease, transform .3s ease';
+     setTimeout(()=>{ r.style.opacity = 1; r.style.transform = 'translateY(0)'; }, 60 + i*40);
+   });
+ })();
+
+ /* ---------- C7 Gantt: spine + dots + trajectory ---------- */
+ (function gantt(){
+   const spine = document.getElementById('ganttSpine');
+   if(!spine) return;
+   setTimeout(()=>{ spine.style.clipPath = 'inset(0 0% 0 0)'; }, 200);
+   ['dot1','dot2','dot3'].forEach((id,i)=>{
+     setTimeout(()=>{ document.getElementById(id).classList.add('show'); }, 1000 + i*180);
+   });
+   // trajectory line + diamonds
+   const traj = document.getElementById('ganttTraj');
+   const sn = D.roadmap.score_now;
+   const s1 = D.roadmap.score_phase1;
+   const s3 = D.roadmap.score_phase3;
+   const yFor = s => 100 - ((s/5)*100); // invert
+   const points = [[5,yFor(sn)],[40,yFor(s1)],[80,yFor(s3)]];
+   const ply = `<polyline points="${points.map(p=>p.join(',')).join(' ')}"
+       fill="none" stroke="#3B82F6" stroke-width="0.8"
+       stroke-dasharray="2,1.5" vector-effect="non-scaling-stroke"/>`;
+   const diamonds = points.map(([x,y])=>`
+     <polygon points="${x},${y-1.5} ${x+1.2},${y} ${x},${y+1.5} ${x-1.2},${y}"
+       fill="#2563EB" stroke="#fff" stroke-width="0.4" vector-effect="non-scaling-stroke"/>`).join('');
+   const labels = [
+     [5,yFor(sn),sn.toFixed(1)],[40,yFor(s1),s1.toFixed(1)],[80,yFor(s3),s3.toFixed(1)]
+   ].map(([x,y,t])=>`<text x="${x+2}" y="${y-2}" font-family="Inter" font-size="3.2" font-weight="700" fill="#2563EB">${t}</text>`).join('');
+   traj.innerHTML = ply + diamonds + labels;
+ })();
+
+ /* ---------- C8 Benchmark ---------- */
+ (function benchmark(){
+   const host = document.getElementById('benchmarkRows');
+   if(!host) return;
+   const ranges = {
+     ETO:  { people:[1.5,3.0], process:[1.5,2.5], data:[1.0,2.5], technology:[1.5,3.0] },
+     CTO:  { people:[2.0,3.5], process:[2.5,3.5], data:[2.0,3.5], technology:[2.5,4.0] },
+     CETO: { people:[1.5,3.0], process:[2.0,3.5], data:[1.5,3.0], technology:[2.0,3.5] },
+     STD:  { people:[2.5,4.0], process:[2.5,4.0], data:[2.5,4.0], technology:[2.5,4.0] }
+   };
+   const bm = ranges[D.business_model];
+   if(!bm){
+     host.innerHTML = `<div style="text-align:center;padding:24px">
+       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8896A5" stroke-width="2" style="margin:0 auto 10px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+       <p style="font:400 13px Inter;color:#8896A5">Benchmark context is available when business model is specified during the assessment.</p>
+     </div>`;
+     return;
+   }
+   D.kpi.pillars.forEach(p=>{
+     const range = bm[p.key];
+     const lvl = p.level;
+     const color = LEVEL_COLORS[lvl];
+     const textColor = LEVEL_TEXT_COLORS[lvl];
+     const lpct = (range[0]/5)*100, hpct = (range[1]/5)*100;
+     const wpct = hpct - lpct;
+     const dotpct = (p.score/5)*100;
+     const row = document.createElement('div');
+     row.className = 'bm-row';
+     row.innerHTML = `
+       <span class="bm-label">${p.name}</span>
+       <div class="bm-track-area">
+         <div class="bm-track"></div>
+         <div class="bm-band" style="left:${lpct}%;width:${wpct}%"></div>
+         <div class="bm-dot" style="left:${dotpct}%;background:${color}"
+              data-name="${p.name}" data-score="${p.score.toFixed(1)}"
+              data-range="${range[0]}–${range[1]}"></div>
+         <span class="bm-range">Typical: ${range[0]}–${range[1]}</span>
+       </div>
+       <span class="bm-score" style="color:${textColor}">${p.score.toFixed(1)}</span>`;
+     host.appendChild(row);
+   });
+   host.querySelectorAll('.bm-dot').forEach(d=>{
+     d.addEventListener('mouseenter',e=>{
+       showTip(e.clientX,e.clientY, d.dataset.name,
+         `Typical ${D.business_model} range: ${d.dataset.range}`,
+         d.dataset.score+' / 5.0','#fff');
+     });
+     d.addEventListener('mousemove',e=>{ tt.style.transform = `translate(${e.clientX+14}px,${e.clientY+14}px)`; });
+     d.addEventListener('mouseleave',hideTip);
+   });
+ })();
+
+ /* ---------- C9 Confidence ---------- */
+ (function confidence(){
+   const host = document.getElementById('confidenceRows');
+   if(!host) return;
+   D.kpi.pillars.forEach(p=>{
+     const conf = D.confidence[p.key];
+     const row = document.createElement('div');
+     row.className = 'conf-row';
+     const showStrong = conf.strong > 60;
+     if (conf.strong === 100){
+       row.innerHTML = `
+         <div class="conf-lbl-row">
+           <span class="conf-lbl">${p.name.toUpperCase()} — Evidence Confidence</span>
+         </div>
+         <span class="conf-pill">
+           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+           High Confidence
+         </span>`;
+     } else {
+       row.innerHTML = `
+         <div class="conf-lbl-row">
+           <span class="conf-lbl">${p.name.toUpperCase()} — Evidence Confidence</span>
+           ${showStrong?`<span class="conf-strong-pct">${conf.strong}% strong</span>`:''}
+         </div>
+         <div class="conf-track">
+           <div class="conf-seg-strong" style="width:${conf.strong}%"></div>
+           <div class="conf-seg-inferred" style="width:${conf.inferred}%"></div>
+           <div class="conf-seg-assumed" style="width:${conf.assumed}%"></div>
+         </div>`;
+     }
+     host.appendChild(row);
+   });
+ })();
+
+ /* ---------- C10 What-If Simulator ---------- */
+ (function simulator(){
+   const host = document.getElementById('simGrid');
+   if(!host) return;
+   const cur = D.scores.overall;
+   const bnKey = (D.bottleneck||'').toLowerCase();
+   const fixed = { ...D.scores }; if(bnKey) fixed[bnKey] = 3.0;
+   const fixedOverall = (fixed.people + fixed.process + fixed.data + fixed.technology)/4;
+   const allOverall = 3.5;
+
+   function donut(score, color, size=120){
+     const r = (size-22)/2;
+     const cx = size/2, cy = size/2;
+     const startA = 135, sweep = 270;
+     function polar(angle, rad){
+       const a = (angle - 90) * Math.PI/180;
+       return [cx + rad*Math.cos(a), cy + rad*Math.sin(a)];
+     }
+     function arcPath(start, end, rad){
+       const [x1,y1] = polar(start, rad);
+       const [x2,y2] = polar(end, rad);
+       const large = (end-start) > 180 ? 1 : 0;
+       return `M ${x1} ${y1} A ${rad} ${rad} 0 ${large} 1 ${x2} ${y2}`;
+     }
+     const bgD = arcPath(startA, startA+sweep, r);
+     const fgEnd = startA + (score/5)*sweep;
+     const fgD = arcPath(startA, fgEnd, r);
+     return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+       <path d="${bgD}" stroke="#E2E8F0" stroke-width="14" fill="none" stroke-linecap="round"/>
+       <path d="${fgD}" stroke="${color}" stroke-width="14" fill="none" stroke-linecap="round"/>
+       <text x="${cx}" y="${cy+4}" text-anchor="middle" fill="${color}" style="font:800 24px Inter,sans-serif">${score.toFixed(1)}</text>
+     </svg>`;
+   }
+
+   const bnPillarName = D.bottleneck || '—';
+   const fixDelta = fixedOverall - cur;
+   const allDelta = allOverall - cur;
+
+   host.innerHTML = `
+     <div class="sim-col cur">
+       <span class="sim-label">Current State</span>
+       ${donut(cur, LEVEL_COLORS[scoreToLevel(cur)])}
+       <span class="sim-score-lbl">/5.0</span>
+       <span class="sim-name">Today</span>
+     </div>
+     <div class="sim-col fix">
+       <span class="sim-label">Fix ${bnPillarName} to 3.0</span>
+       ${donut(fixedOverall, LEVEL_COLORS[scoreToLevel(fixedOverall)])}
+       <span class="sim-delta" style="color:#38A169">↑ +${fixDelta.toFixed(1)}</span>
+       <span class="sim-score-lbl">/5.0</span>
+       <span class="sim-name">After Phase 1</span>
+     </div>
+     <div class="sim-col all">
+       <span class="sim-label">All Pillars to 3.5</span>
+       ${donut(allOverall, LEVEL_COLORS[scoreToLevel(allOverall)])}
+       <span class="sim-delta" style="color:#2B6CB0">↑ +${allDelta.toFixed(1)}</span>
+       <span class="sim-score-lbl">/5.0</span>
+       <span class="sim-name">All-pillar lift</span>
+     </div>`;
+
+   document.getElementById('simInsight').textContent =
+     `Fixing ${bnPillarName} alone adds +${fixDelta.toFixed(1)} to your overall score. Fixing all pillars to 3.5 adds +${allDelta.toFixed(1)}. Address ${bnPillarName} first — it unlocks the greatest gain per unit of effort.`;
+ })();
+
+})();
+</script>
+
+</body>
+</html>
