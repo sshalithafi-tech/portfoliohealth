@@ -107,7 +107,41 @@ Currently active: 5-turn Hannila/PPDT prompt with mandatory JSON emission (ready
 - `backend/tests/test_trimmed_prompt_e2e.py` / `test_completion_e2e_clear.py` — real-LLM E2E tests. Deferred pending LLM budget top-up.
 - `backend/tests/test_completion_flow_e2e.py` — ambiguous-answer E2E. Deferred (budget).
 
-## Standalone HTML Deliverables + Backend Wiring (2026-04-28)
+## Premium Navy + Gold Theme + Report v2 (2026-04-28)
+Major theme overhaul to match the user's premium, paid-tool spec across the **entire** product (landing, internal app, and the standalone HTML report).
+
+### Design tokens (everywhere)
+- `--navy: #0C1B2A` (primary dark) · `--navy-mid: #162333` (cards on dark) · `--navy-deep: #091622` (recessed)
+- `--gold: #C9A84C` (accent) · `--gold-soft: #F7F0DC` · `--gold-mid: #E8D49A` · `--gold-deep: #A88A2E`
+- Maturity colours per spec: L1 `#C0392B` · L2 `#D4850A` · L3 `#B8860B` · L4 `#27AE60` · L5 `#1A5276`
+- Primary CTA: navy bg + gold text (verified rgb(12,27,42) + rgb(201,168,76)) — pill, premium shadow
+- Cards: white bg + 1px `#E2E8F0` border + 3px gold top border + 16px radius
+- Dropdown popover: opaque `#162333` (HSL 216 42% 14%) — fixes dropdown transparency issue
+
+### HTML Report (`portfoliohealth-report.html`) — major redesign
+- **R1 Cover redesigned for premium readability** — gold accent stripe down the left edge, gold-bordered score panel on the right, ample whitespace, pill-style "Bottleneck-capped" tag, dedicated dark-strip pillar tile band, tag pill + meta line + duration chip. Score numbers always rendered in gold (per chosen option ii); maturity-level pill below carries the semantic colour.
+- **Removed 3 charts**: C1 KPI tiles, C2 Gauge SVG, C3 Maturity Journey track, C5 PPDT Radar. Kept: C4 Bar (full-width), C6 Capability Matrix, C7 Roadmap (rebuilt), C8 Benchmark, C9 Confidence, C10 What-If.
+- **C7 Roadmap rebuilt** — replaced the broken Gantt (overlapping markers, dashed trajectory, axis labels colliding) with a clean 3-column phase board: numbered circle (red/gold/green), phase tag, title, duration window, bulleted actions, divider, projected score with green delta badge.
+- All blue/glass tokens replaced with navy/gold; `--blue` aliased to `--gold` so legacy references keep working.
+
+### Landing page (`LandingPage.jsx` + `landing.css`)
+- Full token swap to navy/gold premium palette.
+- Hero accent word now in `--gold-deep`; meta-row clock icon in gold-deep.
+- All 4-pillar cards on navy section now show gold badges; bottleneck callout uses gold border-left.
+- Bottom CTA section now uses navy-mid → navy gradient with a gold radial glow + gold CTA button (gold bg, navy text — for highest contrast in the dark section).
+- Footer uses gold accents; cite labels in gold-deep.
+- `.ph-glass-card` now white card with 3px gold top border and `--border` outline (no more glass blur on light bg).
+
+### Internal app (`index.css`)
+- `--background` updated to `#0C1B2A` (per spec, was `#0A1628`).
+- Shadcn HSL tokens updated: `--background: 211 56% 11%` · `--card`/`--popover: 216 42% 14%` (= `#162333` opaque, eliminates transparent dropdown issue) · `--border` switched to gold @ 0.10 alpha · `--destructive` recoloured to spec red `#C0392B` · `--success` & `--warning` realigned to spec.
+- Login/Register page background hardcoded `#0A1628` updated to `#0C1B2A`.
+- All chat / dashboard / report / admin / login pages automatically pick up the new tokens via the existing `bg-background` / `bg-card` / `bg-popover` references — no layout rewrites.
+
+### Verified
+- Backend report endpoint still returns 200 with company name, gold score, hydrated tiles, 3-column roadmap with 3 actions per phase.
+- Zero console errors after gauge/radar/track/Gantt JS removal (each renderer already had `if(!el) return;` guards).
+- Computed CTA style: `background-color: rgb(12, 27, 42); color: rgb(201, 168, 76);` ✅
 Two self-contained, brand-consistent HTML files generated outside the React app, per user's 5-Block spec (design system + dashboard charts + report layout). No external dependencies beyond Google Fonts (Inter). Inline SVG / Vanilla JS Canvas only — no charting libraries.
 
 - **`/app/portfoliohealth-site.html`** (1,043 lines) — Marketing site (single-file SPA, Home + Theory tabs).

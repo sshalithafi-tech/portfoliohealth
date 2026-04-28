@@ -69,7 +69,7 @@ const RegisterPage = () => {
       </div>
 
       {/* Right side - Register form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-8 bg-[#0A1628]">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-8 bg-[#0C1B2A]">
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <div className="flex items-center justify-center gap-3 mb-6 lg:hidden">

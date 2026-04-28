@@ -5,23 +5,25 @@
 @tailwind utilities;
 
 :root {
-    /* Deep Navy Corporate Palette */
-    --background: #0A1628;
+    /* Premium Navy + Gold Palette */
+    --background: #0C1B2A;
     --surface: rgba(255, 255, 255, 0.04);
     --surface-hover: rgba(255, 255, 255, 0.07);
     --elevated: rgba(255, 255, 255, 0.06);
     --primary: #C9A84C;
-    --primary-hover: #D4B85C;
+    --primary-hover: #E8D49A;
     --accent: #C9A84C;
+    --gold-deep: #A88A2E;
+    --navy-mid: #162333;
     --text-primary: #F0F0F0;
     --text-secondary: rgba(240, 240, 240, 0.65);
     --text-muted: rgba(240, 240, 240, 0.35);
-    --border-glass: rgba(255, 255, 255, 0.07);
-    --border-glass-highlight: rgba(255, 255, 255, 0.14);
-    --success: #34D399;
-    --warning: #C9A84C;
-    --error: #EF4444;
-    --info: #60A5FA;
+    --border-glass: rgba(201, 168, 76, 0.10);
+    --border-glass-highlight: rgba(201, 168, 76, 0.22);
+    --success: #27AE60;
+    --warning: #D4850A;
+    --error: #C0392B;
+    --info: #C9A84C;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -40,31 +42,31 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
 
 @layer base {
     :root {
-        --background: 217 60% 10%;
+        --background: 211 56% 11%;
         --foreground: 0 0% 94%;
-        --card: 217 55% 11%;
+        --card: 216 42% 14%;
         --card-foreground: 0 0% 94%;
-        --popover: 217 55% 11%;
+        --popover: 216 42% 14%;
         --popover-foreground: 0 0% 94%;
         --primary: 43 50% 54%;
-        --primary-foreground: 217 60% 10%;
+        --primary-foreground: 211 56% 11%;
         --secondary: 0 0% 100% / 0.06;
         --secondary-foreground: 0 0% 94%;
         --muted: 0 0% 100% / 0.06;
-        --muted-foreground: 0 0% 100% / 0.35;
+        --muted-foreground: 0 0% 100% / 0.45;
         --accent: 0 0% 100% / 0.06;
         --accent-foreground: 0 0% 94%;
-        --destructive: 0 84% 60%;
+        --destructive: 0 65% 51%;
         --destructive-foreground: 0 0% 100%;
-        --border: 0 0% 100% / 0.07;
-        --input: 0 0% 100% / 0.07;
+        --border: 43 50% 54% / 0.10;
+        --input: 43 50% 54% / 0.10;
         --ring: 43 50% 54%;
         --radius: 0.75rem;
         --chart-1: 43 50% 54%;
-        --chart-2: 160 50% 50%;
-        --chart-3: 217 70% 60%;
-        --chart-4: 0 70% 60%;
-        --chart-5: 270 50% 60%;
+        --chart-2: 145 64% 42%;
+        --chart-3: 211 56% 11%;
+        --chart-4: 5 65% 51%;
+        --chart-5: 36 88% 43%;
     }
 }
 

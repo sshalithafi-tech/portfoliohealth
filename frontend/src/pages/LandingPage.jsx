@@ -46,7 +46,7 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
 
         <h1 className="ph-animate-in" style={{ "--i": 1 }}>
           Diagnose your{" "}
-          <span style={{ color: "var(--blue)" }}>product portfolio</span>{" "}
+          <span style={{ color: "var(--gold-deep)" }}>product portfolio</span>{" "}
           decision-making maturity.
         </h1>
 
@@ -73,7 +73,7 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
         </div>
 
         <div className="ph-meta-row">
-          <Clock size={16} style={{ color: "var(--blue)" }} />
+          <Clock size={16} style={{ color: "var(--gold-deep)" }} />
           Full assessment: 45–60 minutes · Conversational format · Structured PDF report
         </div>
 

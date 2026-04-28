@@ -13,17 +13,21 @@
  --text-xl:clamp(26px,3.5vw,40px);--text-hero:clamp(34px,5vw,60px);
  --lh-tight:1.15;--lh-normal:1.65;--lh-loose:1.75;
  --ls-tight:-1.5px;--ls-normal:-0.3px;--ls-label:1.2px;
- --navy:#0C1B33;--blue:#2563EB;--blue-light:#3B82F6;--blue-soft:#EFF6FF;
- --slate:#4A5568;--muted:#8896A5;--bg:#F4F7FB;--bg-alt:#F0F4F8;--white:#FFFFFF;
- --border:rgba(37,99,235,0.13);--border-dark:rgba(255,255,255,0.10);
- --overlay:rgba(12,27,51,0.92);--grid-line:rgba(37,99,235,0.06);
- --glass-bg:rgba(255,255,255,0.72);--glass-dark:rgba(255,255,255,0.06);
- --danger:#E53E3E;--warning:#D69E2E;--success:#38A169;--info:#2563EB;
- --l1:#E53E3E;--l1-bg:#FFF5F5;--l1-bd:#FED7D7;
- --l2:#D69E2E;--l2-bg:#FFFFF0;--l2-bd:#FAF089;
- --l3:#ECC94B;--l3-bg:#FEFCE8;--l3-bd:#FEF08A;--l3-text:#744210;
- --l4:#38A169;--l4-bg:#F0FFF4;--l4-bd:#C6F6D5;
- --l5:#2B6CB0;--l5-bg:#EBF8FF;--l5-bd:#BEE3F8;
+ --navy:#0C1B2A;--navy-mid:#162333;--navy-deep:#091622;
+ --gold:#C9A84C;--gold-soft:#F7F0DC;--gold-mid:#E8D49A;--gold-deep:#A88A2E;
+ --white:#FFFFFF;--off-white:#F8F9FA;
+ --slate:#4A5568;--text-mid:#4A5568;--muted:#8896A5;--text-muted:#8896A5;
+ --bg:#FFFFFF;--bg-alt:#F8F9FA;
+ --border:#E2E8F0;--border-dark:rgba(201,168,76,0.18);
+ --overlay:rgba(12,27,42,0.95);--grid-line:rgba(12,27,42,0.06);
+ --glass-bg:#FFFFFF;--glass-dark:rgba(255,255,255,0.04);
+ --blue:#C9A84C;--blue-light:#E8D49A;--blue-soft:#F7F0DC;--info:#C9A84C;
+ --danger:#C0392B;--warning:#D4850A;--success:#27AE60;
+ --l1:#C0392B;--l1-bg:#FBE9E7;--l1-bd:#F2C2BB;
+ --l2:#D4850A;--l2-bg:#FCF1DC;--l2-bd:#F2D399;
+ --l3:#B8860B;--l3-bg:#FAF1D6;--l3-bd:#E8CB76;--l3-text:#5C4308;
+ --l4:#27AE60;--l4-bg:#E5F6EC;--l4-bd:#B5E2C5;
+ --l5:#1A5276;--l5-bg:#E3EDF3;--l5-bd:#A4C3D6;
  --space-xs:8px;--space-sm:16px;--space-md:24px;--space-lg:32px;
  --space-xl:48px;--space-2xl:64px;--space-3xl:90px;
  --radius-sm:10px;--radius:18px;--radius-lg:28px;--radius-pill:50px;
@@ -82,45 +86,70 @@ h1,h2,h3,h4,h5{color:var(--navy);line-height:var(--lh-tight);font-weight:800}
 .report-wrapper{max-width:900px;margin:0 auto;background:var(--bg);min-height:100vh}
 .report-wrapper > section{page-break-inside:avoid}
 
-/* ============ R1 Cover ============ */
-.r1-cover{background:var(--navy);padding:52px 56px;page-break-after:always;
- display:flex;flex-direction:column;gap:36px}
-.r1-top{display:flex;justify-content:space-between;align-items:flex-start;
- gap:var(--space-xl);flex-wrap:wrap}
-.r1-left{flex:1;min-width:260px}
-.r1-tag{font:700 11px 'Inter';color:#60A5FA;text-transform:uppercase;
- letter-spacing:1.2px;display:block;margin-bottom:20px}
-.r1-company{font:800 34px/1.15 'Inter';color:#fff;letter-spacing:-0.5px;
- margin-bottom:10px}
-.r1-meta{display:flex;flex-wrap:wrap;font:400 14px 'Inter';
- color:#64748B;margin-bottom:16px;align-items:center}
-.r1-meta .sep{color:#334155;margin:0 10px}
-.r1-complete{display:flex;align-items:center;gap:8px;
- font:500 12px 'Inter';color:#334155}
-.r1-complete svg{color:#60A5FA}
-.r1-right{text-align:right;align-self:center;display:flex;flex-direction:column;
- align-items:flex-end;min-width:200px}
-.r1-score{font:800 72px/1 'Inter';letter-spacing:-3px}
-.r1-score-suffix{font:400 28px 'Inter';color:#475569;vertical-align:middle;
- margin-left:4px}
-.r1-score-label{font:400 13px 'Inter';color:#64748B;margin-top:8px;display:block}
-.r1-level-name{font:700 20px 'Inter';color:#fff;margin-top:6px;display:block}
-.r1-bcap{display:flex;align-items:center;justify-content:flex-end;gap:6px;
- margin-top:6px;font:600 13px 'Inter';color:var(--danger)}
-.r1-strip{border-top:1px solid rgba(255,255,255,0.08);padding-top:20px;
- margin-top:36px;display:flex;justify-content:space-between;
- align-items:flex-start;gap:16px;flex-wrap:wrap}
-.r1-tile{display:flex;flex-direction:column;gap:4px;flex:1;min-width:130px}
-.r1-tile-top{display:flex;align-items:center;gap:8px}
-.r1-tile-badge{width:28px;height:28px;border-radius:8px;
- background:rgba(255,255,255,0.08);font:800 13px 'Inter';color:#93C5FD;
- display:flex;align-items:center;justify-content:center}
-.r1-tile-label{font:600 11px 'Inter';text-transform:uppercase;color:#64748B}
-.r1-tile-score{font:700 18px 'Inter'}
-.r1-tile-level{font:500 10px 'Inter';text-transform:uppercase;color:#475569}
-.r1-tile.bottleneck .r1-tile-badge{background:rgba(229,62,62,0.18)}
+/* ============ R1 Cover (premium navy+gold) ============ */
+.r1-cover{background:var(--navy);padding:0;page-break-after:always;color:#fff;position:relative;overflow:hidden}
+.r1-cover::before{content:"";position:absolute;top:0;right:0;width:340px;height:340px;
+ background:radial-gradient(circle,rgba(201,168,76,0.12) 0%,transparent 70%);pointer-events:none}
+.r1-cover::after{content:"";position:absolute;left:0;top:0;width:5px;height:100%;background:var(--gold)}
+.r1-cover-inner{padding:64px 64px 48px;position:relative;z-index:1}
+.r1-top{display:grid;grid-template-columns:1fr auto;gap:64px;align-items:center;margin-bottom:56px}
+.r1-left{min-width:0}
+.r1-tag{display:inline-flex;align-items:center;gap:10px;
+ font:700 10.5px 'Inter';color:var(--gold);text-transform:uppercase;
+ letter-spacing:2.4px;margin-bottom:32px;
+ background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.22);
+ padding:8px 16px;border-radius:50px}
+.r1-tag::before{content:"";width:6px;height:6px;background:var(--gold);border-radius:50%}
+.r1-company{font:700 44px/1.1 'Inter';color:#fff;letter-spacing:-1.2px;margin-bottom:18px}
+.r1-meta{display:flex;flex-wrap:wrap;gap:0;align-items:center;
+ font:500 13px 'Inter';color:#A8B5C5;margin-bottom:24px}
+.r1-meta span:not(.sep){padding:4px 0}
+.r1-meta .sep{color:rgba(201,168,76,0.5);margin:0 14px;font-weight:600}
+.r1-complete{display:inline-flex;align-items:center;gap:10px;
+ font:500 12.5px 'Inter';color:#A8B5C5;
+ background:rgba(255,255,255,0.04);padding:8px 16px;border-radius:8px;
+ border:1px solid rgba(255,255,255,0.06)}
+.r1-complete svg{color:var(--gold)}
+.r1-right{display:flex;flex-direction:column;align-items:flex-end;
+ padding:32px 36px;background:linear-gradient(160deg,rgba(201,168,76,0.06) 0%,rgba(201,168,76,0.02) 100%);
+ border:1px solid rgba(201,168,76,0.18);border-radius:18px;min-width:220px}
+.r1-score-block{display:flex;align-items:baseline;gap:4px;line-height:1}
+.r1-score{font:700 80px/1 'Inter';letter-spacing:-4px;color:var(--gold)}
+.r1-score-suffix{font:400 28px 'Inter';color:rgba(201,168,76,0.45);letter-spacing:-1px}
+.r1-score-label{font:600 10px 'Inter';color:#A8B5C5;margin-top:14px;
+ letter-spacing:1.6px;text-transform:uppercase}
+.r1-level-name{font:700 22px 'Inter';color:#fff;margin-top:10px;
+ padding:6px 14px;background:rgba(255,255,255,0.06);border-radius:8px;
+ letter-spacing:.4px;border:1px solid rgba(255,255,255,0.08)}
+.r1-bcap{display:flex;align-items:center;gap:8px;margin-top:14px;
+ font:600 12px 'Inter';color:var(--danger);
+ background:rgba(192,57,43,0.10);padding:6px 12px;border-radius:50px;
+ border:1px solid rgba(192,57,43,0.22)}
+.r1-strip{border-top:1px solid rgba(201,168,76,0.14);padding:32px 64px 56px;
+ display:grid;grid-template-columns:repeat(4,1fr);gap:24px;background:var(--navy-deep);
+ position:relative;z-index:1}
+.r1-tile{display:flex;flex-direction:column;gap:8px;
+ padding:20px 22px;border-radius:14px;
+ background:linear-gradient(160deg,rgba(255,255,255,0.04) 0%,rgba(255,255,255,0.01) 100%);
+ border:1px solid rgba(255,255,255,0.06);transition:all .25s ease}
+.r1-tile-top{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.r1-tile-badge{width:32px;height:32px;border-radius:8px;
+ background:rgba(201,168,76,0.12);font:700 14px 'Inter';color:var(--gold);
+ display:flex;align-items:center;justify-content:center;
+ border:1px solid rgba(201,168,76,0.22)}
+.r1-tile-label{font:700 10.5px 'Inter';text-transform:uppercase;
+ color:#A8B5C5;letter-spacing:1.4px;flex:1}
+.r1-tile-score{font:700 32px 'Inter';color:var(--gold);letter-spacing:-1.5px;
+ margin:4px 0 2px}
+.r1-tile-level{font:600 9.5px 'Inter';text-transform:uppercase;
+ letter-spacing:1.4px;display:inline-block;padding:3px 10px;border-radius:50px;
+ align-self:flex-start;background:rgba(255,255,255,0.05);
+ border:1px solid rgba(255,255,255,0.08);color:#A8B5C5}
+.r1-tile.bottleneck{border-color:rgba(192,57,43,0.32);
+ background:linear-gradient(160deg,rgba(192,57,43,0.08) 0%,rgba(192,57,43,0.02) 100%)}
+.r1-tile.bottleneck .r1-tile-badge{background:rgba(192,57,43,0.14);color:var(--danger);border-color:rgba(192,57,43,0.30)}
 .r1-tile.bottleneck .r1-tile-score{color:var(--danger)}
-.r1-tile.bottleneck .r1-tile-label::before{content:"⚠ ";color:var(--danger)}
+.r1-tile.bottleneck .r1-tile-level::before{content:"⚠ ";color:var(--danger);font-weight:700}
 
 /* ============ R2 Executive Summary ============ */
 .r2{padding:var(--space-xl) var(--space-xl);background:var(--bg)}
@@ -372,6 +401,7 @@ h1,h2,h3,h4,h5{color:var(--navy);line-height:var(--lh-tight);font-weight:800}
 /* Row 3 Bar + Radar */
 .dashboard-row-3{display:grid;grid-template-columns:1.4fr 1fr;
  gap:var(--space-md);align-items:start}
+.dashboard-row-3.single{grid-template-columns:1fr}
 .bar-row{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
 .bar-row.bottleneck{padding:10px 12px;background:rgba(229,62,62,0.04);
  border:1px dashed rgba(229,62,62,0.28);border-radius:var(--radius-sm)}
@@ -433,37 +463,43 @@ h1,h2,h3,h4,h5{color:var(--navy);line-height:var(--lh-tight);font-weight:800}
  font:700 11px/1 'Inter';letter-spacing:1.2px;text-transform:uppercase;
  color:var(--blue)}
 
-/* Row 4 Gantt */
+/* Row 4 — Roadmap board (premium 3-phase columns) */
 .dashboard-row-4{width:100%}
-.gantt-outer{position:relative;height:200px;overflow:hidden;display:flex;
- border-radius:var(--radius)}
-.gantt-zone{height:100%;position:relative}
-.gantt-zone.p1{flex:1;background:var(--l5-bg);border-radius:var(--radius) 0 0 var(--radius)}
-.gantt-zone.p2{flex:2.5;background:var(--l4-bg)}
-.gantt-zone.p3{flex:2;background:var(--l5-bg);border-radius:0 var(--radius) var(--radius) 0}
-.gantt-zone-label{position:absolute;top:12px;left:14px;
- font:700 10px 'Inter';text-transform:uppercase}
-.gantt-zone.p1 .gantt-zone-label,.gantt-zone.p3 .gantt-zone-label{color:var(--l5)}
-.gantt-zone.p2 .gantt-zone-label{color:var(--l4)}
-.gantt-spine{position:absolute;top:52%;left:16px;right:16px;height:4px;
- border-radius:2px;z-index:2;
- background:linear-gradient(90deg,var(--blue-light),var(--l5));
- clip-path:inset(0 100% 0 0);transition:clip-path .8s ease-out}
-.gantt-divider{position:absolute;top:0;bottom:0;width:1px;
- background:rgba(37,99,235,0.20);
- border-right:1px dashed rgba(37,99,235,0.20)}
-.gantt-axis{position:absolute;bottom:8px;left:16px;right:16px;display:flex;
- justify-content:space-between;font:500 10px 'Inter';color:var(--muted)}
-.gantt-dot{position:absolute;width:16px;height:16px;border-radius:50%;
- border:2px solid #fff;box-shadow:var(--shadow-sm);z-index:3;
- top:calc(52% - 8px);transform:translateX(-50%) scale(0);
- transition:transform .2s ease-out}
-.gantt-dot.show{transform:translateX(-50%) scale(1)}
-.gantt-dot-lbl{position:absolute;font:500 11px 'Inter';color:var(--slate);
- max-width:120px;text-align:center;line-height:1.3;
- transform:translateX(-50%);z-index:3}
-.gantt-traj{position:absolute;top:0;left:0;right:0;bottom:0;z-index:4;
- pointer-events:none}
+.roadmap-board{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.rb-phase{background:#fff;border:1px solid var(--border);
+ border-top:3px solid var(--gold);border-radius:14px;
+ padding:24px 22px;display:flex;flex-direction:column;gap:14px;
+ page-break-inside:avoid;position:relative;transition:all .2s ease}
+.rb-phase:hover{box-shadow:0 8px 24px rgba(12,27,42,0.08)}
+.rb-phase.p1{border-top-color:var(--danger)}
+.rb-phase.p2{border-top-color:var(--gold)}
+.rb-phase.p3{border-top-color:var(--success)}
+.rb-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.rb-tag{font:700 10px 'Inter';text-transform:uppercase;letter-spacing:1.6px;
+ color:var(--text-muted)}
+.rb-num{width:30px;height:30px;border-radius:50%;
+ display:flex;align-items:center;justify-content:center;
+ font:700 14px 'Inter';color:#fff}
+.rb-phase.p1 .rb-num{background:var(--danger)}
+.rb-phase.p2 .rb-num{background:var(--gold)}
+.rb-phase.p3 .rb-num{background:var(--success)}
+.rb-title{font:700 17px 'Inter';color:var(--navy);letter-spacing:-0.3px;line-height:1.3}
+.rb-window{font:500 12px 'Inter';color:var(--gold-deep);
+ text-transform:uppercase;letter-spacing:1.2px;
+ padding-bottom:12px;border-bottom:1px solid var(--border)}
+.rb-actions{display:flex;flex-direction:column;gap:10px;flex:1}
+.rb-action{display:flex;gap:10px;align-items:flex-start;
+ font:400 13px 'Inter';color:var(--text-mid);line-height:1.55}
+.rb-action::before{content:"";flex-shrink:0;margin-top:7px;
+ width:5px;height:5px;border-radius:50%;background:var(--gold)}
+.rb-outcome{margin-top:auto;padding-top:14px;border-top:1px solid var(--border);
+ display:flex;flex-direction:column;gap:4px}
+.rb-outcome-lbl{font:600 9.5px 'Inter';text-transform:uppercase;
+ letter-spacing:1.4px;color:var(--text-muted)}
+.rb-outcome-val{font:700 14px 'Inter';color:var(--navy);
+ display:flex;align-items:center;gap:8px}
+.rb-outcome-val .arrow{color:var(--gold);font-weight:700}
+.rb-outcome-val .delta{color:var(--success);font-weight:700;font-size:12px}
 
 /* Row 5 Benchmark + Confidence */
 .dashboard-row-5{display:grid;grid-template-columns:1fr 1fr;
@@ -709,43 +745,45 @@ function scoreToLevel(s){ if(s<2)return 1;if(s<3)return 2;if(s<4)return 3;if(s<4
 
 <!-- ============================================================ R1 COVER ============================================================ -->
 <section class="r1-cover">
- <div class="r1-top">
-  <div class="r1-left">
-   <span class="r1-tag">PPDT MATURITY ASSESSMENT · FULL REPORT</span>
-   <h1 class="r1-company">Northpine Industries</h1>
-   <div class="r1-meta">
-    <span>Industrial Manufacturing</span><span class="sep">·</span>
-    <span>ETO</span><span class="sep">·</span>
-    <span>Director of Product Portfolio Management</span><span class="sep">·</span>
-    <span>April 2026</span>
+ <div class="r1-cover-inner">
+  <div class="r1-top">
+   <div class="r1-left">
+    <span class="r1-tag">PPDT Maturity Assessment · Full Report</span>
+    <h1 class="r1-company">Northpine Industries</h1>
+    <div class="r1-meta">
+     <span>Industrial Manufacturing</span><span class="sep">·</span>
+     <span>ETO</span><span class="sep">·</span>
+     <span>Director of Product Portfolio Management</span><span class="sep">·</span>
+     <span>April 2026</span>
+    </div>
+    <div class="r1-complete">
+     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+     Full Assessment · 45–60 minutes
+    </div>
    </div>
-   <div class="r1-complete">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-    Full Assessment · 45–60 minutes
-   </div>
-  </div>
-  <div class="r1-right">
-   <div>
-    <span class="r1-score" style="color:#D69E2E">2.3</span><span class="r1-score-suffix">/5.0</span>
-   </div>
-   <span class="r1-score-label">Overall Maturity Score</span>
-   <span class="r1-level-name">Aware</span>
-   <div class="r1-bcap">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-    (Bottleneck-capped)
+   <div class="r1-right">
+    <div class="r1-score-block">
+     <span class="r1-score">2.3</span><span class="r1-score-suffix">/5.0</span>
+    </div>
+    <span class="r1-score-label">Overall Maturity</span>
+    <span class="r1-level-name">Developing</span>
+    <div class="r1-bcap">
+     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+     Bottleneck-capped
+    </div>
    </div>
   </div>
  </div>
  <div class="r1-strip">
   <div class="r1-tile">
    <div class="r1-tile-top"><div class="r1-tile-badge">P</div><span class="r1-tile-label">People</span></div>
-   <span class="r1-tile-score" style="color:#D69E2E">2.8</span>
-   <span class="r1-tile-level">Aware</span>
+   <span class="r1-tile-score">2.8</span>
+   <span class="r1-tile-level">Developing</span>
   </div>
   <div class="r1-tile">
    <div class="r1-tile-top"><div class="r1-tile-badge">P</div><span class="r1-tile-label">Process</span></div>
-   <span class="r1-tile-score" style="color:#D69E2E">2.4</span>
-   <span class="r1-tile-level">Aware</span>
+   <span class="r1-tile-score">2.4</span>
+   <span class="r1-tile-level">Developing</span>
   </div>
   <div class="r1-tile bottleneck">
    <div class="r1-tile-top"><div class="r1-tile-badge">D</div><span class="r1-tile-label">Data</span></div>
@@ -754,8 +792,8 @@ function scoreToLevel(s){ if(s<2)return 1;if(s<3)return 2;if(s<4)return 3;if(s<4
   </div>
   <div class="r1-tile">
    <div class="r1-tile-top"><div class="r1-tile-badge">T</div><span class="r1-tile-label">Technology</span></div>
-   <span class="r1-tile-score" style="color:#D69E2E">2.6</span>
-   <span class="r1-tile-level">Aware</span>
+   <span class="r1-tile-score">2.6</span>
+   <span class="r1-tile-level">Developing</span>
   </div>
  </div>
 </section>
@@ -1054,102 +1092,14 @@ function scoreToLevel(s){ if(s<2)return 1;if(s<3)return 2;if(s<4)return 3;if(s<4
  <span class="section-label">Assessment Dashboard</span>
  <div class="dashboard-grid">
 
-  <!-- Row 1: KPI Tiles (C1) -->
-  <div class="dashboard-row-1">
-   <div class="kpi-tile l2 animate-in" style="--i:1">
-    <div class="kpi-r1"><div class="kpi-letter">P</div><span class="kpi-name">People</span></div>
-    <div class="kpi-r2"><span class="v" style="color:#D69E2E">2.8</span><span class="s">/5</span></div>
-    <div class="kpi-r3"><span class="level-pill l2">Aware</span></div>
-   </div>
-   <div class="kpi-tile l2 animate-in" style="--i:2">
-    <div class="kpi-r1"><div class="kpi-letter">P</div><span class="kpi-name">Process</span></div>
-    <div class="kpi-r2"><span class="v" style="color:#D69E2E">2.4</span><span class="s">/5</span></div>
-    <div class="kpi-r3"><span class="level-pill l2">Aware</span></div>
-   </div>
-   <div class="kpi-tile l1 bottleneck animate-in" style="--i:3">
-    <div class="kpi-r1"><div class="kpi-letter">D</div><span class="kpi-name">Data</span><span class="kpi-warn">⚠</span></div>
-    <div class="kpi-r2"><span class="v" style="color:#E53E3E">1.5</span><span class="s">/5</span></div>
-    <div class="kpi-r3"><span class="level-pill l1">Ad Hoc</span></div>
-   </div>
-   <div class="kpi-tile l2 animate-in" style="--i:4">
-    <div class="kpi-r1"><div class="kpi-letter">T</div><span class="kpi-name">Technology</span></div>
-    <div class="kpi-r2"><span class="v" style="color:#D69E2E">2.6</span><span class="s">/5</span></div>
-    <div class="kpi-r3"><span class="level-pill l2">Aware</span></div>
-   </div>
-  </div>
-
-  <!-- Row 2: Gauge (C2) + Maturity Track (C3) -->
-  <div class="dashboard-row-2">
-   <div class="chart-container gauge-container animate-in" style="--i:5">
-    <div class="chart-head">
-     <div><div class="chart-title">Overall Score</div><div class="chart-sub">Aware · April 2026</div></div>
-    </div>
-    <div class="gauge-body">
-     <svg id="gaugeSvg" width="200" height="200" viewBox="0 0 200 200" aria-label="Overall score gauge"></svg>
-    </div>
-    <div class="chart-foot">Equal-weight scoring: Hannila (2019) PPDT baseline</div>
-   </div>
-   <div class="chart-container track-container animate-in" style="--i:6">
-    <div class="chart-head">
-     <div><div class="chart-title">Maturity Journey</div><div class="chart-sub">Current: Aware · 2.3 / 5.0</div></div>
-    </div>
-    <div class="track-body">
-     <div class="track-spine"></div>
-     <div class="level-segment">
-      <div class="lvl-num past" style="background:var(--l1)">1</div>
-      <div class="lvl-box past" style="background:var(--l1)"><span class="lvl-name-inner">Ad Hoc</span></div>
-     </div>
-     <div class="level-segment">
-      <div class="you-here"><span class="you-here-lbl">You Are Here</span><span class="you-here-arrow">▼</span></div>
-      <div class="lvl-num current" style="border-color:var(--l2);color:var(--l2)">2</div>
-      <div class="lvl-box current" style="background:var(--l2)"><span class="lvl-name-inner">Aware</span></div>
-     </div>
-     <div class="level-segment">
-      <div class="lvl-num future">3</div>
-      <div class="lvl-box future"><span class="lvl-name-inner">Defined</span></div>
-     </div>
-     <div class="level-segment">
-      <div class="lvl-num future">4</div>
-      <div class="lvl-box future"><span class="lvl-name-inner">Managed</span></div>
-     </div>
-     <div class="level-segment">
-      <div class="lvl-num future">5</div>
-      <div class="lvl-box future"><span class="lvl-name-inner">Predictive</span></div>
-     </div>
-    </div>
-    <div style="text-align:center">
-     <span class="bn-pill">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-      Overall capped at AWARE — DATA bottleneck
-     </span>
-    </div>
-    <div class="chart-foot">5-level model from IEM doctoral research, Univ. of Oulu</div>
-   </div>
-  </div>
-
-  <!-- Row 3: Bar Chart (C4) + Radar (C5) -->
-  <div class="dashboard-row-3">
-   <div class="chart-container animate-in" style="--i:7">
+  <!-- Row 3: Bar Chart (C4, full-width after radar removal) -->
+  <div class="dashboard-row-3 single">
+   <div class="chart-container animate-in" style="--i:1">
     <div class="chart-head">
      <div><div class="chart-title">Pillar Scores</div><div class="chart-sub">Scored against IEM maturity criteria</div></div>
     </div>
     <div id="barRows"></div>
     <div class="chart-foot">Criteria: Hannila et al. (2022, 2020) · Silvola (2018)</div>
-   </div>
-   <div class="chart-container animate-in" style="--i:8">
-    <div class="chart-head">
-     <div><div class="chart-title">PPDT Pillar Overview</div><div class="chart-sub">Balance view · Equal weights</div></div>
-    </div>
-    <div class="radar-body">
-     <svg id="radarSvg" width="280" height="280" viewBox="0 0 280 280" aria-label="PPDT radar chart"></svg>
-     <div class="radar-legend">
-      <div class="radar-leg-item"><span class="radar-leg-dot" style="background:var(--l2)"></span>People · 2.8</div>
-      <div class="radar-leg-item"><span class="radar-leg-dot" style="background:var(--l2)"></span>Process · 2.4</div>
-      <div class="radar-leg-item"><span class="radar-leg-dot" style="background:var(--l1)"></span>Data · 1.5</div>
-      <div class="radar-leg-item"><span class="radar-leg-dot" style="background:var(--l2)"></span>Technology · 2.6</div>
-     </div>
-    </div>
-    <div class="chart-foot">PPDT framework: Hannila (2019) · IEM, University of Oulu</div>
    </div>
   </div>
 
@@ -1168,31 +1118,14 @@ function scoreToLevel(s){ if(s<2)return 1;if(s<3)return 2;if(s<4)return 3;if(s<4
   <!-- Divider -->
   <div class="row-divider" role="separator"></div>
 
-  <!-- Row 4: Roadmap Gantt (C7) -->
+  <!-- Row 4: Improvement Roadmap (C7 — premium 3-column board) -->
   <div class="dashboard-row-4">
    <div class="chart-container animate-in" style="--i:10">
     <div class="chart-head">
-     <div><div class="chart-title">Improvement Roadmap</div><div class="chart-sub">Bottleneck-first sequencing · 3 phases</div></div>
+     <div><div class="chart-title">Improvement Roadmap</div><div class="chart-sub">Bottleneck-first sequencing · three sequential phases</div></div>
     </div>
-    <div class="gantt-outer" id="ganttOuter">
-     <div class="gantt-zone p1"><span class="gantt-zone-label">Phase 1 · 0–3 Months</span></div>
-     <div class="gantt-zone p2"><span class="gantt-zone-label">Phase 2 · 3–12 Months</span></div>
-     <div class="gantt-zone p3"><span class="gantt-zone-label">Phase 3 · 12+ Months</span></div>
-     <div class="gantt-divider" style="left:18.18%"></div>
-     <div class="gantt-divider" style="left:63.63%"></div>
-     <div class="gantt-spine" id="ganttSpine"></div>
-     <svg class="gantt-traj" id="ganttTraj" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
-     <div class="gantt-axis">
-      <span>Now</span><span>3 Months</span><span>12 Months</span><span>12+ Months</span>
-     </div>
-     <div class="gantt-dot" id="dot1" style="left:9%;background:var(--l5)"></div>
-     <div class="gantt-dot-lbl" style="left:9%;top:calc(52% + 16px)">Data Owner appointed</div>
-     <div class="gantt-dot" id="dot2" style="left:40%;background:var(--l4)"></div>
-     <div class="gantt-dot-lbl" style="left:40%;top:calc(52% - 32px)">Quarterly portfolio cadence</div>
-     <div class="gantt-dot" id="dot3" style="left:80%;background:var(--l5)"></div>
-     <div class="gantt-dot-lbl" style="left:80%;top:calc(52% + 16px)">Portfolio Council live</div>
-    </div>
-    <div class="chart-foot">Hannila et al. (2020) · JEIM 33(1) · bottleneck-first logic</div>
+    <div class="roadmap-board" id="roadmapBoard"></div>
+    <div class="chart-foot">Hannila et al. (2020) · JEIM 33(1) · bottleneck-first sequencing logic</div>
    </div>
   </div>
 
@@ -1666,32 +1599,62 @@ function scoreToLevel(s){ if(s<2)return 1;if(s<3)return 2;if(s<4)return 3;if(s<4
    });
  })();
 
- /* ---------- C7 Gantt: spine + dots + trajectory ---------- */
- (function gantt(){
-   const spine = document.getElementById('ganttSpine');
-   if(!spine) return;
-   setTimeout(()=>{ spine.style.clipPath = 'inset(0 0% 0 0)'; }, 200);
-   ['dot1','dot2','dot3'].forEach((id,i)=>{
-     setTimeout(()=>{ document.getElementById(id).classList.add('show'); }, 1000 + i*180);
-   });
-   // trajectory line + diamonds
-   const traj = document.getElementById('ganttTraj');
-   const sn = D.roadmap.score_now;
-   const s1 = D.roadmap.score_phase1;
-   const s3 = D.roadmap.score_phase3;
-   const yFor = s => 100 - ((s/5)*100); // invert
-   const points = [[5,yFor(sn)],[40,yFor(s1)],[80,yFor(s3)]];
-   const ply = `<polyline points="${points.map(p=>p.join(',')).join(' ')}"
-       fill="none" stroke="#3B82F6" stroke-width="0.8"
-       stroke-dasharray="2,1.5" vector-effect="non-scaling-stroke"/>`;
-   const diamonds = points.map(([x,y])=>`
-     <polygon points="${x},${y-1.5} ${x+1.2},${y} ${x},${y+1.5} ${x-1.2},${y}"
-       fill="#2563EB" stroke="#fff" stroke-width="0.4" vector-effect="non-scaling-stroke"/>`).join('');
-   const labels = [
-     [5,yFor(sn),sn.toFixed(1)],[40,yFor(s1),s1.toFixed(1)],[80,yFor(s3),s3.toFixed(1)]
-   ].map(([x,y,t])=>`<text x="${x+2}" y="${y-2}" font-family="Inter" font-size="3.2" font-weight="700" fill="#2563EB">${t}</text>`).join('');
-   traj.innerHTML = ply + diamonds + labels;
+ /* ---------- C7 Improvement Roadmap (premium 3-column board) ---------- */
+ (function roadmap(){
+   const host = document.getElementById('roadmapBoard');
+   if(!host) return;
+   const r = D.roadmap || {};
+   const bn = D.bottleneck || 'the bottleneck';
+   const phases = [
+     {
+       cls:'p1', n:'1',
+       tag:'Phase 1', window:'0 – 3 Months',
+       title:'Resolve the Bottleneck',
+       actions:(r.phase1_actions || []).slice(0,3),
+       outLbl:'Projected score',
+       outVal:`${(r.score_now||0).toFixed(1)} → ${(r.score_phase1||0).toFixed(1)}`,
+       delta:((r.score_phase1||0)-(r.score_now||0))
+     },
+     {
+       cls:'p2', n:'2',
+       tag:'Phase 2', window:'3 – 12 Months',
+       title:'Systemic Improvement',
+       actions:(r.phase2_actions || []).slice(0,3),
+       outLbl:'Projected overall',
+       outVal:`${(r.score_phase1||0).toFixed(1)} → ${(((r.score_phase1||0)+(r.score_phase3||0))/2).toFixed(1)}`,
+       delta:((((r.score_phase1||0)+(r.score_phase3||0))/2)-(r.score_phase1||0))
+     },
+     {
+       cls:'p3', n:'3',
+       tag:'Phase 3', window:'12+ Months',
+       title:'Sustained Capability',
+       actions:(r.phase3_actions || []).slice(0,3),
+       outLbl:'Target maturity',
+       outVal:`${(r.score_phase3||0).toFixed(1)} / 5.0`,
+       delta:0
+     }
+   ];
+   host.innerHTML = phases.map((p,i) => `
+     <div class="rb-phase ${p.cls} animate-in" style="--i:${i+1}">
+       <div class="rb-head">
+         <span class="rb-tag">${p.tag}</span>
+         <div class="rb-num">${p.n}</div>
+       </div>
+       <div class="rb-title">${p.title}</div>
+       <div class="rb-window">${p.window}</div>
+       <div class="rb-actions">
+         ${p.actions.map(a => `<div class="rb-action">${a}</div>`).join('')}
+       </div>
+       <div class="rb-outcome">
+         <span class="rb-outcome-lbl">${p.outLbl}</span>
+         <span class="rb-outcome-val">
+           ${p.outVal}
+           ${p.delta > 0 ? `<span class="delta">+${p.delta.toFixed(1)}</span>` : ''}
+         </span>
+       </div>
+     </div>`).join('');
  })();
+
 
  /* ---------- C8 Benchmark ---------- */
  (function benchmark(){
@@ -1882,27 +1845,27 @@ function scoreToLevel(s){ if(s<2)return 1;if(s<3)return 2;if(s<4)return 3;if(s<4
       `<span>${t}</span>${i<items.length-1?'<span class="sep">·</span>':''}`
     ).join('');
   }
+  // Score is always gold for premium feel; level badge below carries semantics
   const elScore = document.querySelector('.r1-score');
-  if(elScore){ elScore.textContent = fmt1(D.scores?.overall); elScore.style.color = lvlTextColor(ovIdx); }
+  if(elScore){ elScore.textContent = fmt1(D.scores?.overall); }
   const elLevelName = document.querySelector('.r1-level-name');
   if(elLevelName) elLevelName.textContent = cap(D.levels?.overall || "");
   const elBcap = document.querySelector('.r1-bcap');
   if(elBcap) elBcap.style.display = D.bottleneck_capped ? '' : 'none';
 
-  // 4 pillar tiles in cover strip
+  // 4 pillar tiles in cover strip — score always gold; bottleneck class flips colors
   const tiles = document.querySelectorAll('.r1-strip .r1-tile');
   const tilePillars = ['people','process','data','technology'];
   const tileLetters = {'people':'P','process':'P','data':'D','technology':'T'};
   tiles.forEach((tile, i) => {
     const key = tilePillars[i]; if(!key) return;
-    const sc = D.scores?.[key]; const lvl = lvlIdxOf(D.levels?.[key], sc);
+    const sc = D.scores?.[key];
     tile.classList.toggle('bottleneck', (D.bottleneck||'').toLowerCase() === key);
     tile.querySelector('.r1-tile-badge').textContent = tileLetters[key];
     tile.querySelector('.r1-tile-label').textContent = key.charAt(0).toUpperCase()+key.slice(1);
     const sEl = tile.querySelector('.r1-tile-score');
     sEl.textContent = fmt1(sc);
-    if(tile.classList.contains('bottleneck')) sEl.style.color = '';
-    else sEl.style.color = lvlTextColor(lvl);
+    sEl.style.color = '';  // let CSS take over
     tile.querySelector('.r1-tile-level').textContent = cap(D.levels?.[key] || "");
   });
 
@@ -1910,7 +1873,7 @@ function scoreToLevel(s){ if(s<2)return 1;if(s<3)return 2;if(s<4)return 3;if(s<4
   const r5 = document.querySelector('.r5-card');
   if(r5){
     r5.querySelector('.r5-score').textContent = fmt1(D.scores?.overall);
-    r5.querySelector('.r5-score').style.color = lvlTextColor(ovIdx);
+    r5.querySelector('.r5-score').style.color = '';
     r5.querySelector('.r5-level').textContent = cap(D.levels?.overall || "");
     const cap5 = r5.querySelector('.r5-cap');
     if(D.bottleneck_capped){
