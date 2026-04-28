@@ -303,6 +303,32 @@ User feedback in two waves:
 - Report: refined R1 cover renders with tight typography. R4 People card opens cleanly with full evidence; Process card collapses to a single quote line with cyan-tinted "click to expand" hint.
 - Logo click navigates to dashboard from any internal page.
 
+## Report Cyan Migration + R1 Redesign (2026-04-28 — current session)
+User feedback (two screenshots): R1 cover looked ugly with "Meridian Controls" wrapping awkwardly to two lines, and the report still used gold accents that didn't match the rest of the SaaS app. Wanted cyan accent applied to the report **but maturity colors (L1–L5) and score colors kept as-is**.
+
+### Changes
+- **`premium.css` — gold variables remapped to cyan in `.ph-report` scope only**:
+  - `--gold #C9A84C → #0891B2`, `--gold-soft #F7F0DC → #ECFEFF`, `--gold-mid #E8D49A → #67E8F9`, `--gold-deep #A88A2E → #0E7490`
+  - **L1–L5 maturity colors UNTOUCHED** (red `#C0392B`, amber `#D4850A`, gold `#B8860B`, green `#27AE60`, deep blue `#1A5276` — these are the traffic-light maturity scale, not brand colors)
+  - 25 inline `rgba(201,168,76,*)` references in shadows/glows batch-migrated to `rgba(8,145,178,*)`
+- **R1 Cover redesigned** for tighter, premium SaaS proportions:
+  - Company title now uses `clamp(30px, 4.4vw, 46px)` so it scales with viewport — "Meridian Controls" fits on one line at any reasonable width
+  - `min-width: 0` on left grid column so it can shrink properly
+  - Score panel constrained to `min-width 200px / max-width 260px` instead of growing unbounded
+  - Score number "2.4" now has a soft cyan glow `text-shadow`
+  - Cyan radial bloom moved to top-right corner; left rail uses navy→cyan→transparent gradient
+  - Eyebrow pill has bright cyan dot with glow
+  - Padding tightened (48/56/32 vs 56/64/36 previously)
+- **Pillar tiles** in the dark strip — hover lift, refined typography, smaller badges (24px)
+- **`.ph-report` shell** — softened to `border-radius: 16px` + crisp `0 12px 32px rgba(15,23,42,0.10)` shadow (was the ivory's heavy 24px shadow)
+- **New responsive breakpoint at 1099px** for tighter padding on mid-size screens; full stack at <900px
+
+### Verified via screenshot (1920×1100 + 1280×900)
+- R1 cover: "Meridian Controls" on a single line, cyan eyebrow + score, white "Developing" pill on navy
+- R4 pillar accordion: Process bottleneck card opens with **red maturity score badge** correctly preserved (L1 colors untouched), evidence bullets readable
+- R2/R3: cyan card top borders, cyan "STD" pill, "Strongest pillar — Data" still has score-3 amber, "Critical bottleneck — Process" still has bottleneck red — maturity colors preserved
+- Sidebar gradient rail and `Export PDF` button cyan, consistent with the rest of the app
+
 ## Open / Backlog
 - P1: Real-LLM E2E verification of auto-emission after Turn 5 (pending Emergent LLM Key budget top-up).
 - P1: Hydration could expand to also rewrite R2 callout/bullets, R4 evidence, R7 roadmap actions, R8 decision impact when those exist on `assessment.report` — currently they remain static narrative from the template. Today's hydration covers R1, R5, R6 (the data-driven sections); narrative sections still show the Northpine demo content unless future LLM output populates new keys.
