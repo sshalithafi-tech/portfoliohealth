@@ -1,4 +1,4 @@
-import { ArrowLeft, Building2, User, FileText, Download, ExternalLink } from "lucide-react";
+import { ArrowLeft, Building2, User, FileText, Download } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -27,23 +27,6 @@ export const ChatHeader = ({ assessment, assessmentId }) => {
     }
   };
 
-  const openHtml = async () => {
-    try {
-      const res = await fetch(
-        `${BACKEND_URL}/api/assessments/${assessmentId}/report.html`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      if (!res.ok) throw new Error();
-      const html = await res.text();
-      const blob = new Blob([html], { type: "text/html" });
-      const url = URL.createObjectURL(blob);
-      window.open(url, "_blank", "noopener");
-      setTimeout(() => URL.revokeObjectURL(url), 60000);
-    } catch (e) {
-      alert("HTML report not ready yet.");
-    }
-  };
-
   return (
     <header className="h-14 sm:h-16 glass-surface flex items-center px-3 sm:px-6 shrink-0 relative z-10">
       <Link
@@ -68,15 +51,6 @@ export const ChatHeader = ({ assessment, assessmentId }) => {
 
       {assessment?.status === "completed" && (
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          <button
-            onClick={openHtml}
-            data-testid="chat-view-html-btn"
-            title="Open interactive HTML report"
-            className="flex items-center gap-1 sm:gap-2 px-2.5 sm:px-3 py-2 btn-glass rounded-xl text-xs sm:text-sm"
-          >
-            <ExternalLink size={14} />
-            <span className="hidden md:inline">HTML</span>
-          </button>
           <button
             onClick={downloadPdf}
             data-testid="chat-download-pdf-btn"

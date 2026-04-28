@@ -163,6 +163,41 @@ Applied the Block 1/2/3 design system to the public-facing site. The internal ap
 - **NEW** `/app/frontend/src/components/landing/landing.css` — full Block 1 design system as scoped CSS variables + component classes (`.ph-glass-card`, `.ph-dark-card`, `.ph-btn-primary`, `.ph-btn-secondary`, `.ph-section-label`, `.ph-section-footer`, `.ph-hero-badge`, `.ph-pulse-dot`, `.ph-level-pill`, `.ph-animate-in`, `.ph-hero-bg`, `.ph-nav`, etc.).
 - **REWRITTEN** `/app/frontend/src/pages/LandingPage.jsx` — Block 2 (Home: H1 hero, H2 What You Receive, H3 Four Pillars on navy, H4 Maturity Levels with 5-step track, H5 How It Works, H6 CTA) and Block 3 (Theory: T1 hero, T2 What This Measures, T3 Academic Foundation on navy, T4 Research Gap, T5 Decision Impact, T6 Thesis Contribution, T7 Bottom CTA) plus shared footer with citation strip + disclaimer. Tab switching via React state. All Lucide icons (no emoji). All copy follows the spec verbatim — never "Product Wellbeing", never "quick assessment", always "Full Assessment · 45–60 minutes".
 
+## Premium Report Consolidation (2026-04-28 — current session)
+User feedback: the standalone HTML report alongside the React web report was confusing. Action: the premium Navy+Gold layout was ported directly into `ReportPage.jsx`, the standalone HTML report and its endpoint were **deleted**, and the "View HTML" buttons were removed from `ChatHeader` and `ReportHeader`.
+
+### Changes
+- **NEW** `/app/frontend/src/lib/reportData.js` — JS port of the backend `_build_report_data` helper. Computes scores/levels/bottleneck/evidence/confidence/roadmap from `assessment.report` so the React report is fully self-contained.
+- **NEW** `/app/frontend/src/components/report/premium.css` — scoped (`.ph-report`) light "consultant document" theme with all R1–R10 styles ported from the deleted HTML template (R1 navy cover with gold accent stripe + gold score panel + 4-pillar dark strip · R2 executive summary · R3 organisation profile · R4 pillar cards with score bars + L→L+1 gap callout · R5 navy calc block with monospace breakdown · R6 red bottleneck callout · R7 3-column roadmap board with phase numbers + outcomes · R8 decision impact 3-tier · R9 bar/benchmark/confidence charts · R10 academic foundation grid + thesis pill).
+- **REWRITTEN** `/app/frontend/src/pages/ReportPage.jsx` (~720 lines) — full premium light report with all 10 sections, replacing the previous 13-numbered-section dark layout. Wrapped in white rounded container (radius 20px, deep shadow) so it sits as a "document" inside the dark app shell. Backed by the new `buildReportData` helper.
+- **REMOVED** standalone HTML report endpoint `GET /api/assessments/{id}/report.html` from `server.py`.
+- **DELETED** `/app/backend/html_report.py`, `/app/portfoliohealth-report.html`, `/app/frontend/src/components/report/ReportHeader.jsx` (no longer used).
+- **CLEANED** `ChatHeader.jsx` — removed `openHtml` handler + "HTML" button + `ExternalLink` icon import.
+- **CLEANED** `LandingPage.jsx` — removed the 3 stat cards (Peer-Reviewed / Doctoral Work / Empirical Study) from the Theory page hero.
+
+### Verified via screenshot
+- Premium R1 cover renders with navy bg, gold "2.4/5.0", "Developing" pill, 4 pillar tiles with Process (1.5) shown as bottleneck with red border.
+- R4 pillar cards correctly colour-code by maturity level (red L1, gold L2/L3, green L4, navy L5).
+- R5 calc block + R7 roadmap board (red/gold/green numbered phases) + R8 decision impact + R9 bar+benchmark+confidence + R10 academic citations all render with real Meridian Controls data.
+- Light report sits cleanly inside dark app shell with rounded edges and shadow. Toolbar (Back · View Chat · Export PDF) remains in the dark theme above.
+
+## Internal App Theme Unification (2026-04-28 — current session)
+User feedback: "the dashboard and the rest still have that old navy theme — change all to the new theme as the home page". Action: updated the shared design tokens and component classes in `index.css` so every internal page (Dashboard, Assessments, Companies, Chat, Admin) automatically inherits the same premium Navy+Gold consultant aesthetic as the public home page.
+
+### Changes
+- **`index.css` shared classes rewritten** to mirror `landing.ph-dark-card` / `ph-btn-primary`:
+  - `.glass-surface` / `.glass-surface-highlight` / `.glass-card` → solid `#162333` background with gold-tinted borders (`rgba(201,168,76,0.14–0.32)`), no more ghostly `rgba(255,255,255,0.03)` blur surfaces.
+  - `.glass-card` now has a 3px gold top-border + lift-on-hover with gold accent — identical look to the home page's white cards but on dark surface.
+  - `.btn-liquid` (primary CTA) → solid bright gold `#C9A84C` on navy text — matches the home-page hero CTA exactly.
+  - `.btn-glass` (secondary) → gold-tinted surface with gold-bordered hover state.
+  - `.glass-input` → navy input with gold focus ring.
+  - `.chat-message-assistant` / `.chat-message-user` → navy/gold solid bubbles instead of white-alpha glass.
+  - Killed the noisy `liquid-blob` background animations; replaced with subtle gold radial-gradient ambience.
+- **Sidebar (`Layout.jsx`) active state** → pure gold pill (`bg-[#C9A84C]/12`, gold border, inset gold glow) instead of the previous blue/gold gradient mix.
+
+### Verified via screenshot
+- Dashboard cards, stat tiles, Recent Assessments rows, Quick Check / Companies / Assessments tiles, sidebar active state, "New Assessment" CTA — all now mirror the premium home-page aesthetic. No blue accents remain.
+
 ## Open / Backlog
 - P1: Real-LLM E2E verification of auto-emission after Turn 5 (pending Emergent LLM Key budget top-up).
 - P1: Hydration could expand to also rewrite R2 callout/bullets, R4 evidence, R7 roadmap actions, R8 decision impact when those exist on `assessment.report` — currently they remain static narrative from the template. Today's hydration covers R1, R5, R6 (the data-driven sections); narrative sections still show the Northpine demo content unless future LLM output populates new keys.

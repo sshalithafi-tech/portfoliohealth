@@ -435,21 +435,6 @@ const TheoryPage = ({ ctaTo, onJumpToHomeCta }) => (
             Explore the Research <ArrowDown size={16} />
           </a>
         </div>
-
-        <div className="ph-stat-grid" style={{ marginTop: 24 }}>
-          {[
-            { icon: <BookOpen size={20} />, label: "Peer-Reviewed", val: "8 IEM Publications", desc: "Peer-reviewed papers 2018–2022" },
-            { icon: <GraduationCap size={20} />, label: "Doctoral Work", val: "2 Dissertations", desc: "University of Oulu, IEM Department" },
-            { icon: <Microscope size={20} />, label: "Empirical Study", val: "8 Companies", desc: "Maturity variation confirmed" },
-          ].map((s, i) => (
-            <div key={s.label} className="ph-glass-card ph-stat-card ph-animate-in" style={{ "--i": 4 + i }}>
-              <div className="ph-icon-badge">{s.icon}</div>
-              <span className="ph-stat-label">{s.label}</span>
-              <div className="ph-val">{s.val}</div>
-              <p className="ph-desc">{s.desc}</p>
-            </div>
-          ))}
-        </div>
       </div>
     </section>
 

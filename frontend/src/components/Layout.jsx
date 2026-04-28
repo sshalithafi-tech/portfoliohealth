@@ -89,8 +89,8 @@ const Layout = ({ children }) => {
               className={`
                 flex items-center gap-3 px-4 py-3 rounded-xl transition-all
                 ${isActive(path)
-                  ? 'bg-gradient-to-r from-[#60A5FA]/20 to-[#C9A84C]/10 text-[#C9A84C] border border-[#C9A84C]/20'
-                  : 'text-white/50 hover:text-white hover:bg-white/[0.04]'
+                  ? 'bg-[#C9A84C]/12 text-[#C9A84C] border border-[#C9A84C]/30 shadow-[0_0_18px_rgba(201,168,76,0.15)_inset]'
+                  : 'text-white/55 hover:text-white hover:bg-[#C9A84C]/[0.06]'
                 }
               `}
             >

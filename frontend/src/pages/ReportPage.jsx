@@ -1,48 +1,723 @@
 import { useState, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { AlertTriangle, RefreshCw } from "lucide-react";
+import {
+  AlertTriangle, RefreshCw, Clock, ArrowLeft, ArrowRight,
+  MessageSquare, Download, Info, BookOpen, GraduationCap,
+} from "lucide-react";
 import { toast } from "sonner";
 import Layout from "../components/Layout";
 import { useAssessment } from "../hooks/useData";
 import { LoadingSpinner } from "../components/ScoreComponents";
-import { DIMENSIONS } from "../components/report/constants";
-import ReportHeader from "../components/report/ReportHeader";
-import PortfolioContext from "../components/report/PortfolioContext";
-import { OverallScoreCard, DimensionScoreCards } from "../components/report/ScoreCards";
-import MaturityLevelsPanel from "../components/report/MaturityLevelsPanel";
-import ContributionChart from "../components/report/ContributionChart";
-import ScoreBreakdown from "../components/report/ScoreBreakdown";
-import ScoreMethodology from "../components/report/ScoreMethodology";
-import BottleneckSection from "../components/report/BottleneckSection";
-import { GovernanceObservations, ManagementCommitment } from "../components/report/GovernanceSections";
-import AssessmentReliability from "../components/report/AssessmentReliability";
-import { FindingsAndGaps, DecisionVulnerability, ImprovementRoadmap } from "../components/report/FindingsAndRoadmap";
-import { BenchmarkAndNote, ClosingStatement, ReportFooter } from "../components/report/BenchmarkAndClosing";
+import {
+  buildReportData,
+  scoreToLevel,
+  LEVEL_TITLES,
+  LEVEL_COLORS,
+  LEVEL_TEXT_COLORS,
+} from "../lib/reportData";
+import "../components/report/premium.css";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-const SectionLabel = ({ index, title, subtitle }) => (
-  <div className="flex items-baseline gap-3">
-    <span className="text-[10px] font-['JetBrains_Mono'] text-[#C9A84C]/60 tracking-widest">
-      {String(index).padStart(2, "0")}
-    </span>
-    <div>
-      <h2 className="text-base sm:text-lg font-semibold text-white font-['Outfit'] tracking-tight">
-        {title}
-      </h2>
-      {subtitle && <p className="text-[11px] text-white/35 italic mt-0.5">{subtitle}</p>}
+/* Level pill + class helpers */
+const lvlClass = (n) => `l${n}`;
+
+/* ============ R1 Cover ============ */
+const R1Cover = ({ data }) => {
+  const { company, industry, business_model, role, date, kpi, bottleneck_capped, bottleneck } = data;
+  const overallLvl = kpi.overall.level_index;
+  const overallScore = kpi.overall.score;
+
+  const metaParts = [industry, business_model, role, date].filter(Boolean);
+
+  return (
+    <section className="r1-cover" data-testid="report-r1-cover">
+      <div className="r1-inner">
+        <div className="r1-top">
+          <div>
+            <span className="r1-tag">PPDT Maturity Assessment · Full Report</span>
+            <h1 className="r1-company">{company}</h1>
+            <div className="r1-meta">
+              {metaParts.map((m, i) => (
+                <span key={i} style={{ display: "inline-flex", alignItems: "center" }}>
+                  <span>{m}</span>
+                  {i < metaParts.length - 1 && <span className="sep">·</span>}
+                </span>
+              ))}
+            </div>
+            <div className="r1-complete">
+              <span className="ico"><Clock size={14} /></span>
+              Full Assessment · 45–60 minutes
+            </div>
+          </div>
+          <div className="r1-right">
+            <div className="r1-score-block">
+              <span className="r1-score" data-testid="report-overall-score">{overallScore.toFixed(1)}</span>
+              <span className="r1-score-suffix">/5.0</span>
+            </div>
+            <span className="r1-score-label">Overall Maturity</span>
+            <span className="r1-level-name" data-testid="report-overall-level">
+              {LEVEL_TITLES[overallLvl] || "—"}
+            </span>
+            {bottleneck_capped && (
+              <div className="r1-bcap" data-testid="report-bottleneck-capped">
+                <AlertTriangle size={12} />
+                Bottleneck-capped
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      <div className="r1-strip">
+        {kpi.pillars.map((p) => {
+          const isBn = bottleneck && p.key === bottleneck;
+          return (
+            <div
+              key={p.key}
+              className={`r1-tile${isBn ? " bottleneck" : ""}`}
+              data-testid={`report-tile-${p.key}`}
+            >
+              <div className="r1-tile-top">
+                <div className="r1-tile-badge">{p.letter}</div>
+                <span className="r1-tile-label">{p.name}</span>
+              </div>
+              <span className="r1-tile-score">{p.score.toFixed(1)}</span>
+              <span className="r1-tile-level">
+                {isBn && "⚠ "}
+                {LEVEL_TITLES[p.level]}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+};
+
+/* ============ R2 Executive Summary ============ */
+const R2ExecutiveSummary = ({ data }) => {
+  const { kpi, bottleneck, bottleneck_capped, executive_summary, scores } = data;
+  const bnPillar = data.kpi.pillars.find((p) => p.key === bottleneck);
+  const strongest = [...kpi.pillars].sort((a, b) => b.score - a.score)[0];
+
+  const intro =
+    executive_summary ||
+    `${data.company} scores ${scores.overall.toFixed(1)}/5.0 (${LEVEL_TITLES[kpi.overall.level_index]}) on the PPDT maturity baseline.${
+      bottleneck_capped && bnPillar
+        ? ` The ${bnPillar.name} pillar at ${bnPillar.score.toFixed(1)} is capping the full system — no matter how strong the other pillars score, portfolio decisions cannot become data-driven until this bottleneck is resolved.`
+        : ""
+    }`;
+
+  return (
+    <section className="r2" data-testid="report-r2">
+      <div className="glass-card r2-card">
+        <span className="section-label">Executive Summary</span>
+        <p className="r2-open">{intro}</p>
+        {bottleneck_capped && bnPillar && (
+          <div className="r2-callout">
+            Portfolio decisions are currently being made without a verified {bnPillar.name.toLowerCase()} foundation, exposing the business to retaining low-leverage initiatives and under-investing in genuine high-margin opportunities.
+          </div>
+        )}
+        <div className="r2-bullets">
+          {strongest && (
+            <div className="r2-bullet">
+              <span className="dot" />
+              <p>
+                <b>Strongest pillar — {strongest.name} ({strongest.score.toFixed(1)}):</b>{" "}
+                {data.evidence[strongest.key]?.[0] ||
+                  "This pillar provides the foundation to build from once the bottleneck is resolved."}
+              </p>
+            </div>
+          )}
+          {bnPillar && (
+            <div className="r2-bullet">
+              <span className="dot" style={{ background: "var(--danger)" }} />
+              <p>
+                <b>Critical bottleneck — {bnPillar.name} ({bnPillar.score.toFixed(1)}):</b>{" "}
+                {data.evidence[bottleneck]?.[0] ||
+                  "This pillar is the binding constraint on overall maturity."}
+              </p>
+            </div>
+          )}
+          <div className="r2-bullet">
+            <span className="dot" />
+            <p>
+              <b>Immediate priority:</b>{" "}
+              {data.roadmap.phase1_actions?.[0] ||
+                "Appoint a single accountable owner with a 90-day mandate to resolve the highest-leverage bottleneck."}
+            </p>
+          </div>
+        </div>
+        <div className="section-footer">
+          Assessment grounded in Hannila (2019) doctoral dissertation, IEM, University of Oulu.
+        </div>
+      </div>
+    </section>
+  );
+};
+
+/* ============ R3 Organisation Profile ============ */
+const R3OrgProfile = ({ data }) => (
+  <section className="r3" data-testid="report-r3">
+    <div className="glass-card r3-card">
+      <span className="section-label">Organisation</span>
+      <div className="r3-row"><span className="lbl">Company</span><span className="val">{data.company}</span></div>
+      <div className="r3-row"><span className="lbl">Industry</span><span className="val">{data.industry}</span></div>
+      {data.business_model && (
+        <div className="r3-row"><span className="lbl">Business Model</span><span className="val">{data.business_model}</span></div>
+      )}
+      <div className="r3-row"><span className="lbl">Company Size</span><span className="val">{data.size}</span></div>
+      {data.respondent_name && (
+        <div className="r3-row"><span className="lbl">Respondent</span><span className="val">{data.respondent_name}</span></div>
+      )}
+      {data.role && (
+        <div className="r3-row"><span className="lbl">Role</span><span className="val">{data.role}</span></div>
+      )}
+      {data.date && (
+        <div className="r3-row"><span className="lbl">Assessment Date</span><span className="val">{data.date}</span></div>
+      )}
+    </div>
+    <div className="glass-card r3-card">
+      <span className="section-label">Business Model Context</span>
+      {data.business_model && <div className="r3-badge">{data.business_model}</div>}
+      <p className="r3-body">
+        Business model context informs the interpretation of pillar scores. Equal-weight scoring is the validated baseline — context informs how the gap is described and prioritised, but does not erase a bottleneck.
+      </p>
+      <p className="r3-note">
+        Equal-weight scoring is not adjusted by business model. Context informs interpretation only.
+      </p>
+      <div className="section-footer">
+        Business model classification: Hannila (2019) and Hannila et al. (2020) product type frameworks.
+      </div>
+    </div>
+  </section>
+);
+
+/* ============ R4 Pillar Cards ============ */
+const PillarCard = ({ pillar, data, idx }) => {
+  const { key, letter, name, score, level } = pillar;
+  const lvl = lvlClass(level);
+  const isBn = data.bottleneck === key;
+  const bullets = data.evidence[key] || [];
+  const nextLvl = Math.min(5, level + 1);
+
+  return (
+    <div className={`glass-card r4-card ${lvl}`} data-testid={`report-pillar-${key}`}>
+      <div className="r4-head">
+        <div className="r4-head-left">
+          <div className="r4-letter">{letter}</div>
+          <div>
+            <div className="r4-title-row">
+              <span className="r4-title">{name}</span>
+              {isBn && <span className="r4-bn-tag">⚠ Bottleneck</span>}
+            </div>
+            <div className="r4-sub">Dimension {idx + 1} of 4</div>
+          </div>
+        </div>
+        <div className="r4-head-right">
+          <div className={`r4-score-badge ${lvl}`}>{score.toFixed(1)} / 5.0</div>
+          <div className={`r4-level-name ${lvl}`}>{LEVEL_TITLES[level]}</div>
+        </div>
+      </div>
+      <div className="r4-bar">
+        <div className="r4-track">
+          <div
+            className={`r4-fill ${lvl}`}
+            style={{ width: `${(score / 5) * 100}%` }}
+          />
+        </div>
+        <div className="r4-scale">
+          <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+        </div>
+      </div>
+      <span className="section-label">Evidence from Assessment</span>
+      <div className="r4-evidence">
+        {bullets.map((b, i) => (
+          <div key={i} className="r4-bullet">
+            <span className="dash">—</span>
+            <p>{b}</p>
+          </div>
+        ))}
+      </div>
+      {level < 5 && (
+        <div className="r4-gap">
+          <div className="r4-gap-head">
+            <span className={`level-pill ${lvl}`}>{LEVEL_TITLES[level]}</span>
+            <span className="r4-gap-arrow"><ArrowRight size={14} /></span>
+            <span className={`level-pill l${nextLvl}`}>{LEVEL_TITLES[nextLvl]}</span>
+          </div>
+          <p className="r4-gap-desc">
+            To reach {LEVEL_TITLES[nextLvl]}, the {name.toLowerCase()} pillar needs the practices described in the roadmap (Phases 1–2) to be operational and consistently applied.
+          </p>
+        </div>
+      )}
+      <div className="section-footer">
+        PPDT pillar definitions: Hannila (2019) · Hannila, Härkönen &amp; Haapasalo (2022), Journal of Decision Systems, 31(3), 258–279.
+      </div>
+    </div>
+  );
+};
+
+const R4PillarSection = ({ data }) => (
+  <section className="r4" data-testid="report-r4">
+    {data.kpi.pillars.map((p, i) => (
+      <PillarCard key={p.key} pillar={p} data={data} idx={i} />
+    ))}
+  </section>
+);
+
+/* ============ R5 Overall Score Calculation ============ */
+const R5Calculation = ({ data }) => {
+  const { scores, kpi, bottleneck, bottleneck_capped } = data;
+  const bnPillar = kpi.pillars.find((p) => p.key === bottleneck);
+  const lvl = scoreToLevel(scores.overall);
+
+  return (
+    <section className="r5" data-testid="report-r5">
+      <div className="r5-card">
+        <div className="r5-left">
+          <span className="r5-label">Overall Maturity Score</span>
+          <div>
+            <span className="r5-score" style={{ color: LEVEL_COLORS[lvl] }}>
+              {scores.overall.toFixed(1)}
+            </span>
+            <span className="r5-score-suffix">/5.0</span>
+          </div>
+          <span className="r5-level">{LEVEL_TITLES[lvl]}</span>
+          {bottleneck_capped && bnPillar && (
+            <div className="r5-cap">
+              <span className="ico"><AlertTriangle size={14} /></span>
+              Capped by {bnPillar.name.toUpperCase()} bottleneck ({bnPillar.score.toFixed(1)} / 5.0)
+            </div>
+          )}
+        </div>
+        <div className="r5-right">
+          <div className="r5-calc">
+            {kpi.pillars.map((p) => (
+              <div key={p.key} className="r5-calc-row">
+                <span>{p.name.padEnd(11)} × 0.25</span>
+                <span>= {(p.score * 0.25).toFixed(2)}</span>
+              </div>
+            ))}
+            <div className="r5-calc-div" />
+            <div className="r5-calc-row tot">
+              <span>Overall Score</span>
+              <span>= {scores.overall.toFixed(2)}</span>
+            </div>
+          </div>
+          <p className="r5-research">
+            Equal weights: validated IEM baseline. Business-model weighting is open research (RQ5).
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+/* ============ R6 Bottleneck ============ */
+const R6Bottleneck = ({ data }) => {
+  const { bottleneck, kpi, bottleneck_narrative } = data;
+  if (!bottleneck) return null;
+  const bn = kpi.pillars.find((p) => p.key === bottleneck);
+  if (!bn) return null;
+
+  const narrative =
+    bottleneck_narrative ||
+    `The ${bn.name} pillar scores ${bn.score.toFixed(1)}/5.0 (${LEVEL_TITLES[bn.level]}) and is the binding constraint on overall maturity. It caps the other pillars because every portfolio decision ultimately depends on the practices and evidence this pillar provides. Until this gap is closed, investments in the other pillars will not lift the overall maturity score.`;
+
+  return (
+    <section className="r6" data-testid="report-r6">
+      <div className="r6-card">
+        <div className="r6-head">
+          <span className="ico"><AlertTriangle size={22} /></span>
+          <span className="r6-title">⚠ Bottleneck Identified — {bn.name.toUpperCase()}</span>
+        </div>
+        <p className="r6-body">{narrative}</p>
+        <div className="r6-risk">
+          <div className="r6-risk-head">
+            <span className="ico"><Info size={14} /></span>
+            <span className="r6-risk-label">Decision Risk</span>
+          </div>
+          <p className="r6-risk-body">
+            Portfolio renewal, retirement and investment-reallocation decisions are currently made on incomplete or unverified evidence in the {bn.name.toLowerCase()} pillar — and the gap will widen with every new project the organisation accepts until it is closed.
+          </p>
+        </div>
+        <div className="section-footer">
+          Bottleneck principle: Hannila et al. (2022) — five preconditions that must all function together for data-driven PPM to be possible.
+        </div>
+      </div>
+    </section>
+  );
+};
+
+/* ============ R7 Roadmap Board ============ */
+const RoadmapPhase = ({ phaseClass, num, tag, title, window: win, actions, outcomeLabel, outcomeValue, deltaText }) => (
+  <div className={`rb-phase ${phaseClass}`}>
+    <div className="rb-head">
+      <span className="rb-tag">{tag}</span>
+      <div className="rb-num">{num}</div>
+    </div>
+    <h3 className="rb-title">{title}</h3>
+    <div className="rb-window">{win}</div>
+    <div className="rb-actions">
+      {actions.map((a, i) => (
+        <div key={i} className="rb-action"><span>{a}</span></div>
+      ))}
+    </div>
+    <div className="rb-outcome">
+      <span className="rb-outcome-lbl">{outcomeLabel}</span>
+      <span className="rb-outcome-val">
+        <span className="arrow">→</span>
+        {outcomeValue}
+        {deltaText && <span className="delta">{deltaText}</span>}
+      </span>
     </div>
   </div>
 );
 
-const Section = ({ index, title, subtitle, children }) => (
-  <section className="space-y-3">
-    <SectionLabel index={index} title={title} subtitle={subtitle} />
-    <div>{children}</div>
+const R7Roadmap = ({ data }) => {
+  const { roadmap } = data;
+  const delta1 = roadmap.score_phase1 - roadmap.score_now;
+  const delta3 = roadmap.score_phase3 - roadmap.score_phase1;
+
+  return (
+    <section className="r7" data-testid="report-r7">
+      <span className="section-label">Improvement Roadmap</span>
+      <p className="r7-intro">
+        Actions are sequenced bottleneck-first. Phase 2 work will not improve overall maturity until the Phase 1 bottleneck is resolved.
+      </p>
+      <div className="roadmap-board">
+        <RoadmapPhase
+          phaseClass="p1"
+          num="1"
+          tag="Phase 1"
+          title="Resolve the Bottleneck"
+          window="0–3 months"
+          actions={roadmap.phase1_actions}
+          outcomeLabel="Projected Score"
+          outcomeValue={`${roadmap.score_phase1.toFixed(1)} / 5.0`}
+          deltaText={delta1 > 0 ? `+${delta1.toFixed(1)}` : null}
+        />
+        <RoadmapPhase
+          phaseClass="p2"
+          num="2"
+          tag="Phase 2"
+          title="Systemic Improvement"
+          window="3–12 months"
+          actions={roadmap.phase2_actions}
+          outcomeLabel="Build governance"
+          outcomeValue={`Defined → Managed`}
+        />
+        <RoadmapPhase
+          phaseClass="p3"
+          num="3"
+          tag="Phase 3"
+          title="Sustained Capability"
+          window="12+ months"
+          actions={roadmap.phase3_actions}
+          outcomeLabel="Target Maturity"
+          outcomeValue={`${roadmap.score_phase3.toFixed(1)} / 5.0`}
+          deltaText={delta3 > 0 ? `+${delta3.toFixed(1)}` : null}
+        />
+      </div>
+      <div className="glass-card r7-gov" style={{ marginTop: 18, padding: "16px 20px" }}>
+        <span className="ico"><Info size={16} /></span>
+        <p>
+          Each phase action must have a named governance owner. Investing in Phase 3 tooling before the Phase 1 bottleneck is resolved will not improve overall portfolio maturity. Sequence matters.
+        </p>
+      </div>
+      <div className="section-footer" style={{ paddingLeft: 0 }}>
+        Roadmap logic: Hannila et al. (2020), Journal of Enterprise Information Management, 33(1), 214–237. Bottleneck-first sequencing principle.
+      </div>
+    </section>
+  );
+};
+
+/* ============ R8 Portfolio Decision Impact ============ */
+const R8DecisionImpact = ({ data }) => {
+  const narrative =
+    data.decision_vulnerability_narrative ||
+    `Portfolio decisions today rely on the practices captured in the pillar scores above. Until the bottleneck is resolved, retirement, renewal and reallocation choices will be made on incomplete evidence — meaning low-leverage initiatives may be retained while high-margin opportunities are under-funded.`;
+
+  return (
+    <section className="r8" data-testid="report-r8">
+      <div className="glass-card r8-card">
+        <span className="section-label">Portfolio Decision Impact</span>
+        <div className="r8-sub">
+          <span className="r8-sub-label">Current Decision Quality</span>
+          <p className="r8-sub-body">{narrative}</p>
+        </div>
+        <div className="r8-sub">
+          <span className="r8-sub-label">At Next Maturity Level</span>
+          <p className="r8-sub-body">
+            Once Phase 1 is complete, leadership will be able to review portfolio performance on verified data with shorter cycle times. Retirement decisions become evidence-based rather than political. Manual reconciliation effort is freed for analytical work.
+          </p>
+        </div>
+        <div className="r8-sub">
+          <span className="r8-sub-label">At Full Maturity (Level 4–5)</span>
+          <p className="r8-sub-body">
+            Full maturity routinely supports continuous portfolio optimisation: live profitability dashboards, predictive flags for under-performing initiatives, and integrated decision-support at the moment of approval. The Portfolio Council reviews exception cases continuously rather than the entire portfolio annually.
+          </p>
+        </div>
+        <div className="section-footer">Decision quality framing: Hannila (2019) and Hannila et al. (2022).</div>
+      </div>
+    </section>
+  );
+};
+
+/* ============ R9 Dashboard charts (Bar + Confidence + Benchmark) ============ */
+const BarChart = ({ data }) => {
+  const { kpi, scores, bottleneck } = data;
+  const avg = scores.overall;
+
+  return (
+    <div className="chart-container" data-testid="report-bar-chart">
+      <div className="chart-head">
+        <div>
+          <div className="chart-title">Pillar Scores</div>
+          <div className="chart-sub">Scored against IEM maturity criteria</div>
+        </div>
+      </div>
+      {kpi.pillars.map((p) => {
+        const isBn = p.key === bottleneck;
+        const color = LEVEL_COLORS[p.level];
+        const textColor = LEVEL_TEXT_COLORS[p.level];
+        return (
+          <div key={p.key} className={`bar-row${isBn ? " bottleneck" : ""}`}>
+            <div className="bar-top">
+              <div className="bar-left">
+                <div className="bar-letter">{p.letter}</div>
+                <div>
+                  <span className="bar-name">
+                    {p.name}
+                    {isBn && <span style={{ color: "var(--danger)", fontWeight: 700, marginLeft: 4 }}>⚠</span>}
+                  </span>
+                  <span className={`level-pill ${lvlClass(p.level)}`} style={{ marginLeft: 8 }}>
+                    {LEVEL_TITLES[p.level]}
+                  </span>
+                </div>
+              </div>
+              <div>
+                <span className="bar-value" style={{ color: textColor }}>{p.score.toFixed(1)}</span>
+                <span className="bar-value-suffix">/5</span>
+              </div>
+            </div>
+            <div className="bar-track">
+              <div
+                className="bar-fill"
+                style={{
+                  width: `${(p.score / 5) * 100}%`,
+                  background: `linear-gradient(90deg, ${color}, ${color}BF)`,
+                }}
+              />
+              <div className="bar-avg" style={{ left: `${(avg / 5) * 100}%` }}>
+                <span className="bar-avg-lbl">AVG</span>
+              </div>
+            </div>
+            <div className="bar-scale">
+              <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+            </div>
+          </div>
+        );
+      })}
+      <div className="chart-foot">Criteria: Hannila et al. (2022, 2020) · Silvola (2018)</div>
+    </div>
+  );
+};
+
+const ConfidenceChart = ({ data }) => (
+  <div className="chart-container" data-testid="report-confidence-chart">
+    <div className="chart-head">
+      <div>
+        <div className="chart-title">Score Confidence</div>
+        <div className="chart-sub">Evidence quality behind each pillar score</div>
+      </div>
+    </div>
+    {data.kpi.pillars.map((p) => {
+      const c = data.confidence[p.key] || { strong: 60, inferred: 30, assumed: 10 };
+      return (
+        <div key={p.key} className="conf-row">
+          <div className="conf-lbl-row">
+            <span className="conf-lbl">{p.name}</span>
+            <span className="conf-strong-pct">{c.strong}% strong</span>
+          </div>
+          <div className="conf-track">
+            <div className="conf-seg-strong" style={{ width: `${c.strong}%` }} />
+            <div className="conf-seg-inferred" style={{ width: `${c.inferred}%` }} />
+            <div className="conf-seg-assumed" style={{ width: `${c.assumed}%` }} />
+          </div>
+        </div>
+      );
+    })}
+    <div className="conf-legend">
+      <div className="conf-leg-item"><span className="conf-leg-sw" style={{ background: "var(--gold)" }} />Strong</div>
+      <div className="conf-leg-item"><span className="conf-leg-sw" style={{ background: "var(--gold)", opacity: 0.4 }} />Inferred</div>
+      <div className="conf-leg-item"><span className="conf-leg-sw" style={{ background: "#CBD5E0" }} />Assumed</div>
+    </div>
+    <div className="chart-foot">Evidence-based scoring: IEM empirical methodology</div>
+  </div>
+);
+
+const BenchmarkChart = ({ data }) => {
+  const ranges = {
+    people: [2.0, 3.5],
+    process: [1.8, 3.2],
+    data: [1.5, 3.0],
+    technology: [2.0, 3.5],
+  };
+  return (
+    <div className="chart-container" data-testid="report-benchmark-chart">
+      <div className="chart-head">
+        <div>
+          <div className="chart-title">Benchmark Context</div>
+          <div className="chart-sub">Typical range for similar organisations</div>
+        </div>
+      </div>
+      {data.kpi.pillars.map((p) => {
+        const [min, max] = ranges[p.key] || [2.0, 3.2];
+        const bandLeft = (min / 5) * 100;
+        const bandWidth = ((max - min) / 5) * 100;
+        const dotLeft = (p.score / 5) * 100;
+        const color = LEVEL_COLORS[p.level];
+        return (
+          <div key={p.key} className="bm-row">
+            <div className="bm-label">{p.name}</div>
+            <div className="bm-track-area">
+              <div className="bm-track" />
+              <div className="bm-band" style={{ left: `${bandLeft}%`, width: `${bandWidth}%` }} />
+              <div className="bm-dot" style={{ left: `${dotLeft}%`, background: color }} />
+            </div>
+            <div className="bm-score">{p.score.toFixed(1)}</div>
+          </div>
+        );
+      })}
+      <p className="bm-disclaimer">
+        Ranges derived from Hannila et al. (2020) 8-company empirical study. Directional context only — not statistically validated.
+      </p>
+      <div className="chart-foot">Hannila, Koskinen, Härkönen &amp; Haapasalo (2020), JEIM</div>
+    </div>
+  );
+};
+
+const R9Dashboard = ({ data }) => (
+  <section className="r9" data-testid="report-r9">
+    <span className="section-label">Assessment Dashboard</span>
+    <BarChart data={data} />
+    <BenchmarkChart data={data} />
+    <ConfidenceChart data={data} />
   </section>
 );
 
+/* ============ R10 Research Basis ============ */
+const R10Research = () => (
+  <section className="r10" data-testid="report-r10">
+    <div className="r10-wrap">
+      <span className="section-label">Academic Foundation</span>
+      <p className="r10-sub">
+        Every dimension, maturity level, and improvement principle in this report has a published academic source. This section documents those sources.
+      </p>
+      <div className="r10-grid">
+        <div className="r10-cite">
+          <span className="r10-cite-tag">Doctoral Dissertation</span>
+          <h4 className="r10-cite-title">Towards data-driven decision-making in product portfolio management</h4>
+          <p className="r10-cite-auth">Hannila, H. (2019). University of Oulu, Finland.</p>
+          <p className="r10-cite-rel"><b>Relevance:</b> Provides the PPDT framework, five preconditions, and identifies the core research gap this tool addresses.</p>
+        </div>
+        <div className="r10-cite">
+          <span className="r10-cite-tag">Peer-Reviewed Article</span>
+          <h4 className="r10-cite-title">Digitalisation of a company decision-making system</h4>
+          <p className="r10-cite-auth">Hannila, H., Härkönen, J. &amp; Haapasalo, H. (2022). Journal of Decision Systems, 31(3), 258–279.</p>
+          <p className="r10-cite-rel"><b>Relevance:</b> Five preconditions that form the backbone of pillar assessment and bottleneck logic.</p>
+        </div>
+        <div className="r10-cite">
+          <span className="r10-cite-tag">Peer-Reviewed Article</span>
+          <h4 className="r10-cite-title">Product-level profitability: Preconditions for data-driven PPM</h4>
+          <p className="r10-cite-auth">Hannila, H., Koskinen, J., Härkönen, J. &amp; Haapasalo, H. (2020). JEIM, 33(1), 214–237.</p>
+          <p className="r10-cite-rel"><b>Relevance:</b> Empirical 8-company study confirming maturity variation and identifying the assessment gap.</p>
+        </div>
+        <div className="r10-cite">
+          <span className="r10-cite-tag">Doctoral Dissertation + Article</span>
+          <h4 className="r10-cite-title">One product data for integrated business processes</h4>
+          <p className="r10-cite-auth">Silvola, R. (2018). University of Oulu, Finland. Also: Hannila et al. (2022). Data-driven begins with DATA. JCIS, 62(1), 29–38.</p>
+          <p className="r10-cite-rel"><b>Relevance:</b> Defines Level 5 benchmark and the data-first principle underpinning the Data pillar.</p>
+        </div>
+      </div>
+      <div className="r10-thesis">
+        <div className="r10-thesis-head">
+          <span className="ico"><GraduationCap size={18} /></span>
+          <span className="r10-thesis-title">Master's Thesis Contribution</span>
+          <span className="r10-thesis-pill">IEM · University of Oulu · 2026</span>
+        </div>
+        <p className="r10-thesis-body">
+          This assessment instrument was developed as original Master's thesis research in Industrial Engineering and Management at the University of Oulu (IPIC programme, 2026). The instrument operationalises the research gap identified across Hannila (2019), Hannila et al. (2020, 2022) and Silvola (2018) — bridging the gap between published academic framework and practitioner-facing assessment tool.
+        </p>
+      </div>
+      <div className="section-footer">
+        Academic sources are publicly available through the University of Oulu repository and respective journal publishers.
+      </div>
+    </div>
+  </section>
+);
+
+/* ============ Footer ============ */
+const ReportFooter = ({ data }) => (
+  <footer className="report-footer">
+    <div className="l">PortfolioHealth Advisor · PPDT Maturity Assessment</div>
+    <div className="c">
+      <span className="a">IEM research-grounded · University of Oulu</span>
+      <span className="b">Hannila (2019) · Hannila et al. (2020, 2022) · Silvola (2018)</span>
+    </div>
+    <div className="r">
+      <span className="a">Full Assessment Report{data.date ? ` · ${data.date}` : ""}</span>
+      <span className="b">Prepared for: {data.company}</span>
+    </div>
+  </footer>
+);
+
+/* ============ Top toolbar (sits above the report doc, in dark app shell) ============ */
+const ReportToolbar = ({ id, onDownload, downloading, companyName }) => (
+  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+    <div className="flex items-center gap-3">
+      <Link
+        to="/assessments"
+        data-testid="report-back-btn"
+        className="p-2 rounded-xl glass-surface text-white/50 hover:text-white transition-all"
+      >
+        <ArrowLeft size={18} />
+      </Link>
+      <div>
+        <h1 className="text-lg sm:text-xl font-semibold text-white font-['Outfit'] tracking-tight">
+          PPDT Assessment Report
+        </h1>
+        <p className="text-white/40 text-xs">
+          {companyName} · Premium consultant report
+        </p>
+      </div>
+    </div>
+    <div className="flex items-center gap-2 flex-wrap">
+      <Link
+        to={`/assessments/${id}`}
+        data-testid="view-chat-btn"
+        className="flex items-center gap-2 px-3 py-2 btn-glass rounded-xl text-sm"
+      >
+        <MessageSquare size={16} />
+        <span className="hidden sm:inline">View Chat</span>
+      </Link>
+      <button
+        onClick={onDownload}
+        disabled={downloading}
+        data-testid="export-pdf-btn"
+        className="flex items-center gap-2 px-4 py-2 btn-liquid rounded-xl text-sm disabled:opacity-50"
+      >
+        <Download size={16} />
+        {downloading ? "..." : "Export PDF"}
+      </button>
+    </div>
+  </div>
+);
+
+/* ============ Main page ============ */
 const ReportPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -60,14 +735,12 @@ const ReportPage = () => {
             ? "Report recovered from the last message."
             : "Report regenerated successfully."
         );
-        // Full reload so useAssessment refetches cleanly
         navigate(0);
       } else {
         toast.error("Could not regenerate the report.");
       }
     } catch (err) {
-      const detail = err?.response?.data?.detail || "Regeneration failed. Please try again.";
-      toast.error(detail);
+      toast.error(err?.response?.data?.detail || "Regeneration failed. Please try again.");
     } finally {
       setRegenerating(false);
     }
@@ -80,13 +753,13 @@ const ReportPage = () => {
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", `PPDT_Assessment_${assessment?.company_name?.replace(/\s+/g, "_")}.pdf`);
+      link.setAttribute("download", `PPDT_Assessment_${(assessment?.company_name || "Report").replace(/\s+/g, "_")}.pdf`);
       document.body.appendChild(link);
       link.click();
       link.remove();
       toast.success("PDF downloaded");
     } catch (err) {
-      console.error("PDF download failed:", err);
+      console.error(err);
       toast.error("Failed to download PDF");
     } finally {
       setDownloading(false);
@@ -133,106 +806,28 @@ const ReportPage = () => {
     );
   }
 
-  const report = assessment.report;
-  const scores = report.scores || {};
-  const levelNames = report.level_names || {};
-  const weightsRaw = report.weights_raw || { people: 5, process: 5, data: 5, technology: 5 };
-  const rawTotal = Object.values(weightsRaw).reduce((a, b) => a + (Number(b) || 0), 0) || 1;
-  const weightsNorm = report.weights_normalised || Object.fromEntries(
-    DIMENSIONS.map(d => [d, (Number(weightsRaw[d]) || 5) / rawTotal])
-  );
-  const overallLevel = Math.round(scores.overall || 0);
-  const contextualScore = typeof report.contextual_score === "number" ? report.contextual_score : null;
+  const data = buildReportData(assessment);
 
   return (
     <Layout>
-      <div className="space-y-8 sm:space-y-10">
-        <ReportHeader
-          assessmentId={id}
-          onDownload={downloadPDF}
-          downloading={downloading}
-        />
-
-        {/* 01 — Portfolio Context */}
-        <Section index={1} title="Portfolio Context" subtitle="Who and what this report is about">
-          <PortfolioContext assessment={assessment} report={report} />
-        </Section>
-
-        {/* 02 — Overall Maturity (Dual Score) */}
-        <Section index={2} title="Overall Maturity" subtitle="Equal-weighted vs contextual score">
-          <OverallScoreCard
-            scores={scores}
-            levelNames={levelNames}
-            overallLevel={overallLevel}
-            contextualScore={contextualScore}
-          />
-        </Section>
-
-        {/* 03 — Pillar Maturity Levels (L1–L5) */}
-        <Section index={3} title="Pillar Maturity Levels" subtitle="Where each pillar sits on the L1–L5 Hannila maturity ladder">
-          <MaturityLevelsPanel overallLevel={overallLevel} scores={scores} report={report} />
-        </Section>
-
-        {/* 04 — Dimension Scores */}
-        <Section index={4} title="Dimension Scores" subtitle="Raw pillar grades (1–5)">
-          <DimensionScoreCards scores={scores} levelNames={levelNames} />
-        </Section>
-
-        {/* 05 — Weighted Score Calculation */}
-        <Section index={5} title="Weighted Score Calculation" subtitle="How the overall score is derived from strategic weighting">
-          <div className="space-y-5">
-            <ContributionChart scores={scores} weightsNorm={weightsNorm} />
-            <ScoreBreakdown scores={scores} weightsRaw={weightsRaw} weightsNorm={weightsNorm} />
-            <ScoreMethodology scores={scores} weightsNorm={weightsNorm} />
-          </div>
-        </Section>
-
-        {/* 06 — Bottleneck Pillar */}
-        <Section index={6} title="Bottleneck Pillar" subtitle="The weakest pillar caps real-world capability">
-          <BottleneckSection
-            bottleneckPillar={report.bottleneck_pillar}
-            scores={scores}
-            report={report}
-          />
-        </Section>
-
-        {/* 07 — Governance & Ownership */}
-        <Section index={7} title="Governance & Ownership" subtitle="Accountability for portfolio decisions">
-          <GovernanceObservations report={report} />
-        </Section>
-
-        {/* 08 — Management Commitment */}
-        <Section index={8} title="Management Commitment" subtitle="The multiplier on all capability investments">
-          <ManagementCommitment report={report} />
-        </Section>
-
-        {/* 09 — Assessment Reliability (optional, small) */}
-        <Section index={9} title="Assessment Reliability" subtitle="How much to rely on these results">
-          <AssessmentReliability report={report} assessment={assessment} />
-        </Section>
-
-        {/* 10 — Decision-Type Vulnerability Analysis */}
-        <Section index={10} title="Decision-Type Vulnerability" subtitle="Risk by portfolio decision type">
-          <DecisionVulnerability report={report} />
-        </Section>
-
-        {/* 11 — Key Findings + 12 — Critical Capability Gaps */}
-        <Section index={11} title="Key Findings & Critical Gaps" subtitle="What matters most from this assessment">
-          <FindingsAndGaps report={report} />
-        </Section>
-
-        {/* 13 — Improvement Roadmap */}
-        <Section index={12} title="Improvement Roadmap" subtitle="Phased plan — immediate, short-term, strategic">
-          <ImprovementRoadmap report={report} />
-        </Section>
-
-        {/* 14 — Benchmark Context + 15 — Consultant's Note */}
-        <Section index={13} title="Benchmark & Consultant Note" subtitle="Context and a direct final take">
-          <BenchmarkAndNote report={report} />
-        </Section>
-
-        <ClosingStatement />
-        <ReportFooter />
+      <ReportToolbar
+        id={id}
+        onDownload={downloadPDF}
+        downloading={downloading}
+        companyName={data.company}
+      />
+      <div className="ph-report" data-testid="premium-report">
+        <R1Cover data={data} />
+        <R2ExecutiveSummary data={data} />
+        <R3OrgProfile data={data} />
+        <R4PillarSection data={data} />
+        <R5Calculation data={data} />
+        <R6Bottleneck data={data} />
+        <R7Roadmap data={data} />
+        <R8DecisionImpact data={data} />
+        <R9Dashboard data={data} />
+        <R10Research />
+        <ReportFooter data={data} />
       </div>
     </Layout>
   );
