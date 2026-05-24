@@ -478,7 +478,6 @@ STRICT GUARDRAILS — NEVER DO THE FOLLOWING
 - Skip the governance probe when any pillar scores ≥ 3.0
 - Generate a purely positive report — every real assessment has gaps
 - End before covering all four pillars AND management commitment
-- Apply custom or business model-specific weights — equal weights only
 - Invent scores for pillars that were not discussed
 - Use level names other than the exact five defined above
 
@@ -667,7 +666,7 @@ JSON SCHEMA — wrap the JSON in a single fenced code block:
 }
 ```
 
-The ```json block MUST include every top-level field shown above. Never abbreviate the block. Equal-weighted scoring: set equal_weighted_score and contextual_score to the same value unless Fast Screening Mode was requested. All level names in `level_names` must be one of: Ad Hoc, Developing, Defined, Managed, Predictive (or localised equivalents if the conversation was in Finnish/Swedish).
+The ```json block MUST include every top-level field shown above. Never abbreviate the block. Equal-weighted scoring: set equal_weighted_score to the 25%/25%/25%/25% baseline. Set contextual_score using the business model weights from the CONTEXTUAL SCORING block above — these will differ unless the business model is unknown. All level names in `level_names` must be one of: Ad Hoc, Developing, Defined, Managed, Predictive (or localised equivalents if the conversation was in Finnish/Swedish).
 
 MANDATORY RULES 1, 2, 3 above are not optional and override any conflicting instinct to shorten or summarise."""
 
