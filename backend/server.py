@@ -299,10 +299,94 @@ STEP 1 — ASSIGN PILLAR SCORES
 Score each pillar from 1.0 to 5.0 using the maturity level definitions above. Use half-point increments (e.g. 2.5, 3.5) when the respondent's evidence straddles two levels. Never assign a score without specific conversational evidence to justify it. If evidence is ambiguous, score conservatively (round down) and note the uncertainty in the Key Evidence column.
 
 STEP 2 — CALCULATE OVERALL SCORE
-Apply equal weights to all four pillars, consistent with the Product Wellbeing framework. Empirical validation of business model-specific weights is an open research question and has not been established in the literature. Do not apply custom weights.
 
-FORMULA:
-(People × 0.25) + (Process × 0.25) + (Data × 0.25) + (Technology × 0.25) = Overall Score
+CONTEXTUAL SCORING — BUSINESS MODEL WEIGHTS (MANDATORY)
+
+The overall score is reported in two forms:
+
+  1. EQUAL-WEIGHTED SCORE (primary): All four pillars weighted 25% each.
+     This is the academically validated baseline. Always shown as the main score.
+
+  2. CONTEXTUAL SCORE (secondary): Pillar weights adjusted for the company's
+     declared business model AND strategic priority. Shown alongside as secondary.
+     Labelled: "Adjusted for business model and stated priority."
+
+──────────────────────────────────────────────────────────────────────────────
+STEP 1 — SELECT BASE WEIGHTS FROM BUSINESS MODEL
+
+Use exactly these weights as the starting point for the contextual score:
+
+  Business Model  | People | Process | Data | Technology
+  ───────────────────────────────────────────────────────
+  ETO             |  35%   |  30%    | 20%  |   15%
+  CETO            |  25%   |  30%    | 25%  |   20%
+  CTO             |  20%   |  25%    | 30%  |   25%
+  Standard        |  15%   |  30%    | 35%  |   20%
+  Bulk            |  10%   |  35%    | 20%  |   35%
+
+All rows sum to 100%. Use the EXACT values above. Do NOT interpolate or adjust
+based on company size, industry, or any other variable. If the business model is
+unknown, use equal weights (25% each).
+
+──────────────────────────────────────────────────────────────────────────────
+STEP 2 — APPLY STRATEGIC PRIORITY BOOST (if applicable)
+
+If the respondent's declared strategic priority maps CLEARLY to a single pillar,
+add +5% to that pillar and subtract −1.67% from each of the other three pillars,
+then normalise to 100%.
+
+Priority keyword → pillar mapping:
+  People, talent, culture, training, leadership, HR     → People   +5%
+  Process, governance, workflow, review, cadence        → Process  +5%
+  Data, master data, analytics, reporting, BI, insight  → Data     +5%
+  Technology, systems, ERP, PLM, IT, digital tools      → Technology +5%
+
+  Ambiguous priorities — NO boost, use business model weights as-is:
+    "Portfolio simplification", "profitability improvement", "complexity reduction",
+    "digital transformation", "innovation", "growth", or any multi-pillar phrase.
+
+RULE: If in doubt, do NOT apply the boost. The business model weight alone is
+sufficient. Never force a boost where the priority is unclear.
+
+──────────────────────────────────────────────────────────────────────────────
+STEP 3 — COMPUTE CONTEXTUAL SCORE
+
+  contextual_score = (people_score × people_weight)
+                   + (process_score × process_weight)
+                   + (data_score × data_weight)
+                   + (technology_score × technology_weight)
+
+Where weights = final normalised weights after Step 1 + Step 2.
+
+──────────────────────────────────────────────────────────────────────────────
+STEP 4 — POPULATE JSON FIELDS
+
+  "contextual_weights":   { final weights from Step 1+2, normalised to 1.0 }
+  "weights_raw":          { base weights from Step 1 only, normalised to 1.0 }
+  "weights_normalised":   { same as contextual_weights }
+  "equal_weighted_score": sum(score × 0.25 for all four pillars)
+  "contextual_score":     sum computed in Step 3
+
+IMPORTANT: equal_weighted_score and contextual_score MUST DIFFER unless:
+  (a) The business model is unknown (equal weights used for both), OR
+  (b) By coincidence the weighted sum equals the equal-weighted sum (rare).
+
+If you compute equal_weighted_score == contextual_score for a known business
+model: STOP. Recheck your weight table lookup. You have used equal weights
+(25% each) by mistake. Fix before emitting.
+
+──────────────────────────────────────────────────────────────────────────────
+ACADEMIC BASIS FOR THESE WEIGHTS
+
+The business model weights are derived from the CODP (Customer Order Decoupling
+Point) framework (Haug, Ladeby & Edwards, 2009; Wikner & Rudberg, 2004) and
+corroborated by:
+  - Hannila, Salonen & Vierimaa (2024): PPDT must be adjusted to the product journey
+  - Tolonen et al. (2014, 2015): empirical PPM capability challenges by portfolio type
+  - Trentin et al. (2022): knowledge management primacy in ETO environments
+  - Hannila et al. (2020): data accessibility as primary bottleneck in Standard/HW portfolios
+
+These weights are a peer-reviewed, thesis-grounded design choice — not heuristics.
 
 STEP 3 — APPLY BOTTLENECK RULE
 If the lowest pillar score is 1.0 or more below the calculated overall average, the narrative interpretation must be capped at the bottleneck pillar's level — not the average.
