@@ -8,10 +8,10 @@
   --navy: #0D1B2A;
   --navy-mid: #1A3550;
   --navy-deep: #091622;
-  /* Brand accent — bright cyan (matches dashboard).
-     Variable names retained for backwards-compat; values are now cyan.
-     L1–L5 maturity colors below stay untouched. */
-  --gold: #22D3EE;
+  /* Brand accent — Deep Teal (was cyan #22D3EE; cyan now reserved for the
+     overall maturity score number only). Variable names retained for
+     backwards-compat. */
+  --gold: #0891B2;
   --gold-soft: #ECFEFF;
   --gold-mid: #67E8F9;
   --gold-deep: #0E7490;
@@ -22,12 +22,13 @@
   --border: #E5E7EB;
   --danger: #EF4444;
   --success: #22C55E;
-  /* Maturity score palette — DO NOT change these (intentional traffic-light scale) */
-  --l1: #C0392B; --l1-bg: #FBE9E7; --l1-bd: #F2C2BB;
-  --l2: #D4850A; --l2-bg: #FCF1DC; --l2-bd: #F2D399;
-  --l3: #B8860B; --l3-bg: #FAF1D6; --l3-bd: #E8CB76; --l3-text: #5C4308;
-  --l4: #27AE60; --l4-bg: #E5F6EC; --l4-bd: #B5E2C5;
-  --l5: #1A5276; --l5-bg: #E3EDF3; --l5-bd: #A4C3D6;
+  /* Maturity score palette — dynamic numeric-band scale
+     1.0–1.4 red · 1.5–2.4 amber · 2.5–3.4 green · 3.5–4.4 sky · 4.5–5.0 emerald */
+  --l1: #DC2626; --l1-bg: #FEE2E2; --l1-bd: #FCA5A5;
+  --l2: #F59E0B; --l2-bg: #FEF3C7; --l2-bd: #FCD34D;
+  --l3: #10B981; --l3-bg: #D1FAE5; --l3-bd: #6EE7B7; --l3-text: #047857;
+  --l4: #0EA5E9; --l4-bg: #E0F2FE; --l4-bd: #7DD3FC;
+  --l5: #059669; --l5-bg: #D1FAE5; --l5-bd: #6EE7B7;
 
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   color: var(--slate);
@@ -222,12 +223,12 @@
 .ph-report .r1-score {
   font: 700 60px/1 'Outfit', 'Inter', sans-serif;
   letter-spacing: -2.5px;
-  color: var(--gold-mid);
-  text-shadow: 0 2px 14px rgba(8, 145, 178, 0.40);
+  color: #22D3EE;
+  text-shadow: 0 2px 14px rgba(34, 211, 238, 0.40);
 }
 .ph-report .r1-score-suffix {
   font: 500 17px 'Inter';
-  color: rgba(103, 232, 249, 0.55);
+  color: rgba(34, 211, 238, 0.55);
   letter-spacing: -0.5px;
 }
 .ph-report .r1-level-name {
@@ -348,10 +349,10 @@
   margin-top: 7px;
   flex-shrink: 0;
 }
-/* Executive Summary bullet dots — green / red / cyan by position */
+/* Executive Summary bullet dots — green / red / deep teal by position */
 .ph-report .r2-bullet:nth-child(1) .dot { background: #22C55E; }
 .ph-report .r2-bullet:nth-child(2) .dot { background: #EF4444; }
-.ph-report .r2-bullet:nth-child(3) .dot { background: #22D3EE; }
+.ph-report .r2-bullet:nth-child(3) .dot { background: #0891B2; }
 .ph-report .r2-bullet p { font: 400 14px 'Inter'; color: var(--slate); line-height: 1.6; }
 
 /* ============ R3 Organisation Profile ============ */
@@ -487,7 +488,7 @@
 }
 .ph-report .r4-score-badge.l1 { background: var(--l1); }
 .ph-report .r4-score-badge.l2 { background: var(--l2); }
-.ph-report .r4-score-badge.l3 { background: var(--l3); color: var(--l3-text); }
+.ph-report .r4-score-badge.l3 { background: var(--l3); }
 .ph-report .r4-score-badge.l4 { background: var(--l4); }
 .ph-report .r4-score-badge.l5 { background: var(--l5); }
 .ph-report .r4-score-num { font: 700 18px/1 'Inter'; letter-spacing: -0.4px; }
@@ -624,12 +625,12 @@
 .ph-report .r5-score {
   font: 800 52px/1 'Inter';
   letter-spacing: -2px;
-  color: var(--gold);
+  color: #22D3EE;
   display: inline;
 }
 .ph-report .r5-score-suffix {
   font: 400 22px 'Inter';
-  color: rgba(8, 145, 178, 0.4);
+  color: rgba(34, 211, 238, 0.55);
   margin-left: 4px;
 }
 .ph-report .r5-level {

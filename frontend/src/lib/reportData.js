@@ -11,6 +11,21 @@ export const LEVEL_TITLES = ["", "Ad Hoc", "Developing", "Defined", "Managed", "
 export const LEVEL_COLORS = { 1: "#C0392B", 2: "#D4850A", 3: "#B8860B", 4: "#27AE60", 5: "#1A5276" };
 export const LEVEL_TEXT_COLORS = { 1: "#C0392B", 2: "#D4850A", 3: "#5C4308", 4: "#27AE60", 5: "#1A5276" };
 
+/* Dynamic maturity-band colors — driven by NUMERIC score band, not discrete level index.
+   1.0–1.4 red · 1.5–2.4 amber · 2.5–3.4 green · 3.5–4.4 sky · 4.5–5.0 emerald */
+export const BAND_COLORS = { 1: "#DC2626", 2: "#F59E0B", 3: "#10B981", 4: "#0EA5E9", 5: "#059669" };
+export const BAND_TEXT_COLORS = { 1: "#DC2626", 2: "#B45309", 3: "#047857", 4: "#0369A1", 5: "#047857" };
+
+export function scoreToBand(s) {
+  const n = parseFloat(s);
+  if (!Number.isFinite(n)) return 1;
+  if (n < 1.5) return 1;
+  if (n < 2.5) return 2;
+  if (n < 3.5) return 3;
+  if (n < 4.5) return 4;
+  return 5;
+}
+
 const LEVEL_NAME_TO_INDEX = {
   "ad hoc": 1,
   developing: 2,

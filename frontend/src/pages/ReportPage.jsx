@@ -12,16 +12,18 @@ import { LoadingSpinner } from "../components/ScoreComponents";
 import {
   buildReportData,
   scoreToLevel,
+  scoreToBand,
   LEVEL_TITLES,
-  LEVEL_COLORS,
-  LEVEL_TEXT_COLORS,
+  BAND_COLORS,
+  BAND_TEXT_COLORS,
 } from "../lib/reportData";
 import "../components/report/premium.css";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-/* Level pill + class helpers */
-const lvlClass = (n) => `l${n}`;
+/* Level pill + class helpers — driven by numeric band (not discrete level index)
+   so the colour scale stays continuous across pillar scores. */
+const bandClass = (score) => `l${scoreToBand(score)}`;
 
 /* ============ R1 Cover ============ */
 const R1Cover = ({ data }) => {
@@ -175,10 +177,11 @@ const R3OrgProfile = ({ data }) => (
 /* ============ R4 Pillar Cards (clickable accordion) ============ */
 const PillarCard = ({ pillar, data, idx, isOpen, onToggle }) => {
   const { key, letter, name, score, level } = pillar;
-  const lvl = lvlClass(level);
+  const lvl = bandClass(score);
+  const nextLvl = `l${Math.min(5, scoreToBand(score) + 1)}`;
   const isBn = data.bottleneck === key;
   const bullets = data.evidence[key] || [];
-  const nextLvl = Math.min(5, level + 1);
+  const nextLevel = Math.min(5, level + 1);
   const summary = bullets[0] || "";
 
   return (
@@ -253,10 +256,10 @@ const PillarCard = ({ pillar, data, idx, isOpen, onToggle }) => {
               <div className="r4-gap-head">
                 <span className={`level-pill ${lvl}`}>{LEVEL_TITLES[level]}</span>
                 <span className="r4-gap-arrow"><ArrowRight size={14} /></span>
-                <span className={`level-pill l${nextLvl}`}>{LEVEL_TITLES[nextLvl]}</span>
+                <span className={`level-pill ${nextLvl}`}>{LEVEL_TITLES[nextLevel]}</span>
               </div>
               <p className="r4-gap-desc">
-                To reach {LEVEL_TITLES[nextLvl]}, the {name.toLowerCase()} pillar needs the practices described in the roadmap (Phases 1–2) to be operational and consistently applied.
+                To reach {LEVEL_TITLES[nextLevel]}, the {name.toLowerCase()} pillar needs the practices described in the roadmap (Phases 1–2) to be operational and consistently applied.
               </p>
             </div>
           )}
@@ -305,7 +308,7 @@ const R5Calculation = ({ data }) => {
         <div className="r5-left">
           <span className="r5-label">Overall Maturity Score</span>
           <div>
-            <span className="r5-score" style={{ color: LEVEL_COLORS[lvl] }}>
+            <span className="r5-score">
               {scores.overall.toFixed(1)}
             </span>
             <span className="r5-score-suffix">/5.0</span>
@@ -507,8 +510,9 @@ const BarChart = ({ data }) => {
       </div>
       {kpi.pillars.map((p) => {
         const isBn = p.key === bottleneck;
-        const color = LEVEL_COLORS[p.level];
-        const textColor = LEVEL_TEXT_COLORS[p.level];
+        const band = scoreToBand(p.score);
+        const color = BAND_COLORS[band];
+        const textColor = BAND_TEXT_COLORS[band];
         return (
           <div key={p.key} className={`bar-row${isBn ? " bottleneck" : ""}`}>
             <div className="bar-top">
@@ -519,7 +523,7 @@ const BarChart = ({ data }) => {
                     {p.name}
                     {isBn && <span style={{ color: "var(--danger)", fontWeight: 700, marginLeft: 4 }}>⚠</span>}
                   </span>
-                  <span className={`level-pill ${lvlClass(p.level)}`} style={{ marginLeft: 8 }}>
+                  <span className={`level-pill ${bandClass(p.score)}`} style={{ marginLeft: 8 }}>
                     {LEVEL_TITLES[p.level]}
                   </span>
                 </div>
@@ -552,86 +556,14 @@ const BarChart = ({ data }) => {
   );
 };
 
-const ConfidenceChart = ({ data }) => (
-  <div className="chart-container" data-testid="report-confidence-chart">
-    <div className="chart-head">
-      <div>
-        <div className="chart-title">Score Confidence</div>
-        <div className="chart-sub">Evidence quality behind each pillar score</div>
-      </div>
-    </div>
-    {data.kpi.pillars.map((p) => {
-      const c = data.confidence[p.key] || { strong: 60, inferred: 30, assumed: 10 };
-      return (
-        <div key={p.key} className="conf-row">
-          <div className="conf-lbl-row">
-            <span className="conf-lbl">{p.name}</span>
-            <span className="conf-strong-pct">{c.strong}% strong</span>
-          </div>
-          <div className="conf-track">
-            <div className="conf-seg-strong" style={{ width: `${c.strong}%` }} />
-            <div className="conf-seg-inferred" style={{ width: `${c.inferred}%` }} />
-            <div className="conf-seg-assumed" style={{ width: `${c.assumed}%` }} />
-          </div>
-        </div>
-      );
-    })}
-    <div className="conf-legend">
-      <div className="conf-leg-item"><span className="conf-leg-sw" style={{ background: "var(--gold)" }} />Strong</div>
-      <div className="conf-leg-item"><span className="conf-leg-sw" style={{ background: "var(--gold)", opacity: 0.4 }} />Inferred</div>
-      <div className="conf-leg-item"><span className="conf-leg-sw" style={{ background: "#CBD5E0" }} />Assumed</div>
-    </div>
-    <div className="chart-foot">Evidence-based scoring: IEM empirical methodology</div>
-  </div>
-);
-
-const BenchmarkChart = ({ data }) => {
-  const ranges = {
-    people: [2.0, 3.5],
-    process: [1.8, 3.2],
-    data: [1.5, 3.0],
-    technology: [2.0, 3.5],
-  };
-  return (
-    <div className="chart-container" data-testid="report-benchmark-chart">
-      <div className="chart-head">
-        <div>
-          <div className="chart-title">Benchmark Context</div>
-          <div className="chart-sub">Typical range for similar organisations</div>
-        </div>
-      </div>
-      {data.kpi.pillars.map((p) => {
-        const [min, max] = ranges[p.key] || [2.0, 3.2];
-        const bandLeft = (min / 5) * 100;
-        const bandWidth = ((max - min) / 5) * 100;
-        const dotLeft = (p.score / 5) * 100;
-        const color = LEVEL_COLORS[p.level];
-        return (
-          <div key={p.key} className="bm-row">
-            <div className="bm-label">{p.name}</div>
-            <div className="bm-track-area">
-              <div className="bm-track" />
-              <div className="bm-band" style={{ left: `${bandLeft}%`, width: `${bandWidth}%` }} />
-              <div className="bm-dot" style={{ left: `${dotLeft}%`, background: color }} />
-            </div>
-            <div className="bm-score">{p.score.toFixed(1)}</div>
-          </div>
-        );
-      })}
-      <p className="bm-disclaimer">
-        Ranges derived from Hannila et al. (2020) 8-company empirical study. Directional context only — not statistically validated.
-      </p>
-      <div className="chart-foot">Hannila, Koskinen, Härkönen &amp; Haapasalo (2020), JEIM</div>
-    </div>
-  );
-};
+/* Note: Score Confidence and Benchmark Context charts were removed from the
+   dashboard view per design polish. They still exist in the PDF export
+   pipeline (`/app/backend/pdf_builder.py`). */
 
 const R9Dashboard = ({ data }) => (
   <section className="r9" data-testid="report-r9">
     <span className="section-label">Assessment Dashboard</span>
     <BarChart data={data} />
-    <BenchmarkChart data={data} />
-    <ConfidenceChart data={data} />
   </section>
 );
 

@@ -21,16 +21,53 @@ from reportlab.platypus import (
 CONTACT_EMAIL = "shalitha.samarakoonmudiyanselage@student.oulu.fi"
 DIMENSIONS = ["people", "process", "data", "technology"]
 
-# --- Brand palette (Deep Navy Corporate) ---
+# --- Brand palette (Premium SaaS — Deep Teal accent) ---
+# `GOLD` keeps its legacy name for backwards-compat; the value is now deep teal.
+# The overall maturity score number/suffix is intentionally rendered in
+# cyan (`#22D3EE`) to match the web dashboard — the rest of the report uses
+# the deeper teal as the primary brand accent.
 NAVY = colors.HexColor('#0D1B2A')
 NAVY_DEEP = colors.HexColor('#1A3550')
-GOLD = colors.HexColor('#22D3EE')
+GOLD = colors.HexColor('#0891B2')          # primary brand accent (deep teal)
+SCORE_CYAN = colors.HexColor('#22D3EE')    # reserved for the main maturity score
 GOLD_BG = colors.HexColor('#F0F4F8')
 GOLD_HILITE = colors.HexColor('#E2E8F0')
 TEXT_DARK = colors.HexColor('#1E293B')
 TEXT_MUTED = colors.HexColor('#94A3B8')
 ROW_ALT = colors.HexColor('#F8FAFC')
 LINE_LIGHT = colors.HexColor('#E2E8F0')
+
+# Dynamic maturity-band colors — driven by numeric score band.
+# 1.0–1.4 red · 1.5–2.4 amber · 2.5–3.4 green · 3.5–4.4 sky · 4.5–5.0 emerald
+BAND_COLORS_HEX = {
+    1: '#DC2626',
+    2: '#F59E0B',
+    3: '#10B981',
+    4: '#0EA5E9',
+    5: '#059669',
+}
+
+
+def score_band(score):
+    """Map a raw maturity score to its 1–5 numeric band (see palette above)."""
+    try:
+        n = float(score)
+    except (TypeError, ValueError):
+        return 1
+    if n < 1.5:
+        return 1
+    if n < 2.5:
+        return 2
+    if n < 3.5:
+        return 3
+    if n < 4.5:
+        return 4
+    return 5
+
+
+def band_color(score):
+    """Return the reportlab HexColor for a given score's maturity band."""
+    return colors.HexColor(BAND_COLORS_HEX[score_band(score)])
 
 # Hannila L1–L5 maturity ladder definitions (mirrors the web MaturityLevelsPanel)
 MATURITY_LADDER = [
@@ -111,11 +148,11 @@ def build_cover_page(story, assessment, report):
     # Tall navy banner that occupies the top half of the cover page
     brand_title = Paragraph(
         '<font size="30" color="#FFFFFF"><b>PortfolioHealth</b></font>'
-        '<font size="30" color="#22D3EE"><b> Advisor</b></font>',
+        '<font size="30" color="#0891B2"><b> Advisor</b></font>',
         ParagraphStyle("CovBrand", leading=36),
     )
     brand_sub = Paragraph(
-        '<font size="10" color="#22D3EE"><b>PPM CAPABILITY MATURITY ASSESSMENT</b></font>',
+        '<font size="10" color="#0891B2"><b>PPM CAPABILITY MATURITY ASSESSMENT</b></font>',
         ParagraphStyle("CovBrandSub", leading=14, spaceBefore=8),
     )
     report_title = Paragraph(
@@ -150,7 +187,7 @@ def build_cover_page(story, assessment, report):
     company_name = assessment.get("company_name", "—")
     industry = assessment.get("company_industry", "")
     prepared_label = Paragraph(
-        '<font size="9" color="#22D3EE"><b>PREPARED FOR</b></font>',
+        '<font size="9" color="#0891B2"><b>PREPARED FOR</b></font>',
         ParagraphStyle("PrepLabel", leading=12),
     )
     company = Paragraph(
@@ -196,12 +233,12 @@ def build_cover_page(story, assessment, report):
             ParagraphStyle("CovScoreLabel", alignment=1, leading=12),
         )],
         [Paragraph(
-            f'<font size="52" color="#0D1B2A"><b>{overall_text}</b></font>'
-            f'<font size="18" color="#94A3B8"> / 5.00</font>',
+            f'<font size="52" color="#22D3EE"><b>{overall_text}</b></font>'
+            f'<font size="18" color="#67E8F9"> / 5.00</font>',
             ParagraphStyle("CovScoreValue", alignment=1, leading=60, spaceBefore=8),
         )],
         [Paragraph(
-            f'<font size="13" color="#22D3EE"><b>{overall_level}</b></font>',
+            f'<font size="13" color="#0891B2"><b>{overall_level}</b></font>',
             ParagraphStyle("CovScoreLevel", alignment=1, leading=18, spaceBefore=8),
         )],
     ]
@@ -291,7 +328,7 @@ def build_toc_page(story):
     Compact layout so all 14 entries fit on a single A4 page.
     """
     story.append(Paragraph(
-        '<font color="#22D3EE" size="8"><b>CONTENTS</b></font>',
+        '<font color="#0891B2" size="8"><b>CONTENTS</b></font>',
         ParagraphStyle("TocEyebrow", leading=10, spaceAfter=2),
     ))
     story.append(Paragraph(
@@ -446,7 +483,7 @@ def build_references_section(story, styles):
 
     # Section header
     story.append(Paragraph(
-        '<font color="#22D3EE"><b>14</b></font>&nbsp;&nbsp;ACADEMIC FRAMEWORK &amp; REFERENCES',
+        '<font color="#0891B2"><b>14</b></font>&nbsp;&nbsp;ACADEMIC FRAMEWORK &amp; REFERENCES',
         ParagraphStyle("RefHeader", fontSize=11, fontName="Helvetica-Bold",
                        textColor=NAVY, spaceAfter=2, leading=14),
     ))
@@ -465,7 +502,7 @@ def build_references_section(story, styles):
     )
     for i, (authors, title, venue) in enumerate(REFERENCES, start=1):
         story.append(Paragraph(
-            f'<font color="#22D3EE"><b>{i}.</b></font>&nbsp; '
+            f'<font color="#0891B2"><b>{i}.</b></font>&nbsp; '
             f'{authors} <i>{title}</i> {venue}',
             ref_item_style,
         ))
@@ -506,7 +543,7 @@ def build_section_label(story, styles, number: int, title: str, subtitle: str = 
         textColor=TEXT_MUTED, spaceAfter=8, leading=10,
     )
     story.append(Paragraph(
-        f'<font color="#22D3EE">{number:02d}</font>&nbsp;&nbsp;{title.upper()}',
+        f'<font color="#0891B2">{number:02d}</font>&nbsp;&nbsp;{title.upper()}',
         label_style,
     ))
     if subtitle:
@@ -589,12 +626,12 @@ def build_overall_score(story, scores, report, level_names, heading, body):
     score_text = f"{equal}" if not isinstance(equal, (int, float)) else f"{equal}"
     eq_cell = [
         [Paragraph(
-            '<font size="7" color="#22D3EE"><b>EQUAL-WEIGHTED SCORE · PRIMARY</b></font>',
+            '<font size="7" color="#0891B2"><b>EQUAL-WEIGHTED SCORE · PRIMARY</b></font>',
             ParagraphStyle("EqLabel", leading=10),
         )],
         [Paragraph(
-            f'<font size="24" color="#0D1B2A"><b>{score_text}</b></font>'
-            f'<font size="11" color="#94A3B8"> / 5.00</font>',
+            f'<font size="24" color="#22D3EE"><b>{score_text}</b></font>'
+            f'<font size="11" color="#67E8F9"> / 5.00</font>',
             ParagraphStyle("EqScore", leading=30),
         )],
         [Paragraph(
@@ -673,7 +710,7 @@ def build_pillar_maturity_levels(story, scores, report, body):
     )
     ladder_data = [[
         Paragraph(
-            f'<font color="#22D3EE" size="9"><b>{lvl}</b></font><br/>'
+            f'<font color="#0891B2" size="9"><b>{lvl}</b></font><br/>'
             f'<font color="#0D1B2A" size="9"><b>{name}</b></font><br/><br/>'
             f'<font color="#94A3B8">{desc}</font>',
             ladder_style,
@@ -705,10 +742,19 @@ def build_pillar_maturity_levels(story, scores, report, body):
         s = scores.get(dim, 0)
         lvl = level_names.get(dim) or _derive_level_name(s)
         interp = pillar_interps.get(dim, "") or "\u2013"
+        band_hex = BAND_COLORS_HEX[score_band(s)]
+        score_cell_style = ParagraphStyle(
+            f"PillarScore_{dim}", fontSize=10, leading=12,
+            textColor=colors.HexColor(band_hex), alignment=1,
+        )
+        level_cell_style = ParagraphStyle(
+            f"PillarLevel_{dim}", fontSize=8.5, leading=11,
+            textColor=colors.HexColor(band_hex),
+        )
         interp_data.append([
             Paragraph(f"<b>{dim.capitalize()}</b>", cell_style),
-            Paragraph(str(s), cell_style),
-            Paragraph(lvl, cell_style),
+            Paragraph(f"<b>{s}</b>", score_cell_style),
+            Paragraph(f"<b>{lvl}</b>", level_cell_style),
             Paragraph(interp, cell_style),
         ])
     table = Table(interp_data, colWidths=[70, 45, 85, 290], repeatRows=1)
@@ -839,11 +885,21 @@ def build_dimension_scores_table(story, scores, level_names, dim_summaries, head
     data = [header]
     for dim in DIMENSIONS:
         summary_raw = dim_summaries.get(dim, "") or "\u2013"
-        lvl = level_names.get(dim) or _derive_level_name(scores.get(dim))
+        raw_score = scores.get(dim)
+        lvl = level_names.get(dim) or _derive_level_name(raw_score)
+        band_hex = BAND_COLORS_HEX[score_band(raw_score)]
+        score_cell_style = ParagraphStyle(
+            f"DimScore_{dim}", fontSize=10, leading=12,
+            textColor=colors.HexColor(band_hex), alignment=1,
+        )
+        level_cell_style = ParagraphStyle(
+            f"DimLevel_{dim}", fontSize=8.5, leading=11,
+            textColor=colors.HexColor(band_hex),
+        )
         data.append([
             Paragraph(f"<b>{dim.capitalize()}</b>", body_cell),
-            Paragraph(str(scores.get(dim, "\u2013")), body_cell),
-            Paragraph(lvl, body_cell),
+            Paragraph(f"<b>{raw_score if raw_score is not None else '–'}</b>", score_cell_style),
+            Paragraph(f"<b>{lvl}</b>", level_cell_style),
             Paragraph(summary_raw, body_cell),
         ])
 
@@ -1018,7 +1074,7 @@ def build_findings_and_gaps(story, report, heading, body):
         textColor=TEXT_MUTED, spaceAfter=6, leading=12,
     )
     story.append(Paragraph(
-        '<font color="#22D3EE"><b>11</b></font>&nbsp;&nbsp;KEY FINDINGS &amp; CRITICAL GAPS  <font color="#94A3B8">(continued)</font>',
+        '<font color="#0891B2"><b>11</b></font>&nbsp;&nbsp;KEY FINDINGS &amp; CRITICAL GAPS  <font color="#94A3B8">(continued)</font>',
         ParagraphStyle("GapsHeader", fontSize=11, fontName="Helvetica-Bold",
                        textColor=NAVY, spaceAfter=2, leading=14),
     ))
@@ -1081,7 +1137,7 @@ def build_benchmark_and_note(story, report, heading, body):
     story.append(Paragraph(report.get("benchmark_context", "N/A"), body))
     story.append(Spacer(1, 10))
 
-    story.append(Paragraph('<font color="#22D3EE"><b>Consultant\'s Note</b></font>', body))
+    story.append(Paragraph('<font color="#0891B2"><b>Consultant\'s Note</b></font>', body))
     story.append(Paragraph(f'<i>"{report.get("consultant_note", "N/A")}"</i>', body))
 
 

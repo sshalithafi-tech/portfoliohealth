@@ -373,8 +373,8 @@ select option {
 ::-webkit-scrollbar-thumb { background: var(--border-soft); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--accent-mid); }
 
-/* Selection */
-::selection { background: var(--accent-mid); color: var(--navy); }
+/* Selection — light gray for premium feel */
+::selection { background: #E5E7EB; color: var(--navy); }
 
 /* ============================================ */
 /* CHAT BUBBLES                                  */

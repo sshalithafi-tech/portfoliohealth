@@ -329,6 +329,45 @@ User feedback (two screenshots): R1 cover looked ugly with "Meridian Controls" w
 - R2/R3: cyan card top borders, cyan "STD" pill, "Strongest pillar — Data" still has score-3 amber, "Critical bottleneck — Process" still has bottleneck red — maturity colors preserved
 - Sidebar gradient rail and `Export PDF` button cyan, consistent with the rest of the app
 
+## 5-Point Design Polish (2026-05-24 — current session)
+User requested a precise 5-point design update to unify the dashboard + PDF and complete the premium SaaS polish.
+
+### Spec
+1. Primary accent everywhere → **deep teal `#0891B2`** (was `#22D3EE`)
+2. Overall maturity score number/suffix **stays `#22D3EE`** (cyan) on web + PDF
+3. Pillar/maturity colors driven by **numeric band**, not discrete level index:
+   - 1.0–1.4 red `#DC2626` · 1.5–2.4 amber `#F59E0B` · 2.5–3.4 green `#10B981` · 3.5–4.4 sky `#0EA5E9` · 4.5–5.0 emerald `#059669`
+4. Text selection highlight → light gray `#E5E7EB`
+5. **Remove** "Score Confidence" + "Benchmark Context" cards from the React R9 dashboard view (kept in PDF export)
+
+### Changes
+- **`/app/frontend/src/index.css`** — `::selection { background: #E5E7EB; color: var(--navy); }`
+- **`/app/frontend/src/components/report/premium.css`**:
+  - `--gold #22D3EE → #0891B2` (brand accent), `--gold-mid` `--gold-deep` `--gold-soft` retained
+  - `--l1..--l5` palette swapped to new numeric-band colors (red / amber / green / sky / emerald)
+  - `.r1-score` & `.r5-score` overridden to `#22D3EE` cyan with matching opacity'd suffix
+  - `.r4-score-badge.l3` override removed (default white text now applies on dark-green background)
+  - R2 bullet `:nth-child(3) .dot` → `#0891B2` deep teal
+- **`/app/frontend/src/lib/reportData.js`** — new `scoreToBand(score)`, `BAND_COLORS`, `BAND_TEXT_COLORS` exports
+- **`/app/frontend/src/pages/ReportPage.jsx`**:
+  - `lvlClass(level)` → `bandClass(score)` driven by numeric band
+  - `R5Calculation` overall score `style={{ color: LEVEL_COLORS[lvl] }}` removed (lets CSS keep it cyan)
+  - `BarChart` uses `BAND_COLORS[scoreToBand(p.score)]` per row
+  - `R9Dashboard` no longer renders `ConfidenceChart` or `BenchmarkChart` (definitions deleted)
+- **`/app/backend/pdf_builder.py`**:
+  - `GOLD` constant → `#0891B2` (deep teal); added `SCORE_CYAN = #22D3EE`
+  - `BAND_COLORS_HEX`, `score_band()`, `band_color()` helpers added
+  - All `#22D3EE` brand-accent literals → `#0891B2` (TOC, section labels, footer rules, ladder, consultant note, page strip)
+  - Cover overall score number + EQ-score number → `#22D3EE` cyan to match web
+  - `build_pillar_maturity_levels` and `build_dimension_scores_table` now render the Score and Level cells in the band color per pillar
+
+### Verified
+- Screenshot R1 cover: bright cyan 2.4 score, deep-teal "Developing" pill, teal eyebrow ✅
+- Screenshot R5: cyan 2.4 score on navy panel, dynamic green/amber bar fills, teal "Overall Score" total ✅
+- Screenshot R9: only one chart container (Pillar Scores), confidence + benchmark cards absent ✅
+- PDF download HTTP 200, 28KB, valid `%PDF-1.4`/`%%EOF`
+- PDF page 4 analysis confirms band coloring: People/Process/Tech 2.5 → green, Data 2.0 → amber ✅
+
 ## Open / Backlog
 - P1: Real-LLM E2E verification of auto-emission after Turn 5 (pending Emergent LLM Key budget top-up).
 - P1: Hydration could expand to also rewrite R2 callout/bullets, R4 evidence, R7 roadmap actions, R8 decision impact when those exist on `assessment.report` — currently they remain static narrative from the template. Today's hydration covers R1, R5, R6 (the data-driven sections); narrative sections still show the Northpine demo content unless future LLM output populates new keys.
