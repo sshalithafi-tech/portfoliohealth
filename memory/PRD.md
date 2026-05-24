@@ -375,5 +375,29 @@ User requested a precise 5-point design update to unify the dashboard + PDF and 
 - P2: Advanced analytics / benchmarking dashboard across all companies.
 - P3: Revisit token storage (localStorage → httpOnly cookies) once CORS supports it.
 
+## Executive Cover Redesign (2026-05-24 — current session)
+User asked for ONLY the front cover page to be redesigned with a premium boardroom/McKinsey/Deloitte aesthetic, fully aligned with the updated dashboard branding.
+
+### Spec
+- Deep navy gradient hero (#061B33 → #0A223D → #081827) with cyan glow
+- Top brand ribbon: "PortfolioHealth Advisor" wordmark + "Confidential · Executive Briefing" pill
+- Cyan eyebrow pill: "PPDT MATURITY ASSESSMENT"
+- Huge company name (Outfit bold, -1.6px tracking)
+- Thin cyan rule + clean metadata row with cyan-dot separators
+- Glass score panel on right with cyan-glow score number + white level pill
+- Hairline bottom strip with confidentiality + research line
+
+### Changes (cover-only)
+- **`/app/frontend/src/pages/ReportPage.jsx`** — `R1Cover` re-laid-out with `r1-brand`, `r1-rule`, and `r1-footer` blocks. No other R sections touched.
+- **`/app/frontend/src/components/report/premium.css`** — `.r1-cover` + all `.r1-*` rules rewritten end-to-end with the new palette, glassmorphic score panel, cyan glow rail and grid-line texture. Responsive breakpoints (1099/899) updated to match the new structure.
+- **`/app/backend/pdf_builder.py`** — `build_cover_page` rewritten: single navy hero card with brand row → cyan tag pill → huge company → cyan rule → cyan-dotted metadata → full-assessment chip + glass score panel (cyan number, white level pill) → hairline divider → confidentiality/research footer row.
+- Inner pages (TOC, R2–R10, PDF sections 01–14) **untouched**.
+
+### Verified
+- Web R1 cover screenshot (1920×1080 + 1440×900): brand ribbon, cyan tag, executive title, score panel with cyan 3.6 glow + "DEFINED" pill, footer strip — all clean.
+- React inner pages still mount: `r2=True r5=True r9=True` (no collateral changes).
+- PDF cover screenshot (rendered at 150 dpi): metadata stays inside panel, footer fits on a single line, cyan left-edge rail spans top→bottom.
+- Linter clean.
+
 ## Known Issue (recurring)
 Testing agent has historically replaced `from emergentintegrations.llm.chat import ...` with direct `import anthropic` in `chat_service.py` — ALWAYS check after running testing agent and revert if needed. App uses Emergent Universal Key, not a raw Anthropic SDK key.

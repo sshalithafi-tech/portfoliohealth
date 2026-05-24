@@ -25,7 +25,7 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
    so the colour scale stays continuous across pillar scores. */
 const bandClass = (score) => `l${scoreToBand(score)}`;
 
-/* ============ R1 Cover ============ */
+/* ============ R1 Cover — Executive Briefing ============ */
 const R1Cover = ({ data }) => {
   const { company, industry, business_model, role, date, kpi, bottleneck_capped } = data;
   const overallLvl = kpi.overall.level_index;
@@ -36,15 +36,25 @@ const R1Cover = ({ data }) => {
   return (
     <section className="r1-cover" data-testid="report-r1-cover">
       <div className="r1-inner">
+        {/* Top brand ribbon */}
+        <div className="r1-brand">
+          <span className="r1-brand-mark" data-testid="report-brand-mark">
+            PortfolioHealth<span className="accent">Advisor</span>
+          </span>
+          <span className="r1-brand-conf">Confidential · Executive Briefing</span>
+        </div>
+
+        {/* Hero */}
         <div className="r1-top">
           <div className="r1-left">
             <span className="r1-tag">PPDT Maturity Assessment</span>
             <h1 className="r1-company">{company}</h1>
+            <div className="r1-rule" aria-hidden="true" />
             <div className="r1-meta">
               {metaParts.map((m, i) => (
                 <span key={i} className="r1-meta-item">
                   <span>{m}</span>
-                  {i < metaParts.length - 1 && <span className="sep">·</span>}
+                  {i < metaParts.length - 1 && <span className="sep" aria-hidden="true" />}
                 </span>
               ))}
             </div>
@@ -53,6 +63,7 @@ const R1Cover = ({ data }) => {
               Full Assessment · 45–60 minutes
             </div>
           </div>
+
           <div className="r1-right">
             <span className="r1-score-label">Overall Maturity</span>
             <div className="r1-score-block">
@@ -69,6 +80,16 @@ const R1Cover = ({ data }) => {
               </div>
             )}
           </div>
+        </div>
+
+        {/* Bottom ribbon */}
+        <div className="r1-footer">
+          <span className="r1-footer-conf">
+            <b>Confidential</b> Prepared for the named organisation only — distribution requires authorisation.
+          </span>
+          <span className="r1-footer-meta">
+            PPM Capability Maturity · University of Oulu Research
+          </span>
         </div>
       </div>
     </section>
