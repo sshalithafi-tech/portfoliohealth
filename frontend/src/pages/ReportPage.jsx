@@ -159,6 +159,14 @@ const R2ExecutiveSummary = ({ data }) => {
 };
 
 /* ============ R3 Organisation Profile ============ */
+const BM_DESCRIPTIONS = {
+  "ETO": "Engineer-to-Order: every product is fully designed and built per customer order. The organisation depends heavily on individual expertise and per-order process governance — nothing is standardised until an order exists.",
+  "CETO": "Configure-and-Engineer-to-Order: a standard base is configured for most orders, but a significant portion require custom engineering. The primary challenge is governing which path each order follows — CTO or ETO.",
+  "CTO": "Configure-to-Order: customers select from a predefined option set applied to a standard base design. Variant proliferation and configuration data integrity are the primary portfolio risks.",
+  "Standard": "Standard Products: manufactured at scale with fixed specifications. Product-level profitability visibility and disciplined phase-in/phase-out governance are the primary portfolio management challenges.",
+  "Bulk": "Bulk: high-volume production where competitive advantage is entirely operational. Process standardisation and Technology automation are the primary capability investments — individual human dependency is actively reduced.",
+};
+
 const R3OrgProfile = ({ data }) => (
   <section className="r3" data-testid="report-r3">
     <div className="glass-card r3-card">
@@ -182,12 +190,11 @@ const R3OrgProfile = ({ data }) => (
     <div className="glass-card r3-card">
       <span className="section-label">Business Model Context</span>
       {data.business_model && <div className="r3-badge">{data.business_model}</div>}
-      <p className="r3-body">
-        Business model context informs the interpretation of pillar scores. Equal-weight scoring is the validated baseline — context informs how the gap is described and prioritised, but does not erase a bottleneck.
-      </p>
-      <p className="r3-note">
-        Equal-weight scoring is not adjusted by business model. Context informs interpretation only.
-      </p>
+      {BM_DESCRIPTIONS[data.business_model] && (
+        <p className="r3-body">
+          {BM_DESCRIPTIONS[data.business_model]}
+        </p>
+      )}
       <div className="section-footer">
         Business model classification: Hannila (2019) and Hannila et al. (2020) product type frameworks.
       </div>
