@@ -6,13 +6,13 @@
 
 :root {
     /* Premium Cool Off-White (Linear / Vercel / Stripe style) */
-    --paper:        #F7F8FA;   /* cool off-white body — modern SaaS premium */
-    --paper-soft:   #FBFCFD;
-    --paper-deep:   #EEF1F5;   /* subtle alt section bg */
+    --paper:        #F0F4F8;   /* cool blue-grey body — matches report page bg */
+    --paper-soft:   #F7FAFC;
+    --paper-deep:   #E5EBF1;   /* subtle alt section bg */
     --surface:      #FFFFFF;   /* cards lift cleanly off cool gray */
-    --surface-hover:#FAFBFC;
-    --background:   #F7F8FA;
-    --bg-alt:       #FBFCFD;
+    --surface-hover:#F7FAFC;
+    --background:   #F0F4F8;
+    --bg-alt:       #F7FAFC;
 
     --navy:         #0C1B2A;
     --navy-mid:     #162333;
@@ -87,8 +87,8 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
 
 @layer base {
     :root {
-        /* shadcn HSL tokens — cool off-white */
-        --background: 220 20% 97%;                /* #F7F8FA */
+        /* shadcn HSL tokens — cool blue-grey */
+        --background: 213 33% 95%;                /* #F0F4F8 */
         --foreground: 211 56% 11%;                /* navy */
         --card: 0 0% 100%;
         --card-foreground: 211 56% 11%;

@@ -5,23 +5,23 @@
    ================================================================ */
 
 .ph-report {
-  --navy: #0C1B2A;
-  --navy-mid: #162333;
+  --navy: #0D1B2A;
+  --navy-mid: #1A3550;
   --navy-deep: #091622;
-  /* Brand accent — cyan (matches the rest of the SaaS app).
+  /* Brand accent — bright cyan (matches dashboard).
      Variable names retained for backwards-compat; values are now cyan.
      L1–L5 maturity colors below stay untouched. */
-  --gold: #0891B2;
+  --gold: #22D3EE;
   --gold-soft: #ECFEFF;
   --gold-mid: #67E8F9;
   --gold-deep: #0E7490;
-  --slate: #4A5568;
-  --muted: #8896A5;
+  --slate: #1E293B;
+  --muted: #94A3B8;
   --bg: #FFFFFF;
-  --bg-alt: #F7F8FA;
+  --bg-alt: #F0F4F8;
   --border: #E5E7EB;
-  --danger: #C0392B;
-  --success: #27AE60;
+  --danger: #EF4444;
+  --success: #22C55E;
   /* Maturity score palette — DO NOT change these (intentional traffic-light scale) */
   --l1: #C0392B; --l1-bg: #FBE9E7; --l1-bd: #F2C2BB;
   --l2: #D4850A; --l2-bg: #FCF1DC; --l2-bd: #F2D399;
@@ -51,11 +51,11 @@
 }
 
 .ph-report .section-label {
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 1.2px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--gold-deep);
+  color: var(--gold);
   margin-bottom: 12px;
   display: block;
 }
@@ -71,7 +71,7 @@
 .ph-report .glass-card {
   background: #fff;
   border: 1px solid var(--border);
-  border-top: 3px solid var(--gold);
+  border-left: 3px solid var(--gold);
   border-radius: 18px;
   box-shadow: 0 4px 16px rgba(12, 27, 51, 0.07);
 }
@@ -131,12 +131,11 @@
   align-items: center;
   gap: 10px;
   font: 700 10px 'Inter';
-  color: var(--gold-mid);
+  color: var(--gold);
   text-transform: uppercase;
   letter-spacing: 2.6px;
   margin-bottom: 20px;
-  background: rgba(8, 145, 178, 0.10);
-  border: 1px solid rgba(8, 145, 178, 0.32);
+  background: var(--navy-mid);
   padding: 7px 16px;
   border-radius: 50px;
   white-space: nowrap;
@@ -349,6 +348,10 @@
   margin-top: 7px;
   flex-shrink: 0;
 }
+/* Executive Summary bullet dots — green / red / cyan by position */
+.ph-report .r2-bullet:nth-child(1) .dot { background: #22C55E; }
+.ph-report .r2-bullet:nth-child(2) .dot { background: #EF4444; }
+.ph-report .r2-bullet:nth-child(3) .dot { background: #22D3EE; }
 .ph-report .r2-bullet p { font: 400 14px 'Inter'; color: var(--slate); line-height: 1.6; }
 
 /* ============ R3 Organisation Profile ============ */
@@ -378,12 +381,11 @@
   max-width: 65%;
 }
 .ph-report .r3-badge {
-  background: var(--gold-soft);
-  border: 1px solid var(--gold-mid);
-  border-radius: 50px;
-  padding: 5px 14px;
-  font: 700 11px 'Inter';
-  color: var(--gold-deep);
+  background: var(--navy-mid);
+  border-radius: 9999px;
+  padding: 2px 10px;
+  font: 700 0.75rem 'Inter';
+  color: var(--gold);
   display: inline-block;
   margin-bottom: 14px;
 }
@@ -817,7 +819,7 @@
   padding: 24px 24px 18px;
   background: #fff;
   border: 1px solid var(--border);
-  border-top: 3px solid var(--gold);
+  border-left: 3px solid var(--gold);
   border-radius: 18px;
   box-shadow: 0 4px 16px rgba(12, 27, 51, 0.05);
   margin-bottom: 20px;
@@ -970,7 +972,7 @@
   border-radius: 10px;
   padding: 18px 20px;
   border: 1px solid var(--border);
-  border-top: 3px solid var(--gold);
+  border-left: 3px solid var(--gold);
 }
 .ph-report .r10-cite-tag {
   font: 700 10px 'Inter';
