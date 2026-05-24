@@ -418,7 +418,63 @@ After completing PHASE 4 (Confirm & Close), you MUST produce the final report in
 
 PART A — Human-readable prose report (using the structured format with pillar table, management commitment, bottleneck, decision vulnerabilities, roadmap, framework basis, closing).
 
-PART B — Structured JSON emission, wrapped in a single fenced code block:
+PART B — Structured JSON emission, wrapped in a single fenced code block.
+
+
+MANDATORY RULE 1 — PRECONDITION LABELLING IN critical_gaps
+
+Every item in the `critical_gaps` array MUST end with a precondition label in this exact format:
+  (Precondition N: [name])
+
+Use only these five preconditions, derived from Hannila et al. (2020), numbered exactly as listed:
+
+  Precondition 1: Mutual understanding of products and a consistent commercial and technical product structure
+  Precondition 2: Product classification into strategic, supportive, and non-strategic categories
+  Precondition 3: A holistic, corporate-level data model that connects master data to key business processes
+  Precondition 4: Data governance practices ensuring data quality, data ownership, and data accessibility
+  Precondition 5: Business IT systems adapted to support real-time visualisation and analysis of the product portfolio
+
+If a single gap spans two preconditions, cite both, e.g. `(Precondition 3 & 4: holistic data model and data governance)`.
+No gap may be written without this label. This rule is non-optional.
+
+Example of a correctly-labelled gap:
+  "Product master data is fragmented across SAP, Salesforce and spreadsheets; no single source of truth for portfolio decisions (Precondition 3: holistic, corporate-level data model)."
+
+
+MANDATORY RULE 2 — SCORE TRAJECTORY IN ROADMAP PHASES
+
+Each of the three roadmap phases (`roadmap.immediate`, `roadmap.short_term`, `roadmap.strategic`) MUST include an `expected_gain` field showing score deltas for all four pillars in this exact format:
+
+  People: X.X → X.X | Process: X.X → X.X | Data: X.X → X.X | Technology: X.X → X.X
+
+Rules of continuity:
+- Phase 1 (`immediate`) starting values MUST equal the assessed pillar scores from `scores`.
+- Each phase's end value MUST equal the next phase's start value (no gaps, no resets).
+- All four pillars MUST appear in every phase, even if a pillar has no movement (write "3.0 → 3.0").
+- Use one decimal place. Use the arrow character "→" (not "->" or "to").
+
+No phase may omit this trajectory. This rule is non-optional.
+
+Example for assessed scores People 2.0, Process 1.5, Data 3.0, Technology 3.0:
+  immediate.expected_gain:  "People: 2.0 → 2.5 | Process: 1.5 → 2.5 | Data: 3.0 → 3.0 | Technology: 3.0 → 3.0"
+  short_term.expected_gain: "People: 2.5 → 3.0 | Process: 2.5 → 3.5 | Data: 3.0 → 3.5 | Technology: 3.0 → 3.5"
+  strategic.expected_gain:  "People: 3.0 → 4.0 | Process: 3.5 → 4.0 | Data: 3.5 → 4.5 | Technology: 3.5 → 4.0"
+
+
+MANDATORY RULE 3 — COOPER STAGE-GATE REFERENCE (conditional)
+
+This rule has two trigger conditions. Apply each one independently whenever its trigger fires:
+
+  (3a) When `decision_vulnerability_ratings.new_launch` is rated "High" or "Critical", the `decision_vulnerability` prose field MUST include this exact sentence, verbatim, once:
+       "Where new product launch governance is absent or immature, a formal Stage-Gate intake process (Cooper, Edgett & Kleinschmidt, 2001) provides structured go/kill criteria at each development gate, directly addressing Process pillar gaps."
+
+  (3b) When the Process pillar score is below 3.0, the `roadmap.short_term.actions` field MUST include this exact sentence, verbatim, once:
+       "Introduce a lightweight Stage-Gate intake process for new launches (Cooper et al., 2001), applying strategic fit, value maximisation, and portfolio balance as the three gate criteria to anchor new launch decisions to portfolio strategy."
+
+If a trigger condition does not apply (e.g. Process ≥ 3.0, or new_launch risk is Low/Medium), do NOT insert that sentence.
+
+
+JSON SCHEMA — wrap the JSON in a single fenced code block:
 
 ```json
 {
@@ -479,24 +535,29 @@ PART B — Structured JSON emission, wrapped in a single fenced code block:
     "product_change": "Low | Medium | High | Critical",
     "portfolio_investment": "Low | Medium | High | Critical"
   },
-  "decision_vulnerability": "...",
+  "decision_vulnerability": "... (MANDATORY RULE 3a: if new_launch is High or Critical, include the Cooper Stage-Gate sentence verbatim)",
   "key_findings": ["...", "...", "...", "...", "..."],
-  "critical_gaps": ["...", "...", "...", "...", "..."],
+  // List all critical gaps identified — minimum 3, no upper limit. Each MUST end with (Precondition N: name).
+  "critical_gaps": [
+    "... (Precondition N: name)",
+    "... (Precondition N: name)",
+    "... (Precondition N: name)"
+  ],
   "roadmap": {
     "immediate": {
       "actions": "...",
       "pillar_focus": "...",
       "governance_milestone": "...",
       "management_required": "...",
-      "expected_gain": "...",
+      "expected_gain": "People: X.X → X.X | Process: X.X → X.X | Data: X.X → X.X | Technology: X.X → X.X",
       "timeframe": "0–3 months"
     },
     "short_term": {
-      "actions": "...",
+      "actions": "... (MANDATORY RULE 3b: if Process score < 3.0, include the Cooper Stage-Gate intake sentence verbatim)",
       "pillar_focus": "...",
       "governance_milestone": "...",
       "management_required": "...",
-      "expected_gain": "...",
+      "expected_gain": "People: X.X → X.X | Process: X.X → X.X | Data: X.X → X.X | Technology: X.X → X.X",
       "timeframe": "3–12 months"
     },
     "strategic": {
@@ -504,7 +565,7 @@ PART B — Structured JSON emission, wrapped in a single fenced code block:
       "pillar_focus": "...",
       "governance_milestone": "...",
       "management_required": "...",
-      "expected_gain": "...",
+      "expected_gain": "People: X.X → X.X | Process: X.X → X.X | Data: X.X → X.X | Technology: X.X → X.X",
       "timeframe": "12+ months"
     }
   },
@@ -518,11 +579,13 @@ PART B — Structured JSON emission, wrapped in a single fenced code block:
   },
   "benchmark_context": "...",
   "consultant_note": "...",
-  "closing_statement": "Thank you for completing this PPDT Capability Maturity Assessment. This report is based on the Product Wellbeing framework developed at the University of Oulu (Hannila, Vierimaa & Salonen, 2026) and supporting peer-reviewed research on data-driven Product Portfolio Management."
+  "closing_statement": "Thank you for completing this PPDT Capability Maturity Assessment. This report is based on the Product Wellbeing framework developed at the University of Oulu (Hannila, Salonen & Vierimaa, 2024) and supporting peer-reviewed research on data-driven Product Portfolio Management."
 }
 ```
 
-The ```json block MUST include every top-level field shown above. Never abbreviate the block. Equal-weighted scoring: set equal_weighted_score and contextual_score to the same value unless Fast Screening Mode was requested. All level names in `level_names` must be one of: Ad Hoc, Developing, Defined, Managed, Predictive (or localised equivalents if the conversation was in Finnish/Swedish)."""
+The ```json block MUST include every top-level field shown above. Never abbreviate the block. Equal-weighted scoring: set equal_weighted_score and contextual_score to the same value unless Fast Screening Mode was requested. All level names in `level_names` must be one of: Ad Hoc, Developing, Defined, Managed, Predictive (or localised equivalents if the conversation was in Finnish/Swedish).
+
+MANDATORY RULES 1, 2, 3 above are not optional and override any conflicting instinct to shorten or summarise."""
 
 # Auth Routes
 @api_router.post("/auth/register")
