@@ -22,15 +22,15 @@ CONTACT_EMAIL = "shalitha.samarakoonmudiyanselage@student.oulu.fi"
 DIMENSIONS = ["people", "process", "data", "technology"]
 
 # --- Brand palette (Deep Navy Corporate) ---
-NAVY = colors.HexColor('#0A1628')
-NAVY_DEEP = colors.HexColor('#1A1A2E')
-GOLD = colors.HexColor('#C9A84C')
-GOLD_BG = colors.HexColor('#FAF6E8')
-GOLD_HILITE = colors.HexColor('#EEE8D5')
-TEXT_DARK = colors.HexColor('#333333')
-TEXT_MUTED = colors.HexColor('#666666')
-ROW_ALT = colors.HexColor('#F8F8F8')
-LINE_LIGHT = colors.HexColor('#E0E0E0')
+NAVY = colors.HexColor('#0D1B2A')
+NAVY_DEEP = colors.HexColor('#1A3550')
+GOLD = colors.HexColor('#22D3EE')
+GOLD_BG = colors.HexColor('#F0F4F8')
+GOLD_HILITE = colors.HexColor('#E2E8F0')
+TEXT_DARK = colors.HexColor('#1E293B')
+TEXT_MUTED = colors.HexColor('#94A3B8')
+ROW_ALT = colors.HexColor('#F8FAFC')
+LINE_LIGHT = colors.HexColor('#E2E8F0')
 
 # Hannila L1–L5 maturity ladder definitions (mirrors the web MaturityLevelsPanel)
 MATURITY_LADDER = [
@@ -60,7 +60,7 @@ def make_report_styles():
         ),
         "gov": ParagraphStyle(
             'Governance', parent=base['Normal'], fontSize=9, spaceAfter=4,
-            textColor=colors.HexColor('#5C4A1E'), backColor=GOLD_BG,
+            textColor=colors.HexColor('#1A3550'), backColor=GOLD_BG,
             borderPadding=6, borderColor=GOLD, borderWidth=0.5, leading=12
         ),
         "closing": ParagraphStyle(
@@ -69,7 +69,7 @@ def make_report_styles():
             borderWidth=1, leading=13
         ),
         "footer": ParagraphStyle(
-            'Footer', fontSize=7.5, textColor=colors.HexColor('#999999'),
+            'Footer', fontSize=7.5, textColor=colors.HexColor('#94A3B8'),
             alignment=1, spaceBefore=12
         ),
     }
@@ -93,7 +93,7 @@ def _page_decoration(canvas, doc):
     canvas.setLineWidth(0.4)
     canvas.line(50, 40, page_width - 50, 40)
     canvas.setFont("Helvetica", 7)
-    canvas.setFillColor(colors.HexColor("#888888"))
+    canvas.setFillColor(colors.HexColor("#94A3B8"))
     canvas.drawString(
         50, 26,
         "PortfolioHealth Advisor  \u00b7  PPM Capability Maturity Assessment  \u00b7  University of Oulu",
@@ -111,11 +111,11 @@ def build_cover_page(story, assessment, report):
     # Tall navy banner that occupies the top half of the cover page
     brand_title = Paragraph(
         '<font size="30" color="#FFFFFF"><b>PortfolioHealth</b></font>'
-        '<font size="30" color="#C9A84C"><b> Advisor</b></font>',
+        '<font size="30" color="#22D3EE"><b> Advisor</b></font>',
         ParagraphStyle("CovBrand", leading=36),
     )
     brand_sub = Paragraph(
-        '<font size="10" color="#C9A84C"><b>PPM CAPABILITY MATURITY ASSESSMENT</b></font>',
+        '<font size="10" color="#22D3EE"><b>PPM CAPABILITY MATURITY ASSESSMENT</b></font>',
         ParagraphStyle("CovBrandSub", leading=14, spaceBefore=8),
     )
     report_title = Paragraph(
@@ -150,16 +150,16 @@ def build_cover_page(story, assessment, report):
     company_name = assessment.get("company_name", "—")
     industry = assessment.get("company_industry", "")
     prepared_label = Paragraph(
-        '<font size="9" color="#C9A84C"><b>PREPARED FOR</b></font>',
+        '<font size="9" color="#22D3EE"><b>PREPARED FOR</b></font>',
         ParagraphStyle("PrepLabel", leading=12),
     )
     company = Paragraph(
-        f'<font size="28" color="#0A1628"><b>{company_name}</b></font>',
+        f'<font size="28" color="#0D1B2A"><b>{company_name}</b></font>',
         ParagraphStyle("CovCompany", leading=32, spaceBefore=4),
     )
     industry_p = (
         Paragraph(
-            f'<font size="11" color="#666666">{industry}</font>',
+            f'<font size="11" color="#94A3B8">{industry}</font>',
             ParagraphStyle("CovIndustry", leading=14, spaceBefore=4),
         )
         if industry else None
@@ -192,16 +192,16 @@ def build_cover_page(story, assessment, report):
 
     score_badge_rows = [
         [Paragraph(
-            '<font size="8" color="#666666"><b>OVERALL MATURITY SCORE</b></font>',
+            '<font size="8" color="#94A3B8"><b>OVERALL MATURITY SCORE</b></font>',
             ParagraphStyle("CovScoreLabel", alignment=1, leading=12),
         )],
         [Paragraph(
-            f'<font size="52" color="#0A1628"><b>{overall_text}</b></font>'
-            f'<font size="18" color="#999999"> / 5.00</font>',
+            f'<font size="52" color="#0D1B2A"><b>{overall_text}</b></font>'
+            f'<font size="18" color="#94A3B8"> / 5.00</font>',
             ParagraphStyle("CovScoreValue", alignment=1, leading=60, spaceBefore=8),
         )],
         [Paragraph(
-            f'<font size="13" color="#C9A84C"><b>{overall_level}</b></font>',
+            f'<font size="13" color="#22D3EE"><b>{overall_level}</b></font>',
             ParagraphStyle("CovScoreLevel", alignment=1, leading=18, spaceBefore=8),
         )],
     ]
@@ -231,13 +231,13 @@ def build_cover_page(story, assessment, report):
     meta = Table(
         [[
             Paragraph(
-                '<font size="7" color="#888888"><b>REPORT DATE</b></font><br/>'
-                f'<font size="10" color="#0A1628"><b>{report_date}</b></font>',
+                '<font size="7" color="#94A3B8"><b>REPORT DATE</b></font><br/>'
+                f'<font size="10" color="#0D1B2A"><b>{report_date}</b></font>',
                 meta_style,
             ),
             Paragraph(
-                '<font size="7" color="#888888"><b>RESPONDENT</b></font><br/>'
-                f'<font size="10" color="#0A1628"><b>{respondent_cell}</b></font>',
+                '<font size="7" color="#94A3B8"><b>RESPONDENT</b></font><br/>'
+                f'<font size="10" color="#0D1B2A"><b>{respondent_cell}</b></font>',
                 meta_style,
             ),
         ]],
@@ -248,14 +248,14 @@ def build_cover_page(story, assessment, report):
         ('RIGHTPADDING', (0, 0), (-1, -1), 32),
         ('TOPPADDING', (0, 0), (-1, -1), 16),
         ('BOTTOMPADDING', (0, 0), (-1, -1), 16),
-        ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#F4F6FA')),
+        ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#F0F4F8')),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
     ]))
     story.append(meta)
     story.append(Spacer(1, 18))
 
     story.append(Paragraph(
-        '<font size="7" color="#999999"><i>CONFIDENTIAL  ·  Prepared for the named organisation only.  '
+        '<font size="7" color="#94A3B8"><i>CONFIDENTIAL  ·  Prepared for the named organisation only.  '
         'Distribution without authorisation is not permitted.</i></font>',
         ParagraphStyle("CovConfidential", leading=10, alignment=1),
     ))
@@ -291,11 +291,11 @@ def build_toc_page(story):
     Compact layout so all 14 entries fit on a single A4 page.
     """
     story.append(Paragraph(
-        '<font color="#C9A84C" size="8"><b>CONTENTS</b></font>',
+        '<font color="#22D3EE" size="8"><b>CONTENTS</b></font>',
         ParagraphStyle("TocEyebrow", leading=10, spaceAfter=2),
     ))
     story.append(Paragraph(
-        '<font color="#0A1628" size="20"><b>Table of Contents</b></font>',
+        '<font color="#0D1B2A" size="20"><b>Table of Contents</b></font>',
         ParagraphStyle("TocTitle", leading=24, spaceAfter=10),
     ))
     rule = Table([[""]], colWidths=[490], rowHeights=[1])
@@ -313,7 +313,7 @@ def build_toc_page(story):
         "TocItemSub", fontName="Helvetica-Oblique", fontSize=8, leading=10, textColor=TEXT_MUTED,
     )
     marker_style = ParagraphStyle(
-        "TocMarker", fontSize=7.5, leading=10, textColor=colors.HexColor("#888888"), alignment=2,
+        "TocMarker", fontSize=7.5, leading=10, textColor=colors.HexColor("#94A3B8"), alignment=2,
     )
 
     combo_style = ParagraphStyle(
@@ -323,8 +323,8 @@ def build_toc_page(story):
     data = []
     for (num, title, sub) in TOC_ENTRIES:
         combo = (
-            f'<font name="Helvetica-Bold" color="#0A1628" size="10">{title}</font><br/>'
-            f'<font color="#666666" size="8"><i>{sub}</i></font>'
+            f'<font name="Helvetica-Bold" color="#0D1B2A" size="10">{title}</font><br/>'
+            f'<font color="#94A3B8" size="8"><i>{sub}</i></font>'
         )
         data.append([
             Paragraph(f"{num:02d}", num_style),
@@ -354,7 +354,7 @@ def build_pdf_header(story, styles, title_text=""):
     """Professional PDF header for management-level reports."""
     brand_style = ParagraphStyle('BrandName', fontSize=20, fontName='Helvetica-Bold',
                                  textColor=colors.white, leading=24)
-    sub_style = ParagraphStyle('BrandSub', fontSize=8, textColor=colors.HexColor('#8899AA'),
+    sub_style = ParagraphStyle('BrandSub', fontSize=8, textColor=colors.HexColor('#94A3B8'),
                                leading=10)
 
     brand_content = Table([
@@ -407,7 +407,7 @@ def build_pdf_closing(story, styles):
         'expert input, or tailored recommendations based on your results, please reach out to '
         f'arrange a follow-up consultation: <b>{CONTACT_EMAIL}</b><br/><br/>'
         '<i>This report is confidential. Distribution without authorisation is not permitted.</i><br/>'
-        '<font color="#666666" size="8">PortfolioHealth Advisor  |  PPM Capability Maturity '
+        '<font color="#94A3B8" size="8">PortfolioHealth Advisor  |  PPM Capability Maturity '
         'Assessment  |  University of Oulu</font>',
         callout_style,
     ))
@@ -446,7 +446,7 @@ def build_references_section(story, styles):
 
     # Section header
     story.append(Paragraph(
-        '<font color="#C9A84C"><b>14</b></font>&nbsp;&nbsp;ACADEMIC FRAMEWORK &amp; REFERENCES',
+        '<font color="#22D3EE"><b>14</b></font>&nbsp;&nbsp;ACADEMIC FRAMEWORK &amp; REFERENCES',
         ParagraphStyle("RefHeader", fontSize=11, fontName="Helvetica-Bold",
                        textColor=NAVY, spaceAfter=2, leading=14),
     ))
@@ -465,7 +465,7 @@ def build_references_section(story, styles):
     )
     for i, (authors, title, venue) in enumerate(REFERENCES, start=1):
         story.append(Paragraph(
-            f'<font color="#C9A84C"><b>{i}.</b></font>&nbsp; '
+            f'<font color="#22D3EE"><b>{i}.</b></font>&nbsp; '
             f'{authors} <i>{title}</i> {venue}',
             ref_item_style,
         ))
@@ -481,7 +481,7 @@ def build_references_section(story, styles):
         'programme led by Hannila, Vierimaa &amp; Salonen (2026).</i>',
         ParagraphStyle(
             "RefAttribution", fontSize=8.5, leading=12, textColor=TEXT_MUTED,
-            backColor=colors.HexColor("#F4F6FA"),
+            backColor=colors.HexColor("#F0F4F8"),
             borderColor=LINE_LIGHT, borderWidth=0.5, borderPadding=12,
             spaceBefore=6,
         ),
@@ -506,7 +506,7 @@ def build_section_label(story, styles, number: int, title: str, subtitle: str = 
         textColor=TEXT_MUTED, spaceAfter=8, leading=10,
     )
     story.append(Paragraph(
-        f'<font color="#C9A84C">{number:02d}</font>&nbsp;&nbsp;{title.upper()}',
+        f'<font color="#22D3EE">{number:02d}</font>&nbsp;&nbsp;{title.upper()}',
         label_style,
     ))
     if subtitle:
@@ -589,20 +589,20 @@ def build_overall_score(story, scores, report, level_names, heading, body):
     score_text = f"{equal}" if not isinstance(equal, (int, float)) else f"{equal}"
     eq_cell = [
         [Paragraph(
-            '<font size="7" color="#C9A84C"><b>EQUAL-WEIGHTED SCORE · PRIMARY</b></font>',
+            '<font size="7" color="#22D3EE"><b>EQUAL-WEIGHTED SCORE · PRIMARY</b></font>',
             ParagraphStyle("EqLabel", leading=10),
         )],
         [Paragraph(
-            f'<font size="24" color="#0A1628"><b>{score_text}</b></font>'
-            f'<font size="11" color="#999999"> / 5.00</font>',
+            f'<font size="24" color="#0D1B2A"><b>{score_text}</b></font>'
+            f'<font size="11" color="#94A3B8"> / 5.00</font>',
             ParagraphStyle("EqScore", leading=30),
         )],
         [Paragraph(
-            f'<font size="11" color="#0A1628"><b>{lvl_overall}</b></font>',
+            f'<font size="11" color="#0D1B2A"><b>{lvl_overall}</b></font>',
             ParagraphStyle("EqLevel", leading=14, spaceBefore=2),
         )],
         [Paragraph(
-            '<font size="7" color="#666666"><i>Academically validated baseline (25% each pillar)</i></font>',
+            '<font size="7" color="#94A3B8"><i>Academically validated baseline (25% each pillar)</i></font>',
             ParagraphStyle("EqFoot", leading=10, spaceBefore=6),
         )],
     ]
@@ -617,27 +617,27 @@ def build_overall_score(story, scores, report, level_names, heading, body):
     if isinstance(ctx, (int, float)):
         ctx_rows = [
             [Paragraph(
-                '<font size="7" color="#666666"><b>CONTEXTUAL SCORE · SECONDARY</b></font>',
+                '<font size="7" color="#94A3B8"><b>CONTEXTUAL SCORE · SECONDARY</b></font>',
                 ParagraphStyle("CtxLabel", leading=10),
             )],
             [Paragraph(
-                f'<font size="24" color="#0A1628"><b>{ctx:.2f}</b></font>'
-                f'<font size="11" color="#999999"> / 5.00</font>',
+                f'<font size="24" color="#0D1B2A"><b>{ctx:.2f}</b></font>'
+                f'<font size="11" color="#94A3B8"> / 5.00</font>',
                 ParagraphStyle("CtxScore", leading=30),
             )],
             [Paragraph(
-                '<font size="7" color="#666666"><i>Adjusted for business model + stated priority</i></font>',
+                '<font size="7" color="#94A3B8"><i>Adjusted for business model + stated priority</i></font>',
                 ParagraphStyle("CtxFoot", leading=10, spaceBefore=6),
             )],
         ]
     else:
         ctx_rows = [
             [Paragraph(
-                '<font size="7" color="#666666"><b>CONTEXTUAL SCORE · SECONDARY</b></font>',
+                '<font size="7" color="#94A3B8"><b>CONTEXTUAL SCORE · SECONDARY</b></font>',
                 ParagraphStyle("CtxLabel", leading=10),
             )],
             [Paragraph(
-                '<font size="11" color="#999999"><i>Not yet calculated for this assessment.</i></font>',
+                '<font size="11" color="#94A3B8"><i>Not yet calculated for this assessment.</i></font>',
                 ParagraphStyle("CtxEmpty", leading=14, spaceBefore=4),
             )],
         ]
@@ -673,9 +673,9 @@ def build_pillar_maturity_levels(story, scores, report, body):
     )
     ladder_data = [[
         Paragraph(
-            f'<font color="#C9A84C" size="9"><b>{lvl}</b></font><br/>'
-            f'<font color="#0A1628" size="9"><b>{name}</b></font><br/><br/>'
-            f'<font color="#666666">{desc}</font>',
+            f'<font color="#22D3EE" size="9"><b>{lvl}</b></font><br/>'
+            f'<font color="#0D1B2A" size="9"><b>{name}</b></font><br/><br/>'
+            f'<font color="#94A3B8">{desc}</font>',
             ladder_style,
         )
         for (lvl, name, desc) in MATURITY_LADDER
@@ -683,7 +683,7 @@ def build_pillar_maturity_levels(story, scores, report, body):
     ladder = Table(ladder_data, colWidths=[98, 98, 98, 98, 98])
     ladder.setStyle(TableStyle([
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#F4F6FA')),
+        ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#F0F4F8')),
         ('TOPPADDING', (0, 0), (-1, -1), 12),
         ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
         ('LEFTPADDING', (0, 0), (-1, -1), 10),
@@ -791,7 +791,7 @@ def build_assessment_reliability(story, report, assessment, body):
 
     # Confidence badge row
     badge = Paragraph(
-        f'<font size="7" color="#666666"><b>CONFIDENCE</b></font>&nbsp;&nbsp;'
+        f'<font size="7" color="#94A3B8"><b>CONFIDENCE</b></font>&nbsp;&nbsp;'
         f'<font size="10" color="{tone_color}"><b>{confidence.upper()}</b></font>',
         body,
     )
@@ -1001,7 +1001,7 @@ def build_findings_and_gaps(story, report, heading, body):
     is forced onto its own page for readability when delivered to executives."""
     # --- Key Findings ---
     story.append(Paragraph(
-        '<font color="#0A1628" size="11"><b>Key Findings</b></font>',
+        '<font color="#0D1B2A" size="11"><b>Key Findings</b></font>',
         ParagraphStyle("FindingsH", spaceAfter=8, leading=14),
     ))
     for item in report.get("key_findings", []) or []:
@@ -1018,7 +1018,7 @@ def build_findings_and_gaps(story, report, heading, body):
         textColor=TEXT_MUTED, spaceAfter=6, leading=12,
     )
     story.append(Paragraph(
-        '<font color="#C9A84C"><b>11</b></font>&nbsp;&nbsp;KEY FINDINGS &amp; CRITICAL GAPS  <font color="#888888">(continued)</font>',
+        '<font color="#22D3EE"><b>11</b></font>&nbsp;&nbsp;KEY FINDINGS &amp; CRITICAL GAPS  <font color="#94A3B8">(continued)</font>',
         ParagraphStyle("GapsHeader", fontSize=11, fontName="Helvetica-Bold",
                        textColor=NAVY, spaceAfter=2, leading=14),
     ))
@@ -1033,7 +1033,7 @@ def build_findings_and_gaps(story, report, heading, body):
 
     # --- Critical Capability Gaps ---
     story.append(Paragraph(
-        '<font color="#C0392B" size="11"><b>Critical Capability Gaps</b></font>',
+        '<font color="#EF4444" size="11"><b>Critical Capability Gaps</b></font>',
         ParagraphStyle("GapsH", spaceAfter=8, leading=14),
     ))
     for item in report.get("critical_gaps", []) or []:
@@ -1077,11 +1077,11 @@ def build_roadmap(story, roadmap, heading, body):
 
 
 def build_benchmark_and_note(story, report, heading, body):
-    story.append(Paragraph('<font color="#0A1628"><b>Benchmark Context</b></font>', body))
+    story.append(Paragraph('<font color="#0D1B2A"><b>Benchmark Context</b></font>', body))
     story.append(Paragraph(report.get("benchmark_context", "N/A"), body))
     story.append(Spacer(1, 10))
 
-    story.append(Paragraph('<font color="#C9A84C"><b>Consultant\'s Note</b></font>', body))
+    story.append(Paragraph('<font color="#22D3EE"><b>Consultant\'s Note</b></font>', body))
     story.append(Paragraph(f'<i>"{report.get("consultant_note", "N/A")}"</i>', body))
 
 
