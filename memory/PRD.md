@@ -399,5 +399,29 @@ User asked for ONLY the front cover page to be redesigned with a premium boardro
 - PDF cover screenshot (rendered at 150 dpi): metadata stays inside panel, footer fits on a single line, cyan left-edge rail spans top→bottom.
 - Linter clean.
 
+## Cover Polish (2026-05-24 — later in session)
+User flagged: (a) web R1 had too much empty vertical space; (b) PDF cover had readability issues — company name wrapping, score panel cyan border bleeding past the navy panel, metadata + footer wrapping awkwardly.
+
+### Fixes
+- **`premium.css` (web R1)** — tightened the vertical rhythm:
+  - `.r1-inner` padding 64/64/56 → 44/56/36
+  - `.r1-brand` margin-bottom 56 → 32; `.r1-tag` margin-bottom 28 → 20
+  - `.r1-company` font-size clamp 34–54 → 32–48; margin-bottom 18 → 14
+  - `.r1-meta` margin-bottom 28 → 20; `.r1-footer` margin-top 56 → 36
+  - `.r1-right` padding 28/26/24 → 22/24/20
+  - Result: R1 cover height drops from ~720px to **437px** on a 1440×900 viewport.
+- **`pdf_builder.build_cover_page`** — root cause was `PAGE_WIDTH=540` vs. SimpleDocTemplate usable width = **495pt** (A4 595 − 2×50pt margins). Fixed with proper math:
+  - `PAGE_WIDTH = 495`, `INNER_WIDTH = PAGE_WIDTH − 2×HERO_PAD − 3 = 444pt`
+  - hero_row colWidths now respect inner width: `LEFT_COL = 280`, `RIGHT_COL = 164`
+  - Company-title size adapts to name length: 24pt (≤24 chars) · 20pt (≤32) · 18pt (>32)
+  - Role text truncated to 32 chars + ellipsis so metadata fits on one line
+  - Score-panel padding tightened (22/22 → 18/12) and inner col width = `RIGHT_COL − 28`
+  - Footer text shortened ("UNIVERSITY OF OULU" + "Prepared for the named organisation only.") to single-line each at 7pt
+  - Outer `cover_frame` removed; hero is one self-contained navy card with 28pt top / 24pt bottom / 27pt left (24 + 3 cyan rail) / 24pt right padding
+
+### Verified (live PDF + web)
+- AI vision pass on rendered PDF page 1 confirms: company name single-line · score panel fully contained · metadata one line · both footer halves one line · no awkward whitespace · "premium boardroom" aesthetic.
+- Web R1 height = 437px (≈40% shorter than before) — Executive Summary now flows naturally under the cover.
+
 ## Known Issue (recurring)
 Testing agent has historically replaced `from emergentintegrations.llm.chat import ...` with direct `import anthropic` in `chat_service.py` — ALWAYS check after running testing agent and revert if needed. App uses Emergent Universal Key, not a raw Anthropic SDK key.

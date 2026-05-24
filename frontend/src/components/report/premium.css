@@ -126,7 +126,7 @@
   -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, #000 30%, transparent 90%);
 }
 .ph-report .r1-inner {
-  padding: 64px 64px 56px;
+  padding: 44px 56px 36px;
   position: relative;
   z-index: 1;
 }
@@ -134,7 +134,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 56px;
+  margin-bottom: 32px;
   font-family: 'Outfit', 'Inter', sans-serif;
 }
 .ph-report .r1-brand-mark {
@@ -177,7 +177,7 @@
   color: #22D3EE;
   text-transform: uppercase;
   letter-spacing: 0.30em;
-  margin-bottom: 28px;
+  margin-bottom: 20px;
   background: rgba(31, 199, 243, 0.08);
   padding: 7px 16px 7px 14px;
   border-radius: 50px;
@@ -194,10 +194,10 @@
   box-shadow: 0 0 8px rgba(34, 211, 238, 0.85);
 }
 .ph-report .r1-company {
-  font: 700 clamp(34px, 4.8vw, 54px) / 1.04 'Outfit', 'Inter', sans-serif;
+  font: 700 clamp(32px, 4.4vw, 48px) / 1.04 'Outfit', 'Inter', sans-serif;
   color: #FFFFFF;
-  letter-spacing: -1.6px;
-  margin-bottom: 18px;
+  letter-spacing: -1.4px;
+  margin-bottom: 14px;
   word-break: break-word;
   text-wrap: balance;
 }
@@ -205,7 +205,7 @@
   width: 56px;
   height: 2px;
   background: linear-gradient(90deg, #22D3EE 0%, rgba(34, 211, 238, 0.0) 100%);
-  margin-bottom: 22px;
+  margin-bottom: 18px;
   border-radius: 1px;
 }
 .ph-report .r1-meta {
@@ -214,7 +214,7 @@
   align-items: center;
   font: 500 13px 'Inter', sans-serif;
   color: #A7B4C4;
-  margin-bottom: 28px;
+  margin-bottom: 20px;
   row-gap: 6px;
 }
 .ph-report .r1-meta-item {
@@ -252,7 +252,7 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 28px 26px 24px;
+  padding: 22px 24px 20px;
   background:
     radial-gradient(ellipse 100% 70% at 50% 0%, rgba(34, 211, 238, 0.16) 0%, transparent 70%),
     linear-gradient(165deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.015) 60%);
@@ -331,8 +331,8 @@
 .ph-report .r1-footer {
   position: relative;
   z-index: 1;
-  margin-top: 56px;
-  padding-top: 22px;
+  margin-top: 36px;
+  padding-top: 18px;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
   display: flex;
   align-items: center;

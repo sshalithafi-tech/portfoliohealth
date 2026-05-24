@@ -161,7 +161,14 @@ def build_cover_page(story, assessment, report):
     CYAN_GLOW = colors.HexColor('#1FC7F3')
     CYAN_TAG_BG = colors.HexColor('#0F2A47')  # tag pill fill
 
-    PAGE_WIDTH = 540  # inner content width matching the rest of the report
+    # ----------------------------------------------------------------
+    # Width math: A4 (595pt) − 50pt left/right SimpleDocTemplate margins
+    # = 495pt usable. Hero card spans this full width. Inner content area
+    # = 495 − 2×24pt hero padding − 3pt cyan rail = 444pt.
+    # ----------------------------------------------------------------
+    PAGE_WIDTH = 495
+    HERO_PAD = 24
+    INNER_WIDTH = PAGE_WIDTH - 2 * HERO_PAD - 3  # 444
 
     # ----------------------------------------------------------------
     # Header: brand wordmark (left)  +  confidential pill (right)
@@ -172,10 +179,10 @@ def build_cover_page(story, assessment, report):
         ParagraphStyle("CovBrandMark", leading=14, alignment=0),
     )
     conf_pill = Paragraph(
-        '<font size="7.5" color="#A7B4C4"><b>CONFIDENTIAL  ·  EXECUTIVE BRIEFING</b></font>',
-        ParagraphStyle("CovConfPill", leading=12, alignment=2),
+        '<font size="7" color="#A7B4C4"><b>CONFIDENTIAL  ·  EXECUTIVE BRIEFING</b></font>',
+        ParagraphStyle("CovConfPill", leading=11, alignment=2),
     )
-    brand_row = Table([[brand_mark, conf_pill]], colWidths=[260, 230])
+    brand_row = Table([[brand_mark, conf_pill]], colWidths=[INNER_WIDTH * 0.5, INNER_WIDTH * 0.5])
     brand_row.setStyle(TableStyle([
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ('TOPPADDING', (0, 0), (-1, -1), 0),
@@ -184,32 +191,43 @@ def build_cover_page(story, assessment, report):
         ('RIGHTPADDING', (0, 0), (-1, -1), 0),
     ]))
 
+    # Two columns for the hero body: left text stack + right score panel
+    LEFT_COL = 280
+    RIGHT_COL = INNER_WIDTH - LEFT_COL  # 164
+
     # ----------------------------------------------------------------
     # Hero body: tag pill, company, rule, metadata, full-assessment chip
     # ----------------------------------------------------------------
     tag_pill = Paragraph(
-        '<font size="7" color="#22D3EE"><b>●&nbsp;&nbsp;PPDT MATURITY ASSESSMENT</b></font>',
-        ParagraphStyle("CovTag", leading=12, alignment=0),
+        '<font size="6.5" color="#22D3EE"><b>●&nbsp;&nbsp;PPDT MATURITY ASSESSMENT</b></font>',
+        ParagraphStyle("CovTag", leading=11, alignment=0),
     )
-    tag_pill_tbl = Table([[tag_pill]], colWidths=[180])
+    tag_pill_tbl = Table([[tag_pill]], colWidths=[168])
     tag_pill_tbl.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, -1), CYAN_TAG_BG),
         ('BOX', (0, 0), (-1, -1), 0.5, CYAN_GLOW),
-        ('ROUNDEDCORNERS', [10, 10, 10, 10]),
-        ('TOPPADDING', (0, 0), (-1, -1), 6),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-        ('LEFTPADDING', (0, 0), (-1, -1), 14),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 14),
+        ('TOPPADDING', (0, 0), (-1, -1), 5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+        ('LEFTPADDING', (0, 0), (-1, -1), 12),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 12),
     ]))
 
+    # Company title: shrink so most names fit on one line in 280pt column.
+    # "Lumivex Photonics GmbH" (22 chars) fits cleanly at 24pt Helvetica-Bold.
     company_name = assessment.get("company_name", "—")
+    title_size = 24 if len(company_name) <= 24 else (20 if len(company_name) <= 32 else 18)
     company_title = Paragraph(
-        f'<font size="34" color="#FFFFFF"><b>{company_name}</b></font>',
-        ParagraphStyle("CovCompanyName", leading=38, alignment=0),
+        f'<font size="{title_size}" color="#FFFFFF"><b>{company_name}</b></font>',
+        ParagraphStyle(
+            "CovCompanyName",
+            leading=title_size + 4,
+            alignment=0,
+            wordWrap='LTR',
+        ),
     )
 
     # Thin cyan rule under the company name
-    rule = Table([[""]], colWidths=[56], rowHeights=[2])
+    rule = Table([[""]], colWidths=[44], rowHeights=[1.6])
     rule.setStyle(TableStyle([('BACKGROUND', (0, 0), (-1, -1), CYAN_PRIMARY)]))
 
     # Metadata row — industry · model · role · date with cyan-dot separators
@@ -231,41 +249,45 @@ def build_cover_page(story, assessment, report):
     except Exception:
         report_date = str(report_date_raw)[:10] or "—"
 
+    # Truncate overly-long role text so the metadata stays on a single line.
+    if role and len(role) > 32:
+        role = role[:30].rstrip() + "…"
+
     parts = [p for p in [industry, business_model, role, report_date] if p]
     sep = '&nbsp;&nbsp;<font color="#3BC9F5">●</font>&nbsp;&nbsp;'
     meta_html = sep.join(f'<font color="#DCE3EC">{p}</font>' for p in parts)
     metadata = Paragraph(
-        f'<font size="10">{meta_html}</font>',
-        ParagraphStyle("CovMeta2", leading=14, alignment=0),
+        f'<font size="9">{meta_html}</font>',
+        ParagraphStyle("CovMeta2", leading=13, alignment=0),
     )
 
     full_chip = Paragraph(
-        '<font size="8.5" color="#22D3EE"><b>◷</b></font>'
-        '&nbsp;&nbsp;<font size="9" color="#A7B4C4">Full Assessment · 45–60 minutes</font>',
-        ParagraphStyle("CovChip", leading=12, alignment=0),
+        '<font size="8" color="#22D3EE"><b>◷</b></font>'
+        '&nbsp;&nbsp;<font size="8.5" color="#A7B4C4">Full Assessment · 45–60 minutes</font>',
+        ParagraphStyle("CovChip", leading=11, alignment=0),
     )
-    full_chip_tbl = Table([[full_chip]], colWidths=[220])
+    full_chip_tbl = Table([[full_chip]], colWidths=[190])
     full_chip_tbl.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#0F2A47')),
         ('BOX', (0, 0), (-1, -1), 0.4, HERO_HAIR),
-        ('TOPPADDING', (0, 0), (-1, -1), 6),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-        ('LEFTPADDING', (0, 0), (-1, -1), 12),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 12),
+        ('TOPPADDING', (0, 0), (-1, -1), 5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+        ('LEFTPADDING', (0, 0), (-1, -1), 10),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 10),
     ]))
 
     left_stack = Table(
         [[tag_pill_tbl], [company_title], [rule], [metadata], [full_chip_tbl]],
-        colWidths=[310],
+        colWidths=[LEFT_COL],
     )
     left_stack.setStyle(TableStyle([
         ('LEFTPADDING', (0, 0), (-1, -1), 0),
         ('RIGHTPADDING', (0, 0), (-1, -1), 0),
         ('TOPPADDING', (0, 0), (0, 0), 0),
-        ('BOTTOMPADDING', (0, 0), (0, 0), 22),
-        ('BOTTOMPADDING', (0, 1), (0, 1), 14),
-        ('BOTTOMPADDING', (0, 2), (0, 2), 18),
-        ('BOTTOMPADDING', (0, 3), (0, 3), 22),
+        ('BOTTOMPADDING', (0, 0), (0, 0), 16),
+        ('BOTTOMPADDING', (0, 1), (0, 1), 10),
+        ('BOTTOMPADDING', (0, 2), (0, 2), 12),
+        ('BOTTOMPADDING', (0, 3), (0, 3), 14),
         ('BOTTOMPADDING', (0, 4), (0, 4), 0),
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
@@ -287,38 +309,38 @@ def build_cover_page(story, assessment, report):
             overall_text = str(overall)
 
     score_label = Paragraph(
-        '<font size="7.5" color="#A7B4C4"><b>OVERALL MATURITY</b></font>',
-        ParagraphStyle("ScoreLabel", leading=12, alignment=1),
+        '<font size="7" color="#A7B4C4"><b>OVERALL MATURITY</b></font>',
+        ParagraphStyle("ScoreLabel", leading=11, alignment=1),
     )
     score_number = Paragraph(
-        f'<font size="48" color="#22D3EE"><b>{overall_text}</b></font>'
-        f'<font size="16" color="#67E8F9">&nbsp;/ 5.0</font>',
-        ParagraphStyle("ScoreNumber", leading=52, alignment=1),
+        f'<font size="42" color="#22D3EE"><b>{overall_text}</b></font>'
+        f'<font size="14" color="#67E8F9">&nbsp;/ 5.0</font>',
+        ParagraphStyle("ScoreNumber", leading=46, alignment=1),
     )
     level_pill_para = Paragraph(
-        f'<font size="9" color="#FFFFFF"><b>{overall_level.upper()}</b></font>',
-        ParagraphStyle("LevelPill", leading=14, alignment=1),
+        f'<font size="8.5" color="#FFFFFF"><b>{overall_level.upper()}</b></font>',
+        ParagraphStyle("LevelPill", leading=12, alignment=1),
     )
-    level_pill_tbl = Table([[level_pill_para]], colWidths=[120])
+    level_pill_tbl = Table([[level_pill_para]], colWidths=[100])
     level_pill_tbl.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#13314F')),
         ('BOX', (0, 0), (-1, -1), 0.5, colors.HexColor('#284B70')),
-        ('TOPPADDING', (0, 0), (-1, -1), 5),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
-        ('LEFTPADDING', (0, 0), (-1, -1), 14),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 14),
+        ('TOPPADDING', (0, 0), (-1, -1), 4),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ('LEFTPADDING', (0, 0), (-1, -1), 12),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 12),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
     ]))
 
     score_panel_inner = Table(
         [[score_label], [score_number], [level_pill_tbl]],
-        colWidths=[170],
+        colWidths=[RIGHT_COL - 28],  # 136
     )
     score_panel_inner.setStyle(TableStyle([
         ('TOPPADDING', (0, 0), (0, 0), 0),
-        ('BOTTOMPADDING', (0, 0), (0, 0), 6),
+        ('BOTTOMPADDING', (0, 0), (0, 0), 4),
         ('TOPPADDING', (0, 1), (0, 1), 0),
-        ('BOTTOMPADDING', (0, 1), (0, 1), 14),
+        ('BOTTOMPADDING', (0, 1), (0, 1), 10),
         ('TOPPADDING', (0, 2), (0, 2), 0),
         ('BOTTOMPADDING', (0, 2), (0, 2), 0),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
@@ -326,18 +348,18 @@ def build_cover_page(story, assessment, report):
         ('RIGHTPADDING', (0, 0), (-1, -1), 0),
     ]))
 
-    score_panel = Table([[score_panel_inner]], colWidths=[200])
+    score_panel = Table([[score_panel_inner]], colWidths=[RIGHT_COL])
     score_panel.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#0D284A')),
         ('BOX', (0, 0), (-1, -1), 0.8, colors.HexColor('#3BC9F5')),
         ('LINEABOVE', (0, 0), (-1, 0), 1.2, CYAN_PRIMARY),
-        ('TOPPADDING', (0, 0), (-1, -1), 22),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 22),
-        ('LEFTPADDING', (0, 0), (-1, -1), 14),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 14),
+        ('TOPPADDING', (0, 0), (-1, -1), 18),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 18),
+        ('LEFTPADDING', (0, 0), (-1, -1), 12),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 12),
     ]))
 
-    hero_row = Table([[left_stack, score_panel]], colWidths=[310, 200])
+    hero_row = Table([[left_stack, score_panel]], colWidths=[LEFT_COL, RIGHT_COL])
     hero_row.setStyle(TableStyle([
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ('LEFTPADDING', (0, 0), (-1, -1), 0),
@@ -347,20 +369,20 @@ def build_cover_page(story, assessment, report):
     ]))
 
     # Hairline divider near the bottom of the hero
-    divider = Table([[""]], colWidths=[PAGE_WIDTH - 60], rowHeights=[0.5])
+    divider = Table([[""]], colWidths=[INNER_WIDTH], rowHeights=[0.5])
     divider.setStyle(TableStyle([('BACKGROUND', (0, 0), (-1, -1), HERO_HAIR)]))
 
-    # Footer ribbon: confidential text + research line
+    # Footer ribbon: confidential text + research line (shortened so they fit on one line each)
     foot_conf = Paragraph(
-        '<font size="7.5" color="#FFFFFF"><b>CONFIDENTIAL</b></font>&nbsp;&nbsp;'
-        '<font size="8" color="#A7B4C4">Prepared for the named organisation only — distribution requires authorisation.</font>',
-        ParagraphStyle("CovFootConf", leading=12, alignment=0),
+        '<font size="7" color="#FFFFFF"><b>CONFIDENTIAL</b></font>&nbsp;&nbsp;'
+        '<font size="7" color="#A7B4C4">Prepared for the named organisation only.</font>',
+        ParagraphStyle("CovFootConf", leading=10, alignment=0),
     )
     foot_meta = Paragraph(
-        '<font size="7.5" color="#A7B4C4"><b>PPM CAPABILITY MATURITY  ·  UNIVERSITY OF OULU RESEARCH</b></font>',
-        ParagraphStyle("CovFootMeta", leading=12, alignment=2),
+        '<font size="7" color="#A7B4C4"><b>PPM CAPABILITY MATURITY  ·  UNIVERSITY OF OULU</b></font>',
+        ParagraphStyle("CovFootMeta", leading=10, alignment=2),
     )
-    foot_row = Table([[foot_conf, foot_meta]], colWidths=[330, 180])
+    foot_row = Table([[foot_conf, foot_meta]], colWidths=[INNER_WIDTH * 0.5, INNER_WIDTH * 0.5])
     foot_row.setStyle(TableStyle([
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ('LEFTPADDING', (0, 0), (-1, -1), 0),
@@ -372,40 +394,41 @@ def build_cover_page(story, assessment, report):
     # ----------------------------------------------------------------
     # Compose the hero card (single navy panel containing everything)
     # ----------------------------------------------------------------
-    hero = Table(
+    hero_inner = Table(
         [
             [brand_row],
-            [Spacer(1, 38)],
+            [Spacer(1, 24)],
             [hero_row],
-            [Spacer(1, 44)],
+            [Spacer(1, 22)],
             [divider],
-            [Spacer(1, 12)],
+            [Spacer(1, 10)],
             [foot_row],
         ],
-        colWidths=[PAGE_WIDTH - 60],
+        colWidths=[INNER_WIDTH],
     )
+    hero_inner.setStyle(TableStyle([
+        ('LEFTPADDING', (0, 0), (-1, -1), 0),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+        ('TOPPADDING', (0, 0), (-1, -1), 0),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
+    ]))
+
+    # Outer hero shell: navy fill with cyan left rail, ample internal padding
+    hero = Table([[hero_inner]], colWidths=[PAGE_WIDTH])
     hero.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, -1), HERO_PANEL),
         ('LINEBEFORE', (0, 0), (0, -1), 3, CYAN_PRIMARY),
-        ('TOPPADDING', (0, 0), (-1, -1), 0),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
-        ('LEFTPADDING', (0, 0), (-1, -1), 0),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+        ('TOPPADDING', (0, 0), (-1, -1), 28),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 24),
+        ('LEFTPADDING', (0, 0), (-1, -1), HERO_PAD + 3),  # +3 for the cyan rail
+        ('RIGHTPADDING', (0, 0), (-1, -1), HERO_PAD),
     ]))
 
-    # Outer frame: provides the deepest navy edge + crisp inner padding so the
-    # hero panel feels lifted off the page.
-    cover_frame = Table([[hero]], colWidths=[PAGE_WIDTH])
-    cover_frame.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, -1), HERO_NAVY),
-        ('TOPPADDING', (0, 0), (-1, -1), 56),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 56),
-        ('LEFTPADDING', (0, 0), (-1, -1), 30),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 30),
-    ]))
+    # Reference HERO_NAVY so it stays in the palette block above (used in print)
+    _ = HERO_NAVY  # noqa: F841 — intentional palette reference
 
-    # Render the cover at the very top of the page, edge-to-edge.
-    story.append(cover_frame)
+    # Render the cover at the very top of the page.
+    story.append(hero)
     story.append(PageBreak())
 
 
