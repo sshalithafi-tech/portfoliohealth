@@ -34,6 +34,28 @@ MODEL_COMPLEXITY_ORDER = ["ETO", "CETO", "CTO", "Standard", "Bulk"]
 
 
 # ---------------------------------------------------------------------------
+# Contextual scoring tables (Python source of truth — overrides LLM output)
+# ---------------------------------------------------------------------------
+BM_WEIGHTS = {
+    "ETO":      {"people": 0.35, "process": 0.30, "data": 0.20, "technology": 0.15},
+    "CETO":     {"people": 0.25, "process": 0.30, "data": 0.25, "technology": 0.20},
+    "CTO":      {"people": 0.20, "process": 0.25, "data": 0.30, "technology": 0.25},
+    "Standard": {"people": 0.15, "process": 0.30, "data": 0.35, "technology": 0.20},
+    "Bulk":     {"people": 0.10, "process": 0.35, "data": 0.20, "technology": 0.35},
+}
+PRIORITY_PILLAR_MAP = {
+    "people": ["people", "talent", "culture", "training", "leadership", "hr"],
+    "process": ["process", "governance", "workflow", "review", "cadence"],
+    "data": ["data", "master data", "analytics", "reporting", "bi", "insight"],
+    "technology": ["technology", "systems", "erp", "plm", "it", "digital tools"],
+}
+AMBIGUOUS_KEYWORDS = [
+    "portfolio simplification", "profitability", "complexity", "digital transformation",
+    "innovation", "growth",
+]
+
+
+# ---------------------------------------------------------------------------
 # Client selection
 # ---------------------------------------------------------------------------
 _anthropic_client = None
@@ -211,6 +233,73 @@ def normalise_business_model(report_data: dict) -> dict:
     return report_data
 
 
+def resolve_priority_pillar(strategic_priority: str) -> Optional[str]:
+    """Return the single pillar keyword if priority maps cleanly, else None."""
+    if not strategic_priority:
+        return None
+    sp = strategic_priority.lower()
+    if any(amb in sp for amb in AMBIGUOUS_KEYWORDS):
+        return None
+    for pillar, keywords in PRIORITY_PILLAR_MAP.items():
+        if any(kw in sp for kw in keywords):
+            return pillar
+    return None
+
+
+def resolve_contextual_score(report_data: dict) -> None:
+    """
+    Compute contextual_score and contextual_weights from business model + strategic priority.
+    Mutates report_data in-place. Never modifies equal_weighted_score or scores.overall.
+    If business model is unknown, sets contextual_score = equal_weighted_score (fallback).
+    """
+    bm = report_data.get("business_model", "")
+    if isinstance(bm, str):
+        bm = bm.strip()
+    scores = report_data.get("scores", {})
+    p = float(scores.get("people", 0))
+    pr = float(scores.get("process", 0))
+    d = float(scores.get("data", 0))
+    t = float(scores.get("technology", 0))
+    # Step 1 — base weights from BM table
+    base = BM_WEIGHTS.get(bm)
+    if base is None:
+        # Unknown BM — contextual == equal-weighted, no boost
+        eq = round((p + pr + d + t) / 4.0, 2)
+        report_data["contextual_score"] = eq
+        report_data["contextual_weights"] = {"people": 0.25, "process": 0.25, "data": 0.25, "technology": 0.25}
+        report_data["weights_raw"] = {"people": 0.25, "process": 0.25, "data": 0.25, "technology": 0.25}
+        report_data["weights_normalised"] = report_data["contextual_weights"]
+        return
+    weights = dict(base)  # mutable copy
+    # Step 2 — strategic priority boost (only for unambiguous single-pillar priorities)
+    strategic = report_data.get("strategic_priority", "") or ""
+    boosted_pillar = resolve_priority_pillar(strategic)
+    if boosted_pillar:
+        boost = 0.05
+        deduct = boost / 3.0
+        for k in weights:
+            if k == boosted_pillar:
+                weights[k] = round(weights[k] + boost, 6)
+            else:
+                weights[k] = round(weights[k] - deduct, 6)
+        # Normalise to ensure sum == 1.0 exactly
+        total = sum(weights.values())
+        weights = {k: round(v / total, 6) for k, v in weights.items()}
+    # Step 3 — compute contextual score
+    ctx = round(
+        p * weights["people"] +
+        pr * weights["process"] +
+        d * weights["data"] +
+        t * weights["technology"],
+        2
+    )
+    # Step 4 — write back (never touch equal_weighted_score or scores.overall)
+    report_data["contextual_score"] = ctx
+    report_data["contextual_weights"] = weights
+    report_data["weights_raw"] = base
+    report_data["weights_normalised"] = weights
+
+
 def recompute_dual_scores(report_data: dict) -> dict:
     scores = report_data.get("scores") or {}
     pillars = ["people", "process", "data", "technology"]
@@ -247,5 +336,6 @@ def normalise_report_weights(report_data: dict) -> dict:
         total = sum(raw.values()) or 1
         report_data["weights_normalised"] = {k: round(v / total, 4) for k, v in raw.items()}
     normalise_business_model(report_data)
+    resolve_contextual_score(report_data)
     recompute_dual_scores(report_data)
     return report_data
