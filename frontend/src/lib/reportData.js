@@ -145,9 +145,14 @@ const FALLBACK_EVIDENCE = {
 };
 
 const BUSINESS_MODEL_MAP = {
-  ETO: "ETO", CTO: "CTO", CETO: "CETO",
-  STANDARD: "STD", "STANDARD/BULK": "STD", BULK: "STD", STD: "STD",
+  ETO: "ETO",
   MTO: "ETO",
+  CTO: "CTO",
+  CETO: "CETO",
+  STANDARD: "Standard",
+  STD: "Standard",
+  BULK: "Bulk",
+  "STANDARD/BULK": "Standard",
 };
 
 export function buildReportData(assessment) {
