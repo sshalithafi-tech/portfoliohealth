@@ -452,9 +452,9 @@ def build_pdf_closing(story, styles):
 
 # --- Academic references block -------------------------------------------
 REFERENCES = [
-    ("Hannila, H., Vierimaa, M., &amp; Salonen, N. (2026).",
-     "Product Wellbeing.",
-     "University of Oulu."),
+    ("Hannila, H., Salonen, N. &amp; Vierimaa, M. (2024).",
+     "The Journey to Product Wellbeing\u2122: Turn Your Business into a Market-Driven Value Monster.",
+     ""),
     ("Hannila, H., Kuula, S., H\u00e4rk\u00f6nen, J., &amp; Haapasalo, H. (2022).",
      "Digitalisation of a company decision-making system: A concept for data-driven "
      "and fact-based product portfolio management.",
@@ -473,6 +473,12 @@ REFERENCES = [
     ("Wings, J., &amp; H\u00e4rk\u00f6nen, J. (2023).",
      "Decentralised or centralised management of data and products.",
      "University of Oulu."),
+    ("Cooper, R.G., Edgett, S.J. &amp; Kleinschmidt, E.J. (1999).",
+     "New product portfolio management: practices and performance.",
+     "Journal of Product Innovation Management, 16(4), 333\u2013351."),
+    ("Cooper, R.G., Edgett, S.J. &amp; Kleinschmidt, E.J. (2001).",
+     "Portfolio management for new product development: results of an industry practices study.",
+     "R&amp;D Management, 31(4), 361\u2013380."),
 ]
 
 
