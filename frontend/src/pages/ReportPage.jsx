@@ -138,6 +138,125 @@ const R2ExecutiveSummary = ({ data }) => {
 };
 
 /* ============ R3 Organisation Profile ============ */
+
+/* Business-model → pillar weight table (mirrors the backend canonical map in
+   chat_service.py BUSINESS_MODEL_WEIGHTS — kept in sync by hand). Used only
+   to display the weight row alongside the explanation of the contextual
+   score in the Business Model Context card. */
+const BUSINESS_MODEL_WEIGHT_TABLE = {
+  ETO:      { people: 0.35, process: 0.30, data: 0.20, technology: 0.15 },
+  CETO:     { people: 0.25, process: 0.30, data: 0.25, technology: 0.20 },
+  CTO:      { people: 0.20, process: 0.25, data: 0.30, technology: 0.25 },
+  Standard: { people: 0.15, process: 0.30, data: 0.35, technology: 0.20 },
+  Bulk:     { people: 0.10, process: 0.35, data: 0.20, technology: 0.35 },
+};
+
+const PRIORITY_PILLAR_KEYWORDS = [
+  { pillar: "People",     kws: ["people", "talent", "culture", "training", "leadership", "hr"] },
+  { pillar: "Process",    kws: ["process", "governance", "workflow", "review", "cadence"] },
+  { pillar: "Data",       kws: ["data", "master data", "analytics", "reporting", "bi", "insight"] },
+  { pillar: "Technology", kws: ["technology", "systems", "erp", "plm", "it ", "digital tool"] },
+];
+const AMBIGUOUS_PRIORITY_TERMS = new Set([
+  "portfolio simplification", "profitability improvement", "complexity reduction",
+  "digital transformation", "innovation", "growth",
+]);
+
+const detectPriorityPillar = (priority) => {
+  const p = (priority || "").trim().toLowerCase();
+  if (!p || AMBIGUOUS_PRIORITY_TERMS.has(p)) return null;
+  for (const { pillar, kws } of PRIORITY_PILLAR_KEYWORDS) {
+    if (kws.some((kw) => p.includes(kw))) return pillar;
+  }
+  return null;
+};
+
+const formatPct = (v) => {
+  const n = parseFloat(v);
+  if (!Number.isFinite(n)) return "–";
+  return `${Math.round(n * 100)}%`;
+};
+
+const BusinessModelContextCard = ({ data }) => {
+  const { business_model, business_model_raw, contextual_weights, strategic_priority,
+          equal_weighted_score, contextual_score } = data;
+
+  // Resolve which canonical row applies. Prefer the raw model name from the
+  // LLM (preserves Bulk vs Standard); fall back to the display code.
+  const canonicalKey = (() => {
+    const candidates = [business_model_raw, business_model]
+      .filter(Boolean)
+      .map((s) => String(s).trim());
+    for (const c of candidates) {
+      if (BUSINESS_MODEL_WEIGHT_TABLE[c]) return c;
+      const cap = c.charAt(0).toUpperCase() + c.slice(1).toLowerCase();
+      if (BUSINESS_MODEL_WEIGHT_TABLE[cap]) return cap;
+      const upper = c.toUpperCase();
+      if (BUSINESS_MODEL_WEIGHT_TABLE[upper]) return upper;
+    }
+    return null;
+  })();
+
+  const weightsToShow = contextual_weights || (canonicalKey
+    ? BUSINESS_MODEL_WEIGHT_TABLE[canonicalKey]
+    : null);
+
+  const boostedPillar = detectPriorityPillar(strategic_priority);
+  const hasContextual = typeof contextual_score === "number" && Number.isFinite(contextual_score);
+  const eqShown = typeof equal_weighted_score === "number" && Number.isFinite(equal_weighted_score)
+    ? equal_weighted_score
+    : null;
+
+  return (
+    <div className="glass-card r3-card" data-testid="business-model-context-card">
+      <span className="section-label">Business Model Context</span>
+      {business_model && <div className="r3-badge">{business_model}</div>}
+
+      <div className="r3-bmc">
+        <p className="r3-bmc-line">
+          <b>Equal-Weighted Score (primary):</b> the academically validated baseline —
+          the simple average of the four pillar scores (25% each).
+          {eqShown !== null && (
+            <> Current value: <b>{eqShown.toFixed(2)} / 5.00</b>.</>
+          )}
+        </p>
+        <p className="r3-bmc-line">
+          <b>Contextual Score (secondary):</b> a weighted sum that adjusts the four
+          pillar scores using the weight row declared for your business model
+          {boostedPillar ? <> and a +5% boost toward <b>{boostedPillar}</b> (your stated strategic priority)</> : null}.
+          {hasContextual && (
+            <> Current value: <b>{contextual_score.toFixed(2)} / 5.00</b>.</>
+          )}
+        </p>
+
+        {weightsToShow && (
+          <div className="r3-bmc-weights" data-testid="business-model-weight-row">
+            <span className="r3-bmc-weights-lbl">
+              Weight row · {canonicalKey || business_model || "Equal"}
+            </span>
+            <div className="r3-bmc-weights-grid">
+              <div><span>People</span><b>{formatPct(weightsToShow.people)}</b></div>
+              <div><span>Process</span><b>{formatPct(weightsToShow.process)}</b></div>
+              <div><span>Data</span><b>{formatPct(weightsToShow.data)}</b></div>
+              <div><span>Technology</span><b>{formatPct(weightsToShow.technology)}</b></div>
+            </div>
+          </div>
+        )}
+
+        <p className="r3-note">
+          Business model changes the <i>contextual score calculation</i> directly — not just
+          the narrative interpretation. A strategic-priority boost (+5% to a single pillar)
+          is applied only when the priority maps unambiguously to one of the four pillars.
+        </p>
+      </div>
+
+      <div className="section-footer">
+        Business model classification: Hannila (2019) and Hannila et al. (2020) product type frameworks.
+      </div>
+    </div>
+  );
+};
+
 const R3OrgProfile = ({ data }) => (
   <section className="r3" data-testid="report-r3">
     <div className="glass-card r3-card">
@@ -158,19 +277,7 @@ const R3OrgProfile = ({ data }) => (
         <div className="r3-row"><span className="lbl">Assessment Date</span><span className="val">{data.date}</span></div>
       )}
     </div>
-    <div className="glass-card r3-card">
-      <span className="section-label">Business Model Context</span>
-      {data.business_model && <div className="r3-badge">{data.business_model}</div>}
-      <p className="r3-body">
-        Business model context informs the interpretation of pillar scores. Equal-weight scoring is the validated baseline — context informs how the gap is described and prioritised, but does not erase a bottleneck.
-      </p>
-      <p className="r3-note">
-        Equal-weight scoring is not adjusted by business model. Context informs interpretation only.
-      </p>
-      <div className="section-footer">
-        Business model classification: Hannila (2019) and Hannila et al. (2020) product type frameworks.
-      </div>
-    </div>
+    <BusinessModelContextCard data={data} />
   </section>
 );
 

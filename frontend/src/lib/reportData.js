@@ -186,6 +186,30 @@ export function buildReportData(assessment) {
   const bmRaw = (assessment?.business_model || report?.business_model || "").trim().toUpperCase();
   const business_model = BUSINESS_MODEL_MAP[bmRaw] || bmRaw || null;
 
+  // Dual-score plumbing for the Business Model Context card and any downstream
+  // dual-score UI. Equal-weighted is the primary academic baseline (simple
+  // mean of the four pillars). Contextual is the business-model-weighted
+  // value, optionally with an unambiguous priority boost.
+  const pillarKeys = ["people", "process", "data", "technology"];
+  const equalWeightedFromReport = toFloat(report?.equal_weighted_score, NaN);
+  const equalWeightedComputed = Number.isFinite(equalWeightedFromReport)
+    ? equalWeightedFromReport
+    : Math.round(
+        (pillarKeys.reduce((acc, p) => acc + (scores[p] || 0), 0) / 4) * 10
+      ) / 10;
+  const contextualRaw = report?.contextual_score;
+  const contextualScore =
+    contextualRaw === null || contextualRaw === undefined
+      ? null
+      : (Number.isFinite(parseFloat(contextualRaw)) ? parseFloat(contextualRaw) : null);
+  const contextualWeights =
+    (report?.contextual_weights && typeof report.contextual_weights === "object")
+      ? report.contextual_weights
+      : (report?.weights_normalised && typeof report.weights_normalised === "object")
+        ? report.weights_normalised
+        : null;
+  const strategicPriority = report?.strategic_priority || assessment?.strategic_priority || null;
+
   const pillarLetters = { people: "P", process: "P", data: "D", technology: "T" };
   const pillars = ["people", "process", "data", "technology"].map((key) => {
     const sc = scores[key];
@@ -236,6 +260,11 @@ export function buildReportData(assessment) {
     company: assessment?.company_name || "Organisation",
     industry: assessment?.company_industry || assessment?.industry || "—",
     business_model,
+    business_model_raw: report?.business_model || assessment?.business_model || null,
+    strategic_priority: strategicPriority,
+    equal_weighted_score: equalWeightedComputed,
+    contextual_score: contextualScore,
+    contextual_weights: contextualWeights,
     size: assessment?.company_size || "—",
     role: assessment?.respondent_role || assessment?.respondent_name || "—",
     respondent_name: assessment?.respondent_name || "",

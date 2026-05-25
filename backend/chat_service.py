@@ -32,6 +32,83 @@ EMERGENT_LLM_KEY = os.environ.get("EMERGENT_LLM_KEY")
 VALID_BUSINESS_MODELS = {"Bulk", "Standard", "CTO", "CETO", "ETO"}
 MODEL_COMPLEXITY_ORDER = ["ETO", "CETO", "CTO", "Standard", "Bulk"]
 
+# Business model → pillar weight table (CODP-derived, see system prompt in
+# server.py). Each row sums to 1.0. Used both for the LLM prompt (documented
+# in server.py) and for deterministic recomputation of the contextual score
+# when the LLM omits it or duplicates the equal-weighted value into it.
+BUSINESS_MODEL_WEIGHTS = {
+    "ETO":      {"people": 0.35, "process": 0.30, "data": 0.20, "technology": 0.15},
+    "CETO":     {"people": 0.25, "process": 0.30, "data": 0.25, "technology": 0.20},
+    "CTO":      {"people": 0.20, "process": 0.25, "data": 0.30, "technology": 0.25},
+    "Standard": {"people": 0.15, "process": 0.30, "data": 0.35, "technology": 0.20},
+    "Bulk":     {"people": 0.10, "process": 0.35, "data": 0.20, "technology": 0.35},
+}
+
+# Strategic-priority → pillar mapping for the +5% boost (Step 2 in the prompt).
+# Only applied when the priority maps UNAMBIGUOUSLY to a single pillar.
+PRIORITY_PILLAR_MAP = {
+    "people":     ["people", "talent", "culture", "training", "leadership", "hr"],
+    "process":    ["process", "governance", "workflow", "review", "cadence"],
+    "data":       ["data", "master data", "analytics", "reporting", "bi", "insight"],
+    "technology": ["technology", "systems", "erp", "plm", "it ", "digital tool"],
+}
+
+# Multi-pillar / vague priorities that must NOT trigger a boost.
+AMBIGUOUS_PRIORITY_TERMS = {
+    "portfolio simplification",
+    "profitability improvement",
+    "complexity reduction",
+    "digital transformation",
+    "innovation",
+    "growth",
+}
+
+
+def derive_contextual_weights(report_data: dict) -> Optional[dict]:
+    """Return the final normalised pillar weights for the contextual score.
+
+    Order of preference:
+      1. Business-model lookup (+ optional unambiguous priority boost).
+      2. LLM-supplied `contextual_weights` (or `weights_normalised` as legacy
+         fallback).
+    Returns ``None`` when no usable weight source is available — the caller
+    then keeps the equal-weighted baseline as the contextual value.
+    """
+    pillars = ("people", "process", "data", "technology")
+    bm = report_data.get("business_model")
+    base = BUSINESS_MODEL_WEIGHTS.get(bm)
+
+    if base is None:
+        # Fall back to weights the LLM may have produced.
+        for key in ("contextual_weights", "weights_normalised"):
+            w = report_data.get(key)
+            if isinstance(w, dict) and all(p in w for p in pillars):
+                try:
+                    total = sum(float(w[p]) for p in pillars)
+                except (TypeError, ValueError):
+                    continue
+                if total > 0:
+                    return {p: float(w[p]) / total for p in pillars}
+        return None
+
+    weights = dict(base)
+    priority = (report_data.get("strategic_priority") or "").strip().lower()
+    if priority and priority not in AMBIGUOUS_PRIORITY_TERMS:
+        target = None
+        for pillar, keywords in PRIORITY_PILLAR_MAP.items():
+            if any(kw in priority for kw in keywords):
+                target = pillar
+                break
+        if target:
+            weights[target] += 0.05
+            others = [p for p in weights if p != target]
+            decrement = 0.05 / len(others) if others else 0
+            for p in others:
+                weights[p] -= decrement
+            total = sum(weights.values()) or 1
+            weights = {p: weights[p] / total for p in weights}
+    return weights
+
 
 # ---------------------------------------------------------------------------
 # Client selection
@@ -212,30 +289,78 @@ def normalise_business_model(report_data: dict) -> dict:
 
 
 def recompute_dual_scores(report_data: dict) -> dict:
+    """Make the dual-score invariants hold regardless of what the LLM emitted.
+
+    Invariants enforced here (and asserted by tests):
+      • equal_weighted_score  ==  simple average of the 4 pillar scores
+                                  (academically validated 25%/25%/25%/25%
+                                  baseline — never overridden by the LLM).
+      • scores.overall        ==  equal_weighted_score
+                                  (this is the primary score surfaced on
+                                  the cover page and in dashboard rows).
+      • contextual_score      ==  weighted sum using the business-model
+                                  weight table (+ optional unambiguous
+                                  priority boost). Recomputed deterministically
+                                  if the LLM omitted it; otherwise the LLM
+                                  value is retained (it captures the priority
+                                  boost nuance).
+
+    The contextual score is intentionally left distinct from the equal
+    baseline: they may be numerically equal (unknown business model, or
+    rare coincidence) but the LABELS must always remain separate. UI and
+    PDF code both follow this contract.
+    """
     scores = report_data.get("scores") or {}
     pillars = ["people", "process", "data", "technology"]
     try:
-        pillar_scores = [float(scores.get(p, 0) or 0) for p in pillars]
+        pillar_scores = {p: float(scores.get(p, 0) or 0) for p in pillars}
     except (TypeError, ValueError):
         return report_data
-    mean = round(sum(pillar_scores) / 4.0, 1)
-    eq = report_data.get("equal_weighted_score")
-    ctx = report_data.get("contextual_score")
-    bm = report_data.get("business_model")
-    strategic = (report_data.get("strategic_priority") or "").strip().lower()
-    adjustment_present = (bm not in (None, "Bulk", "Standard")) or bool(strategic)
-    try:
-        if eq is not None and ctx is not None:
-            if round(float(eq), 2) == round(float(ctx), 2) and adjustment_present:
-                report_data["equal_weighted_score"] = mean
-    except (TypeError, ValueError):
-        pass
-    final_eq = report_data.get("equal_weighted_score")
-    if final_eq is None or not isinstance(final_eq, (int, float)):
-        report_data["equal_weighted_score"] = mean
-        final_eq = mean
-    scores["overall"] = float(final_eq)
+
+    # ── Equal-weighted score: simple average, ALWAYS recomputed.
+    eq_mean = round(sum(pillar_scores.values()) / 4.0, 1)
+    report_data["equal_weighted_score"] = eq_mean
+
+    # scores.overall mirrors the equal-weighted baseline (primary view).
+    scores["overall"] = eq_mean
     report_data["scores"] = scores
+
+    # ── Contextual score: prefer LLM-emitted value, else recompute from
+    # business-model weight table. If the LLM duplicated the equal-weighted
+    # value into the contextual slot for a known business model, treat it as
+    # missing and recompute.
+    try:
+        ctx_raw = report_data.get("contextual_score")
+        ctx_value = float(ctx_raw) if ctx_raw is not None else None
+    except (TypeError, ValueError):
+        ctx_value = None
+
+    bm = report_data.get("business_model")
+    weights = derive_contextual_weights(report_data)
+
+    # Detect the "LLM lazily copied the equal-weighted value" case for known
+    # business models and force a recomputation.
+    if (
+        ctx_value is not None
+        and weights is not None
+        and bm in BUSINESS_MODEL_WEIGHTS
+        and round(ctx_value, 1) == round(eq_mean, 1)
+    ):
+        ctx_value = None
+
+    if ctx_value is None and weights is not None:
+        ctx_value = sum(pillar_scores[p] * weights[p] for p in pillars)
+
+    if ctx_value is not None:
+        report_data["contextual_score"] = round(float(ctx_value), 2)
+
+    # Expose the final normalised contextual weights so the dashboard/PDF can
+    # show the row used for the calculation.
+    if weights is not None:
+        report_data["contextual_weights"] = {
+            p: round(weights[p], 4) for p in pillars
+        }
+
     return report_data
 
 

@@ -306,7 +306,7 @@ def build_cover_page(story, assessment, report):
 
 TOC_ENTRIES = [
     (1,  "Portfolio Context",             "Who and what this report is about"),
-    (2,  "Overall Maturity",              "Equal-weighted vs contextual score"),
+    (2,  "Overall Maturity",              "Equal-weighted baseline & business-model contextual score"),
     (3,  "Pillar Maturity Levels",        "The Hannila L1\u2013L5 ladder"),
     (4,  "Dimension Scores",              "Raw pillar grades (1\u20135)"),
     (5,  "Weighted Score Calculation",    "Derivation and methodology"),
@@ -623,13 +623,28 @@ def build_company_info(story, assessment, report, body):
 
 
 def build_overall_score(story, scores, report, level_names, heading, body):
-    equal = scores.get("overall", "N/A")
+    # ── Equal-weighted score: ALWAYS the simple average of the four pillar
+    #    scores. We recompute here as a safety net so the PDF never displays
+    #    a contextual value in the equal-weighted slot, even if upstream data
+    #    drifts. This mirrors recompute_dual_scores() in chat_service.py.
+    pillar_keys = ("people", "process", "data", "technology")
+    try:
+        pillar_vals = [float(scores.get(p, 0) or 0) for p in pillar_keys]
+        if any(pillar_vals):
+            equal = round(sum(pillar_vals) / 4.0, 1)
+        else:
+            equal = scores.get("overall", "N/A")
+    except (TypeError, ValueError):
+        equal = scores.get("overall", "N/A")
     ctx = report.get("contextual_score")
     lvl_overall = level_names.get("overall") or _derive_level_name(equal)
     # Dual-score card rendered as a stacked Table so that the big (22pt) score
     # number cannot overlap the adjacent label / level-name lines. Each row owns
     # its own row-height and leading.
-    score_text = f"{equal}" if not isinstance(equal, (int, float)) else f"{equal}"
+    if isinstance(equal, (int, float)):
+        score_text = f"{float(equal):.2f}"
+    else:
+        score_text = f"{equal}"
     eq_cell = [
         [Paragraph(
             '<font size="7" color="#0891B2"><b>EQUAL-WEIGHTED SCORE · PRIMARY</b></font>',
@@ -1204,7 +1219,7 @@ def build_full_assessment_pdf(assessment: dict) -> BytesIO:
     # --- Group A: Context + Overall Score ---
     build_section_label(story, styles, 1, "Portfolio Context", "Who and what this report is about")
     build_portfolio_context(story, assessment, report, body)
-    build_section_label(story, styles, 2, "Overall Maturity", "Equal-weighted vs contextual score")
+    build_section_label(story, styles, 2, "Overall Maturity", "Equal-weighted baseline & business-model contextual score")
     build_overall_score(story, scores, report, level_names, heading, body)
     story.append(PageBreak())
 
