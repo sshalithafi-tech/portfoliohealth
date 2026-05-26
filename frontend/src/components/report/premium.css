@@ -427,7 +427,7 @@
   flex-direction: column;
   align-items: flex-start;
   padding: 6px 8px;
-  background: #fff;
+  background: transparent;
   border: 1px solid var(--line);
   border-radius: 6px;
 }
