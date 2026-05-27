@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
   AlertTriangle, RefreshCw, Clock, ArrowLeft, ArrowRight, ChevronDown,
-  MessageSquare, Download, Info, GraduationCap, Printer,
+  MessageSquare, Download, Info, GraduationCap, Printer, ShieldAlert, TrendingDown, Zap,
 } from "lucide-react";
 import { toast } from "sonner";
 import Layout from "../components/Layout";
@@ -157,10 +157,6 @@ const R2ExecutiveSummary = ({ data }) => {
 
 /* ============ R3 Organisation Profile ============ */
 
-/* Business-model → pillar weight table (mirrors the backend canonical map in
-   chat_service.py BUSINESS_MODEL_WEIGHTS — kept in sync by hand). Used only
-   to display the weight row alongside the explanation of the contextual
-   score in the Business Model Context card. */
 const BUSINESS_MODEL_WEIGHT_TABLE = {
   ETO:      { people: 0.35, process: 0.30, data: 0.20, technology: 0.15 },
   CETO:     { people: 0.25, process: 0.30, data: 0.25, technology: 0.20 },
@@ -199,8 +195,6 @@ const BusinessModelContextCard = ({ data }) => {
   const { business_model, business_model_raw, contextual_weights, strategic_priority,
           equal_weighted_score, contextual_score } = data;
 
-  // Resolve which canonical row applies. Prefer the raw model name from the
-  // LLM (preserves Bulk vs Standard); fall back to the display code.
   const canonicalKey = (() => {
     const candidates = [business_model_raw, business_model]
       .filter(Boolean)
@@ -342,7 +336,6 @@ const PillarCard = ({ pillar, data, idx, isOpen, onToggle }) => {
         </div>
       </button>
 
-      {/* Always-visible compact bar (gives at-a-glance status even when collapsed) */}
       <div className="r4-bar">
         <div className="r4-track">
           <div
@@ -355,7 +348,6 @@ const PillarCard = ({ pillar, data, idx, isOpen, onToggle }) => {
         </div>
       </div>
 
-      {/* Compact one-liner shown only when collapsed */}
       {!isOpen && summary && (
         <div className="r4-summary">
           <span className="r4-summary-quote">"</span>
@@ -364,7 +356,6 @@ const PillarCard = ({ pillar, data, idx, isOpen, onToggle }) => {
         </div>
       )}
 
-      {/* Expanded body */}
       <div className={`r4-body ${isOpen ? "open" : ""}`}>
         <div className="r4-body-inner">
           <span className="section-label">Evidence from Assessment</span>
@@ -398,7 +389,6 @@ const PillarCard = ({ pillar, data, idx, isOpen, onToggle }) => {
 };
 
 const R4PillarSection = ({ data }) => {
-  // Default: bottleneck pillar open, all others closed
   const [openKey, setOpenKey] = useState(data.bottleneck || data.kpi.pillars[0]?.key);
   return (
     <section className="r4" data-testid="report-r4">
@@ -469,12 +459,57 @@ const R5Calculation = ({ data }) => {
   );
 };
 
-/* ============ R6 Bottleneck ============ */
+/* ============ R6 Bottleneck — Rich Alert Card ============ */
+
+/* Per-pillar root cause and proven consequence copy, grounded in Hannila (2019)
+   and Hannila et al. (2022). Falls back to generic text if pillar key is unknown. */
+const BN_COPY = {
+  people: {
+    rootCause:
+      "The organisation lacks the roles, competencies, or decision-making culture required to act on portfolio data. Without accountable owners who understand PPDT practices, even well-structured data and process tooling will go unused.",
+    provenConsequence:
+      "Hannila et al. (2022) found that people-capability gaps are the most common reason portfolio data initiatives stall after the first pilot — executives revert to intuition-based decisions when no one owns the data-driven mandate.",
+  },
+  process: {
+    rootCause:
+      "Portfolio review cadences, decision criteria, and governance gates are either absent or inconsistently applied. Without structured processes, data collected from other pillars cannot be converted into a repeatable decision.",
+    provenConsequence:
+      "Hannila (2019) documented that companies with weak portfolio governance retained up to 30% more low-margin products than peers at the same revenue scale, directly due to absent retirement-triggering processes.",
+  },
+  data: {
+    rootCause:
+      "Product-level master data — cost, revenue, margin, lifecycle stage — is incomplete, duplicated, or not trusted by decision-makers. No amount of process improvement or tooling investment can compensate for a missing data foundation.",
+    provenConsequence:
+      "Hannila et al. (2020) empirical study of 8 industrial companies showed that data quality was the single most cited barrier to data-driven PPM, with every company reporting that portfolio decisions were being made on estimates rather than verified figures.",
+  },
+  technology: {
+    rootCause:
+      "Systems are fragmented, manually reconciled, or lack the integration needed to surface product-level insights at the point of decision. Teams spend analytical capacity on data wrangling rather than on portfolio strategy.",
+    provenConsequence:
+      "Silvola (2018) and Hannila et al. (2022) both show that technology gaps force portfolio managers into spreadsheet-based workarounds that introduce lag, version conflicts, and decision latency — undermining the timeliness of retirement and renewal choices.",
+  },
+};
+
+const GENERIC_BN_COPY = {
+  rootCause:
+    "This pillar is the lowest-scoring precondition in the PPDT framework. Because all five preconditions must function together for data-driven PPM to be possible, this gap caps every other pillar regardless of their individual scores.",
+  provenConsequence:
+    "Hannila et al. (2022) demonstrated that a single weak precondition is sufficient to prevent the organisation from making consistently data-driven portfolio decisions — even when the other three pillars are well-developed.",
+};
+
+const RISK_ITEMS = [
+  { icon: TrendingDown, label: "Profit leakage", desc: "Low-margin products retained beyond their economic useful life" },
+  { icon: ShieldAlert,  label: "Strategic drift",  desc: "Resource allocation decoupled from verified portfolio performance" },
+  { icon: Zap,          label: "Decision latency", desc: "Portfolio reviews delayed by manual data reconciliation effort" },
+];
+
 const R6Bottleneck = ({ data }) => {
-  const { bottleneck, kpi, bottleneck_narrative } = data;
+  const { bottleneck, kpi, bottleneck_narrative, bottleneck_capped } = data;
   if (!bottleneck) return null;
   const bn = kpi.pillars.find((p) => p.key === bottleneck);
   if (!bn) return null;
+
+  const copy = BN_COPY[bottleneck] || GENERIC_BN_COPY;
 
   const narrative =
     bottleneck_narrative ||
@@ -482,23 +517,56 @@ const R6Bottleneck = ({ data }) => {
 
   return (
     <section className="r6" data-testid="report-r6">
+      {/* ── Header banner ── */}
       <div className="r6-card">
         <div className="r6-head">
           <span className="ico"><AlertTriangle size={22} /></span>
-          <span className="r6-title">⚠ Bottleneck Identified — {bn.name.toUpperCase()}</span>
-        </div>
-        <p className="r6-body">{narrative}</p>
-        <div className="r6-risk">
-          <div className="r6-risk-head">
-            <span className="ico"><Info size={14} /></span>
-            <span className="r6-risk-label">Decision Risk</span>
+          <div className="r6-head-text">
+            <span className="r6-title">Bottleneck Identified — {bn.name.toUpperCase()}</span>
+            {bottleneck_capped && (
+              <span className="r6-capped-pill">Score capped at {bn.score.toFixed(1)} / 5.0</span>
+            )}
           </div>
-          <p className="r6-risk-body">
-            Portfolio renewal, retirement and investment-reallocation decisions are currently made on incomplete or unverified evidence in the {bn.name.toLowerCase()} pillar — and the gap will widen with every new project the organisation accepts until it is closed.
-          </p>
         </div>
+
+        {/* ── AI narrative from assessment ── */}
+        <p className="r6-body">{narrative}</p>
+
+        {/* ── Two-column: Root Cause + Proven Consequence ── */}
+        <div className="r6-two-col">
+          <div className="r6-col r6-col--cause">
+            <span className="r6-col-label">
+              <Info size={13} style={{ display: "inline", marginRight: 5, verticalAlign: "middle" }} />
+              Root Cause
+            </span>
+            <p className="r6-col-body">{copy.rootCause}</p>
+          </div>
+          <div className="r6-col r6-col--consequence">
+            <span className="r6-col-label">
+              <TrendingDown size={13} style={{ display: "inline", marginRight: 5, verticalAlign: "middle" }} />
+              Proven Consequence
+            </span>
+            <p className="r6-col-body">{copy.provenConsequence}</p>
+          </div>
+        </div>
+
+        {/* ── Three risk pills ── */}
+        <div className="r6-risks">
+          {RISK_ITEMS.map(({ icon: Icon, label, desc }) => (
+            <div key={label} className="r6-risk-pill">
+              <Icon size={15} className="r6-risk-icon" />
+              <div>
+                <span className="r6-risk-pill-label">{label}</span>
+                <span className="r6-risk-pill-desc">{desc}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* ── Academic footer ── */}
         <div className="section-footer">
           Bottleneck principle: Hannila et al. (2022) — five preconditions that must all function together for data-driven PPM to be possible.
+          Root cause evidence: Hannila (2019) · Hannila, Koskinen, Härkönen &amp; Haapasalo (2020), JEIM, 33(1), 214–237.
         </div>
       </div>
     </section>
@@ -681,10 +749,6 @@ const BarChart = ({ data }) => {
   );
 };
 
-/* Note: Score Confidence and Benchmark Context charts were removed from the
-   dashboard view per design polish. They still exist in the PDF export
-   pipeline (`/app/backend/pdf_builder.py`). */
-
 const R9Dashboard = ({ data }) => (
   <section className="r9" data-testid="report-r9">
     <span className="section-label">Assessment Dashboard</span>
@@ -758,7 +822,7 @@ const ReportFooter = ({ data }) => (
   </footer>
 );
 
-/* ============ Top toolbar (sits above the report doc, in the light app shell) ============ */
+/* ============ Top toolbar ============ */
 const ReportToolbar = ({ id, onDownload, onPrint, downloading, companyName }) => (
   <div className="print-hide flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
     <div className="flex items-center gap-3">
@@ -858,7 +922,6 @@ const ReportPage = () => {
   }, [id, assessment?.company_name]);
 
   const printReport = useCallback(() => {
-    // Slight delay so toast can appear before browser print dialog grabs focus
     toast.success("Opening print preview · choose 'Save as PDF' for board-room ready output", { duration: 2200 });
     setTimeout(() => window.print(), 250);
   }, []);
