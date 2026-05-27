@@ -71,6 +71,24 @@ const R1Cover = ({ data }) => {
           </div>
         </div>
       </div>
+
+      {/* 4-pillar score strip */}
+      <div className="r1-strip">
+        {kpi.pillars.map((p) => {
+          const isBn = data.bottleneck === p.key;
+          return (
+            <div key={p.key} className={`r1-tile${isBn ? " bottleneck" : ""}`}>
+              <div className="r1-tile-top">
+                <div className="r1-tile-badge">{p.letter}</div>
+                <span className="r1-tile-label">{p.name}</span>
+                {isBn && <span className="r1-tile-bn-mark">⚠</span>}
+              </div>
+              <div className="r1-tile-score">{p.score.toFixed(1)}</div>
+              <div className="r1-tile-level">{LEVEL_TITLES[p.level] || "—"}</div>
+            </div>
+          );
+        })}
+      </div>
     </section>
   );
 };
@@ -340,7 +358,7 @@ const PillarCard = ({ pillar, data, idx, isOpen, onToggle }) => {
       {/* Compact one-liner shown only when collapsed */}
       {!isOpen && summary && (
         <div className="r4-summary">
-          <span className="r4-summary-quote">“</span>
+          <span className="r4-summary-quote">"</span>
           <p>{summary}</p>
           <span className="r4-expand-hint">Click to read full evidence →</span>
         </div>
