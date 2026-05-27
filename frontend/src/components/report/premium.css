@@ -717,7 +717,7 @@
 .ph-report .r5-calc-div { height: 1px; background: rgba(255,255,255,0.08); margin: 10px 0; }
 .ph-report .r5-research { font: italic 400 11px 'Inter'; color: rgba(8, 145, 178, 0.4); margin-top: 10px; }
 
-/* ============ R6 Bottleneck ============ */
+/* ============ R6 Bottleneck — Rich Alert Card ============ */
 .ph-report .r6 { padding: 24px 48px; }
 .ph-report .r6-card {
   background: #FFF5F5;
@@ -727,15 +727,121 @@
   border-radius: 18px;
   padding: 28px 32px;
 }
-.ph-report .r6-head { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-.ph-report .r6-head .ico { color: var(--danger); display: flex; flex-shrink: 0; }
-.ph-report .r6-title { font: 700 18px 'Inter'; color: #C53030; }
+
+/* Header row: icon + stacked title/pill */
+.ph-report .r6-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.ph-report .r6-head .ico { color: var(--danger); display: flex; flex-shrink: 0; margin-top: 2px; }
+.ph-report .r6-head-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ph-report .r6-title {
+  font: 700 18px 'Inter';
+  color: #C53030;
+  line-height: 1.25;
+}
+/* "Score capped at X / 5.0" pill */
+.ph-report .r6-capped-pill {
+  display: inline-flex;
+  align-items: center;
+  font: 600 11px 'Inter';
+  color: var(--danger);
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.28);
+  border-radius: 50px;
+  padding: 3px 10px;
+  letter-spacing: 0.3px;
+  align-self: flex-start;
+}
+
+/* AI narrative */
 .ph-report .r6-body {
   font: 400 14px 'Inter';
   color: var(--slate);
   line-height: 1.65;
-  margin-bottom: 18px;
+  margin-bottom: 22px;
 }
+
+/* Two-column: Root Cause | Proven Consequence */
+.ph-report .r6-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+.ph-report .r6-col {
+  border-radius: 12px;
+  padding: 16px 18px;
+}
+.ph-report .r6-col--cause {
+  background: rgba(239, 68, 68, 0.05);
+  border: 1px solid rgba(239, 68, 68, 0.14);
+}
+.ph-report .r6-col--consequence {
+  background: rgba(30, 41, 59, 0.04);
+  border: 1px solid rgba(30, 41, 59, 0.10);
+}
+.ph-report .r6-col-label {
+  display: block;
+  font: 700 10.5px 'Inter';
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+  color: #C53030;
+  margin-bottom: 10px;
+}
+.ph-report .r6-col--consequence .r6-col-label {
+  color: var(--navy);
+}
+.ph-report .r6-col-body {
+  font: 400 13px 'Inter';
+  color: var(--slate);
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* Three risk pills */
+.ph-report .r6-risks {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+.ph-report .r6-risk-pill {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: rgba(239, 68, 68, 0.07);
+  border: 1px solid rgba(239, 68, 68, 0.18);
+  border-radius: 10px;
+  padding: 10px 14px;
+  flex: 1;
+  min-width: 160px;
+}
+.ph-report .r6-risk-icon {
+  color: var(--danger);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.ph-report .r6-risk-pill-label {
+  display: block;
+  font: 700 12px 'Inter';
+  color: #C53030;
+  margin-bottom: 2px;
+}
+.ph-report .r6-risk-pill-desc {
+  display: block;
+  font: 400 11.5px 'Inter';
+  color: var(--slate);
+  line-height: 1.5;
+}
+
+/* Legacy single-box risk (kept for backwards compat, hidden by new layout) */
 .ph-report .r6-risk {
   background: rgba(192, 57, 43, 0.06);
   border-radius: 10px;
@@ -1093,6 +1199,11 @@
   .ph-report .roadmap-board { grid-template-columns: 1fr; }
   .ph-report .r10-grid { grid-template-columns: 1fr; }
   .ph-report .report-footer { padding: 16px 20px; }
+
+  /* R6 responsive */
+  .ph-report .r6-two-col { grid-template-columns: 1fr; gap: 12px; }
+  .ph-report .r6-risks { flex-direction: column; }
+  .ph-report .r6-risk-pill { min-width: unset; }
 }
 
 /* ============ Print — A4 Board-Room Ready ============ */
@@ -1136,15 +1247,21 @@
     break-inside: avoid;
   }
 
-  /* Crisper colors in print */
-  .ph-report .r1-cover {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-    color-adjust: exact;
+  /* Keep R6 two-col and risk pills from breaking across pages */
+  .ph-report .r6-two-col,
+  .ph-report .r6-risks {
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
+
+  /* Force print colors */
+  .ph-report .r1-cover,
   .ph-report .r5-card,
   .ph-report .navy-panel,
-  .ph-report .r1-strip {
+  .ph-report .r1-strip,
+  .ph-report .r6-card,
+  .ph-report .r6-col,
+  .ph-report .r6-risk-pill {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
     color-adjust: exact;
