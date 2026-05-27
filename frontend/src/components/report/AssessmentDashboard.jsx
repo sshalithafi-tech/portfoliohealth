@@ -1,28 +1,29 @@
 /**
- * AssessmentDashboard.jsx
+ * AssessmentDashboard.jsx — v2
  *
- * Compact, scannable 2x2 dashboard that replaces the previous wall-of-text
- * R6 Bottleneck + R8 Decision Impact sections in the consultant report.
+ * Layout:
+ *   Row 1 — Bottleneck (full width, hero)
+ *   Row 2 — Preconditions (half) · Portfolio Decision Impact (half)
+ *   Row 3 — Portfolio Renewal Radar (full width)
  *
- * Cards (always in this order, always rendered, never skipped):
- *   Row 1 — BottleneckCard           · PreconditionsCard
- *   Row 2 — PortfolioDecisionImpactCard · GovernanceReadinessCard
+ * Design language is shared across every card (same surface, radius, padding,
+ * eyebrow, chip, and severity palette). All AI prose is normalised through a
+ * deterministic composer so dashboard structure stays stable across companies.
  *
- * Design rules:
- *   - All four cards share the same surface, radius, padding, label and chip styles.
- *   - Severity colors are driven by the global maturity band palette:
- *       Critical / very weak  = red   #DC2626 (--bn-critical)
- *       Moderate / partial    = amber #F59E0B (--bn-warning)
- *       Good / established    = green #10B981 (--bn-good)
- *       Advanced / strong     = sky   #0EA5E9 (--bn-advanced)
- *   - All long AI prose is normalised through `truncateInsight` / `extractFirstSentence`.
- *   - Backend `pdf_builder.py` still consumes the verbose fields untouched.
+ * Severity palette (aliased to maturity bands):
+ *   red    #DC2626 (--bn-critical)  · Weak / Critical / High
+ *   amber  #F59E0B (--bn-warning)   · Partial / Medium / Moderate
+ *   green  #10B981 (--bn-good)      · Met / Established / Low
+ *   sky    #0EA5E9 (--bn-advanced)  · Advanced / Strong (band 4)
+ *
+ * The PDF export pipeline in `/app/backend/pdf_builder.py` is intentionally
+ * untouched — the verbose narrative still ships in downloads.
  */
 import {
   AlertTriangle,
   Layers,
   Compass,
-  ShieldCheck,
+  Radar,
   CheckCircle2,
   CircleDot,
   XCircle,
@@ -34,9 +35,9 @@ import {
   LEVEL_TITLES,
 } from "../../lib/reportData";
 
-/* ============================================================
- * Small shared helpers
- * ============================================================ */
+/* =====================================================================
+ * Tokens & tiny helpers
+ * ===================================================================== */
 
 const SEVERITY_COLORS = {
   critical: "var(--bn-critical, #DC2626)",
@@ -53,7 +54,6 @@ const PILLAR_LABELS = {
   technology: "Technology",
 };
 
-/** First non-empty sentence; falls back to original text if no period present. */
 export function extractFirstSentence(text = "") {
   const s = String(text || "").trim();
   if (!s) return "";
@@ -61,7 +61,6 @@ export function extractFirstSentence(text = "") {
   return (m ? m[0] : s).trim();
 }
 
-/** Trim a long string to ~maxChars, breaking on word boundary, appending an ellipsis. */
 export function truncateInsight(text = "", maxChars = 170) {
   const s = String(text || "").trim();
   if (s.length <= maxChars) return s;
@@ -70,25 +69,23 @@ export function truncateInsight(text = "", maxChars = 170) {
   return `${space > 60 ? cut.slice(0, space) : cut}…`;
 }
 
-/** Map a 0–5 score to one of the 4 severity buckets used in this dashboard. */
 function severityFromScore(score) {
   const b = scoreToBand(score);
   if (b <= 1) return "critical";
   if (b === 2) return "warning";
   if (b === 3) return "good";
-  return "advanced"; // 4 and 5
+  return "advanced";
 }
 
-/** Map H/M/L impact strings to severity buckets. */
 function severityFromImpact(level) {
   if (level === "High") return "critical";
   if (level === "Medium") return "warning";
   return "good";
 }
 
-/* ============================================================
- * Generic visual atoms
- * ============================================================ */
+/* =====================================================================
+ * Atoms — shared across every card so spacing/typography stay consistent
+ * ===================================================================== */
 
 const StatusChip = ({ label, severity = "muted", testid }) => (
   <span
@@ -107,19 +104,33 @@ const SeverityBar = ({ severity = "muted" }) => (
   </span>
 );
 
-/** Circular SVG gauge — animates fill on mount via CSS keyframe. */
+const CardHead = ({ icon: Icon, eyebrow, chip, sub }) => (
+  <header className="bn-card-head-block">
+    <div className="bn-card-head">
+      <span className="bn-card-eyebrow">
+        <Icon size={13} /> {eyebrow}
+      </span>
+      {chip}
+    </div>
+    {sub && <p className="bn-card-sub">{sub}</p>}
+  </header>
+);
+
+const CardFooter = ({ children }) =>
+  children ? <p className="bn-card-foot">{children}</p> : null;
+
 const RingGauge = ({ score = 0, color = SEVERITY_COLORS.critical, levelLabel = "" }) => {
   const safe = Math.max(0, Math.min(5, Number(score) || 0));
   const pct = safe / 5;
-  const R = 52;
+  const R = 62;
   const C = 2 * Math.PI * R;
   return (
-    <div className="bn-ring">
-      <svg viewBox="0 0 130 130" className="bn-ring-svg">
-        <circle cx="65" cy="65" r={R} className="bn-ring-track" />
+    <div className="bn-ring bn-ring--lg">
+      <svg viewBox="0 0 150 150" className="bn-ring-svg">
+        <circle cx="75" cy="75" r={R} className="bn-ring-track" />
         <circle
-          cx="65"
-          cy="65"
+          cx="75"
+          cy="75"
           r={R}
           className="bn-ring-fill"
           style={{
@@ -140,134 +151,9 @@ const RingGauge = ({ score = 0, color = SEVERITY_COLORS.critical, levelLabel = "
   );
 };
 
-/* ============================================================
- * CARD 1 — Bottleneck
- * ============================================================ */
-
-function buildBottleneckInsight(data, pillarKey) {
-  const chain = [
-    data?.bottleneck_narrative,
-    data?.decision_vulnerability_narrative,
-    data?.pillar_interpretations?.[pillarKey],
-    data?.dimension_summaries?.[pillarKey],
-  ];
-  for (const t of chain) {
-    const v = (t || "").trim();
-    if (v) return truncateInsight(extractFirstSentence(v) || v, 170);
-  }
-  // Pillar-specific fallback
-  const fallbacks = {
-    people: "Decision rights, ownership and stewardship are not yet established — portfolio choices remain personality-led rather than role-led.",
-    process: "Portfolio is reviewed ad hoc rather than on a governed cadence with stage-gates — making intake, change and retirement decisions inconsistent.",
-    data: "Master data and product profitability are fragmented across systems — every portfolio decision is reconciled manually before it can be made.",
-    technology: "Business systems are not yet adapted to surface a live portfolio view — decisions wait on monthly extracts instead of live evidence.",
-  };
-  return truncateInsight(fallbacks[pillarKey] || "Bottleneck details are not yet narrated for this pillar.", 170);
-}
-
-const BottleneckCard = ({ data }) => {
-  const pillarKey = data?.bottleneck;
-  if (!pillarKey) return null;
-  const score = Number(data?.scores?.[pillarKey] ?? 0);
-  const level = scoreToLevel(score);
-  const sev = severityFromScore(score);
-  const band = scoreToBand(score);
-  const color = BAND_COLORS[band];
-  const insight = buildBottleneckInsight(data, pillarKey);
-  const label = PILLAR_LABELS[pillarKey] || pillarKey;
-
-  return (
-    <div className="bn-card" data-testid="dashboard-card-bottleneck">
-      <div className="bn-card-head">
-        <span className="bn-card-eyebrow">
-          <AlertTriangle size={13} /> Bottleneck
-        </span>
-        <StatusChip label={LEVEL_TITLES[level] || "—"} severity={sev} testid="bottleneck-status" />
-      </div>
-      <div className="bn-bn-body">
-        <div className="bn-bn-left">
-          <RingGauge score={score} color={color} levelLabel={LEVEL_TITLES[level]} />
-        </div>
-        <div className="bn-bn-right">
-          <div className="bn-bn-pillar" data-testid="bottleneck-pillar">{label}</div>
-          <div className="bn-bn-meta">
-            {LEVEL_TITLES[level]} · {score.toFixed(1)} / 5.0
-          </div>
-          <p className="bn-bn-insight" data-testid="bottleneck-insight">{insight}</p>
-          <div className="bn-bn-risks" data-testid="bottleneck-risks">
-            <StatusChip label="Profit leakage" severity="critical" />
-            <StatusChip label="Strategic drift" severity="warning" />
-            <StatusChip label="Decision latency" severity="warning" />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-/* ============================================================
- * CARD 2 — Preconditions
- * ============================================================ */
-
-const PRECONDITIONS = [
-  {
-    key: "shared_product",
-    label: "Shared product understanding",
-    keywordsMissing: [
-      "product definition", "common language", "unclear product", "productisation",
-      "no productisation", "inconsistent product", "product family", "no productiz",
-      "no product structure",
-    ],
-    pillars: ["people", "process"],
-  },
-  {
-    key: "structure",
-    label: "Commercial + technical structure",
-    keywordsMissing: [
-      "bom", "fragment", "item hierarchy", "no product structure", "no link between",
-      "commercial and technical", "no family", "no configuration",
-    ],
-    pillars: ["process", "data"],
-  },
-  {
-    key: "classification",
-    label: "Strategic product classification",
-    keywordsMissing: [
-      "strategic", "supportive", "non-strategic", "segmentation", "prioritisation",
-      "no portfolio prioritisation", "no classification",
-    ],
-    pillars: ["process", "people"],
-  },
-  {
-    key: "ownership",
-    label: "Ownership + governance",
-    keywordsMissing: [
-      "no owner", "no accountability", "no stewardship", "no governance",
-      "decision rights", "no governance body", "unclear ownership", "no steward",
-    ],
-    pillars: ["people"],
-  },
-  {
-    key: "cadence",
-    label: "PPM process + review cadence",
-    keywordsMissing: [
-      "stage-gate", "stage gate", "review cadence", "intake", "go-kill", "ad hoc",
-      "ad-hoc", "portfolio review", "review rhythm", "no formal review",
-    ],
-    pillars: ["process"],
-  },
-  {
-    key: "data_reporting",
-    label: "Data + reporting readiness",
-    keywordsMissing: [
-      "fragmented", "single source", "manual profitability", "no dashboard",
-      "isolated reporting", "manual reconciliation", "no live", "spreadsheets",
-    ],
-    pillars: ["data", "technology"],
-  },
-];
-
-const PARTIAL_HINTS = ["inconsistent", "isolated", "manual", "incomplete", "partial", "limited", "ad hoc", "ad-hoc"];
+/* =====================================================================
+ * Signal corpus (lowercased AI text used by all derivation helpers)
+ * ===================================================================== */
 
 function buildSignalCorpus(data) {
   const parts = [
@@ -281,18 +167,163 @@ function buildSignalCorpus(data) {
   return parts.filter(Boolean).join(" \n ").toLowerCase();
 }
 
+/* =====================================================================
+ * CARD 1 — Bottleneck (full width, hero)
+ * ===================================================================== */
+
+const BOTTLENECK_DEFINITIONS = {
+  people: "the People pillar captures decision rights, ownership, and the human governance through which portfolio choices actually get made.",
+  process: "the Process pillar captures stage-gate discipline, review cadence, and the formal mechanics through which portfolio decisions move from intake to closure.",
+  data: "the Data pillar captures master-data integrity, product profitability visibility, and the evidence base every portfolio decision is supposed to rest on.",
+  technology: "the Technology pillar captures whether business IT systems can surface a live, integrated portfolio view at the moment a decision must be made.",
+};
+
+const BOTTLENECK_CONSEQUENCE = {
+  people: "Until ownership is named and decision rights are explicit, portfolio choices remain personality-led and inconsistent across the lifecycle.",
+  process: "Until a governed cadence exists, intake, change, and retirement decisions stay reactive and the portfolio drifts.",
+  data: "Until master data and profitability are integrated, every portfolio decision waits on manual reconciliation before it can be made.",
+  technology: "Until business IT supports a live portfolio view, leadership reviews lag the reality of the market by weeks or months.",
+};
+
+function composeBottleneckExplanation(data, pillarKey) {
+  const def = `In this assessment, ${BOTTLENECK_DEFINITIONS[pillarKey] || ""}`;
+  const cons = BOTTLENECK_CONSEQUENCE[pillarKey] || "";
+  // Pull a short "why" signal from the AI fields. We lowercase only the
+  // first character (so the clause flows after "because") and preserve any
+  // acronyms / proper-nouns intact.
+  const sourceChain = [
+    data?.dimension_summaries?.[pillarKey],
+    data?.pillar_interpretations?.[pillarKey],
+    data?.bottleneck_narrative,
+    data?.decision_vulnerability_narrative,
+  ];
+  let why = "";
+  for (const t of sourceChain) {
+    const s = extractFirstSentence(t || "");
+    if (s && s.length >= 20) {
+      const stripped = s.replace(/[.!?]+$/, "");
+      // Only lowercase the very first character so acronyms (SAP, BI, ERP…)
+      // keep their casing.
+      const flowed = stripped.charAt(0).toLowerCase() + stripped.slice(1);
+      why = `It is the binding constraint here because ${truncateInsight(flowed, 110)}.`;
+      break;
+    }
+  }
+
+  const sentences = [def, why, cons].filter(Boolean);
+  let out = sentences.join(" ").replace(/\s+/g, " ").trim();
+  // If the full 3-sentence version overflows, drop the (optional) "why"
+  // sentence before truncating — we never want to lose the consequence.
+  if (out.length > 360 && why) {
+    out = [def, cons].join(" ").replace(/\s+/g, " ").trim();
+  }
+  if (out.length > 360) out = truncateInsight(out, 358);
+  return out;
+}
+
+const BottleneckCard = ({ data }) => {
+  const pillarKey = data?.bottleneck;
+  if (!pillarKey) return null;
+  const score = Number(data?.scores?.[pillarKey] ?? 0);
+  const level = scoreToLevel(score);
+  const sev = severityFromScore(score);
+  const band = scoreToBand(score);
+  const color = BAND_COLORS[band];
+  const label = PILLAR_LABELS[pillarKey] || pillarKey;
+  const explanation = composeBottleneckExplanation(data, pillarKey);
+
+  return (
+    <article className="bn-card bn-card--hero" data-testid="dashboard-card-bottleneck">
+      <CardHead
+        icon={AlertTriangle}
+        eyebrow="Bottleneck"
+        chip={<StatusChip label={LEVEL_TITLES[level] || "—"} severity={sev} testid="bottleneck-status" />}
+      />
+      <div className="bn-bn-body">
+        <div className="bn-bn-left">
+          <RingGauge score={score} color={color} levelLabel={LEVEL_TITLES[level]} />
+        </div>
+        <div className="bn-bn-right">
+          <h3 className="bn-bn-pillar" data-testid="bottleneck-pillar">
+            {label}
+            <span className="bn-bn-pillar-meta"> · {LEVEL_TITLES[level]} · {score.toFixed(1)} / 5.0</span>
+          </h3>
+          <p className="bn-bn-explanation" data-testid="bottleneck-insight">{explanation}</p>
+          <div className="bn-bn-risks-wrap">
+            <div className="bn-bn-risks" data-testid="bottleneck-risks">
+              <StatusChip label="Profit leakage" severity="critical" />
+              <StatusChip label="Strategic drift" severity="warning" />
+              <StatusChip label="Decision latency" severity="warning" />
+            </div>
+            <p className="bn-bn-risks-note">
+              Together, these capture how the bottleneck weakens value capture, strategic clarity, and decision speed.
+            </p>
+          </div>
+        </div>
+      </div>
+    </article>
+  );
+};
+
+/* =====================================================================
+ * CARD 2 — Preconditions (half width, theory-grounded)
+ * Hannila et al. (2020); Hannila (2019)
+ * ===================================================================== */
+
+const PRECONDITIONS = [
+  {
+    n: 1,
+    key: "p1_understanding",
+    title: "Mutual understanding of company products",
+    blurb: "A shared definition of what counts as a product across functions.",
+    pillars: ["people", "process"],
+    weak: ["product definition", "common language", "unclear product", "no productisation", "no productization", "inconsistent product", "no product structure", "no productiz"],
+  },
+  {
+    n: 2,
+    key: "p2_structure",
+    title: "Commercial and technical product structure",
+    blurb: "Linked commercial families and technical BOM hierarchy.",
+    pillars: ["process", "data"],
+    weak: ["bom", "fragment", "item hierarchy", "no product structure", "no link between", "commercial and technical", "no family", "no configuration"],
+  },
+  {
+    n: 3,
+    key: "p3_data_model",
+    title: "Holistic corporate-level data model",
+    blurb: "Master data connected to the key business processes.",
+    pillars: ["data", "technology"],
+    weak: ["fragmented", "single source", "no single source", "siloed data", "manual reconciliation", "data silos", "isolated", "no master data", "no integrated data"],
+  },
+  {
+    n: 4,
+    key: "p4_classification",
+    title: "Product classification and strategic role visibility",
+    blurb: "Strategic, supportive, and non-strategic categorisation in active use.",
+    pillars: ["process", "people"],
+    weak: ["no strategic", "no classification", "no segmentation", "no portfolio prioritisation", "no prioritization", "no supportive", "non-strategic", "no strategic role"],
+  },
+  {
+    n: 5,
+    key: "p5_governance_it",
+    title: "Data governance and business IT support",
+    blurb: "Ownership of data quality plus IT able to surface a live portfolio view.",
+    pillars: ["data", "technology"],
+    weak: ["no governance", "no data owner", "no data ownership", "no stewardship", "manual profitability", "no dashboard", "no live", "no real-time", "spreadsheets"],
+  },
+];
+
+const PARTIAL_HINTS = ["inconsistent", "isolated", "manual", "incomplete", "partial", "limited", "ad hoc", "ad-hoc"];
+
 function derivePreconditionStatus(precondition, corpus, scores) {
-  const hits = precondition.keywordsMissing.filter((kw) => corpus.includes(kw));
+  const hits = precondition.weak.filter((kw) => corpus.includes(kw));
   const avgScore =
     precondition.pillars.reduce((acc, p) => acc + (Number(scores?.[p]) || 0), 0) /
     precondition.pillars.length;
-  // No textual evidence + decent score → Met
   if (hits.length === 0 && avgScore >= 3.5) return "Met";
-  // Strong textual evidence of absence OR very low pillar avg → Missing
   if (hits.length >= 2 || avgScore < 2.0) return "Missing";
-  // Soft signals or moderate score → Partial
-  const partialHit = PARTIAL_HINTS.some((h) => corpus.includes(h));
-  if (hits.length >= 1 || partialHit || avgScore < 3.0) return "Partial";
+  const partial = PARTIAL_HINTS.some((h) => corpus.includes(h));
+  if (hits.length >= 1 || partial || avgScore < 3.0) return "Partial";
   return "Met";
 }
 
@@ -306,47 +337,55 @@ const PRECON_ICON = {
 const PreconditionsCard = ({ data }) => {
   const corpus = buildSignalCorpus(data);
   const scores = data?.scores || {};
-
-  const rows = PRECONDITIONS.map((p) => ({
-    ...p,
-    status: derivePreconditionStatus(p, corpus, scores),
-  }));
+  const rows = PRECONDITIONS.map((p) => ({ ...p, status: derivePreconditionStatus(p, corpus, scores) }));
   const metCount = rows.filter((r) => r.status === "Met").length;
 
   return (
-    <div className="bn-card" data-testid="dashboard-card-preconditions">
-      <div className="bn-card-head">
-        <span className="bn-card-eyebrow">
-          <Layers size={13} /> Preconditions
-        </span>
-        <StatusChip label={`${metCount} / ${rows.length} met`} severity={metCount >= 4 ? "good" : metCount >= 2 ? "warning" : "critical"} />
-      </div>
-      <ul className="bn-precon-list">
+    <article className="bn-card" data-testid="dashboard-card-preconditions">
+      <CardHead
+        icon={Layers}
+        eyebrow="Preconditions"
+        chip={
+          <StatusChip
+            label={`${metCount} / ${rows.length} met`}
+            severity={metCount >= 4 ? "good" : metCount >= 2 ? "warning" : "critical"}
+          />
+        }
+        sub="Five preconditions for fact-based, data-driven PPM."
+      />
+      <ul className="bn-precon-list bn-precon-list--theory">
         {rows.map((row) => (
           <li key={row.key} className="bn-precon-row" data-testid={`precon-${row.key}`}>
-            <span className="bn-precon-icon" style={{ color: SEVERITY_COLORS[PRECON_SEVERITY[row.status]] }}>
-              {PRECON_ICON[row.status]}
+            <span className="bn-precon-num">P{row.n}</span>
+            <div className="bn-precon-text">
+              <span className="bn-precon-title">{row.title}</span>
+              <span className="bn-precon-blurb">{row.blurb}</span>
+            </div>
+            <span className="bn-precon-status">
+              <span className="bn-precon-icon" style={{ color: SEVERITY_COLORS[PRECON_SEVERITY[row.status]] }}>
+                {PRECON_ICON[row.status]}
+              </span>
+              <StatusChip label={row.status} severity={PRECON_SEVERITY[row.status]} />
             </span>
-            <span className="bn-precon-label">{row.label}</span>
-            <StatusChip label={row.status} severity={PRECON_SEVERITY[row.status]} />
           </li>
         ))}
       </ul>
-    </div>
+      <CardFooter>Based on Hannila et al. (2020); Hannila (2019).</CardFooter>
+    </article>
   );
 };
 
-/* ============================================================
- * CARD 3 — Portfolio Decision Impact
- * ============================================================ */
+/* =====================================================================
+ * CARD 3 — Portfolio Decision Impact (half width, theory-named)
+ * ===================================================================== */
 
 const DECISION_TYPES = [
-  { key: "discontinuation", label: "Discontinuation" },
-  { key: "new_launch", label: "New Product Launch" },
-  { key: "product_change", label: "Product Change" },
-  { key: "investment", label: "Portfolio Investment" },
-  { key: "eol", label: "EOL / Retirement" },
-  { key: "rationalisation", label: "Product Family Rationalisation" },
+  { key: "discontinuation", label: "Discontinuation",            keywords: ["discontinuation", "discontinue", "kill"] },
+  { key: "new_launch",      label: "New Product Launch",         keywords: ["new product launch", "npd", "new launch", "launch"] },
+  { key: "product_change",  label: "Engineering Change",         keywords: ["engineering change", "product change", "configuration change", "product modification"] },
+  { key: "investment",      label: "Capability Investment",      keywords: ["capability investment", "portfolio investment", "investment"] },
+  { key: "eol",             label: "Ramp-down / Retirement",     keywords: ["ramp-down", "ramp down", "eol", "end of life", "end-of-life", "retirement"] },
+  { key: "rationalisation", label: "Product Family Rationalisation", keywords: ["rationalisation", "rationalization", "family rationalisation"] },
 ];
 
 const FALLBACK_BY_PILLAR = {
@@ -369,15 +408,6 @@ const FALLBACK_BY_PILLAR = {
   },
 };
 
-const IMPACT_LABELS = {
-  discontinuation: ["discontinuation", "discontinue", "kill"],
-  new_launch: ["new product launch", "npd", "new launch", "launch"],
-  product_change: ["product change", "product modification", "configuration change"],
-  investment: ["portfolio investment", "capability investment", "investment"],
-  eol: ["eol", "end of life", "retirement"],
-  rationalisation: ["rationalisation", "rationalization", "family rationalisation"],
-};
-
 const EXPLICIT_LEVELS = [
   { re: /high( risk)?/i, level: "High" },
   { re: /critical/i, level: "High" },
@@ -386,9 +416,8 @@ const EXPLICIT_LEVELS = [
   { re: /low( risk)?/i, level: "Low" },
 ];
 
-function deriveDecisionImpact(decisionKey, corpus, bottleneckPillar, bottleneckScore) {
-  // Try to read explicit severity attached to this decision in the narrative.
-  for (const kw of IMPACT_LABELS[decisionKey]) {
+function deriveDecisionImpact(decision, corpus, bottleneckPillar, bottleneckScore) {
+  for (const kw of decision.keywords) {
     const idx = corpus.indexOf(kw);
     if (idx === -1) continue;
     const window = corpus.slice(Math.max(0, idx - 60), idx + 120);
@@ -396,38 +425,41 @@ function deriveDecisionImpact(decisionKey, corpus, bottleneckPillar, bottleneckS
       if (re.test(window)) return level;
     }
   }
-  // Fallback by bottleneck pillar.
   const byPillar = FALLBACK_BY_PILLAR[bottleneckPillar] || FALLBACK_BY_PILLAR.process;
-  let level = byPillar[decisionKey] || "Medium";
-  // Score-based softening / sharpening.
+  let level = byPillar[decision.key] || "Medium";
   if (bottleneckScore < 2.0 && level === "Medium") level = "High";
   if (bottleneckScore > 3.0 && level === "High") level = "Medium";
   if (bottleneckScore > 3.0 && level === "Medium") level = "Low";
   return level;
 }
 
-const PortfolioDecisionImpactCard = ({ data }) => {
+function computeDecisionRows(data) {
   const corpus = buildSignalCorpus(data);
   const pillarKey = data?.bottleneck || "process";
   const pillarScore = Number(data?.scores?.[pillarKey] ?? 2.5);
-  const rows = DECISION_TYPES.map((d) => ({
+  return DECISION_TYPES.map((d) => ({
     ...d,
-    level: deriveDecisionImpact(d.key, corpus, pillarKey, pillarScore),
+    level: deriveDecisionImpact(d, corpus, pillarKey, pillarScore),
   }));
-  const worst = rows.find((r) => r.level === "High") || rows[0];
+}
 
+const PortfolioDecisionImpactCard = ({ data, rows }) => {
+  const worst = rows.find((r) => r.level === "High") || rows[0];
   return (
-    <div className="bn-card" data-testid="dashboard-card-decision-impact">
-      <div className="bn-card-head">
-        <span className="bn-card-eyebrow">
-          <Compass size={13} /> Portfolio Decision Impact
-        </span>
-        <StatusChip
-          label={worst ? `${worst.label} most exposed` : "—"}
-          severity={severityFromImpact(worst?.level || "Medium")}
-        />
-      </div>
-      <p className="bn-card-sub">Decision types most exposed today</p>
+    <article className="bn-card" data-testid="dashboard-card-decision-impact">
+      <CardHead
+        icon={Compass}
+        eyebrow="Portfolio Decision Impact"
+        chip={
+          worst ? (
+            <StatusChip
+              label={`${worst.label} most exposed`}
+              severity={severityFromImpact(worst.level)}
+            />
+          ) : null
+        }
+        sub="Decision types most constrained by the current bottleneck."
+      />
       <ul className="bn-dec-list">
         {rows.map((row) => {
           const sev = severityFromImpact(row.level);
@@ -445,114 +477,216 @@ const PortfolioDecisionImpactCard = ({ data }) => {
           );
         })}
       </ul>
-    </div>
+      <CardFooter>Based on Hannila (2019); Tolonen et al. (2015); Cooper et al. (2001).</CardFooter>
+    </article>
   );
 };
 
-/* ============================================================
- * CARD 4 — PPM Governance Readiness
- * ============================================================ */
+/* =====================================================================
+ * CARD 4 — Portfolio Renewal Radar (full width, SVG radar)
+ * Derived from the same decision-impact logic but rendered as a holistic
+ * exposure pattern instead of a list.
+ * ===================================================================== */
 
-const GOVERNANCE_DIMS = [
-  {
-    key: "ownership",
-    label: "Decision ownership",
-    primaryPillar: "people",
-    weak: ["no owner", "no accountability", "no stewardship", "no governance body", "unclear ownership", "no decision rights"],
-    established: ["named owner", "governance body", "decision rights", "accountability"],
-  },
-  {
-    key: "cadence",
-    label: "Review cadence",
-    primaryPillar: "process",
-    weak: ["no review", "ad hoc", "ad-hoc", "no cadence", "no formal review", "no portfolio review"],
-    established: ["monthly review", "quarterly review", "stage-gate", "stage gate", "review cadence", "portfolio review"],
-  },
-  {
-    key: "kpi",
-    label: "KPI discipline",
-    primaryPillar: "data",
-    weak: ["no kpi", "no metrics", "no target", "no profitability", "manual profitability", "no dashboard"],
-    established: ["kpi", "metrics", "profitability", "dashboard", "scorecard", "renewal rate"],
-  },
-  {
-    key: "alignment",
-    label: "Cross-functional alignment",
-    primaryPillar: "process",
-    weak: ["siloed", "silos", "handoff", "no shared visibility", "no cross-functional", "no alignment"],
-    established: ["cross-functional", "shared visibility", "joint review", "aligned"],
-  },
-];
+const LEVEL_TO_RADIUS = { Low: 0.25, Medium: 0.55, High: 0.92 };
 
-function deriveGovernanceReadiness(dim, corpus, scores) {
-  const score = Number(scores?.[dim.primaryPillar] ?? 0);
-  const weakHits = dim.weak.filter((k) => corpus.includes(k)).length;
-  const strongHits = dim.established.filter((k) => corpus.includes(k)).length;
-  if (weakHits >= 2 || score < 2.0) return "Weak";
-  if (strongHits >= 2 && score >= 3.5) return "Established";
-  if (score >= 3.5 && weakHits === 0) return "Established";
-  return "Emerging";
+// Short axis labels for the radar (full names live in the legend on the right).
+const RADAR_SHORT_LABELS = {
+  discontinuation: "Discontinue",
+  new_launch: "Launch",
+  product_change: "Change",
+  investment: "Investment",
+  eol: "Retire",
+  rationalisation: "Rationalise",
+};
+
+function PortfolioRenewalRadar({ rows, accent = "#0891B2" }) {
+  const N = rows.length;
+  const size = 360;
+  const cx = size / 2;
+  const cy = size / 2;
+  const rMax = size / 2 - 60; // leave room for axis labels outside the chart
+  const angleFor = (i) => (Math.PI * 2 * i) / N - Math.PI / 2;
+
+  const polygon = rows
+    .map((r, i) => {
+      const a = angleFor(i);
+      const d = rMax * LEVEL_TO_RADIUS[r.level];
+      return `${cx + d * Math.cos(a)},${cy + d * Math.sin(a)}`;
+    })
+    .join(" ");
+
+  // Reference rings at 0.25 / 0.55 / 0.92 with labels Low / Med / High
+  const RINGS = [
+    { r: 0.25, label: "Low" },
+    { r: 0.55, label: "Medium" },
+    { r: 0.92, label: "High" },
+  ];
+
+  return (
+    <svg
+      viewBox={`0 0 ${size} ${size}`}
+      className="bn-radar-svg"
+      role="img"
+      aria-label="Portfolio renewal exposure radar"
+    >
+      <defs>
+        <radialGradient id="radarFill" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor={accent} stopOpacity="0.55" />
+          <stop offset="100%" stopColor={accent} stopOpacity="0.10" />
+        </radialGradient>
+      </defs>
+
+      {/* Concentric rings */}
+      {RINGS.map((ring) => (
+        <circle
+          key={ring.label}
+          cx={cx}
+          cy={cy}
+          r={rMax * ring.r}
+          className="bn-radar-ring"
+        />
+      ))}
+
+      {/* Axis spokes */}
+      {rows.map((_, i) => {
+        const a = angleFor(i);
+        return (
+          <line
+            key={`spoke-${i}`}
+            x1={cx}
+            y1={cy}
+            x2={cx + rMax * Math.cos(a)}
+            y2={cy + rMax * Math.sin(a)}
+            className="bn-radar-spoke"
+          />
+        );
+      })}
+
+      {/* Ring labels — tiny, only along the top spoke */}
+      {RINGS.map((ring) => (
+        <text
+          key={`rl-${ring.label}`}
+          x={cx + 3}
+          y={cy - rMax * ring.r + 3}
+          className="bn-radar-ringlabel"
+        >
+          {ring.label}
+        </text>
+      ))}
+
+      {/* Exposure polygon */}
+      <polygon points={polygon} className="bn-radar-shape" fill="url(#radarFill)" stroke={accent} />
+
+      {/* Vertex dots */}
+      {rows.map((r, i) => {
+        const a = angleFor(i);
+        const d = rMax * LEVEL_TO_RADIUS[r.level];
+        return (
+          <circle
+            key={`v-${i}`}
+            cx={cx + d * Math.cos(a)}
+            cy={cy + d * Math.sin(a)}
+            r="4"
+            className="bn-radar-vertex"
+            style={{ fill: SEVERITY_COLORS[severityFromImpact(r.level)] }}
+          />
+        );
+      })}
+
+      {/* Axis labels — placed just outside rMax (uses short labels) */}
+      {rows.map((r, i) => {
+        const a = angleFor(i);
+        const lx = cx + (rMax + 18) * Math.cos(a);
+        const ly = cy + (rMax + 18) * Math.sin(a);
+        let anchor = "middle";
+        if (Math.cos(a) > 0.35) anchor = "start";
+        else if (Math.cos(a) < -0.35) anchor = "end";
+        return (
+          <text
+            key={`l-${i}`}
+            x={lx}
+            y={ly}
+            className="bn-radar-axislabel"
+            textAnchor={anchor}
+            dominantBaseline="middle"
+          >
+            {RADAR_SHORT_LABELS[r.key] || r.label}
+          </text>
+        );
+      })}
+    </svg>
+  );
 }
 
-const GOV_SEVERITY = { Weak: "critical", Emerging: "warning", Established: "good" };
-const GOV_BAR_STEPS = { Weak: 1, Emerging: 2, Established: 3 };
-
-const GovernanceReadinessCard = ({ data }) => {
-  const corpus = buildSignalCorpus(data);
-  const scores = data?.scores || {};
-  const rows = GOVERNANCE_DIMS.map((d) => ({
-    ...d,
-    status: deriveGovernanceReadiness(d, corpus, scores),
-  }));
-  const established = rows.filter((r) => r.status === "Established").length;
+const PortfolioRenewalRadarCard = ({ rows }) => {
+  const exposureScore = rows.reduce((acc, r) => acc + LEVEL_TO_RADIUS[r.level], 0) / rows.length;
+  const exposureLabel =
+    exposureScore >= 0.7 ? "High overall exposure"
+      : exposureScore >= 0.45 ? "Moderate overall exposure"
+      : "Contained exposure";
+  const exposureSev =
+    exposureScore >= 0.7 ? "critical" : exposureScore >= 0.45 ? "warning" : "good";
 
   return (
-    <div className="bn-card" data-testid="dashboard-card-governance">
-      <div className="bn-card-head">
-        <span className="bn-card-eyebrow">
-          <ShieldCheck size={13} /> PPM Governance Readiness
-        </span>
-        <StatusChip
-          label={`${established} / ${rows.length} established`}
-          severity={established >= 3 ? "good" : established >= 1 ? "warning" : "critical"}
-        />
+    <article className="bn-card bn-card--hero" data-testid="dashboard-card-renewal-radar">
+      <CardHead
+        icon={Radar}
+        eyebrow="Portfolio Renewal Radar"
+        chip={<StatusChip label={exposureLabel} severity={exposureSev} />}
+        sub="Holistic exposure pattern across the product renewal lifecycle."
+      />
+      <div className="bn-radar-body">
+        <div className="bn-radar-stage">
+          <PortfolioRenewalRadar rows={rows} accent="#0891B2" />
+        </div>
+        <div className="bn-radar-legend">
+          <div className="bn-radar-legend-head">Lifecycle decision exposure</div>
+          <ul className="bn-radar-legend-list">
+            {rows.map((r) => {
+              const sev = severityFromImpact(r.level);
+              return (
+                <li key={r.key} className="bn-radar-legend-row">
+                  <span className="bn-radar-dot" style={{ background: SEVERITY_COLORS[sev] }} />
+                  <span className="bn-radar-legend-label">{r.label}</span>
+                  <StatusChip label={r.level} severity={sev} />
+                </li>
+              );
+            })}
+          </ul>
+          <div className="bn-radar-legend-scale">
+            <span><i className="bn-dot bn-dot--good" /> Low</span>
+            <span><i className="bn-dot bn-dot--warning" /> Medium</span>
+            <span><i className="bn-dot bn-dot--critical" /> High</span>
+          </div>
+        </div>
       </div>
-      <p className="bn-card-sub">Operating-model readiness for repeatable PPM</p>
-      <ul className="bn-gov-list">
-        {rows.map((row) => {
-          const sev = GOV_SEVERITY[row.status];
-          const steps = GOV_BAR_STEPS[row.status];
-          return (
-            <li key={row.key} className="bn-gov-row" data-testid={`gov-${row.key}`}>
-              <div className="bn-gov-top">
-                <span className="bn-gov-label">{row.label}</span>
-                <StatusChip label={row.status} severity={sev} />
-              </div>
-              <div className="bn-gov-steps" data-severity={sev} style={{ "--c": SEVERITY_COLORS[sev] }}>
-                {[1, 2, 3].map((i) => (
-                  <span key={i} className={`bn-gov-step${i <= steps ? " on" : ""}`} />
-                ))}
-              </div>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
+      <CardFooter>
+        Synthesis view · derived from the same decision logic used above (Hannila 2019; Tolonen et al. 2015).
+      </CardFooter>
+    </article>
   );
 };
 
-/* ============================================================
- * Section wrapper — renders the 2x2 dashboard grid
- * ============================================================ */
+/* =====================================================================
+ * Section wrapper — 3-row responsive grid
+ * ===================================================================== */
 
 export const AssessmentDashboardSection = ({ data }) => {
+  const decisionRows = computeDecisionRows(data);
   return (
     <section className="bn-dashboard" data-testid="report-assessment-dashboard">
-      <div className="bn-grid">
-        <BottleneckCard data={data} />
-        <PreconditionsCard data={data} />
-        <PortfolioDecisionImpactCard data={data} />
-        <GovernanceReadinessCard data={data} />
+      <div className="bn-grid-v2">
+        <div className="bn-row bn-row--full">
+          <BottleneckCard data={data} />
+        </div>
+        <div className="bn-row bn-row--half">
+          <PreconditionsCard data={data} />
+          <PortfolioDecisionImpactCard data={data} rows={decisionRows} />
+        </div>
+        <div className="bn-row bn-row--full">
+          <PortfolioRenewalRadarCard rows={decisionRows} />
+        </div>
       </div>
     </section>
   );

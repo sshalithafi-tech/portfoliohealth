@@ -329,7 +329,43 @@ User feedback (two screenshots): R1 cover looked ugly with "Meridian Controls" w
 - R2/R3: cyan card top borders, cyan "STD" pill, "Strongest pillar — Data" still has score-3 amber, "Critical bottleneck — Process" still has bottleneck red — maturity colors preserved
 - Sidebar gradient rail and `Export PDF` button cyan, consistent with the rest of the app
 
-## Assessment Dashboard Redesign — 4-Card 2×2 Grid (2026-05-27 — current session)
+## Assessment Dashboard v2 — Hero·Half/Half·Hero (2026-05-27 — current session, second pass)
+Iterated on yesterday's 2×2 grid into a more academically grounded, more visually impressive 3-row layout. Same 4-card surface language, sharper hierarchy, theory-numbered labels, executive radar visual.
+
+### Layout
+| Row | Card(s) |
+|---|---|
+| 1 | **Bottleneck** — full-width hero with thick ring gauge + composed 2–3 sentence explanation + risk pills + collective note |
+| 2 | **Preconditions** (half) · **Portfolio Decision Impact** (half) |
+| 3 | **Portfolio Renewal Radar** — full-width SVG radar (deep teal gradient polygon, severity-colored vertex dots, full legend on the right) |
+
+### Theory grounding
+- Preconditions now use Hannila et al. (2020) numbered P1–P5 with theory names + 1-line blurbs + academic footer.
+- Portfolio Decision Impact now uses theory-aligned decision names (Discontinuation, New Product Launch, Engineering Change, Capability Investment, Ramp-down / Retirement, Product Family Rationalisation) + footer citing Hannila (2019); Tolonen et al. (2015); Cooper et al. (2001).
+
+### Bottleneck explanation composer
+Deterministic 3-sentence builder — never echoes raw AI prose:
+1. Definition sentence (pillar-specific, static).
+2. Optional "why" sentence pulled from `dimension_summaries` / `pillar_interpretations` / `bottleneck_narrative` / `decision_vulnerability_narrative`, first-letter lowercased so it flows after "because" while preserving acronyms (SAP, BI, ERP…).
+3. Consequence sentence (pillar-specific, static).
+Total bounded to 360 chars; "why" is dropped first if it overflows so the consequence is always preserved.
+
+### Radar visual
+- Hand-rolled inline SVG (no chart library) — `radialGradient` fill, dashed concentric rings labelled LOW / MEDIUM / HIGH, axis spokes, short axis labels (Launch / Change / Investment / Discontinue / Retire / Rationalise) with full names in the right-hand legend.
+- Polygon radii driven by the same Decision Impact derivation: Low=0.25 · Medium=0.55 · High=0.92 of `rMax`.
+- Overall exposure summary chip ("High overall exposure" / "Moderate overall exposure" / "Contained exposure") derived from the average radius.
+
+### Consistency checks (verified via screenshot @ 1600×1080)
+- All four cards left-aligned at 336px, full-width=1224px, half-width=603px (exact match).
+- Shared `--bn-critical / warning / good / advanced` severity tokens drive every chip, bar, vertex dot, ring band.
+- Shared `bn-card` surface: 16px radius, 22–26px padding, white surface, 1px #E5E7EB border, identical eyebrow + footer styling.
+
+### Files
+- Rewrote `/app/frontend/src/components/report/AssessmentDashboard.jsx` (now 530+ lines, modular: `BottleneckCard`, `PreconditionsCard`, `PortfolioDecisionImpactCard`, `PortfolioRenewalRadarCard`, `PortfolioRenewalRadar` SVG, `RingGauge`, `StatusChip`, `SeverityBar`, `CardHead`, `CardFooter`, helpers `composeBottleneckExplanation`, `derivePreconditionStatus`, `deriveDecisionImpact`, `buildSignalCorpus`, `extractFirstSentence`, `truncateInsight`).
+- Replaced the dashboard CSS block in `/app/frontend/src/components/report/premium.css` (deleted old `.bn-grid` + `.bn-gov-*`; added `.bn-grid-v2`, `.bn-row--full/half`, `.bn-card--hero`, `.bn-precon-list--theory`, `.bn-precon-num`, `.bn-card-foot`, `.bn-radar-*`, `.bn-dot--*`).
+- `/app/backend/pdf_builder.py` intentionally untouched — full narrative still ships in downloads.
+
+## Assessment Dashboard Redesign — 4-Card 2×2 Grid (2026-05-27 — earlier in session)
 Replaced the verbose R6 Bottleneck + R8 Decision Impact prose blocks in the consultant report with a compact, scannable **2×2 dashboard** of four visually consistent cards. The PDF export pipeline (`/app/backend/pdf_builder.py`) was intentionally NOT touched — the full-text version still ships in downloads.
 
 ### New section layout (Report → between R5 Calculation and R7 Roadmap)
