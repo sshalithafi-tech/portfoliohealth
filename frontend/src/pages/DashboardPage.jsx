@@ -15,7 +15,6 @@ import {
   Zap,
   ChevronRight,
   Calendar,
-  AlertTriangle,
 } from "lucide-react";
 
 const DIMENSION_CONFIG = [
@@ -25,181 +24,6 @@ const DIMENSION_CONFIG = [
   { icon: Monitor, label: "Technology", key: "technology" },
 ];
 
-/* ── helpers ── */
-const PILLAR_META = {
-  people:     { letter: "P", precondition: "P1–P2", label: "People" },
-  process:    { letter: "P", precondition: "P3",    label: "Process" },
-  data:       { letter: "D", precondition: "P4",    label: "Data" },
-  technology: { letter: "T", precondition: "P5",    label: "Technology" },
-};
-
-const RISK_COLOR = {
-  HIGH:   { dot: "#EF4444", bg: "rgba(239,68,68,0.08)",   text: "#B91C1C" },
-  MEDIUM: { dot: "#F59E0B", bg: "rgba(245,158,11,0.08)",  text: "#B45309" },
-  LOW:    { dot: "#22C55E", bg: "rgba(34,197,94,0.08)",   text: "#15803D" },
-};
-
-const RiskPill = ({ level }) => {
-  const c = RISK_COLOR[level] || RISK_COLOR.MEDIUM;
-  return (
-    <span style={{
-      display: "inline-flex", alignItems: "center", gap: 5,
-      background: c.bg, color: c.text,
-      border: `1px solid ${c.dot}40`,
-      borderRadius: 50, padding: "2px 10px",
-      fontSize: 11, fontWeight: 700, letterSpacing: "0.04em",
-      fontFamily: "'Outfit', sans-serif",
-    }}>
-      <span style={{ width: 7, height: 7, borderRadius: "50%", background: c.dot, flexShrink: 0 }} />
-      {level}
-    </span>
-  );
-};
-
-/* ── Card 1 — Bottleneck Alert ── */
-const BottleneckAlertCard = ({ bottleneck, score, company }) => {
-  if (!bottleneck) return null;
-  const meta = PILLAR_META[bottleneck] || { letter: bottleneck[0].toUpperCase(), precondition: "P4", label: bottleneck };
-
-  return (
-    <div style={{
-      background: "#fff",
-      border: "1px solid #E5E7EB",
-      borderLeft: "4px solid #EF4444",
-      borderRadius: 16,
-      boxShadow: "0 4px 16px rgba(239,68,68,0.07), 0 1px 3px rgba(15,23,42,0.06)",
-      overflow: "hidden",
-    }} data-testid="bottleneck-alert-card">
-
-      {/* Header */}
-      <div style={{
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "14px 20px",
-        borderBottom: "1px solid #FEE2E2",
-        background: "linear-gradient(135deg, rgba(239,68,68,0.04) 0%, rgba(255,255,255,0) 100%)",
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <AlertTriangle size={15} style={{ color: "#EF4444", flexShrink: 0 }} />
-          <span style={{
-            fontSize: 11, fontWeight: 700, letterSpacing: "0.14em",
-            textTransform: "uppercase", color: "#B91C1C",
-            fontFamily: "'Outfit', sans-serif",
-          }}>Bottleneck Identified</span>
-        </div>
-        <span style={{
-          display: "inline-flex", alignItems: "center", gap: 6,
-          background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)",
-          borderRadius: 50, padding: "3px 12px",
-          fontSize: 11, fontWeight: 700, color: "#B91C1C",
-          fontFamily: "'Outfit', sans-serif",
-        }}>
-          <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#EF4444" }} />
-          {meta.label.toUpperCase()}
-        </span>
-      </div>
-
-      {/* Body */}
-      <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: 14 }}>
-
-        {/* Root cause */}
-        <div>
-          <div style={{
-            fontSize: 10, fontWeight: 700, letterSpacing: "0.12em",
-            textTransform: "uppercase", color: "#6B7280",
-            marginBottom: 5, fontFamily: "'Outfit', sans-serif",
-          }}>Root Cause</div>
-          <p style={{ fontSize: 13, color: "#1E293B", lineHeight: 1.6, margin: 0 }}>
-            The <strong style={{ color: "#0C1B2A" }}>{meta.label}</strong> pillar is structurally
-            isolated from portfolio decision systems — leading indicators cannot flow
-            into renewal, retirement, or investment decisions.
-          </p>
-          <div style={{
-            display: "inline-flex", alignItems: "center", gap: 6,
-            marginTop: 7,
-            background: "rgba(8,145,178,0.06)", border: "1px solid rgba(8,145,178,0.18)",
-            borderRadius: 8, padding: "4px 10px",
-          }}>
-            <span style={{ fontSize: 11, color: "#0E7490", fontWeight: 600 }}>
-              → Precondition {meta.precondition} unmet
-            </span>
-            <span style={{
-              fontSize: 10, color: "#0891B2", fontWeight: 500,
-              fontStyle: "italic",
-            }}>(Hannila et al. 2020)</span>
-          </div>
-        </div>
-
-        {/* Proven consequence */}
-        <div style={{
-          background: "rgba(239,68,68,0.04)",
-          border: "1px solid rgba(239,68,68,0.12)",
-          borderRadius: 10, padding: "11px 14px",
-        }}>
-          <div style={{
-            fontSize: 10, fontWeight: 700, letterSpacing: "0.12em",
-            textTransform: "uppercase", color: "#6B7280",
-            marginBottom: 5, fontFamily: "'Outfit', sans-serif",
-          }}>Proven Consequence</div>
-          <p style={{ fontSize: 12.5, color: "#374151", lineHeight: 1.65, margin: 0 }}>
-            Signals existed <strong>12+ months before financial impact</strong> — but
-            could not reach the decision layer. Cost: a 6-month delayed decision.
-            The gap widens with every new project accepted.
-          </p>
-        </div>
-
-        {/* Risk row */}
-        <div style={{
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          paddingTop: 4,
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div>
-              <div style={{
-                fontSize: 10, fontWeight: 700, letterSpacing: "0.10em",
-                textTransform: "uppercase", color: "#6B7280",
-                marginBottom: 3, fontFamily: "'Outfit', sans-serif",
-              }}>Risk</div>
-              <RiskPill level="HIGH" />
-            </div>
-            <div style={{ width: 1, height: 28, background: "#E5E7EB" }} />
-            <div>
-              <div style={{
-                fontSize: 10, fontWeight: 700, letterSpacing: "0.10em",
-                textTransform: "uppercase", color: "#6B7280",
-                marginBottom: 3, fontFamily: "'Outfit', sans-serif",
-              }}>Until Resolved</div>
-              <p style={{ fontSize: 12, color: "#374151", margin: 0, lineHeight: 1.4 }}>
-                Gap widens with every new project accepted
-              </p>
-            </div>
-          </div>
-          {score && (
-            <div style={{ textAlign: "right" }}>
-              <div style={{ fontSize: 10, color: "#9CA3AF", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase" }}>Score</div>
-              <div style={{ fontSize: 22, fontWeight: 700, color: "#EF4444", fontFamily: "'JetBrains Mono', monospace", lineHeight: 1.1 }}>
-                {typeof score === "number" ? score.toFixed(1) : score}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Citation footer */}
-      <div style={{
-        padding: "9px 20px",
-        borderTop: "1px solid #F3F4F6",
-        background: "#FAFAFA",
-        fontSize: 10.5, color: "#9CA3AF",
-        fontStyle: "italic", lineHeight: 1.5,
-      }}>
-        Hannila et al. 2022, Journal of Decision Systems 31(3), 258–279 ·
-        Hannila et al. 2020, JEIM 33(1), 214–237
-      </div>
-    </div>
-  );
-};
-
-/* ── Existing sub-components (unchanged) ── */
 const StatCard = ({ icon: Icon, label, value, color = "#0891B2" }) => (
   <div className="p-4 sm:p-5 glass-card rounded-xl">
     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
@@ -227,17 +51,6 @@ const DimensionBar = ({ icon: Icon, label, score, color }) => (
   </div>
 );
 
-/* ── derive bottleneck from scores (lowest of the 4 pillars) ── */
-const PILLARS = ["people", "process", "data", "technology"];
-
-function deriveBottleneckFromScores(scores) {
-  if (!scores) return null;
-  const entries = PILLARS.map((p) => [p, scores[p]]).filter(([, v]) => typeof v === "number");
-  if (entries.length === 0) return null;
-  entries.sort((a, b) => a[1] - b[1]);
-  return entries[0][0]; // key of the lowest-scoring pillar
-}
-
 const DashboardPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -246,18 +59,6 @@ const DashboardPage = () => {
   const handleRowClick = (assessment) => {
     navigate(assessment.status === "completed" ? `/assessments/${assessment.id}/report` : `/assessments/${assessment.id}`);
   };
-
-  // Derive bottleneck from most recent completed assessment scores
-  // The list endpoint does not include `report`, so we calculate the bottleneck
-  // as the lowest-scoring pillar directly from the scores object.
-  const latestCompleted = recentAssessments.find((a) => a.status === "completed");
-  const bottleneckKey =
-    latestCompleted?.report?.bottleneck_pillar?.toLowerCase() ||
-    deriveBottleneckFromScores(latestCompleted?.scores) ||
-    null;
-  const bottleneckScore = bottleneckKey && latestCompleted?.scores
-    ? latestCompleted.scores[bottleneckKey]
-    : null;
 
   if (loading) return <Layout><LoadingSpinner className="h-64" /></Layout>;
 
@@ -284,15 +85,6 @@ const DashboardPage = () => {
           <StatCard icon={Zap} label="Quick Screenings" value={stats?.total_quick_assessments || 0} color="#67E8F9" />
           <StatCard icon={Building2} label="Companies" value={stats?.total_companies || 0} color="#0891B2" />
         </div>
-
-        {/* Bottleneck Alert Card — only when a bottleneck is detected */}
-        {bottleneckKey && (
-          <BottleneckAlertCard
-            bottleneck={bottleneckKey}
-            score={bottleneckScore}
-            company={latestCompleted?.company_name}
-          />
-        )}
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
