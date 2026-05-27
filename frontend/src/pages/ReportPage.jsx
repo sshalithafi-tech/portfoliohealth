@@ -350,7 +350,7 @@ const PillarCard = ({ pillar, data, idx, isOpen, onToggle }) => {
 
       {!isOpen && summary && (
         <div className="r4-summary">
-          <span className="r4-summary-quote">"</span>
+          <span className="r4-summary-quote">&ldquo;</span>
           <p>{summary}</p>
           <span className="r4-expand-hint">Click to read full evidence →</span>
         </div>
@@ -461,98 +461,175 @@ const R5Calculation = ({ data }) => {
 
 /* ============ R6 Bottleneck — Rich Alert Card ============ */
 
-/* Per-pillar root cause and proven consequence copy, grounded in Hannila (2019)
-   and Hannila et al. (2022). Falls back to generic text if pillar key is unknown. */
-const BN_COPY = {
-  people: {
-    rootCause:
-      "The organisation lacks the roles, competencies, or decision-making culture required to act on portfolio data. Without accountable owners who understand PPDT practices, even well-structured data and process tooling will go unused.",
-    provenConsequence:
-      "Hannila et al. (2022) found that people-capability gaps are the most common reason portfolio data initiatives stall after the first pilot — executives revert to intuition-based decisions when no one owns the data-driven mandate.",
-  },
-  process: {
-    rootCause:
-      "Portfolio review cadences, decision criteria, and governance gates are either absent or inconsistently applied. Without structured processes, data collected from other pillars cannot be converted into a repeatable decision.",
-    provenConsequence:
-      "Hannila (2019) documented that companies with weak portfolio governance retained up to 30% more low-margin products than peers at the same revenue scale, directly due to absent retirement-triggering processes.",
-  },
-  data: {
-    rootCause:
-      "Product-level master data — cost, revenue, margin, lifecycle stage — is incomplete, duplicated, or not trusted by decision-makers. No amount of process improvement or tooling investment can compensate for a missing data foundation.",
-    provenConsequence:
-      "Hannila et al. (2020) empirical study of 8 industrial companies showed that data quality was the single most cited barrier to data-driven PPM, with every company reporting that portfolio decisions were being made on estimates rather than verified figures.",
-  },
-  technology: {
-    rootCause:
-      "Systems are fragmented, manually reconciled, or lack the integration needed to surface product-level insights at the point of decision. Teams spend analytical capacity on data wrangling rather than on portfolio strategy.",
-    provenConsequence:
-      "Silvola (2018) and Hannila et al. (2022) both show that technology gaps force portfolio managers into spreadsheet-based workarounds that introduce lag, version conflicts, and decision latency — undermining the timeliness of retirement and renewal choices.",
-  },
+/**
+ * Per-pillar FALLBACK root-cause framing — used only when the AI assessment
+ * did not produce a pillar_interpretation or dimension_summary for the
+ * bottleneck pillar. Real assessments will almost always override this via
+ * data.evidence[bottleneck][0].
+ */
+const BN_ROOT_CAUSE_FALLBACK = {
+  people:
+    "Roles, competencies, or decision-making accountability required for data-driven PPM are not yet established.",
+  process:
+    "Portfolio review cadences and decision gates are either absent or inconsistently applied.",
+  data:
+    "Product-level master data — cost, revenue, margin, lifecycle stage — is incomplete or not trusted by decision-makers.",
+  technology:
+    "Systems are fragmented or manually reconciled, preventing product-level insights from surfacing at the point of decision.",
 };
 
-const GENERIC_BN_COPY = {
-  rootCause:
-    "This pillar is the lowest-scoring precondition in the PPDT framework. Because all five preconditions must function together for data-driven PPM to be possible, this gap caps every other pillar regardless of their individual scores.",
-  provenConsequence:
-    "Hannila et al. (2022) demonstrated that a single weak precondition is sufficient to prevent the organisation from making consistently data-driven portfolio decisions — even when the other three pillars are well-developed.",
+/**
+ * Per-pillar FALLBACK proven consequence — used only when the AI did not
+ * supply key_findings or critical_gaps that name the bottleneck pillar.
+ */
+const BN_CONSEQUENCE_FALLBACK = {
+  people:
+    "Hannila et al. (2022): people-capability gaps are the most common reason portfolio data initiatives stall — executives revert to intuition-based decisions when no one owns the mandate.",
+  process:
+    "Hannila (2019): companies with weak portfolio governance retained up to 30% more low-margin products than peers at the same revenue scale.",
+  data:
+    "Hannila et al. (2020) 8-company study: data quality was the single most-cited barrier to data-driven PPM — every company reported decisions were made on estimates rather than verified figures.",
+  technology:
+    "Silvola (2018) and Hannila et al. (2022): technology gaps force portfolio managers into spreadsheet workarounds that introduce lag, version conflicts, and decision latency.",
 };
 
-const RISK_ITEMS = [
-  { icon: TrendingDown, label: "Profit leakage", desc: "Low-margin products retained beyond their economic useful life" },
-  { icon: ShieldAlert,  label: "Strategic drift",  desc: "Resource allocation decoupled from verified portfolio performance" },
-  { icon: Zap,          label: "Decision latency", desc: "Portfolio reviews delayed by manual data reconciliation effort" },
+/**
+ * Build the three risk items from real assessment data.
+ * Priority order:
+ *   1. critical_gaps specific to this pillar
+ *   2. key_findings specific to this pillar
+ *   3. generic risk fallbacks
+ */
+const RISK_ICONS = [TrendingDown, ShieldAlert, Zap];
+const RISK_FALLBACK_LABELS = ["Profit leakage", "Strategic drift", "Decision latency"];
+const RISK_FALLBACK_DESCS = [
+  "Low-margin products retained beyond their economic useful life",
+  "Resource allocation decoupled from verified portfolio performance",
+  "Portfolio reviews delayed by manual data reconciliation effort",
 ];
 
+function buildRiskItems(data, bottleneckKey) {
+  const pillarLower = (bottleneckKey || "").toLowerCase();
+  const allGaps = Array.isArray(data.critical_gaps) ? data.critical_gaps : [];
+  const allFindings = Array.isArray(data.key_findings) ? data.key_findings : [];
+
+  // Collect sentences mentioning the bottleneck pillar
+  const relevant = [
+    ...allGaps.filter((s) => String(s).toLowerCase().includes(pillarLower)),
+    ...allFindings.filter((s) => String(s).toLowerCase().includes(pillarLower)),
+  ].map((s) => String(s).trim()).filter(Boolean);
+
+  // Also include any evidence bullets for the pillar beyond the first
+  // (first bullet is used in R2 / R4; second+ are useful here)
+  const extraEvidence = (data.evidence?.[bottleneckKey] || []).slice(1, 3);
+  const pool = [...relevant, ...extraEvidence];
+
+  const seen = new Set();
+  const unique = pool.filter((s) => {
+    if (seen.has(s)) return false;
+    seen.add(s);
+    return true;
+  });
+
+  return RISK_ICONS.map((Icon, i) => {
+    const raw = unique[i];
+    // If we have a real AI sentence, use it as the description;
+    // otherwise fall back to the generic label+desc pair.
+    if (raw) {
+      return {
+        icon: Icon,
+        label: RISK_FALLBACK_LABELS[i],
+        desc: raw,
+      };
+    }
+    return {
+      icon: Icon,
+      label: RISK_FALLBACK_LABELS[i],
+      desc: RISK_FALLBACK_DESCS[i],
+    };
+  });
+}
+
+/**
+ * R6 — Bottleneck Identified card.
+ *
+ * Content hierarchy (all assessment-driven, not static):
+ *   narrative  → data.bottleneck_narrative (AI-generated during assessment)
+ *   root cause → data.evidence[bottleneck][0] (pillar_interpretation / dimension_summary)
+ *   consequence→ data.evidence[bottleneck][1] OR key_findings / critical_gaps
+ *   risk pills → critical_gaps + key_findings filtered to the bottleneck pillar;
+ *                falls back to generic copy only when the AI supplied nothing.
+ */
 const R6Bottleneck = ({ data }) => {
   const { bottleneck, kpi, bottleneck_narrative, bottleneck_capped } = data;
   if (!bottleneck) return null;
   const bn = kpi.pillars.find((p) => p.key === bottleneck);
   if (!bn) return null;
 
-  const copy = BN_COPY[bottleneck] || GENERIC_BN_COPY;
+  const pillarLower = bottleneck.toLowerCase();
 
+  // ── Narrative (AI-generated, falls back to concise formula) ──────────────
   const narrative =
-    bottleneck_narrative ||
-    `The ${bn.name} pillar scores ${bn.score.toFixed(1)}/5.0 (${LEVEL_TITLES[bn.level]}) and is the binding constraint on overall maturity. It caps the other pillars because every portfolio decision ultimately depends on the practices and evidence this pillar provides. Until this gap is closed, investments in the other pillars will not lift the overall maturity score.`;
+    (bottleneck_narrative && bottleneck_narrative.trim()) ||
+    `${bn.name} scores ${bn.score.toFixed(1)}/5.0 (${LEVEL_TITLES[bn.level]}) — the lowest of the four pillars and therefore the binding constraint on overall maturity. Investments in the other pillars will not lift the overall score until this gap is closed.`;
+
+  // ── Root cause (first evidence bullet = pillar_interpretation / dimension_summary) ─
+  const evidenceBullets = data.evidence?.[pillarLower] || [];
+  const rootCause =
+    (evidenceBullets[0] && evidenceBullets[0].trim()) ||
+    BN_ROOT_CAUSE_FALLBACK[pillarLower] ||
+    BN_ROOT_CAUSE_FALLBACK.people;
+
+  // ── Proven consequence (second evidence bullet, else key_findings / fallback) ─
+  const allFindings = Array.isArray(data.key_findings) ? data.key_findings : [];
+  const allGaps = Array.isArray(data.critical_gaps) ? data.critical_gaps : [];
+  const firstFinding = [
+    ...allGaps.filter((s) => String(s).toLowerCase().includes(pillarLower)),
+    ...allFindings.filter((s) => String(s).toLowerCase().includes(pillarLower)),
+  ].find(Boolean);
+
+  const provenConsequence =
+    (evidenceBullets[1] && evidenceBullets[1].trim()) ||
+    (firstFinding && String(firstFinding).trim()) ||
+    BN_CONSEQUENCE_FALLBACK[pillarLower] ||
+    BN_CONSEQUENCE_FALLBACK.people;
+
+  // ── Risk pills built from real findings ──────────────────────────────────
+  const riskItems = buildRiskItems(data, pillarLower);
 
   return (
     <section className="r6" data-testid="report-r6">
-      {/* ── Header banner ── */}
       <div className="r6-card">
+        {/* ── Header ── */}
         <div className="r6-head">
           <span className="ico"><AlertTriangle size={22} /></span>
           <div className="r6-head-text">
-            <span className="r6-title">Bottleneck Identified — {bn.name.toUpperCase()}</span>
-            {bottleneck_capped && (
-              <span className="r6-capped-pill">Score capped at {bn.score.toFixed(1)} / 5.0</span>
-            )}
+            <span className="r6-title">Bottleneck — {bn.name}</span>
+            <span className="r6-capped-pill">
+              {bn.score.toFixed(1)} / 5.0 · {LEVEL_TITLES[bn.level]}
+              {bottleneck_capped && " · Score capped"}
+            </span>
           </div>
         </div>
 
-        {/* ── AI narrative from assessment ── */}
+        {/* ── AI narrative ── */}
         <p className="r6-body">{narrative}</p>
 
-        {/* ── Two-column: Root Cause + Proven Consequence ── */}
+        {/* ── Two-column: Root Cause | Proven Consequence ── */}
         <div className="r6-two-col">
           <div className="r6-col r6-col--cause">
-            <span className="r6-col-label">
-              <Info size={13} style={{ display: "inline", marginRight: 5, verticalAlign: "middle" }} />
-              Root Cause
-            </span>
-            <p className="r6-col-body">{copy.rootCause}</p>
+            <span className="r6-col-label">What the assessment found</span>
+            <p className="r6-col-body">{rootCause}</p>
           </div>
           <div className="r6-col r6-col--consequence">
-            <span className="r6-col-label">
-              <TrendingDown size={13} style={{ display: "inline", marginRight: 5, verticalAlign: "middle" }} />
-              Proven Consequence
-            </span>
-            <p className="r6-col-body">{copy.provenConsequence}</p>
+            <span className="r6-col-label">Why this constrains maturity</span>
+            <p className="r6-col-body">{provenConsequence}</p>
           </div>
         </div>
 
-        {/* ── Three risk pills ── */}
+        {/* ── Risk pills — driven by assessment findings ── */}
         <div className="r6-risks">
-          {RISK_ITEMS.map(({ icon: Icon, label, desc }) => (
+          {riskItems.map(({ icon: Icon, label, desc }) => (
             <div key={label} className="r6-risk-pill">
               <Icon size={15} className="r6-risk-icon" />
               <div>
@@ -563,10 +640,9 @@ const R6Bottleneck = ({ data }) => {
           ))}
         </div>
 
-        {/* ── Academic footer ── */}
+        {/* ── Footer ── */}
         <div className="section-footer">
-          Bottleneck principle: Hannila et al. (2022) — five preconditions that must all function together for data-driven PPM to be possible.
-          Root cause evidence: Hannila (2019) · Hannila, Koskinen, Härkönen &amp; Haapasalo (2020), JEIM, 33(1), 214–237.
+          Bottleneck principle: Hannila et al. (2022) · Hannila (2019) · Hannila, Koskinen, Härkönen &amp; Haapasalo (2020), JEIM 33(1).
         </div>
       </div>
     </section>
