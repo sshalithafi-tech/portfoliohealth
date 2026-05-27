@@ -1,0 +1,209 @@
+/**
+ * bottleneck.css — Layer 2 of 3: R6 Bottleneck Card styles
+ *
+ * Scope: all selectors are prefixed .r6-* or section.r6
+ * Tokens: inherits --danger, --warning, --success, --text-*, --surface-*
+ *         from premium.css; no global side-effects.
+ *
+ * Colour band classes (l1–l5) are already defined in premium.css;
+ * this file only adds r6-specific overrides where needed.
+ */
+
+/* ── Card shell ──────────────────────────────────────────────────────────────*/
+.r6-card {
+  background: var(--surface, #fff);
+  border: 1.5px solid color-mix(in srgb, var(--danger, #e53e3e) 18%, transparent);
+  border-radius: 14px;
+  padding: 28px 28px 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.r6-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--danger, #e53e3e) 3%, transparent);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* ── Zone 1: Header ──────────────────────────────────────────────────────────*/
+.r6-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.r6-head-ico {
+  color: var(--danger, #e53e3e);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.r6-head-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.r6-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--danger, #e53e3e);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.r6-capped-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+  width: fit-content;
+}
+
+.r6-dot {
+  opacity: 0.6;
+}
+
+.r6-cap-badge {
+  opacity: 0.85;
+  font-weight: 500;
+}
+
+/* ── Zone 2: Narrative body ──────────────────────────────────────────────────*/
+.r6-body {
+  font-size: 0.875rem;
+  line-height: 1.7;
+  color: var(--text-primary, #1a202c);
+  margin-bottom: 20px;
+  max-width: 84ch;
+}
+
+/* ── Zone 3: Two-column findings ─────────────────────────────────────────────*/
+.r6-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 680px) {
+  .r6-two-col {
+    grid-template-columns: 1fr;
+  }
+}
+
+.r6-col {
+  background: color-mix(in srgb, var(--surface-offset, #f7f7f5) 80%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border, #e2e8f0) 70%, transparent);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.r6-col--cause {
+  border-top: 2px solid color-mix(in srgb, var(--danger, #e53e3e) 35%, transparent);
+}
+
+.r6-col--consequence {
+  border-top: 2px solid color-mix(in srgb, var(--warning, #c9a84c) 40%, transparent);
+}
+
+.r6-col-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted, #718096);
+  margin-bottom: 8px;
+}
+
+.r6-col-body {
+  font-size: 0.825rem;
+  line-height: 1.65;
+  color: var(--text-primary, #1a202c);
+  margin: 0;
+}
+
+/* ── Zone 4: Risk pills ──────────────────────────────────────────────────────*/
+.r6-risks {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+@media (max-width: 840px) {
+  .r6-risks {
+    grid-template-columns: 1fr;
+  }
+}
+
+.r6-risk-pill {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: color-mix(in srgb, var(--surface-offset, #f7f7f5) 60%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border, #e2e8f0) 60%, transparent);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.r6-risk-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--danger, #e53e3e);
+  opacity: 0.75;
+}
+
+.r6-risk-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.r6-risk-pill-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--danger, #e53e3e);
+  display: block;
+}
+
+.r6-risk-pill-desc {
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: var(--text-primary, #1a202c);
+  display: block;
+}
+
+/* ── Level-pill band overrides scoped to r6 ──────────────────────────────────*/
+/* These mirror the premium.css l1–l5 variables; added here in case r6 is
+   rendered before premium.css is loaded (e.g., in tests or Storybook). */
+.r6-card .level-pill.l1 { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+.r6-card .level-pill.l2 { background: #fff7ed; color: #92400e; border: 1px solid #fed7aa; }
+.r6-card .level-pill.l3 { background: #fefce8; color: #713f12; border: 1px solid #fde68a; }
+.r6-card .level-pill.l4 { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+.r6-card .level-pill.l5 { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+
+/* ── Print ───────────────────────────────────────────────────────────────────*/
+@media print {
+  .r6-card {
+    border-color: #f5c6cb;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .r6-two-col {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .r6-risks {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
