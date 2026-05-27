@@ -3,8 +3,9 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import Layout from "../components/Layout";
 import { useAssessments } from "../hooks/useData";
-import { getScoreColorClass, getScoreColor, getLevelName } from "../utils/scoring";
+import { getLevelName } from "../utils/scoring";
 import { LoadingSpinner, StatusBadge, EmptyState } from "../components/ScoreComponents";
+import RingGauge from "../components/ui/RingGauge";
 import {
   Plus,
   ClipboardCheck,
@@ -16,6 +17,10 @@ import {
   Calendar,
   UserRound,
   FileText,
+  AlertTriangle,
+  Users,
+  Database,
+  Monitor,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -28,52 +33,47 @@ import {
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-const ScoreRing = ({ score }) => {
-  const pct = score ? Math.max(0, Math.min(100, (score / 5) * 100)) : 0;
-  const color = score ? getScoreColor(score) : "#ffffff20";
-  const circumference = 2 * Math.PI * 22;
-  const offset = circumference - (pct / 100) * circumference;
+// ── Bottleneck pill ────────────────────────────────────────────────────────
+const PILLAR_ICONS   = { people: Users, process: ClipboardCheck, data: Database, technology: Monitor };
+const PILLAR_COLORS  = { people: "#60A5FA", process: "#34D399", data: "#C9A84C", technology: "#A78BFA" };
+const PILLAR_LABELS  = { people: "People", process: "Process", data: "Data", technology: "Technology" };
+
+const BottleneckPill = ({ pillar, score }) => {
+  if (!pillar) return null;
+  const key    = String(pillar).toLowerCase();
+  const color  = PILLAR_COLORS[key]  ?? "#EF4444";
+  const label  = PILLAR_LABELS[key]  ?? pillar;
+  const Icon   = PILLAR_ICONS[key]   ?? AlertTriangle;
   return (
-    <div className="relative w-14 h-14 shrink-0">
-      <svg viewBox="0 0 50 50" className="w-full h-full -rotate-90">
-        <circle cx="25" cy="25" r="22" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="3" />
-        {score ? (
-          <circle
-            cx="25"
-            cy="25"
-            r="22"
-            fill="none"
-            stroke={color}
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeDasharray={circumference}
-            strokeDashoffset={offset}
-            style={{ transition: "stroke-dashoffset 700ms ease" }}
-          />
-        ) : null}
-      </svg>
-      <div className="absolute inset-0 flex items-center justify-center">
-        {score ? (
-          <span className={`text-base font-bold font-['JetBrains_Mono'] ${getScoreColorClass(score)}`}>
-            {score.toFixed(1)}
-          </span>
-        ) : (
-          <span className="text-[#8896A5] text-sm font-['JetBrains_Mono']">–</span>
-        )}
-      </div>
+    <div
+      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border"
+      style={{ color, borderColor: `${color}35`, backgroundColor: `${color}12` }}
+    >
+      <AlertTriangle size={10} style={{ color }} />
+      <span>Bottleneck — {label}</span>
+      {typeof score === "number" && (
+        <span className="font-['JetBrains_Mono'] font-bold">{score.toFixed(1)}</span>
+      )}
     </div>
   );
 };
 
+// ── Assessment card ──────────────────────────────────────────────────────────
 const AssessmentCard = ({ assessment, onClick }) => {
   const downloadPDF = async (e) => {
     e.stopPropagation();
     try {
-      const response = await axios.get(`${BACKEND_URL}/api/assessments/${assessment.id}/pdf`, { responseType: "blob" });
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const response = await axios.get(
+        `${BACKEND_URL}/api/assessments/${assessment.id}/pdf`,
+        { responseType: "blob" }
+      );
+      const url  = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", `${assessment.company_name?.replace(/\s+/g, "_")}_Report.pdf`);
+      link.setAttribute(
+        "download",
+        `${assessment.company_name?.replace(/\s+/g, "_")}_Report.pdf`
+      );
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -82,20 +82,34 @@ const AssessmentCard = ({ assessment, onClick }) => {
     }
   };
 
-  const overall = assessment.scores?.overall;
+  const overall    = assessment.scores?.overall;
   const isComplete = assessment.status === "completed";
-  const levelName = overall ? getLevelName(overall) : null;
+  const levelLabel = overall ? getLevelName(overall) : null;
+
+  // Bottleneck — try report JSON first, fallback to lowest dimension score
+  const report         = assessment.report ?? {};
+  const bnPillar       = report.bottleneck_pillar ?? assessment.bottleneck_pillar ?? null;
+  const bnScore        = bnPillar
+    ? (assessment.scores?.[String(bnPillar).toLowerCase()] ?? null)
+    : null;
+
+  // One-liner preview (AI summary or first key finding)
+  const oneLiner =
+    report.one_liner ??
+    report.executive_summary?.[0] ??
+    report.key_findings?.[0] ??
+    null;
 
   return (
     <div
       data-testid={`assessment-card-${assessment.id}`}
       onClick={onClick}
-      className="group relative flex flex-col glass-surface-highlight rounded-2xl p-5 cursor-pointer transition-all duration-300 hover:border-[#0891B2]/30 hover:-translate-y-0.5 hover:shadow-[0_8px_32px_-8px_rgba(8, 145, 178,0.25)]"
+      className="group relative flex flex-col glass-surface-highlight rounded-2xl p-5 cursor-pointer transition-all duration-300 hover:border-[#0891B2]/30 hover:-translate-y-0.5 hover:shadow-[0_8px_32px_-8px_rgba(8,145,178,0.25)]"
     >
-      {/* Top: company + status */}
+      {/* ─ Top: company + status ─ */}
       <div className="flex items-start justify-between gap-3 mb-4">
         <div className="flex items-start gap-3 min-w-0 flex-1">
-          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#0891B2]/20 to-[#60A5FA]/5 border border-[#60A5FA]/15 flex items-center justify-center shrink-0">
+          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#0891B2]/20 to-[#60A5FA]/05 border border-[#60A5FA]/15 flex items-center justify-center shrink-0">
             <Building2 size={18} className="text-[#60A5FA]" />
           </div>
           <div className="min-w-0 flex-1">
@@ -110,20 +124,40 @@ const AssessmentCard = ({ assessment, onClick }) => {
         <StatusBadge status={assessment.status} />
       </div>
 
-      {/* Middle: score + level */}
-      <div className="flex items-center gap-4 py-4 px-4 rounded-xl bg-[#F8F9FA] border border-[#E2E8F0] mb-4">
-        <ScoreRing score={overall} />
-        <div className="min-w-0 flex-1">
-          <p className="text-[10px] uppercase tracking-wider text-[#8896A5] font-semibold">
-            Overall Maturity
-          </p>
-          <p className={`text-base font-semibold font-['Outfit'] truncate ${overall ? "text-[#0C1B2A]" : "text-[#8896A5]"}`}>
-            {levelName || "Not yet scored"}
-          </p>
+      {/* ─ Score row: RingGauge + level + bottleneck pill ─ */}
+      <div className="flex items-center gap-4 py-3 px-4 rounded-xl bg-[#F8F9FA] border border-[#E2E8F0] mb-3">
+        <RingGauge
+          score={overall ?? 0}
+          size={72}
+          thickness={7}
+          showLevel={false}
+          animate={!!overall}
+        />
+        <div className="min-w-0 flex-1 space-y-1.5">
+          <div>
+            <p className="text-[10px] uppercase tracking-wider text-[#8896A5] font-semibold leading-none mb-0.5">
+              Overall Maturity
+            </p>
+            <p className={`text-sm font-semibold font-['Outfit'] truncate ${
+              overall ? "text-[#0C1B2A]" : "text-[#8896A5]"
+            }`}>
+              {levelLabel || "Not yet scored"}
+            </p>
+          </div>
+          {bnPillar && (
+            <BottleneckPill pillar={bnPillar} score={bnScore} />
+          )}
         </div>
       </div>
 
-      {/* Meta rows */}
+      {/* ─ One-liner preview ─ */}
+      {oneLiner && (
+        <p className="text-xs text-[#8896A5] leading-relaxed line-clamp-2 mb-3 px-1">
+          {oneLiner}
+        </p>
+      )}
+
+      {/* ─ Meta rows ─ */}
       <div className="space-y-2 text-sm">
         <div className="flex items-center gap-2.5 text-[#4A5568]">
           <UserRound size={13} className="text-[#8896A5] shrink-0" />
@@ -136,11 +170,17 @@ const AssessmentCard = ({ assessment, onClick }) => {
         </div>
         <div className="flex items-center gap-2.5 text-[#4A5568]">
           <Calendar size={13} className="text-[#8896A5] shrink-0" />
-          <span>{new Date(assessment.created_at).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}</span>
+          <span>
+            {new Date(assessment.created_at).toLocaleDateString(undefined, {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })}
+          </span>
         </div>
       </div>
 
-      {/* Footer action */}
+      {/* ─ Footer ─ */}
       <div className="mt-5 pt-4 border-t border-[#E2E8F0] flex items-center justify-between">
         {isComplete ? (
           <button
@@ -164,13 +204,14 @@ const AssessmentCard = ({ assessment, onClick }) => {
   );
 };
 
+// ── Page ────────────────────────────────────────────────────────────────────
 const AssessmentsPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const companyFilter = searchParams.get("company");
 
   const { assessments, companies, loading } = useAssessments();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery]   = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [showNewDialog, setShowNewDialog] = useState(false);
   const [formData, setFormData] = useState({
@@ -181,9 +222,7 @@ const AssessmentsPage = () => {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (companyFilter) {
-      setFormData((prev) => ({ ...prev, company_id: companyFilter }));
-    }
+    if (companyFilter) setFormData((prev) => ({ ...prev, company_id: companyFilter }));
   }, [companyFilter]);
 
   const handleFormChange = useCallback((field, value) => {
@@ -193,16 +232,13 @@ const AssessmentsPage = () => {
   const handleSubmit = useCallback(
     async (e) => {
       e.preventDefault();
-      if (!formData.company_id) {
-        toast.error("Please select a company");
-        return;
-      }
+      if (!formData.company_id) { toast.error("Please select a company"); return; }
       setSubmitting(true);
       try {
         const response = await axios.post(`${BACKEND_URL}/api/assessments`, formData);
         setShowNewDialog(false);
         navigate(`/assessments/${response.data.id}`);
-      } catch (err) {
+      } catch {
         toast.error("Failed to create assessment");
       } finally {
         setSubmitting(false);
@@ -226,23 +262,16 @@ const AssessmentsPage = () => {
     const matchesSearch =
       a.company_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       a.respondent_name?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === "all" || a.status === statusFilter;
+    const matchesStatus  = statusFilter === "all" || a.status === statusFilter;
     const matchesCompany = !companyFilter || a.company_id === companyFilter;
     return matchesSearch && matchesStatus && matchesCompany;
   });
 
-  const selectedCompany = companies.find((c) => c.id === companyFilter);
+  const selectedCompany  = companies.find((c) => c.id === companyFilter);
+  const completedCount   = filteredAssessments.filter((a) => a.status === "completed").length;
+  const inProgressCount  = filteredAssessments.length - completedCount;
 
-  const completedCount = filteredAssessments.filter((a) => a.status === "completed").length;
-  const inProgressCount = filteredAssessments.length - completedCount;
-
-  if (loading) {
-    return (
-      <Layout>
-        <LoadingSpinner className="h-64" />
-      </Layout>
-    );
-  }
+  if (loading) return <Layout><LoadingSpinner className="h-64" /></Layout>;
 
   return (
     <Layout>
@@ -252,9 +281,7 @@ const AssessmentsPage = () => {
           <div>
             <h1 className="text-2xl sm:text-3xl font-semibold text-[#0C1B2A] font-['Outfit'] tracking-tight">
               Assessments
-              {selectedCompany && (
-                <span className="text-[#0891B2]"> · {selectedCompany.name}</span>
-              )}
+              {selectedCompany && <span className="text-[#0891B2]"> · {selectedCompany.name}</span>}
             </h1>
             <p className="text-[#4A5568] mt-1 text-sm sm:text-base">
               {selectedCompany
@@ -272,21 +299,19 @@ const AssessmentsPage = () => {
               </div>
             )}
           </div>
+
           <Dialog open={showNewDialog} onOpenChange={setShowNewDialog}>
             <DialogTrigger asChild>
               <button
                 data-testid="new-assessment-btn"
                 className="inline-flex items-center justify-center gap-2 px-6 py-3 btn-liquid rounded-xl w-full sm:w-auto"
               >
-                <Plus size={18} />
-                New Assessment
+                <Plus size={18} /> New Assessment
               </button>
             </DialogTrigger>
             <DialogContent className="glass-heavy border-[#E2E8F0] text-[#0C1B2A] max-w-md rounded-2xl">
               <DialogHeader>
-                <DialogTitle className="text-xl font-semibold font-['Outfit']">
-                  Start New Assessment
-                </DialogTitle>
+                <DialogTitle className="text-xl font-semibold font-['Outfit']">Start New Assessment</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4 mt-4">
                 <div className="space-y-2">
@@ -300,9 +325,7 @@ const AssessmentsPage = () => {
                   >
                     <option value="">Select company</option>
                     {companies.map((company) => (
-                      <option key={company.id} value={company.id}>
-                        {company.name}
-                      </option>
+                      <option key={company.id} value={company.id}>{company.name}</option>
                     ))}
                   </select>
                   {companies.length === 0 && (
@@ -375,10 +398,7 @@ const AssessmentsPage = () => {
             </select>
           </div>
           {companyFilter && (
-            <Link
-              to="/assessments"
-              className="px-4 py-2.5 text-[#0891B2] hover:text-[#0891B2]/80 transition-colors text-sm"
-            >
+            <Link to="/assessments" className="px-4 py-2.5 text-[#0891B2] hover:text-[#0891B2]/80 transition-colors text-sm">
               Clear company filter
             </Link>
           )}
@@ -405,10 +425,7 @@ const AssessmentsPage = () => {
               title="No assessments found"
               description="Start your first assessment to evaluate PPM capability"
               action={
-                <button
-                  onClick={() => setShowNewDialog(true)}
-                  className="px-6 py-2 btn-liquid rounded-xl"
-                >
+                <button onClick={() => setShowNewDialog(true)} className="px-6 py-2 btn-liquid rounded-xl">
                   Create Assessment
                 </button>
               }
