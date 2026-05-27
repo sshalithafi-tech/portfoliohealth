@@ -1095,6 +1095,198 @@
   .ph-report .report-footer { padding: 16px 20px; }
 }
 
+/* =====================================================================
+   ASSESSMENT DASHBOARD (4-card 2×2 grid)
+   Replaces the previous wall-of-text R6 Bottleneck + R8 Decision sections.
+   Shares the same surface/radius/spacing language across all four cards.
+   Severity tokens (--bn-*) are aliased to the global maturity-band palette.
+   ===================================================================== */
+.ph-report {
+  --bn-critical: #DC2626;
+  --bn-warning:  #F59E0B;
+  --bn-good:     #10B981;
+  --bn-advanced: #0EA5E9;
+}
+
+.ph-report .bn-dashboard { margin: 32px 0; padding: 0; background: transparent; }
+.ph-report .bn-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+@media (max-width: 900px) {
+  .ph-report .bn-grid { grid-template-columns: 1fr; }
+}
+
+/* --- Shared card surface ----------------------------------------------- */
+.ph-report .bn-card {
+  position: relative;
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 16px;
+  padding: 20px 22px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.02), 0 8px 24px -16px rgba(15, 23, 42, 0.10);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 0;
+}
+
+.ph-report .bn-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.ph-report .bn-card-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: 600 11px/1 'Inter', sans-serif;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: #64748B;
+}
+.ph-report .bn-card-eyebrow svg { color: #0891B2; }
+.ph-report .bn-card-sub {
+  margin: -6px 0 0;
+  font: 500 12px/1.4 'Inter', sans-serif;
+  color: #64748B;
+}
+
+/* --- Reusable atoms ---------------------------------------------------- */
+.ph-report .bn-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font: 600 11px/1.4 'Inter', sans-serif;
+  letter-spacing: 0.01em;
+  color: var(--c, #475569);
+  background: color-mix(in srgb, var(--c, #475569) 12%, white);
+  border: 1px solid color-mix(in srgb, var(--c, #475569) 28%, white);
+  white-space: nowrap;
+}
+
+.ph-report .bn-sev {
+  flex: 1 1 auto;
+  height: 6px;
+  background: #F1F5F9;
+  border-radius: 999px;
+  overflow: hidden;
+  min-width: 60px;
+  max-width: 120px;
+}
+.ph-report .bn-sev[data-severity="critical"] .bn-sev-fill { width: 92%; }
+.ph-report .bn-sev[data-severity="warning"]  .bn-sev-fill { width: 60%; }
+.ph-report .bn-sev[data-severity="good"]     .bn-sev-fill { width: 32%; }
+.ph-report .bn-sev[data-severity="advanced"] .bn-sev-fill { width: 22%; }
+.ph-report .bn-sev-fill {
+  display: block;
+  height: 100%;
+  background: var(--c);
+  border-radius: inherit;
+  transition: width 600ms ease-out;
+}
+
+/* --- Card 1: Bottleneck ------------------------------------------------ */
+.ph-report .bn-bn-body { display: grid; grid-template-columns: 132px 1fr; gap: 18px; align-items: start; }
+@media (max-width: 480px) {
+  .ph-report .bn-bn-body { grid-template-columns: 1fr; }
+}
+.ph-report .bn-ring { position: relative; width: 132px; height: 132px; display: flex; align-items: center; justify-content: center; }
+.ph-report .bn-ring-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.ph-report .bn-ring-track { fill: none; stroke: #EEF2F6; stroke-width: 12; }
+.ph-report .bn-ring-fill  { fill: none; stroke-width: 12; stroke-linecap: round; transition: stroke-dashoffset 900ms cubic-bezier(.22,.61,.36,1); }
+.ph-report .bn-ring-center {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  pointer-events: none;
+}
+.ph-report .bn-ring-score { font: 800 30px/1 'Inter', sans-serif; letter-spacing: -1px; }
+.ph-report .bn-ring-suffix { font: 500 11px 'Inter'; color: #94A3B8; margin-top: 2px; }
+.ph-report .bn-ring-level {
+  position: absolute; bottom: -22px; left: 0; right: 0;
+  text-align: center; font: 600 10px 'Inter'; letter-spacing: 0.10em; text-transform: uppercase;
+  color: #64748B;
+}
+.ph-report .bn-bn-right { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.ph-report .bn-bn-pillar {
+  font: 700 22px/1.15 'Outfit', 'Inter', sans-serif;
+  letter-spacing: -0.4px; color: #0F172A;
+}
+.ph-report .bn-bn-meta {
+  font: 500 12px/1.4 'Inter'; color: #64748B; margin-top: -2px;
+}
+.ph-report .bn-bn-insight {
+  margin: 4px 0 6px;
+  font: 500 13px/1.5 'Inter', sans-serif;
+  color: #334155;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.ph-report .bn-bn-risks { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+
+/* --- Card 2: Preconditions -------------------------------------------- */
+.ph-report .bn-precon-list {
+  list-style: none; padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.ph-report .bn-precon-row {
+  display: grid;
+  grid-template-columns: 18px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 4px;
+  border-bottom: 1px solid #F1F5F9;
+}
+.ph-report .bn-precon-row:last-child { border-bottom: none; }
+.ph-report .bn-precon-icon { display: inline-flex; align-items: center; justify-content: center; }
+.ph-report .bn-precon-label { font: 500 13px/1.3 'Inter'; color: #1E293B; }
+
+/* --- Card 3: Portfolio Decision Impact -------------------------------- */
+.ph-report .bn-dec-list {
+  list-style: none; padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.ph-report .bn-dec-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 4px;
+  border-bottom: 1px solid #F1F5F9;
+}
+.ph-report .bn-dec-row:last-child { border-bottom: none; }
+.ph-report .bn-dec-row.is-worst {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--bn-critical) 6%, white), transparent 70%);
+  border-left: 3px solid var(--bn-critical);
+  padding-left: 8px;
+  border-radius: 8px;
+}
+.ph-report .bn-dec-label { font: 500 13px/1.3 'Inter'; color: #1E293B; }
+
+/* --- Card 4: PPM Governance Readiness --------------------------------- */
+.ph-report .bn-gov-list {
+  list-style: none; padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.ph-report .bn-gov-row { display: flex; flex-direction: column; gap: 6px; padding-bottom: 8px; border-bottom: 1px solid #F1F5F9; }
+.ph-report .bn-gov-row:last-child { border-bottom: none; }
+.ph-report .bn-gov-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.ph-report .bn-gov-label { font: 500 13px/1.3 'Inter'; color: #1E293B; }
+.ph-report .bn-gov-steps { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; }
+.ph-report .bn-gov-step {
+  height: 6px;
+  background: #F1F5F9;
+  border-radius: 999px;
+}
+.ph-report .bn-gov-step.on { background: var(--c, #94A3B8); }
+
+
 /* ============ Print — A4 Board-Room Ready ============ */
 @media print {
   @page { size: A4; margin: 12mm 14mm; }

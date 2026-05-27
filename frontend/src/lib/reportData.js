@@ -293,5 +293,7 @@ export function buildReportData(assessment) {
     closing_statement: report.closing_statement || "",
     key_findings: report.key_findings || [],
     critical_gaps: report.critical_gaps || [],
+    pillar_interpretations: report.pillar_interpretations || {},
+    dimension_summaries: report.dimension_summaries || {},
   };
 }

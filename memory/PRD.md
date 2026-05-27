@@ -329,7 +329,39 @@ User feedback (two screenshots): R1 cover looked ugly with "Meridian Controls" w
 - R2/R3: cyan card top borders, cyan "STD" pill, "Strongest pillar — Data" still has score-3 amber, "Critical bottleneck — Process" still has bottleneck red — maturity colors preserved
 - Sidebar gradient rail and `Export PDF` button cyan, consistent with the rest of the app
 
-## 5-Point Design Polish (2026-05-24 — current session)
+## Assessment Dashboard Redesign — 4-Card 2×2 Grid (2026-05-27 — current session)
+Replaced the verbose R6 Bottleneck + R8 Decision Impact prose blocks in the consultant report with a compact, scannable **2×2 dashboard** of four visually consistent cards. The PDF export pipeline (`/app/backend/pdf_builder.py`) was intentionally NOT touched — the full-text version still ships in downloads.
+
+### New section layout (Report → between R5 Calculation and R7 Roadmap)
+| Row | Left card | Right card |
+|---|---|---|
+| 1 | **Bottleneck** (ring gauge + insight + risk chips) | **Preconditions** (6-row checklist) |
+| 2 | **Portfolio Decision Impact** (6 severity rows) | **PPM Governance Readiness** (4 segmented bars) |
+
+### Files
+- New: `/app/frontend/src/components/report/AssessmentDashboard.jsx` (modular: `BottleneckCard`, `PreconditionsCard`, `PortfolioDecisionImpactCard`, `GovernanceReadinessCard`, plus `RingGauge`, `StatusChip`, `SeverityBar` atoms and helpers `extractFirstSentence`, `truncateInsight`, `deriveDecisionImpact`, `derivePreconditionStatus`, `deriveGovernanceReadiness`)
+- Edited: `/app/frontend/src/lib/reportData.js` — passes through `pillar_interpretations` and `dimension_summaries`
+- Edited: `/app/frontend/src/components/report/premium.css` — `.bn-dashboard`, `.bn-card`, `.bn-chip`, `.bn-sev`, `.bn-ring`, `.bn-precon-*`, `.bn-dec-*`, `.bn-gov-*` token set, plus severity CSS variables (`--bn-critical`, `--bn-warning`, `--bn-good`, `--bn-advanced`)
+- Edited: `/app/frontend/src/pages/ReportPage.jsx` — replaced `<R6Bottleneck/>` + `<R8DecisionImpact/>` with `<AssessmentDashboardSection/>` (old components retained for safety but unused)
+
+### Data-handling rule
+All AI-generated paragraphs go through a deterministic pipeline before render:
+1. `extractFirstSentence` → 2. `truncateInsight(text, 170)` → 3. Pillar-specific fallback if both empty.
+The cards never dump raw narrative; they normalise into chips, dots, bars, and ring fills.
+
+### Severity color system (aliased to the global maturity-band palette)
+- `--bn-critical: #DC2626` (red) — Critical / Very weak / High impact / Missing / Weak
+- `--bn-warning: #F59E0B` (amber) — Moderate / Partial / Medium impact / Emerging
+- `--bn-good: #10B981` (green) — Good / Established / Low impact / Met
+- `--bn-advanced: #0EA5E9` (sky) — Advanced / Strong (Band 4 maturity)
+
+### Verified
+- Screenshot @ 1920×1080: all four cards render side-by-side; Lumivex Photonics report shows Data bottleneck @ 3.0/5 green ring, 3/6 preconditions met (Strategic classification + PPM cadence missing), Portfolio Investment + Product Family Rationalisation flagged High (with red left-bar highlight on the worst), Governance 3/4 established.
+- Screenshot @ 420px (mobile): cards collapse to single column; `mobile cards=4` confirms full grid render.
+- `data-testid="report-r6"` and `data-testid="report-r8"` confirmed absent in the new render path.
+- ESLint clean on both `ReportPage.jsx` and `AssessmentDashboard.jsx`.
+
+## 5-Point Design Polish (2026-05-24)
 User requested a precise 5-point design update to unify the dashboard + PDF and complete the premium SaaS polish.
 
 ### Spec

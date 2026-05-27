@@ -18,6 +18,7 @@ import {
   BAND_TEXT_COLORS,
 } from "../lib/reportData";
 import "../components/report/premium.css";
+import AssessmentDashboardSection from "../components/report/AssessmentDashboard";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -902,9 +903,8 @@ const ReportPage = () => {
         <R3OrgProfile data={data} />
         <R4PillarSection data={data} />
         <R5Calculation data={data} />
-        <R6Bottleneck data={data} />
+        <AssessmentDashboardSection data={data} />
         <R7Roadmap data={data} />
-        <R8DecisionImpact data={data} />
         <R9Dashboard data={data} />
         <R10Research />
         <ReportFooter data={data} />
