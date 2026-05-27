@@ -53,15 +53,79 @@ PRIORITY_PILLAR_MAP = {
     "technology": ["technology", "systems", "erp", "plm", "it ", "digital tool"],
 }
 
-# Multi-pillar / vague priorities that must NOT trigger a boost.
+# Ambiguous / multi-pillar priorities that must NOT trigger a boost.
+# Source: PPDT Scoring Logic & Business-Model-Contextual Weighting thesis (Table 2):
+# "Portfolio simplification, profitability, complexity" and
+# "Digital transformation, innovation" → No boost.
 AMBIGUOUS_PRIORITY_TERMS = {
     "portfolio simplification",
-    "profitability improvement",
-    "complexity reduction",
+    "profitability",
+    "complexity",
     "digital transformation",
     "innovation",
-    "growth",
 }
+
+
+def compute_pillar_contextual_gaps(scores: dict, weights: dict) -> dict:
+    """Per-pillar contribution to the divergence between contextual and
+    equal-weighted scores.
+
+    Per the thesis (Section: Dual-Score Architecture):
+        per_pillar_gap_i = (w_i − 0.25) × pillar_score_i
+
+    The sum of these four gaps equals (contextual_score − equal_weighted_score).
+    A POSITIVE gap means the company is strong in a pillar the business model
+    weights heavily — alignment. A NEGATIVE gap means the business model
+    demands more from this pillar than the company currently has — the
+    misalignment direction the DBI flags.
+    """
+    pillars = ("people", "process", "data", "technology")
+    out = {}
+    for p in pillars:
+        try:
+            s = float(scores.get(p, 0) or 0)
+            w = float(weights.get(p, 0.25) or 0.25)
+        except (TypeError, ValueError):
+            s, w = 0.0, 0.25
+        out[p] = round((w - 0.25) * s, 4)
+    return out
+
+
+def compute_decision_bottleneck_index(scores: dict, weights: dict) -> Optional[dict]:
+    """Decision Bottleneck Index (DBI) — per the thesis.
+
+    "The pillar with the largest gap between contextual score and
+     equal-weighted score — identifies the dimension most misaligned
+     relative to business model demands."
+
+    The per-pillar contribution to (contextual − equal) is:
+
+        gap_i = (w_i − 0.25) × score_i
+
+    and  ∑ gap_i  ==  contextual_score − equal_weighted_score.
+
+    The DBI is the pillar with the largest ABSOLUTE such gap. The signed
+    `gap` field is exposed so the UI can describe direction:
+      • gap > 0  → pillar contributes MORE to contextual than to equal
+                   (the business model rewards this pillar and the company
+                    has capability here — alignment-positive).
+      • gap < 0  → pillar contributes LESS to contextual than to equal
+                   (the business model de-emphasises this pillar, OR the
+                    company has capability in a pillar that doesn't earn
+                    full credit under the contextual weighting).
+    """
+    pillars = ("people", "process", "data", "technology")
+    gaps = compute_pillar_contextual_gaps(scores, weights)
+    if not any(abs(v) > 1e-9 for v in gaps.values()):
+        return None  # equal weights — DBI is meaningless
+    pillar = max(pillars, key=lambda p: abs(gaps[p]))
+    g = gaps[pillar]
+    return {
+        "pillar": pillar,
+        "gap": round(g, 4),
+        "direction": "above-baseline" if g > 0 else "below-baseline",
+        "gaps_by_pillar": gaps,
+    }
 
 
 def derive_contextual_weights(report_data: dict) -> Optional[dict]:
@@ -360,6 +424,15 @@ def recompute_dual_scores(report_data: dict) -> dict:
         report_data["contextual_weights"] = {
             p: round(weights[p], 4) for p in pillars
         }
+        # Decision Bottleneck Index — per thesis (Section: DBI).
+        # Per-pillar contribution gaps + the pillar with the largest absolute
+        # gap. These are deterministic functions of `scores` + `weights`, so
+        # we always recompute them rather than trusting an LLM-supplied value.
+        gaps = compute_pillar_contextual_gaps(pillar_scores, weights)
+        report_data["pillar_contextual_gaps"] = gaps
+        dbi = compute_decision_bottleneck_index(pillar_scores, weights)
+        if dbi is not None:
+            report_data["decision_bottleneck_index"] = dbi
 
     return report_data
 

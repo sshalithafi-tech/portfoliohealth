@@ -329,7 +329,51 @@ User feedback (two screenshots): R1 cover looked ugly with "Meridian Controls" w
 - R2/R3: cyan card top borders, cyan "STD" pill, "Strongest pillar — Data" still has score-3 amber, "Critical bottleneck — Process" still has bottleneck red — maturity colors preserved
 - Sidebar gradient rail and `Export PDF` button cyan, consistent with the rest of the app
 
-## Assessment Dashboard v2 — Hero·Half/Half·Hero (2026-05-27 — current session, second pass)
+## Thesis-Aligned Scoring Updates — DBI + Ambiguous Priority Cleanup (2026-05-27 — third pass)
+User uploaded the PDF "PPDT Scoring Logic & Business-Model-Contextual Weighting" thesis. I audited every scoring rule against the PDF and made the following changes.
+
+### Audit summary
+| PDF rule | Status before | Action |
+|---|---|---|
+| Equal-weighted = mean of 4 pillars | ✅ matched | no change |
+| Contextual = Σ(score × w_i) + boost | ✅ matched | no change |
+| Business-model weight matrix (ETO 35/30/20/15, CETO 25/30/25/20, CTO 20/25/30/25, Standard 15/30/35/20, Bulk 10/35/20/35) | ✅ exact | no change |
+| Strategic priority +5%/−1.67% with normalisation | ✅ matched | no change |
+| `scores.overall == equal_weighted_score` (primary) | ✅ enforced | no change |
+| **DBI = pillar with largest gap between contextual and equal-weighted** | ❌ missing | **NEW: implemented** |
+| Per-pillar contextual contribution gaps | ❌ missing | **NEW: exposed** |
+| Ambiguous priority list ("Portfolio simplification, profitability, complexity, Digital transformation, innovation") | ⚠ had extra `growth` + drifted phrasings | **fixed to exact PDF wording** |
+
+### DBI implementation
+Per-pillar gap formula (literal PDF reading):
+```
+gap_i = (w_i − 0.25) × score_i
+∑ gap_i  =  contextual_score − equal_weighted_score
+```
+The DBI is the pillar with the largest absolute gap. `direction` is `above-baseline` (gap > 0 — pillar contributes more to contextual than equal) or `below-baseline` (gap < 0).
+
+### Files changed
+- `/app/backend/chat_service.py`:
+  - Added `compute_pillar_contextual_gaps(scores, weights)`
+  - Added `compute_decision_bottleneck_index(scores, weights)` → returns `{pillar, gap, direction, gaps_by_pillar}`
+  - Tightened `AMBIGUOUS_PRIORITY_TERMS` to exact PDF Table 2 wording
+  - `recompute_dual_scores` now writes `pillar_contextual_gaps` and `decision_bottleneck_index` onto the report
+- `/app/backend/server.py`:
+  - System prompt: replaced the duplicate "STEP 3" label with "STEP 5 — DECISION BOTTLENECK INDEX (DBI)" + full DBI documentation
+  - System prompt: aligned ambiguous-priority example wording to PDF Table 2
+  - `GET /api/assessments/{id}` now lazily backfills DBI + pillar gaps on read for reports created before this change (in-memory, idempotent)
+- `/app/frontend/src/lib/reportData.js`:
+  - Passes through `decision_bottleneck_index` and `pillar_contextual_gaps` so the dashboard / report can render them
+- NEW: `/app/backend/tests/test_dbi_scoring.py` — 10 unit tests covering the weight matrix, gap formula, DBI selection (both above- and below-baseline), ambiguous-priority guardrails, priority boost, and end-to-end recompute path.
+
+### Verified
+- **10/10 new tests pass** + 8/8 existing dual-score tests pass (no regression).
+- **Live API check**: `GET /api/assessments/6a1338f66fe46ca1fb55073e` now returns:
+  - `decision_bottleneck_index = {pillar: "people", gap: -0.35, direction: "below-baseline", gaps_by_pillar: {...}}`
+  - `pillar_contextual_gaps = {people: -0.35, process: 0.225, data: 0.3, technology: -0.175}`
+- Ruff clean on `chat_service.py` + `tests/test_dbi_scoring.py`.
+
+## Assessment Dashboard v2 — Hero·Half/Half·Hero (2026-05-27 — second pass)
 Iterated on yesterday's 2×2 grid into a more academically grounded, more visually impressive 3-row layout. Same 4-card surface language, sharper hierarchy, theory-numbered labels, executive radar visual.
 
 ### Layout

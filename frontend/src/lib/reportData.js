@@ -295,5 +295,10 @@ export function buildReportData(assessment) {
     critical_gaps: report.critical_gaps || [],
     pillar_interpretations: report.pillar_interpretations || {},
     dimension_summaries: report.dimension_summaries || {},
+    // Decision Bottleneck Index — per PDF thesis (Section: DBI).
+    // Computed deterministically by the backend from scores+contextual_weights.
+    // Distinct from the classical `bottleneck` (lowest-scoring pillar).
+    decision_bottleneck_index: report.decision_bottleneck_index || null,
+    pillar_contextual_gaps: report.pillar_contextual_gaps || null,
   };
 }

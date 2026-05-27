@@ -341,9 +341,10 @@ Priority keyword → pillar mapping:
   Data, master data, analytics, reporting, BI, insight  → Data     +5%
   Technology, systems, ERP, PLM, IT, digital tools      → Technology +5%
 
-  Ambiguous priorities — NO boost, use business model weights as-is:
-    "Portfolio simplification", "profitability improvement", "complexity reduction",
-    "digital transformation", "innovation", "growth", or any multi-pillar phrase.
+  Ambiguous priorities — NO boost, use business model weights as-is
+  (per thesis Table 2: "No boost — ambiguous"):
+    "Portfolio simplification", "profitability", "complexity",
+    "Digital transformation", "innovation", or any multi-pillar phrase.
 
 RULE: If in doubt, do NOT apply the boost. The business model weight alone is
 sufficient. Never force a boost where the priority is unclear.
@@ -388,12 +389,48 @@ corroborated by:
 
 These weights are a peer-reviewed, thesis-grounded design choice — not heuristics.
 
-STEP 3 — APPLY BOTTLENECK RULE
+──────────────────────────────────────────────────────────────────────────────
+STEP 5 — DECISION BOTTLENECK INDEX (DBI)
+
+The Decision Bottleneck Index is the pillar with the LARGEST absolute gap
+between its contextual contribution (weight_i × score_i) and its equal-weighted
+contribution (0.25 × score_i). The per-pillar gap is:
+
+  gap_i = (weight_i − 0.25) × score_i
+
+and ∑ gap_i  =  contextual_score − equal_weighted_score.
+
+The DBI is computed deterministically by the backend from `scores` +
+`contextual_weights` and emitted on the report as:
+
+  "decision_bottleneck_index": {
+    "pillar": "people | process | data | technology",
+    "gap": <signed float>,
+    "direction": "above-baseline" | "below-baseline",
+    "gaps_by_pillar": { "people": ..., "process": ..., "data": ..., "technology": ... }
+  }
+
+You DO NOT need to emit this field — the backend recomputes it. But when
+present, narrate it correctly:
+  • "above-baseline" → the pillar contributes MORE to the contextual score
+    than to the equal-weighted score (the business model rewards this
+    pillar and the company has capability there → alignment surplus).
+  • "below-baseline" → the pillar contributes LESS to the contextual score
+    than to the equal-weighted score (the business model de-emphasises this
+    pillar, OR company capability is parked in an area the model does not
+    fully credit → potential mis-investment signal).
+
+The DBI is DIFFERENT from the classical `bottleneck_pillar` (lowest-scoring
+pillar that caps overall maturity) — both may be reported. The DBI is
+specifically about business-model-relative misalignment, not absolute capability.
+
+──────────────────────────────────────────────────────────────────────────────
+BOTTLENECK CAPPING RULE
 If the lowest pillar score is 1.0 or more below the calculated overall average, the narrative interpretation must be capped at the bottleneck pillar's level — not the average.
 
 Example: Overall = 3.3, but Data = 2.0 → narrative is capped at DEVELOPING, not DEFINED. The report must name this explicitly.
 
-STEP 4 — ROUND AND PRESENT
+ROUND AND PRESENT
 Round all final scores to 1 decimal place. Show the formula result transparently in the report table.
 
 
@@ -915,6 +952,17 @@ async def get_assessment(assessment_id: str, current_user: dict = Depends(get_cu
     assessment = await db.assessments.find_one({"_id": ObjectId(assessment_id), "user_id": current_user["id"]})
     if not assessment:
         raise HTTPException(status_code=404, detail="Assessment not found")
+    # Backfill DBI + per-pillar contextual gaps on read so reports created
+    # before this logic was introduced still expose the thesis-grade fields.
+    # Idempotent: re-running normalise_report_weights leaves matching reports
+    # unchanged, only adding the new keys when they're missing.
+    report = assessment.get("report")
+    if isinstance(report, dict) and report.get("scores") and report.get("decision_bottleneck_index") is None:
+        try:
+            normalise_report_weights(report)
+            assessment["report"] = report
+        except Exception:  # pragma: no cover — best-effort backfill
+            logger.warning("DBI backfill failed for assessment %s", assessment_id, exc_info=True)
     return {"id": str(assessment["_id"]), **{k: v for k, v in assessment.items() if k != "_id"}}
 
 @api_router.patch("/assessments/{assessment_id}")
