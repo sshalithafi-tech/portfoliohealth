@@ -227,6 +227,17 @@ const DimensionBar = ({ icon: Icon, label, score, color }) => (
   </div>
 );
 
+/* ── derive bottleneck from scores (lowest of the 4 pillars) ── */
+const PILLARS = ["people", "process", "data", "technology"];
+
+function deriveBottleneckFromScores(scores) {
+  if (!scores) return null;
+  const entries = PILLARS.map((p) => [p, scores[p]]).filter(([, v]) => typeof v === "number");
+  if (entries.length === 0) return null;
+  entries.sort((a, b) => a[1] - b[1]);
+  return entries[0][0]; // key of the lowest-scoring pillar
+}
+
 const DashboardPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -236,9 +247,14 @@ const DashboardPage = () => {
     navigate(assessment.status === "completed" ? `/assessments/${assessment.id}/report` : `/assessments/${assessment.id}`);
   };
 
-  // Derive bottleneck from most recent completed assessment
+  // Derive bottleneck from most recent completed assessment scores
+  // The list endpoint does not include `report`, so we calculate the bottleneck
+  // as the lowest-scoring pillar directly from the scores object.
   const latestCompleted = recentAssessments.find((a) => a.status === "completed");
-  const bottleneckKey = latestCompleted?.bottleneck || latestCompleted?.report?.bottleneck || null;
+  const bottleneckKey =
+    latestCompleted?.report?.bottleneck_pillar?.toLowerCase() ||
+    deriveBottleneckFromScores(latestCompleted?.scores) ||
+    null;
   const bottleneckScore = bottleneckKey && latestCompleted?.scores
     ? latestCompleted.scores[bottleneckKey]
     : null;
