@@ -199,14 +199,27 @@ Seeded completed fixture assessment id 6b44c78c2ebdd66625059999 for admin (admin
 ## frontend:
 ##   - task: "Home page content update + premium Login/Register redesign"
 ##     implemented: true
-##     working: "NA"
+##     working: true
 ##     file: "pages/LandingPage.jsx, pages/LoginPage.jsx, pages/RegisterPage.jsx, components/landing/landing.css"
-##     needs_retesting: true
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: false
 ##     status_history:
 ##         -working: "NA"
 ##         -agent: "main"
 ##         -comment: "Redesigned auth pages + extensive home content. Verified compile + login/register screenshots. Needs functional + rendering test."
+##         -working: true
+##         -agent: "testing"
+##         -comment: "ALL TESTS PASSED ✓ Comprehensive end-to-end testing completed. (1) LOGIN PAGE: Premium 2-panel layout verified (dark navy brand panel with PortfolioHealth logo, tagline, 3 feature rows + white form card with 'Welcome back' heading). Login with admin@portfoliohealth.fi / Admin@12345 successful - redirected to /#/dashboard. Password eye-toggle working correctly (password ↔ text). (2) REGISTER PAGE: Premium 2-panel layout verified with 'Create your account' heading. Client-side validation working - password '123' correctly shows error 'Password must be at least 6 characters'. All data-testid attributes present. (3) HOME PAGE: Page loads without console errors. Hero section has 'Dual Score' stat card (label: Output, value: Dual Score, desc: Equal-weighted baseline + business-model contextual score). Scoring disclosure mentions 'two scores'. PPDT Framework section: balance principle callout found, business-model sensitivity callout found. Maturity Model section: TWO formula cards found ('Overall Score (Equal-Weighted)' + 'Overall Score (Business-Model Adjusted)'). Business-model weight table found with 5 rows (ETO, CETO, CTO, Standard, Bulk) with percentage columns. Strategic-priority +5% boost callout found. All 5 maturity levels found (Ad Hoc, Developing, Defined, Managed, Predictive). (4) Header nav scrolling working correctly ('Maturity Levels' scrolls from 0px to 3326px, 'The Framework' scrolls from 0px to 2029px). Screenshots captured. No issues found - implementation is working perfectly."
+
+## test_plan:
+##   current_focus: []
+##   stuck_tasks: []
+##   test_all: false
+##   test_priority: "high_first"
 
 ## agent_communication:
 ##     -agent: "main"
 ##     -message: "Frontend testing approved by user. App uses HashRouter (URLs: /#/, /#/login, /#/register). Test: (1) Login page at /#/login renders premium 2-panel layout; login with admin@portfoliohealth.fi / Admin@12345 succeeds and redirects to /#/dashboard. (2) Register page at /#/register renders and client-side validation shows error for password < 6 chars (do NOT create a real duplicate account unless needed; a fresh random email is fine, but focus on validation + rendering). (3) Home page at /#/ renders without console errors and shows the new sections: Hero 'Dual Score' stat card + scoring disclosure, 'What You Receive' cards, PPDT balance principle callout, business-model sensitivity callout, Maturity section dual-score formulas + business-model WEIGHT TABLE (5 rows: ETO/CETO/CTO/Standard/Bulk) + strategic-priority boost callout, and the 5 maturity levels. (4) Header nav anchors (Maturity Levels, The Framework) scroll correctly. Report any console errors or missing sections."
+##     -agent: "testing"
+##     -message: "Testing complete - ALL TESTS PASSED ✓. Executed comprehensive Playwright tests covering all three pages. STEP 1 (Login): Premium 2-panel layout verified, login successful with redirect to dashboard, password toggle working. STEP 2 (Register): Premium 2-panel layout verified, client-side validation working correctly. STEP 3 (Home): All content sections verified - dual score stat card, scoring disclosure, PPDT framework callouts, dual formula cards, business-model weight table with 5 rows, strategic-priority boost, 5 maturity levels, nav scrolling. No console errors, no missing sections. The frontend redesign is working perfectly. Ready for user validation."
