@@ -404,49 +404,127 @@ const R4PillarSection = ({ data }) => {
   );
 };
 
-/* ============ R5 Overall Score Calculation ============ */
+/* ============ R5 Overall Score Calculation (dual-score) ============ */
 const R5Calculation = ({ data }) => {
-  const { scores, kpi, bottleneck, bottleneck_capped } = data;
+  const {
+    scores,
+    kpi,
+    bottleneck,
+    bottleneck_capped,
+    equal_weighted_score,
+    contextual_score,
+    contextual_weights,
+    business_model,
+  } = data;
   const bnPillar = kpi.pillars.find((p) => p.key === bottleneck);
-  const lvl = scoreToLevel(scores.overall);
+  const eqScore = Number(equal_weighted_score ?? scores.overall ?? 0);
+  const ctxScore = Number(contextual_score ?? eqScore);
+  const lvl = scoreToLevel(eqScore);
+  const hasWeights =
+    contextual_weights && ["people", "process", "data", "technology"].every((p) => p in contextual_weights);
+  const showContextual = hasWeights && Math.abs(eqScore - ctxScore) > 0.005;
 
   return (
     <section className="r5" data-testid="report-r5">
-      <div className="r5-card">
-        <div className="r5-left">
-          <span className="r5-label">Overall Maturity Score</span>
-          <div>
-            <span className="r5-score">
-              {scores.overall.toFixed(1)}
-            </span>
-            <span className="r5-score-suffix">/5.0</span>
+      <div className="r5-card r5-card--dual">
+        {/* Header row: hero score + level */}
+        <div className="r5-hero">
+          <div className="r5-hero-main">
+            <span className="r5-label">Overall Maturity Score</span>
+            <div className="r5-hero-score">
+              <span className="r5-score">{eqScore.toFixed(1)}</span>
+              <span className="r5-score-suffix">/ 5.0</span>
+            </div>
+            <span className="r5-level">{LEVEL_TITLES[lvl]}</span>
+            {bottleneck_capped && bnPillar && (
+              <div className="r5-cap">
+                <span className="ico"><AlertTriangle size={14} /></span>
+                Capped by {bnPillar.name.toUpperCase()} bottleneck ({bnPillar.score.toFixed(1)} / 5.0)
+              </div>
+            )}
           </div>
-          <span className="r5-level">{LEVEL_TITLES[lvl]}</span>
-          {bottleneck_capped && bnPillar && (
-            <div className="r5-cap">
-              <span className="ico"><AlertTriangle size={14} /></span>
-              Capped by {bnPillar.name.toUpperCase()} bottleneck ({bnPillar.score.toFixed(1)} / 5.0)
+          {showContextual && (
+            <div className="r5-hero-aside">
+              <span className="r5-aside-label">Adjusted for business model</span>
+              <div className="r5-aside-score">
+                <span className="r5-aside-num">{ctxScore.toFixed(2)}</span>
+                <span className="r5-aside-suffix"> / 5.0</span>
+              </div>
+              {business_model && (
+                <span className="r5-aside-meta">Business model: {business_model}</span>
+              )}
+              <span className={`r5-aside-delta ${ctxScore >= eqScore ? "up" : "down"}`}>
+                {ctxScore >= eqScore ? "+" : ""}{(ctxScore - eqScore).toFixed(2)} vs. equal-weighted
+              </span>
             </div>
           )}
         </div>
-        <div className="r5-right">
-          <div className="r5-calc">
-            {kpi.pillars.map((p) => (
-              <div key={p.key} className="r5-calc-row">
-                <span>{p.name.padEnd(11)} × 0.25</span>
-                <span>= {(p.score * 0.25).toFixed(2)}</span>
+
+        {/* Two-column calculation breakdown */}
+        <div className="r5-dual">
+          <div className="r5-col">
+            <div className="r5-col-head">
+              <span className="r5-col-eyebrow">Equal-Weighted</span>
+              <span className="r5-col-tag">Primary · academic baseline</span>
+            </div>
+            <div className="r5-calc">
+              {kpi.pillars.map((p) => (
+                <div key={p.key} className="r5-calc-row">
+                  <span>{p.name} × 0.25</span>
+                  <span>= {(p.score * 0.25).toFixed(2)}</span>
+                </div>
+              ))}
+              <div className="r5-calc-div" />
+              <div className="r5-calc-row tot">
+                <span>Overall</span>
+                <span>= {eqScore.toFixed(2)}</span>
               </div>
-            ))}
-            <div className="r5-calc-div" />
-            <div className="r5-calc-row tot">
-              <span>Overall Score</span>
-              <span>= {scores.overall.toFixed(2)}</span>
             </div>
           </div>
-          <p className="r5-research">
-            Equal weights: validated IEM baseline. Business-model weighting is open research (RQ5).
-          </p>
+
+          {showContextual ? (
+            <div className="r5-col">
+              <div className="r5-col-head">
+                <span className="r5-col-eyebrow">Contextual</span>
+                <span className="r5-col-tag">
+                  Business model: <b>{business_model || "—"}</b>
+                </span>
+              </div>
+              <div className="r5-calc">
+                {kpi.pillars.map((p) => {
+                  const w = Number(contextual_weights[p.key] ?? 0.25);
+                  return (
+                    <div key={p.key} className="r5-calc-row">
+                      <span>{p.name} × {w.toFixed(2)}</span>
+                      <span>= {(p.score * w).toFixed(2)}</span>
+                    </div>
+                  );
+                })}
+                <div className="r5-calc-div" />
+                <div className="r5-calc-row tot">
+                  <span>Overall</span>
+                  <span>= {ctxScore.toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="r5-col r5-col--note">
+              <div className="r5-col-head">
+                <span className="r5-col-eyebrow">Contextual</span>
+                <span className="r5-col-tag">Adjusted for business model</span>
+              </div>
+              <p className="r5-col-empty">
+                Business-model weighting produced the same overall score as the equal-weighted baseline
+                {business_model ? ` for ${business_model}` : ""}. This is intentional — it signals balanced
+                pillar performance relative to the business model's demands.
+              </p>
+            </div>
+          )}
         </div>
+
+        <p className="r5-research">
+          Equal weights: validated PPDT baseline (Hannila et al., 2024). Business-model weighting follows the CODP-derived weight matrix (Hannila 2024; Tolonen 2015; Trentin 2022).
+        </p>
       </div>
     </section>
   );

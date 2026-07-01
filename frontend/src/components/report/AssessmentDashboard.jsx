@@ -233,7 +233,7 @@ const BottleneckCard = ({ data }) => {
   const explanation = composeBottleneckExplanation(data, pillarKey);
 
   return (
-    <article className="bn-card bn-card--hero" data-testid="dashboard-card-bottleneck">
+    <article className="bn-card" data-testid="dashboard-card-bottleneck">
       <CardHead
         icon={AlertTriangle}
         eyebrow="Bottleneck"
@@ -249,17 +249,17 @@ const BottleneckCard = ({ data }) => {
             <span className="bn-bn-pillar-meta"> · {LEVEL_TITLES[level]} · {score.toFixed(1)} / 5.0</span>
           </h3>
           <p className="bn-bn-explanation" data-testid="bottleneck-insight">{explanation}</p>
-          <div className="bn-bn-risks-wrap">
-            <div className="bn-bn-risks" data-testid="bottleneck-risks">
-              <StatusChip label="Profit leakage" severity="critical" />
-              <StatusChip label="Strategic drift" severity="warning" />
-              <StatusChip label="Decision latency" severity="warning" />
-            </div>
-            <p className="bn-bn-risks-note">
-              Together, these capture how the bottleneck weakens value capture, strategic clarity, and decision speed.
-            </p>
-          </div>
         </div>
+      </div>
+      <div className="bn-bn-risks-wrap">
+        <div className="bn-bn-risks" data-testid="bottleneck-risks">
+          <StatusChip label="Profit leakage" severity="critical" />
+          <StatusChip label="Strategic drift" severity="warning" />
+          <StatusChip label="Decision latency" severity="warning" />
+        </div>
+        <p className="bn-bn-risks-note">
+          Together, these capture how the bottleneck weakens value capture, strategic clarity, and decision speed.
+        </p>
       </div>
     </article>
   );
@@ -627,38 +627,30 @@ const PortfolioRenewalRadarCard = ({ rows }) => {
       : "Contained exposure";
   const exposureSev =
     exposureScore >= 0.7 ? "critical" : exposureScore >= 0.45 ? "warning" : "good";
+  const worst = rows.find((r) => r.level === "High");
 
   return (
-    <article className="bn-card bn-card--hero" data-testid="dashboard-card-renewal-radar">
+    <article className="bn-card" data-testid="dashboard-card-renewal-radar">
       <CardHead
         icon={Radar}
         eyebrow="Portfolio Renewal Radar"
         chip={<StatusChip label={exposureLabel} severity={exposureSev} />}
         sub="Holistic exposure pattern across the product renewal lifecycle."
       />
-      <div className="bn-radar-body">
-        <div className="bn-radar-stage">
-          <PortfolioRenewalRadar rows={rows} accent="#0891B2" />
-        </div>
-        <div className="bn-radar-legend">
-          <div className="bn-radar-legend-head">Lifecycle decision exposure</div>
-          <ul className="bn-radar-legend-list">
-            {rows.map((r) => {
-              const sev = severityFromImpact(r.level);
-              return (
-                <li key={r.key} className="bn-radar-legend-row">
-                  <span className="bn-radar-dot" style={{ background: SEVERITY_COLORS[sev] }} />
-                  <span className="bn-radar-legend-label">{r.label}</span>
-                  <StatusChip label={r.level} severity={sev} />
-                </li>
-              );
-            })}
-          </ul>
-          <div className="bn-radar-legend-scale">
-            <span><i className="bn-dot bn-dot--good" /> Low</span>
-            <span><i className="bn-dot bn-dot--warning" /> Medium</span>
-            <span><i className="bn-dot bn-dot--critical" /> High</span>
+      <div className="bn-radar-stage">
+        <PortfolioRenewalRadar rows={rows} accent="#0891B2" />
+      </div>
+      <div className="bn-radar-footer">
+        {worst && (
+          <div className="bn-radar-callout">
+            <span className="bn-radar-callout-label">Most exposed</span>
+            <StatusChip label={worst.label} severity="critical" />
           </div>
+        )}
+        <div className="bn-radar-legend-scale">
+          <span><i className="bn-dot bn-dot--good" /> Low</span>
+          <span><i className="bn-dot bn-dot--warning" /> Medium</span>
+          <span><i className="bn-dot bn-dot--critical" /> High</span>
         </div>
       </div>
       <CardFooter>
@@ -669,24 +661,20 @@ const PortfolioRenewalRadarCard = ({ rows }) => {
 };
 
 /* =====================================================================
- * Section wrapper — 3-row responsive grid
+ * Section wrapper — uniform 2×2 grid (all cards same width)
+ * Row 1 — Bottleneck · Portfolio Renewal Radar
+ * Row 2 — Preconditions · Portfolio Decision Impact
  * ===================================================================== */
 
 export const AssessmentDashboardSection = ({ data }) => {
   const decisionRows = computeDecisionRows(data);
   return (
     <section className="bn-dashboard" data-testid="report-assessment-dashboard">
-      <div className="bn-grid-v2">
-        <div className="bn-row bn-row--full">
-          <BottleneckCard data={data} />
-        </div>
-        <div className="bn-row bn-row--half">
-          <PreconditionsCard data={data} />
-          <PortfolioDecisionImpactCard data={data} rows={decisionRows} />
-        </div>
-        <div className="bn-row bn-row--full">
-          <PortfolioRenewalRadarCard rows={decisionRows} />
-        </div>
+      <div className="bn-grid-2x2">
+        <BottleneckCard data={data} />
+        <PortfolioRenewalRadarCard rows={decisionRows} />
+        <PreconditionsCard data={data} />
+        <PortfolioDecisionImpactCard data={data} rows={decisionRows} />
       </div>
     </section>
   );
