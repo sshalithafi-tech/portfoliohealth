@@ -45,7 +45,9 @@ import chat_service  # reuse the existing Anthropic/Emergent client plumbing
 
 logger = logging.getLogger(__name__)
 
-MODEL_NAME = chat_service.MODEL_NAME  # claude-sonnet-4-5-20250929, unchanged
+MODEL_NAME = "claude-sonnet-4-5-20250929"  # report-generation model — intentionally
+# independent of chat_service.CHAT_MODEL_NAME so upgrading the assessment
+# chat model never silently changes the report-generation model.
 
 MAX_TOKENS_A = 4500
 MAX_TOKENS_B = 6000

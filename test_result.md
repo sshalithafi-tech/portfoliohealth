@@ -430,9 +430,21 @@ LLM call (previously ~16000 max_tokens in one shot, causing 4-5 min report gener
 ##         -agent: "testing"
 ##         -comment: "✓ ALL TESTS PASSED. Comprehensive responsive layout testing completed using full absolute URLs. DESKTOP (1920px & 1440px): ✓ Bottleneck + Portfolio Renewal Radar cards render side-by-side with EQUAL widths (diff: 0.0px at both resolutions). ✓ Preconditions + Portfolio Decision Impact cards render side-by-side with EQUAL widths (diff: 0.0px). ✓ All card rows share identical left/right boundaries - perfect horizontal alignment (diff: 0.0px). ✓ bottleneck-severity element found with text 'BOTTLENECK SEVERITY High'. ✓ Bottleneck card height now comparable to Radar card (both in same row). ✓ Improvement Roadmap Phase 1/2/3 render as 3 equal-width columns in single row (diff: 0.0px). MOBILE (375px & 320px): ✓ All dashboard cards (Bottleneck, Radar, Preconditions, Decision Impact) collapse into SINGLE column, full-width, stacked vertically. ✓ NO horizontal page scroll at either width (scrollWidth == clientWidth). ✓ All text readable, nothing cut off or overlapping. ✓ Radar SVG chart fits fully within card boundary without horizontal overflow. ✓ Roadmap phases stack vertically in single column. DESKTOP NAV (1920px landing page): ✓ Logo 'PortfolioHealth Advisor' visible. ✓ Home, Research & Theory, Maturity Levels, The Framework, Start Full Assessment all visible in one row (y-diff: 9.0px). ✓ Hamburger icon NOT visible (correct for desktop). Minor: 'Sign In' link not found by text selector (may use different text or be in a different location, but CTA button present). Screenshots captured at all breakpoints confirm correct responsive behavior."
 
+## backend:
+##   - task: "Model upgrade: assessment chat engine to Claude Sonnet 5 (report generation kept on Sonnet 4.5)"
+##     implemented: true
+##     working: "NA"
+##     file: "chat_service.py, report_sections.py"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: false
+##     status_history:
+##         -working: "NA"
+##         -agent: "main"
+##         -comment: "Pure model-identifier swap, no prompt/scoring/DBI/report-schema changes. Corrected user's assumption: codebase was actually on Claude Sonnet 4.5 (claude-sonnet-4-5-20250929), not 4.6. Verified claude-sonnet-5 is a real, accessible identifier via 3 live minimal API calls directly against the user's ANTHROPIC_API_KEY (not conversation-flow testing, per explicit user constraint): (1) basic call succeeds, (2) max_tokens=16000 (existing ceiling) accepted unchanged, (3) system-as-list-of-blocks with cache_control ephemeral works identically (usage response returns cache_creation/cache_read fields) — no request-shape changes required. Decoupled the previously-shared MODEL_NAME constant: chat_service.py now has its own CHAT_MODEL_NAME='claude-sonnet-5' (used only by call_llm_with_history/call_llm_greeting, i.e. /api/assessments/{id}/start and the conversational turns of /api/assessments/{id}/chat); report_sections.py now has its own independent MODEL_NAME='claude-sonnet-4-5-20250929' (hardcoded, no longer imported from chat_service) so report-generation specialist calls are unaffected. Deterministic backend/tests/test_report_fixes.py re-verified passing (unaffected, no LLM calls). Backend restarted clean. Per explicit user instruction, did NOT run a full test assessment / conversation-flow test."
+
 ## test_plan:
-##   current_focus:
-##     - "Results dashboard responsive layout (desktop/tablet/mobile)"
+##   current_focus: []
 ##   stuck_tasks: []
 ##   test_all: false
 ##   test_priority: "high_first"

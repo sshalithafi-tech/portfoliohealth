@@ -23,7 +23,13 @@ load_dotenv(Path(__file__).parent / ".env")
 logger = logging.getLogger(__name__)
 
 MODEL_PROVIDER = "anthropic"
-MODEL_NAME = "claude-sonnet-4-5-20250929"
+# Assessment chat / interview model (the live PPDT conversational engine —
+# /api/assessments/{id}/start and the conversational turns of
+# /api/assessments/{id}/chat). Upgraded to Claude Sonnet 5.
+# NOTE: this constant is intentionally NOT shared with report_sections.py —
+# report generation keeps its own independent model constant so upgrading
+# the chat model never silently changes the report-generation model.
+CHAT_MODEL_NAME = "claude-sonnet-5"
 MAX_TOKENS = 16000
 
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
@@ -203,7 +209,7 @@ async def _call_anthropic_direct(system_message: str, history: list, user_messag
     import asyncio
     def _do():
         return _anthropic_client.messages.create(
-            model=MODEL_NAME,
+            model=CHAT_MODEL_NAME,
             max_tokens=MAX_TOKENS,
             system=system_message,
             messages=messages,
@@ -223,7 +229,7 @@ async def _call_emergent(session_id: str, system_message: str, history: list, us
             system_message=system_message,
             initial_messages=initial,
         )
-        .with_model(MODEL_PROVIDER, MODEL_NAME)
+        .with_model(MODEL_PROVIDER, CHAT_MODEL_NAME)
         .with_params(max_tokens=MAX_TOKENS)
     )
     return await chat.send_message(UserMessage(text=user_message))
