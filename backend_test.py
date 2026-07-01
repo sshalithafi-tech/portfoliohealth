@@ -26,7 +26,7 @@ import json
 from datetime import datetime
 
 # Backend URL from frontend/.env
-BASE_URL = "https://3b9051c6-d242-4cb5-8c23-c2efa7f58051.preview.emergentagent.com/api"
+BASE_URL = "https://premium-report-hub.preview.emergentagent.com/api"
 
 # Test credentials from /app/memory/test_credentials.md
 EMAIL = "admin@portfoliohealth.fi"

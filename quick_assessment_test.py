@@ -10,7 +10,7 @@ import json
 from datetime import datetime
 
 class QuickAssessmentTester:
-    def __init__(self, base_url="https://ai-assessment-check.preview.emergentagent.com"):
+    def __init__(self, base_url="https://premium-report-hub.preview.emergentagent.com"):
         self.base_url = base_url
         self.session = requests.Session()
         self.session.headers.update({'Content-Type': 'application/json'})

@@ -2,7 +2,7 @@
 import requests
 import json
 
-BASE_URL = "https://3b9051c6-d242-4cb5-8c23-c2efa7f58051.preview.emergentagent.com/api"
+BASE_URL = "https://premium-report-hub.preview.emergentagent.com/api"
 ADMIN_EMAIL = "admin@portfoliohealth.fi"
 ADMIN_PASSWORD = "Admin@12345"
 
