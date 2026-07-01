@@ -12,7 +12,7 @@ import uuid
 from typing import Dict, Any, Optional
 
 # Configuration
-BACKEND_URL = "https://4ad4b2b3-a136-4aa5-a519-c697503c7614.preview.emergentagent.com/api"
+BACKEND_URL = "https://ai-assessment-check.preview.emergentagent.com/api"
 ADMIN_EMAIL = "admin@portfoliohealth.fi"
 ADMIN_PASSWORD = "Admin@12345"
 

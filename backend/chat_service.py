@@ -215,7 +215,13 @@ async def _call_anthropic_direct(system_message: str, history: list, user_messag
             messages=messages,
         )
     response = await asyncio.to_thread(_do)
-    return response.content[0].text
+    # Claude Sonnet 5 supports Extended Thinking and may return multiple content blocks:
+    # - type="text" blocks contain the actual response text
+    # - type="thinking" blocks contain reasoning (should be ignored for final output)
+    # - type="redacted_thinking" blocks are safety-filtered (should be ignored)
+    # Extract and join all text blocks, ignoring thinking blocks.
+    text_blocks = [block.text for block in response.content if block.type == "text"]
+    return "".join(text_blocks) if text_blocks else ""
 
 
 async def _call_emergent(session_id: str, system_message: str, history: list, user_message: str) -> str:
