@@ -3,14 +3,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../App";
 import LogoMark from "../components/LogoMark";
 import Reveal from "../components/landing/Reveal";
-import HeroCarousel from "../components/landing/HeroCarousel";
 import NavDropdown from "../components/landing/NavDropdown";
 import PhaseCard from "../components/landing/PhaseCard";
 import {
   ClipboardCheck,
   Target,
   Layers,
-  Map as MapIcon,
   Clock,
   ArrowRight,
   ArrowDown,
@@ -138,93 +136,8 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
           </div>
         </div>
 
-        <div className="ph-hero-right ph-animate-in" style={{ "--i": 3 }}>
-          <HeroCarousel />
-        </div>
       </div>
     </section>
-
-    {/* H1.5 — Why This Matters */}
-    <Reveal as="section" id="why-this-matters">
-      <div className="ph-inner">
-        <div className="ph-sec-head">
-          <span className="ph-section-label">Why This Matters</span>
-          <h2>The gap isn't ambition. It's decision capability.</h2>
-        </div>
-        <div className="ph-why-grid">
-          {[
-            {
-              icon: <Search size={20} />,
-              title: "Most decisions run on incomplete data",
-              body: "Without a data pillar strong enough to trust, portfolio calls default to whoever argues loudest in the room — not what the numbers actually show.",
-            },
-            {
-              icon: <AlertTriangle size={20} />,
-              title: "One weak pillar stalls the whole portfolio",
-              body: "People, Process, Data and Technology are interdependent. A single lagging pillar becomes the ceiling on every decision the other three enable.",
-            },
-            {
-              icon: <ShieldCheck size={20} />,
-              title: "Governance gaps compound over time",
-              body: "Undocumented ownership and audit-trail-free decisions don't stay small — every quarter without governance makes the eventual fix more expensive.",
-            },
-          ].map((c, i) => (
-            <Reveal as="div" key={c.title} delay={i * 90} className="ph-glass-card ph-why-card">
-              <div className="ph-icon-badge">{c.icon}</div>
-              <h3>{c.title}</h3>
-              <p>{c.body}</p>
-            </Reveal>
-          ))}
-        </div>
-      </div>
-    </Reveal>
-
-    {/* H2 — What you receive */}
-    <Reveal as="section">
-      <div className="ph-inner">
-        <div className="ph-sec-head">
-          <span className="ph-section-label">What you receive</span>
-          <h2>One conversation. A clear, actionable picture.</h2>
-          <p className="ph-sub">
-            A 45–60 minute structured dialogue that becomes a consultant-grade
-            portfolio maturity report.
-          </p>
-        </div>
-        <div className="ph-three-grid">
-          {[
-            {
-              tag: "01",
-              icon: <Target size={28} />,
-              title: "Dual Maturity Score",
-              body: "Your maturity is expressed as two complementary values: (1) an equal-weighted score — all four PPDT pillars at 25% each, the academically grounded baseline consistent with the PPDT balance principle (Hannila, Salonen & Vierimaa, 2024); and (2) a contextual score — pillar weights adjusted for your business model (Bulk, Standard, CTO, CETO, ETO) using Customer Order Decoupling Point logic.",
-            },
-            {
-              tag: "02",
-              icon: <AlertTriangle size={28} />,
-              title: "Bottleneck Identification",
-              body: "The lowest-scoring pillar is identified as your primary bottleneck — the dimension that most constrains real-world portfolio decision quality regardless of strength in the other three pillars (Hannila et al., 2022).",
-            },
-            {
-              tag: "03",
-              icon: <MapIcon size={28} />,
-              title: "Phased Improvement Roadmap",
-              body: "Three-phase plan (0–3 months, 3–12 months, 12+ months) with actions tied to each pillar, sequenced bottleneck-first. Roadmap logic: Hannila et al. (2020), JEIM, 33(1), 214–237.",
-            },
-          ].map((c, i) => (
-            <div key={c.tag} className="ph-glass-card ph-step-card ph-animate-in" style={{ "--i": i + 1 }}>
-              <span className="ph-step-tag">{c.tag}</span>
-              {c.icon}
-              <h3>{c.title}</h3>
-              <p>{c.body}</p>
-            </div>
-          ))}
-        </div>
-        <div className="ph-section-footer">
-          Hannila, Salonen &amp; Vierimaa (2024) · Hannila et al. (2020, 2022) ·
-          IEM research group, University of Oulu.
-        </div>
-      </div>
-    </Reveal>
 
     {/* H3 — Four Pillars (navy) */}
     <Reveal as="section" className="ph-dark-section" id="framework">
@@ -547,7 +460,9 @@ const TheoryPage = ({ ctaTo, onJumpToHomeCta }) => (
   <main className="ph-page" id="page-theory">
     {/* T1 — Hero */}
     <section className="ph-hero" style={{ minHeight: "55vh" }}>
-      <div className="ph-hero-bg" />
+      <div className="ph-hero-bg">
+        <div className="ph-hero-bg-image" aria-hidden="true" />
+      </div>
       <div className="ph-inner">
         <div className="ph-hero-badge">
           <span className="ph-pulse-dot" />

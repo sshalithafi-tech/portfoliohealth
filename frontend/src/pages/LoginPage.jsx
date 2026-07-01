@@ -8,12 +8,15 @@ import LogoMark from "../components/LogoMark";
 /* Premium brand panel shared by Login + Register */
 const BrandPanel = ({ tagline, points }) => (
   <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-    {/* base gradient */}
+    {/* premium background — same textured image used across the homepage */}
     <div
       className="absolute inset-0"
       style={{
-        background:
-          "linear-gradient(155deg, #091622 0%, #0C1B2A 45%, #12293D 100%)",
+        backgroundImage:
+          "linear-gradient(155deg, rgba(9,22,34,0.94) 0%, rgba(12,27,42,0.90) 45%, rgba(18,41,61,0.88) 100%), url('https://customer-assets.emergentagent.com/job_ai-assessment-check/artifacts/eurm3j65_generated-image%20%289%29.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
       }}
     />
     {/* cyan glow */}
@@ -22,15 +25,6 @@ const BrandPanel = ({ tagline, points }) => (
       style={{
         background:
           "radial-gradient(ellipse 55% 45% at 22% 22%, rgba(8,145,178,0.35) 0%, transparent 62%), radial-gradient(ellipse 50% 40% at 85% 90%, rgba(103,232,249,0.16) 0%, transparent 60%)",
-      }}
-    />
-    {/* subtle grid */}
-    <div
-      className="absolute inset-0 opacity-[0.06] pointer-events-none"
-      style={{
-        backgroundImage:
-          "linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px)",
-        backgroundSize: "44px 44px",
       }}
     />
     <div className="relative z-10 flex flex-col justify-between px-14 py-16 w-full">

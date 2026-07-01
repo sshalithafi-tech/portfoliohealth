@@ -534,7 +534,13 @@
 
 /* Pillars (navy) */
 .ph-site .ph-dark-section {
-  background: var(--navy);
+  background-color: var(--navy);
+  background-image:
+    linear-gradient(rgba(8, 16, 25, 0.87), rgba(8, 16, 25, 0.87)),
+    url('https://customer-assets.emergentagent.com/job_ai-assessment-check/artifacts/eurm3j65_generated-image%20%289%29.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   position: relative;
   overflow: hidden;
 }
@@ -676,7 +682,13 @@
 
 /* CTA */
 .ph-site .ph-cta-section {
-  background: var(--navy);
+  background-color: var(--navy);
+  background-image:
+    linear-gradient(rgba(8, 16, 25, 0.90), rgba(8, 16, 25, 0.90)),
+    url('https://customer-assets.emergentagent.com/job_ai-assessment-check/artifacts/eurm3j65_generated-image%20%289%29.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -1072,19 +1084,14 @@
   }
 }
 
-/* ---- Hero two-column layout ---- */
+/* ---- Hero layout (single column, left-aligned — visual card removed;
+   kept left-aligned rather than centered because the hero background
+   gradient's dark/legible zone is on the left side of the image) ---- */
 .ph-site .ph-hero-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-  gap: var(--space-2xl);
-  align-items: center;
+  grid-template-columns: 1fr;
 }
-.ph-site .ph-hero-left { min-width: 0; }
-.ph-site .ph-hero-right { min-width: 0; }
-@media (max-width: 1024px) {
-  .ph-site .ph-hero-grid { grid-template-columns: 1fr; }
-  .ph-site .ph-hero-right { order: -1; max-width: 480px; margin: 0 auto var(--space-lg); }
-}
+.ph-site .ph-hero-left { min-width: 0; max-width: 640px; }
 
 /* ---- Hero visual carousel ---- */
 .ph-site .ph-carousel-wrap {
