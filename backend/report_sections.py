@@ -325,6 +325,34 @@ def _extract_json_block(text: str) -> Optional[dict]:
         return None
 
 
+async def _call_specialist_with_retry(*, label: str, static_block: str, dynamic_block: str,
+                                       schema_block: str, max_tokens: int, attempts: int = 2) -> Optional[dict]:
+    """Call one specialist section, retrying once (fresh call, no cache of
+    the failure) if the response isn't parseable JSON \u2014 LLM output is
+    occasionally malformed (stray comma, unescaped quote). Cheap to retry
+    since each specialist call is small/fast relative to the old monolithic
+    call. Returns None only if every attempt fails.
+    """
+    last_error = None
+    for attempt in range(1, attempts + 1):
+        try:
+            text = await _call_specialist(static_block=static_block, dynamic_block=dynamic_block,
+                                           schema_block=schema_block, max_tokens=max_tokens)
+        except Exception as exc:
+            last_error = exc
+            logger.error("report_sections: call %s attempt %d/%d raised: %s", label, attempt, attempts, exc)
+            continue
+        parsed = _extract_json_block(text)
+        if parsed:
+            if attempt > 1:
+                logger.info("report_sections: call %s succeeded on retry attempt %d", label, attempt)
+            return parsed
+        last_error = "no parseable JSON in response"
+        logger.warning("report_sections: call %s attempt %d/%d returned unparseable JSON", label, attempt, attempts)
+    logger.error("report_sections: call %s failed after %d attempts (last error: %s)", label, attempts, last_error)
+    return None
+
+
 # ---------------------------------------------------------------------------
 # Schema fragments for each concurrent call (verbatim field shapes from the
 # original monolithic schema \u2014 no field renamed, no field dropped).
@@ -441,6 +469,58 @@ _ALLOWED_KEYS_B = {
 }
 _ALLOWED_KEYS_C = {"benchmark_context", "consultant_note"}
 
+# Fallback defaults so the merged report ALWAYS has every field from the
+# original schema, even if a specialist call fails every retry (network
+# error, persistently malformed JSON, etc). Keeps the schema contract intact
+# for pdf_builder.py / normalise_report_weights / the frontend.
+_FIELD_DEFAULTS = {
+    "equal_weighted_score": 0.0,
+    "contextual_score": 0.0,
+    "contextual_weights": {"people": 0.25, "process": 0.25, "data": 0.25, "technology": 0.25},
+    "weights_raw": {"people": 0.25, "process": 0.25, "data": 0.25, "technology": 0.25},
+    "weights_normalised": {"people": 0.25, "process": 0.25, "data": 0.25, "technology": 0.25},
+    "level_names": {"people": "", "process": "", "data": "", "technology": "", "overall": ""},
+    "dimension_summaries": {"people": "", "process": "", "data": "", "technology": ""},
+    "pillar_interpretations": {"people": "", "process": "", "data": "", "technology": ""},
+    "pillar_interpretation_short": {"people": "", "process": "", "data": "", "technology": ""},
+    "failure_pattern_name": "",
+    "failure_pattern_narrative": "",
+    "financial_consequence": {"cost_category": "", "consequence_narrative": "", "metric_framing": ""},
+    "ninety_day_projection": {
+        "score_current": 0.0, "score_projected": 0.0, "score_delta": 0.0,
+        "bottleneck_level_current": "", "bottleneck_level_projected": "",
+        "what_becomes_possible": "", "comparable_outcome": "",
+    },
+    "governance_observations": {"people": "", "process": "", "data": "", "technology": ""},
+    "governance_assessment": "",
+    "governance_signal_summary": [],
+    "management_commitment": "Medium",
+    "management_commitment_assessment": "",
+    "assessment_reliability": {"confidence": "Medium", "factors": []},
+    "decision_vulnerability_ratings": {"discontinuation": "Medium", "new_launch": "Medium",
+                                       "product_change": "Medium", "portfolio_investment": "Medium"},
+    "decision_vulnerability": "",
+    "key_findings": [],
+    "critical_gaps": [],
+    "roadmap": {
+        "immediate": {"action_summary": "", "actions": "", "pillar_focus": "", "governance_milestone": "",
+                      "management_required": "", "expected_gain": "", "timeframe": "0\u20133 months"},
+        "short_term": {"action_summary": "", "actions": "", "pillar_focus": "", "governance_milestone": "",
+                       "management_required": "", "expected_gain": "", "timeframe": "3\u201312 months"},
+        "strategic": {"action_summary": "", "actions": "", "pillar_focus": "", "governance_milestone": "",
+                      "management_required": "", "expected_gain": "", "timeframe": "12+ months"},
+    },
+    "first_action": {
+        "headline": "", "description": "", "expected_outcome": "", "who_owns_it": "",
+        "time_to_implement": "",
+        "preconditions_met": {"p1_product_structure": "partial", "p2_product_classification": "partial",
+                               "p3_data_model": "partial", "p4_data_governance": "partial",
+                               "p5_business_it": "partial"},
+    },
+    "benchmark_context": "",
+    "consultant_note": "",
+}
+
 STATIC_CLOSING_STATEMENT = (
     "Thank you for completing this PPDT Capability Maturity Assessment. This report is based on "
     "the Product Wellbeing framework developed at the University of Oulu (Hannila, Salonen & "
@@ -550,28 +630,32 @@ async def generate_report_sections(seed: dict, chat_history: list) -> dict:
     static_c = "\n\n".join([_SPECIALIST_PERSONA, _WRITING_STYLE_C])
 
     results = await asyncio.gather(
-        _call_specialist(static_block=static_a, dynamic_block=dynamic_common, schema_block=_SCHEMA_A, max_tokens=MAX_TOKENS_A),
-        _call_specialist(static_block=static_b, dynamic_block=dynamic_common, schema_block=_SCHEMA_B, max_tokens=MAX_TOKENS_B),
-        _call_specialist(static_block=static_c, dynamic_block=dynamic_common, schema_block=_SCHEMA_C, max_tokens=MAX_TOKENS_C),
-        return_exceptions=True,
+        _call_specialist_with_retry(label="A (sections 1-7)", static_block=static_a, dynamic_block=dynamic_common,
+                                     schema_block=_SCHEMA_A, max_tokens=MAX_TOKENS_A),
+        _call_specialist_with_retry(label="B (sections 8-12)", static_block=static_b, dynamic_block=dynamic_common,
+                                     schema_block=_SCHEMA_B, max_tokens=MAX_TOKENS_B),
+        _call_specialist_with_retry(label="C (section 13)", static_block=static_c, dynamic_block=dynamic_common,
+                                     schema_block=_SCHEMA_C, max_tokens=MAX_TOKENS_C),
     )
 
     merged = dict(seed)
     call_specs = [("A (sections 1-7)", _ALLOWED_KEYS_A), ("B (sections 8-12)", _ALLOWED_KEYS_B),
                   ("C (section 13)", _ALLOWED_KEYS_C)]
-    for (label, allowed_keys), result in zip(call_specs, results):
-        if isinstance(result, Exception):
-            logger.error("report_sections: specialist call %s failed: %s", label, result)
-            continue
-        parsed = _extract_json_block(result)
+    for (label, allowed_keys), parsed in zip(call_specs, results):
         if parsed:
             merged.update({k: v for k, v in parsed.items() if k in allowed_keys})
         else:
-            logger.error("report_sections: specialist call %s returned no parseable JSON", label)
+            logger.error("report_sections: specialist call %s produced no usable fields "
+                         "(defaults will be used for its section)", label)
 
     merged["closing_statement"] = STATIC_CLOSING_STATEMENT
     merged.setdefault("ready_for_report", True)
     merged.setdefault("status", "completed")
+
+    # Guarantee every field from the original schema exists, even if a call
+    # permanently failed after retries \u2014 keeps the schema contract intact.
+    for key, default in _FIELD_DEFAULTS.items():
+        merged.setdefault(key, default)
 
     merged = _reconcile_roadmap_continuity(merged)
     merged = enforce_verbosity_caps(merged)

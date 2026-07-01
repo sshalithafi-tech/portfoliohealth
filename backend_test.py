@@ -227,6 +227,15 @@ class PortfolioHealthTester:
         if not response:
             return False
         
+        response = self.send_chat_message(
+            "We don't have formal PPM training. People learn on the job. When someone new joins the team, they shadow "
+            "the existing staff for a few weeks. We don't have documented competency requirements for portfolio roles. "
+            "Skills are more about institutional knowledge than formal qualifications.",
+            "Phase (d): PEOPLE - Skills & Training"
+        )
+        if not response:
+            return False
+        
         # Phase (d): Pillar assessment - PROCESS
         response = self.send_chat_message(
             "We have quarterly portfolio reviews, but they're not always well-documented. We discuss performance, "
