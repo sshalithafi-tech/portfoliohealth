@@ -228,6 +228,7 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
 
     {/* H3 — Four Pillars (navy) */}
     <Reveal as="section" className="ph-dark-section" id="framework">
+      <div className="ph-dark-bg-shared" aria-hidden="true" />
       <div className="ph-inner">
         <div className="ph-sec-head dark">
           <span className="ph-section-label dark">The PPDT Framework</span>
@@ -382,39 +383,6 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
           ))}
         </div>
 
-        <div className="ph-dual-formula-grid">
-          <div className="ph-glass-card ph-formula-callout">
-            <span className="ph-formula-tag primary">Primary</span>
-            <h4>Overall Score (Equal-Weighted)</h4>
-            <div className="ph-formula">
-              (People + Process + Data + Technology) ÷ 4
-            </div>
-            <p className="ph-note">
-              Academically grounded, model-neutral baseline consistent with the
-              PPDT balance principle. Provides cross-company comparability.
-              Hannila, Salonen &amp; Vierimaa (2024), Product Wellbeing, Ch. 3.
-            </p>
-          </div>
-          <div className="ph-glass-card ph-formula-callout">
-            <span className="ph-formula-tag secondary">Secondary</span>
-            <h4>Overall Score (Business-Model Adjusted)</h4>
-            <div className="ph-formula">
-              (People × w₁) + (Process × w₂) + (Data × w₃) + (Technology × w₄)
-            </div>
-            <p className="ph-note">
-              Operationally relevant score where pillar weights are set by your
-              business model. CODP framework — Wikner &amp; Rudberg (2004); Haug,
-              Ladeby &amp; Edwards (2009); applied to PPDT by Hannila et al. (2024).
-            </p>
-          </div>
-        </div>
-
-        <p className="ph-match-note">
-          <strong>When they match:</strong> if both scores are identical, your
-          stated strategic priority was ambiguous — the equal-weighted baseline
-          applies without adjustment. This is intentional, not a bug.
-        </p>
-
         <div className="ph-glass-card ph-weights-wrap">
           <h4>Business-model weighting</h4>
           <div className="ph-table-scroll">
@@ -545,81 +513,9 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
       </div>
     </Reveal>
 
-    {/* H5.5 — Product Preview */}
-    <Reveal as="section" className="ph-alt-section" id="product-preview">
-      <div className="ph-inner">
-        <div className="ph-sec-head">
-          <span className="ph-section-label">See It In Action</span>
-          <h2>Your results, in one dashboard.</h2>
-          <p className="ph-sub">
-            Every assessment resolves into a single, board-ready view: dual
-            scores, the named bottleneck, and a phased roadmap — no
-            spreadsheets, no guesswork.
-          </p>
-        </div>
-        <div className="ph-device-frame">
-          <div className="ph-device-chrome">
-            <span className="ph-device-dot" /><span className="ph-device-dot" /><span className="ph-device-dot" />
-            <span className="ph-device-url">portfoliohealth.fi/assessments/report</span>
-          </div>
-          <div className="ph-device-body">
-            <div className="ph-device-row">
-              {[
-                { label: "People", val: 3.2 },
-                { label: "Process", val: 2.4 },
-                { label: "Data", val: 2.8 },
-                { label: "Technology", val: 1.6 },
-              ].map((p) => (
-                <div className="ph-device-chip" key={p.label}>
-                  <span className="ph-device-chip-label">{p.label}</span>
-                  <span className="ph-device-chip-val">{p.val.toFixed(1)}</span>
-                </div>
-              ))}
-            </div>
-            <div className="ph-device-callout">
-              <AlertTriangle size={16} />
-              <span><strong>Bottleneck: Technology</strong> — Decision Vulnerability: Critical</span>
-            </div>
-            <div className="ph-device-roadmap">
-              {["Immediate", "Short-term", "Strategic"].map((phase) => (
-                <div className="ph-device-roadmap-phase" key={phase}>{phase}</div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </Reveal>
-
-    {/* H5.75 — Before / After */}
-    <Reveal as="section" id="before-after">
-      <div className="ph-inner">
-        <div className="ph-sec-head">
-          <span className="ph-section-label">The Shift</span>
-          <h2>From gut feel to a governed, prioritized plan.</h2>
-        </div>
-        <div className="ph-compare-grid">
-          <div className="ph-compare-panel ph-compare-before">
-            <span className="ph-compare-tag">Before</span>
-            <ul>
-              <li><XCircle size={18} />Gut-feel decisions, no shared evidence base</li>
-              <li><XCircle size={18} />No visibility into which pillar is holding you back</li>
-              <li><XCircle size={18} />No governance trail — decisions undocumented</li>
-            </ul>
-          </div>
-          <div className="ph-compare-panel ph-compare-after">
-            <span className="ph-compare-tag">After</span>
-            <ul>
-              <li><CheckCircle2 size={18} />One weighted score, equal-weighted and business-model adjusted</li>
-              <li><CheckCircle2 size={18} />A named bottleneck pillar, ranked by decision impact</li>
-              <li><CheckCircle2 size={18} />A 90-day roadmap with phases and owners</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </Reveal>
-
     {/* H6 — CTA */}
     <Reveal as="section" className="ph-cta-section" id="cta">
+      <div className="ph-dark-bg-shared" aria-hidden="true" />
       <div className="ph-inner">
         <span className="ph-section-label dark">Ready to begin?</span>
         <h2>Find out exactly where your portfolio management stands — and what to do next.</h2>
@@ -1057,17 +953,53 @@ const LandingPage = () => {
   const [page, setPage] = useState("home");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [resourcesOpen, setResourcesOpen] = useState(false);
+  const [navHidden, setNavHidden] = useState(false);
 
   const ctaTo = user ? "/dashboard" : "/register";
 
   // Smooth-scroll to top whenever page changes
   useEffect(() => { window.scrollTo({ top: 0, behavior: "smooth" }); }, [page]);
 
+  // Auto-hide the nav bar when scrolling down, reveal it again when scrolling
+  // up OR when the mouse hovers near the top of the viewport.
+  useEffect(() => {
+    let lastY = window.scrollY;
+    let ticking = false;
+    const HIDE_AFTER = 120; // px scrolled before we start hiding
+
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const y = window.scrollY;
+        if (y <= HIDE_AFTER) {
+          setNavHidden(false);
+        } else if (y > lastY) {
+          setNavHidden(true); // scrolling down
+        } else if (y < lastY) {
+          setNavHidden(false); // scrolling up
+        }
+        lastY = y;
+        ticking = false;
+      });
+    };
+    const onMouseMove = (e) => {
+      if (e.clientY <= 64) setNavHidden(false);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("mousemove", onMouseMove);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("mousemove", onMouseMove);
+    };
+  }, []);
+
   // Lock body scroll while the mobile menu is open, and always close the
   // menu on escape — standard slide-in menu behavior.
   useEffect(() => {
     document.body.style.overflow = mobileMenuOpen ? "hidden" : "";
     if (!mobileMenuOpen) setResourcesOpen(false);
+    if (mobileMenuOpen) setNavHidden(false);
     const onKey = (e) => { if (e.key === "Escape") setMobileMenuOpen(false); };
     window.addEventListener("keydown", onKey);
     return () => {
@@ -1091,7 +1023,7 @@ const LandingPage = () => {
 
   return (
     <div className="ph-site">
-      <nav className="ph-nav" aria-label="Primary">
+      <nav className={`ph-nav${navHidden ? " ph-nav-hidden" : ""}`} aria-label="Primary">
         <div
           className="ph-brand"
           onClick={showHome}
