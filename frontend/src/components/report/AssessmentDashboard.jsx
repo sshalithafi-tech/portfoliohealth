@@ -232,6 +232,17 @@ const BottleneckCard = ({ data }) => {
   const label = PILLAR_LABELS[pillarKey] || pillarKey;
   const explanation = composeBottleneckExplanation(data, pillarKey);
 
+  // Decision Bottleneck Index — computed by the backend from
+  // scores × contextual_weights. Rendered as a compact secondary chip so it
+  // sits alongside the classical bottleneck (lowest-scoring pillar) without
+  // competing with it. Falls back gracefully when the report predates DBI or
+  // uses equal weights (contextual == equal → DBI is null).
+  const dbi = data?.decision_bottleneck_index || null;
+  const dbiSameAsBottleneck = dbi && dbi.pillar === pillarKey;
+  const dbiSeverity = dbi
+    ? dbi.direction === "above-baseline" ? "good" : "warning"
+    : "muted";
+
   return (
     <article className="bn-card" data-testid="dashboard-card-bottleneck">
       <CardHead
@@ -248,6 +259,19 @@ const BottleneckCard = ({ data }) => {
             {label}
             <span className="bn-bn-pillar-meta"> · {LEVEL_TITLES[level]} · {score.toFixed(1)} / 5.0</span>
           </h3>
+          {dbi && (
+            <div className="bn-bn-dbi" data-testid="bottleneck-dbi">
+              <span className="bn-bn-dbi-key">DBI</span>
+              <span className="bn-bn-dbi-val">
+                {PILLAR_LABELS[dbi.pillar] || dbi.pillar}
+                <span className="bn-bn-dbi-delta"> ({dbi.gap > 0 ? "+" : ""}{Number(dbi.gap).toFixed(2)})</span>
+              </span>
+              <StatusChip label={dbi.direction.replace("-", " ")} severity={dbiSeverity} />
+              {dbiSameAsBottleneck && (
+                <span className="bn-bn-dbi-note">· matches capability bottleneck</span>
+              )}
+            </div>
+          )}
           <p className="bn-bn-explanation" data-testid="bottleneck-insight">{explanation}</p>
         </div>
       </div>

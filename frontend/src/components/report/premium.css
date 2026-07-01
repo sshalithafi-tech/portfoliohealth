@@ -1339,6 +1339,37 @@
   color: #64748B;
   letter-spacing: 0;
 }
+.ph-report .bn-bn-dbi {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 4px 0 2px;
+}
+.ph-report .bn-bn-dbi-key {
+  font: 700 10px 'JetBrains Mono', 'Inter', monospace;
+  letter-spacing: 0.14em;
+  color: #0891B2;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #ECFEFF;
+  border: 1px solid #A5F3FC;
+}
+.ph-report .bn-bn-dbi-val {
+  font: 600 12.5px/1 'Inter', sans-serif;
+  color: #0F172A;
+}
+.ph-report .bn-bn-dbi-delta {
+  font: 500 11.5px 'JetBrains Mono', ui-monospace, monospace;
+  color: #64748B;
+  letter-spacing: 0.01em;
+  margin-left: 2px;
+}
+.ph-report .bn-bn-dbi-note {
+  font: 500 11px 'Inter';
+  color: #94A3B8;
+  font-style: italic;
+}
 .ph-report .bn-bn-explanation {
   margin: 0;
   font: 500 13px/1.55 'Inter', sans-serif;
