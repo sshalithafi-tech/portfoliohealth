@@ -820,7 +820,7 @@ const ReportFooter = ({ data }) => (
 );
 
 /* ============ Top toolbar (sits above the report doc, in the light app shell) ============ */
-const ReportToolbar = ({ id, onDownload, onPrint, downloading, companyName }) => (
+const ReportToolbar = ({ id, onDownload, onDownloadSummary, onPrint, downloading, downloadingSummary, companyName }) => (
   <div className="print-hide flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
     <div className="flex items-center gap-3">
       <Link
@@ -857,13 +857,24 @@ const ReportToolbar = ({ id, onDownload, onPrint, downloading, companyName }) =>
         <span className="hidden sm:inline">Print</span>
       </button>
       <button
+        onClick={onDownloadSummary}
+        disabled={downloadingSummary}
+        data-testid="export-summary-pdf-btn"
+        title="4-page Executive Summary — verdict, action, roadmap, scorecard"
+        className="flex items-center gap-2 px-4 py-2.5 btn-glass rounded-xl text-sm disabled:opacity-50"
+      >
+        <Download size={16} />
+        {downloadingSummary ? "..." : "Executive Summary"}
+      </button>
+      <button
         onClick={onDownload}
         disabled={downloading}
         data-testid="export-pdf-btn"
+        title="Full 15-page consultant report"
         className="flex items-center gap-2 px-4 py-2.5 btn-liquid rounded-xl text-sm disabled:opacity-50"
       >
         <Download size={16} />
-        {downloading ? "..." : "Export PDF"}
+        {downloading ? "..." : "Full Report"}
       </button>
     </div>
   </div>
@@ -875,6 +886,7 @@ const ReportPage = () => {
   const navigate = useNavigate();
   const { assessment, loading } = useAssessment(id);
   const [downloading, setDownloading] = useState(false);
+  const [downloadingSummary, setDownloadingSummary] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
 
   const regenerateReport = useCallback(async () => {
@@ -915,6 +927,32 @@ const ReportPage = () => {
       toast.error("Failed to download PDF");
     } finally {
       setDownloading(false);
+    }
+  }, [id, assessment?.company_name]);
+
+  const downloadSummaryPDF = useCallback(async () => {
+    setDownloadingSummary(true);
+    try {
+      const response = await axios.get(
+        `${BACKEND_URL}/api/assessments/${id}/summary-pdf`,
+        { responseType: "blob" }
+      );
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute(
+        "download",
+        `PPDT_ExecSummary_${(assessment?.company_name || "Report").replace(/\s+/g, "_")}.pdf`
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      toast.success("Executive Summary downloaded");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to download Executive Summary");
+    } finally {
+      setDownloadingSummary(false);
     }
   }, [id, assessment?.company_name]);
 
@@ -971,8 +1009,10 @@ const ReportPage = () => {
       <ReportToolbar
         id={id}
         onDownload={downloadPDF}
+        onDownloadSummary={downloadSummaryPDF}
         onPrint={printReport}
         downloading={downloading}
+        downloadingSummary={downloadingSummary}
         companyName={data.company}
       />
       <div className="ph-report" data-testid="premium-report">

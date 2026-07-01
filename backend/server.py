@@ -21,6 +21,7 @@ import asyncio
 
 # PDF generation (delegated to pdf_builder)
 from pdf_builder import build_full_assessment_pdf, build_quick_assessment_pdf
+from executive_summary_builder import build_executive_summary_pdf
 
 # Chat / LLM service helpers
 from chat_service import (
@@ -438,13 +439,31 @@ CONVERSATION FLOW
 
 Always follow this sequence. Do not jump phases. Ask 1–2 questions at a time.
 
-PHASE 1 — CONTEXT (5–6 questions)
-Establish: industry, company size, business model (ETO / CTO / MTO / Standard/Bulk), respondent role, and what triggered this assessment. This context shapes how you interpret pillar scores.
+PHASE 1 — CONTEXT (7–9 questions)
+Establish: industry, company size, business model (ETO / CTO / MTO / Standard/Bulk), respondent role, and what triggered this assessment. This context shapes how you interpret pillar scores. Then anchor the assessment with the four questions below — they populate JSON fields the Executive Summary Report depends on.
 
 Example questions:
 - "What industry are you in, and roughly how large is your organisation?"
 - "How would you describe your main business model — engineer-to-order, configure-to-order, or more standardised products?"
 - "What prompted you to do this assessment today?"
+
+Then ask (in order) these four ANCHOR questions — do not skip:
+
+  Q — Primary performance metric
+     "When your leadership evaluates portfolio decisions, what single metric matters most — gross margin, revenue growth, on-time launch rate, share of new-product revenue, or something else?"
+     → Record verbatim into `primary_performance_metric`. If declined or unclear, set to "" (empty string).
+
+  Q — R&D / development budget scale (optional)
+     "Roughly what scale is your annual R&D or product-development spend? An order-of-magnitude answer is fine — nothing precise."
+     → Map the answer into one of: `under 1M`, `1-5M`, `5-20M`, `20-50M`, `above 50M`. If declined or unclear, set `rd_budget_band` to `"not stated"`.
+
+  Q — Recent portfolio decision that did not go as expected
+     "Think of a recent portfolio decision — a discontinuation, launch, product change, or investment — that did NOT go the way you hoped. What was it, and what did you learn?"
+     → Classify the decision into `anchor_decision_type` (one of: `discontinuation`, `new launch`, `product change`, `portfolio investment`, `other`, `none stated`) and capture a 1–2 sentence summary into `anchor_decision_note`.
+
+  Q — Active-product count and clarity of "active"
+     "Roughly how many products or SKUs are currently active in your portfolio — and does everyone in your organisation agree on what counts as 'active'?"
+     → Record the number into `active_products`. Set `active_product_definition_clarity` to `clear` (everyone agrees), `ambiguous` (definition varies by team), or `not stated`.
 
 PHASE 2 — PILLAR ASSESSMENT (2–3 questions each)
 Assess each pillar in order: People → Process → Data → Technology. Probe beyond surface answers. If someone says "we have a system," ask how it is actually used — not just that it exists.
@@ -594,6 +613,50 @@ This rule has two trigger conditions. Apply each one independently whenever its 
 If a trigger condition does not apply (e.g. Process ≥ 3.0, or new_launch risk is Low/Medium), do NOT insert that sentence.
 
 
+MANDATORY RULE 4 — FAILURE PATTERN SELECTION
+
+`failure_pattern_name` MUST be selected based on the DBI bottleneck pillar (or `bottleneck_pillar` when the DBI is not available):
+
+  • People bottleneck    → "Silent Knowledge Risk"
+  • Process bottleneck   → "Salami Effect"
+  • Data bottleneck      → use judgment:
+      - If Process ≥ Level 3 AND the data gap is in the predictive/foresight layer (forward-looking KPIs, portfolio scenarios, renewal signals) → "Business Case Validity Risk"
+      - If Process < Level 3 OR Technology < Level 3, AND the gap is in the visibility layer (product profitability, master data, integrated dashboards) → "Hidden Maintenance Cost"
+  • Technology bottleneck → "Technology Misattribution Risk"
+
+`failure_pattern_narrative` MUST be exactly 3 sentences, no academic language, following this order:
+  Sentence 1 — what is operationally happening NOW as a result of the bottleneck.
+  Sentence 2 — which portfolio decision type is most at risk and why.
+  Sentence 3 — what capability the organisation is MISSING as a result.
+
+
+MANDATORY RULE 5 — 90-DAY PROJECTION
+
+`ninety_day_projection.what_becomes_possible` MUST be framed in the client's stated `primary_performance_metric`. If none was stated, default to portfolio-margin framing.
+
+`ninety_day_projection.score_projected` MUST NEVER exceed a 0.8-point gain over `score_current` within the 90-day window. If your best-case realistic projection is smaller, use the smaller number — do not inflate.
+
+`ninety_day_projection.comparable_outcome` MUST reference a named outcome type sourced to interview evidence or published literature. NEVER invent a percentage or timeframe without a source. Prefer named categories over invented numbers (e.g. "reduced discontinuation cycle time" rather than "37% faster discontinuations").
+
+
+MANDATORY RULE 6 — PRECONDITIONS STATUS
+
+`first_action.preconditions_met` MUST be populated for all five preconditions based on conversational evidence gathered during the assessment:
+
+  • "met"      — clear evidence the precondition is functioning today.
+  • "partial"  — some evidence exists but with gaps, inconsistencies, or manual workarounds.
+  • "not met"  — clear evidence the precondition is absent.
+
+If evidence is insufficient to classify a precondition, default to "partial" AND explicitly note the evidence gap in `critical_gaps` using the mandatory-rule-1 labelling format.
+
+The five precondition keys (Hannila et al. 2020, Hannila 2019) are:
+  p1_product_structure       — mutual understanding of company products
+  p2_product_classification  — commercial + technical product structure and strategic classification
+  p3_data_model              — holistic corporate-level data model
+  p4_data_governance         — data governance and business IT ownership
+  p5_business_it             — business IT support (systems able to surface a live portfolio view)
+
+
 JSON SCHEMA — wrap the JSON in a single fenced code block:
 
 ```json
@@ -642,6 +705,41 @@ JSON SCHEMA — wrap the JSON in a single fenced code block:
   "management_commitment": "Low | Medium | High",
   "management_commitment_assessment": "...",
   "bottleneck_pillar": "People | Process | Data | Technology",
+  "failure_pattern_name": "Silent Knowledge Risk | Salami Effect | Business Case Validity Risk | Hidden Maintenance Cost | Technology Misattribution Risk",
+  "failure_pattern_narrative": "Exactly 3 sentences. Sentence 1: what is operationally happening now as a result of the bottleneck. Sentence 2: which portfolio decision type is most at risk and why. Sentence 3: what capability the organisation is missing as a result. No academic language.",
+  "primary_performance_metric": "As stated by respondent (e.g. gross margin, revenue growth, on-time launch rate). Empty string if not stated.",
+  "rd_budget_band": "under 1M | 1-5M | 5-20M | 20-50M | above 50M | not stated",
+  "anchor_decision_type": "discontinuation | new launch | product change | portfolio investment | other | none stated",
+  "anchor_decision_note": "1–2 sentences describing the recent portfolio decision that did not go as expected. Empty string if none stated.",
+  "active_product_definition_clarity": "clear | ambiguous | not stated",
+  "financial_consequence": {
+    "cost_category": "Named cost category tied to the bottleneck AND business model (e.g. `unrecovered NRE on ETO variants`, `warranty leakage from undetected quality drift`, `inventory obsolescence on end-of-life SKUs`). Never invent a monetary figure.",
+    "consequence_narrative": "2–3 sentences describing the operational consequence in cost-category terms. No fabricated numbers or percentages.",
+    "metric_framing": "One sentence that maps the consequence back to the respondent's stated `primary_performance_metric`. If none stated, frame in portfolio-margin terms."
+  },
+  "ninety_day_projection": {
+    "score_current": 0.0,
+    "score_projected": 0.0,
+    "score_delta": 0.0,
+    "bottleneck_level_current": "Ad Hoc | Developing | Defined | Managed | Predictive",
+    "bottleneck_level_projected": "Ad Hoc | Developing | Defined | Managed | Predictive",
+    "what_becomes_possible": "Exactly 2 sentences framed in the client's stated `primary_performance_metric` (fallback: portfolio margin). Describe what the organisation can DO in 90 days that it cannot do today.",
+    "comparable_outcome": "Named outcome type sourced to interview evidence or published literature. Never invent a percentage or timeframe without a source."
+  },
+  "first_action": {
+    "headline": "6–10 word imperative — the single most-leveraged next move",
+    "description": "2–3 sentences covering: what to do, with whom, by when, what it produces (artefact / meeting / policy).",
+    "expected_outcome": "One sentence describing the specific outcome the action unlocks.",
+    "who_owns_it": "Role titles only (e.g. `Head of Product Portfolio + PMO Lead`). No named individuals.",
+    "time_to_implement": "e.g. `2–4 weeks`",
+    "preconditions_met": {
+      "p1_product_structure": "met | partial | not met",
+      "p2_product_classification": "met | partial | not met",
+      "p3_data_model": "met | partial | not met",
+      "p4_data_governance": "met | partial | not met",
+      "p5_business_it": "met | partial | not met"
+    }
+  },
   "governance_observations": {
     "people": "...",
     "process": "...",
@@ -705,7 +803,7 @@ JSON SCHEMA — wrap the JSON in a single fenced code block:
 
 The ```json block MUST include every top-level field shown above. Never abbreviate the block. Equal-weighted scoring: set equal_weighted_score to the 25%/25%/25%/25% baseline. Set contextual_score using the business model weights from the CONTEXTUAL SCORING block above — these will differ unless the business model is unknown. All level names in `level_names` must be one of: Ad Hoc, Developing, Defined, Managed, Predictive (or localised equivalents if the conversation was in Finnish/Swedish).
 
-MANDATORY RULES 1, 2, 3 above are not optional and override any conflicting instinct to shorten or summarise."""
+MANDATORY RULES 1, 2, 3, 4, 5, and 6 above are not optional and override any conflicting instinct to shorten or summarise."""
 
 # Auth Routes
 @api_router.post("/auth/register")
@@ -1199,6 +1297,45 @@ async def generate_pdf_report(assessment_id: str, current_user: dict = Depends(g
     buffer = build_full_assessment_pdf(assessment)
     filename = (
         f"PortfolioHealth_Assessment_"
+        f"{assessment.get('company_name', 'Report').replace(' ', '_')}_"
+        f"{assessment_id[:8]}.pdf"
+    )
+    return StreamingResponse(
+        buffer,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
+
+@api_router.get("/assessments/{assessment_id}/summary-pdf")
+async def generate_executive_summary_pdf(
+    assessment_id: str, current_user: dict = Depends(get_current_user)
+):
+    """4-page Executive Summary companion to the full 15-page report."""
+    assessment = await db.assessments.find_one(
+        {"_id": ObjectId(assessment_id), "user_id": current_user["id"]}
+    )
+    if not assessment:
+        raise HTTPException(status_code=404, detail="Assessment not found")
+    if not assessment.get("report"):
+        raise HTTPException(status_code=400, detail="Assessment report not yet generated")
+
+    # Backfill DBI + contextual gaps on read so pre-existing reports can render
+    # the new summary safely. Idempotent (see get_assessment).
+    report = assessment.get("report") or {}
+    if isinstance(report, dict) and report.get("scores") and report.get("decision_bottleneck_index") is None:
+        try:
+            normalise_report_weights(report)
+            assessment["report"] = report
+        except Exception:  # pragma: no cover — best-effort backfill
+            logger.warning(
+                "DBI backfill (summary PDF) failed for assessment %s",
+                assessment_id, exc_info=True,
+            )
+
+    buffer = build_executive_summary_pdf(assessment)
+    filename = (
+        f"PortfolioHealth_ExecSummary_"
         f"{assessment.get('company_name', 'Report').replace(' ', '_')}_"
         f"{assessment_id[:8]}.pdf"
     )
