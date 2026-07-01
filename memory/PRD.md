@@ -497,6 +497,11 @@ User shared 4 zoomed screenshots with attached instructions and asked for direct
   - `LandingPage.jsx`: removed the entire `.ph-stat-grid` block (3 cards) from the hero; the scoring-disclosure callout now sits directly under the meta-row. Removed the now-unused `ClipboardCheck` icon import (`FileText`/`Target` still used elsewhere).
   - Verified via screenshot: hero renders cleanly without the 3 cards, gold + cyan particles both visible drifting through the background, no console errors.
 
+- **Particle density + palette mix (2026-07-01, follow-up 3)** — user asked to increase particle density slightly and add more color variety.
+  - `AnimatedBgOverlay.jsx`: `PARTICLE_COUNT` raised 26 → 42. Replaced the single `isGold` boolean with a 3-way `variant` (`cyan` default / `gold` / `white`) distributed roughly 4:2:1 via `i % 7` bucketing for a richer, less repetitive mix.
+  - `landing.css`: added `.ph-particle-white` variant (soft warm-white radial gradient + glow) alongside the existing cyan/gold variants.
+  - Verified via screenshot: noticeably denser field with cyan/gold/white particles all visible, no console errors, no readability regression.
+
 ## Open / Backlog
 - P1: Real-LLM E2E verification of auto-emission after Turn 5 (pending Emergent LLM Key budget top-up).
 - P1: Hydration could expand to also rewrite R2 callout/bullets, R4 evidence, R7 roadmap actions, R8 decision impact when those exist on `assessment.report` — currently they remain static narrative from the template. Today's hydration covers R1, R5, R6 (the data-driven sections); narrative sections still show the Northpine demo content unless future LLM output populates new keys.

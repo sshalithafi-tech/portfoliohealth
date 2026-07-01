@@ -3,7 +3,7 @@
    Purely decorative, pointer-events disabled, respects prefers-reduced-motion.
    Particle configs are generated once at module load (not per-render) so the
    layout doesn't jump/re-randomize on re-renders. */
-const PARTICLE_COUNT = 26;
+const PARTICLE_COUNT = 42;
 const PARTICLES = Array.from({ length: PARTICLE_COUNT }, (_, i) => {
   const seed = i * 137.5; // golden-angle spread for even distribution
   const left = (seed % 100).toFixed(1);
@@ -13,9 +13,14 @@ const PARTICLES = Array.from({ length: PARTICLE_COUNT }, (_, i) => {
   const drift = (i % 2 === 0 ? 1 : -1) * (10 + (i % 4) * 6);
   const rise = 140 + ((i * 5) % 90);
   const opacity = (0.35 + ((i * 13) % 40) / 100).toFixed(2);
-  const isGold = i % 5 === 0; // ~1 in 5 particles gets a warm gold tint mixed into the cyan field
-  return { left, size, duration, delay, drift, rise, opacity, top: 60 + ((i * 17) % 40), isGold };
+  // Mixed palette: cyan stays dominant, with gold + a soft warm-white
+  // sprinkled in for variety (~4:2:1 ratio).
+  const bucket = i % 7;
+  const variant = bucket === 4 || bucket === 6 ? "gold" : bucket === 5 ? "white" : "cyan";
+  return { left, size, duration, delay, drift, rise, opacity, top: 55 + ((i * 17) % 42), variant };
 });
+
+const VARIANT_CLASS = { gold: " ph-particle-gold", white: " ph-particle-white", cyan: "" };
 
 const AnimatedBgOverlay = () => (
   <>
@@ -24,7 +29,7 @@ const AnimatedBgOverlay = () => (
       {PARTICLES.map((p, i) => (
         <span
           key={i}
-          className={`ph-particle${p.isGold ? " ph-particle-gold" : ""}`}
+          className={`ph-particle${VARIANT_CLASS[p.variant]}`}
           style={{
             left: `${p.left}%`,
             top: `${p.top}%`,
