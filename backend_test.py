@@ -10,7 +10,7 @@ import sys
 from typing import Dict, Any
 
 # Configuration
-BACKEND_URL = "https://api-key-debug-4.preview.emergentagent.com/api"
+BACKEND_URL = "https://cursor-control-fix-1.preview.emergentagent.com/api"
 ADMIN_EMAIL = "admin@portfoliohealth.fi"
 ADMIN_PASSWORD = "Admin@12345"
 SEEDED_ASSESSMENT_ID = "6b44c78c2ebdd66625059999"

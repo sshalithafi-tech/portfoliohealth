@@ -212,8 +212,22 @@ Seeded completed fixture assessment id 6b44c78c2ebdd66625059999 for admin (admin
 ##         -agent: "testing"
 ##         -comment: "ALL TESTS PASSED ✓ Comprehensive end-to-end testing completed. (1) LOGIN PAGE: Premium 2-panel layout verified (dark navy brand panel with PortfolioHealth logo, tagline, 3 feature rows + white form card with 'Welcome back' heading). Login with admin@portfoliohealth.fi / Admin@12345 successful - redirected to /#/dashboard. Password eye-toggle working correctly (password ↔ text). (2) REGISTER PAGE: Premium 2-panel layout verified with 'Create your account' heading. Client-side validation working - password '123' correctly shows error 'Password must be at least 6 characters'. All data-testid attributes present. (3) HOME PAGE: Page loads without console errors. Hero section has 'Dual Score' stat card (label: Output, value: Dual Score, desc: Equal-weighted baseline + business-model contextual score). Scoring disclosure mentions 'two scores'. PPDT Framework section: balance principle callout found, business-model sensitivity callout found. Maturity Model section: TWO formula cards found ('Overall Score (Equal-Weighted)' + 'Overall Score (Business-Model Adjusted)'). Business-model weight table found with 5 rows (ETO, CETO, CTO, Standard, Bulk) with percentage columns. Strategic-priority +5% boost callout found. All 5 maturity levels found (Ad Hoc, Developing, Defined, Managed, Predictive). (4) Header nav scrolling working correctly ('Maturity Levels' scrolls from 0px to 3326px, 'The Framework' scrolls from 0px to 2029px). Screenshots captured. No issues found - implementation is working perfectly."
 
+## frontend:
+##   - task: "Assessment chat input: multi-line textarea, Enter to send, Shift+Enter for newline"
+##     implemented: true
+##     working: "NA"
+##     file: "components/chat/ChatInput.jsx"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: true
+##     status_history:
+##         -working: "NA"
+##         -agent: "main"
+##         -comment: "Replaced single-line <input> with an auto-growing <textarea> (max-h-40, overflow-y-auto) inside the existing form in ChatInput.jsx. Added onKeyDown: Enter (no Shift) -> e.preventDefault() + onSubmit(e) (sends message, matches existing sendMessage(e) signature which only calls e.preventDefault()); Shift+Enter -> not intercepted, so the browser inserts a newline natively. No changes to AssessmentChatPage.jsx (parent state/props contract for inputRef/inputValue/onChange/onSubmit unchanged), so no remount/cursor-reset risk. Did not touch backend, system prompt, or scoring/report code."
+
 ## test_plan:
-##   current_focus: []
+##   current_focus:
+##     - "Assessment chat input: multi-line textarea, Enter to send, Shift+Enter for newline"
 ##   stuck_tasks: []
 ##   test_all: false
 ##   test_priority: "high_first"
@@ -223,3 +237,49 @@ Seeded completed fixture assessment id 6b44c78c2ebdd66625059999 for admin (admin
 ##     -message: "Frontend testing approved by user. App uses HashRouter (URLs: /#/, /#/login, /#/register). Test: (1) Login page at /#/login renders premium 2-panel layout; login with admin@portfoliohealth.fi / Admin@12345 succeeds and redirects to /#/dashboard. (2) Register page at /#/register renders and client-side validation shows error for password < 6 chars (do NOT create a real duplicate account unless needed; a fresh random email is fine, but focus on validation + rendering). (3) Home page at /#/ renders without console errors and shows the new sections: Hero 'Dual Score' stat card + scoring disclosure, 'What You Receive' cards, PPDT balance principle callout, business-model sensitivity callout, Maturity section dual-score formulas + business-model WEIGHT TABLE (5 rows: ETO/CETO/CTO/Standard/Bulk) + strategic-priority boost callout, and the 5 maturity levels. (4) Header nav anchors (Maturity Levels, The Framework) scroll correctly. Report any console errors or missing sections."
 ##     -agent: "testing"
 ##     -message: "Testing complete - ALL TESTS PASSED ✓. Executed comprehensive Playwright tests covering all three pages. STEP 1 (Login): Premium 2-panel layout verified, login successful with redirect to dashboard, password toggle working. STEP 2 (Register): Premium 2-panel layout verified, client-side validation working correctly. STEP 3 (Home): All content sections verified - dual score stat card, scoring disclosure, PPDT framework callouts, dual formula cards, business-model weight table with 5 rows, strategic-priority boost, 5 maturity levels, nav scrolling. No console errors, no missing sections. The frontend redesign is working perfectly. Ready for user validation."
+
+## Update (main agent, 2026-07-01) — Environment restore + Chat input multi-line fix
+- ENVIRONMENT: backend/.env and frontend/.env were missing again (reset). Recreated: backend/.env
+  (MONGO_URL=mongodb://localhost:27017, DB_NAME=portfoliohealth_db, JWT_SECRET regenerated,
+  EMERGENT_LLM_KEY, ADMIN_EMAIL/ADMIN_PASSWORD); frontend/.env (REACT_APP_BACKEND_URL restored from
+  supervisor APP_URL, WDS_SOCKET_PORT=443). Also `pip install -r requirements.txt` (reportlab and
+  other deps were missing, causing backend crash on import). No ANTHROPIC_API_KEY set this time (was
+  lost on reset) — chat_service.py falls back cleanly to EMERGENT_LLM_KEY path (emergentintegrations,
+  Claude Sonnet 4.5), which is the documented preview-mode behavior. Backend confirmed starting clean,
+  admin re-seeded.
+- BUG FIX (frontend only, components/chat/ChatInput.jsx): the assessment chat input was a single-line
+  `<input type="text">` inside a `<form>`. Native browser behavior submits such a form on Enter and a
+  single-line input can never hold a newline — so Enter always sent immediately and Shift+Enter did
+  nothing. Replaced with an auto-growing `<textarea>` (rows=1, max-h-40 + overflow-y-auto, JS auto-grow
+  effect keyed off inputValue via existing inputRef) and added an onKeyDown handler: Enter without Shift
+  -> preventDefault + submit; Shift+Enter -> falls through to native newline insertion (not intercepted).
+  No parent state/props changed (AssessmentChatPage.jsx untouched) — inputRef/inputValue/onChange/onSubmit
+  contract preserved, so no remount/cursor-reset risk. Did NOT touch server.py, PPDT system prompt, or
+  any scoring/report code, per user constraint.
+
+## backend:
+##   - task: "Backend regression test after .env recreation (AI assessment flow)"
+##     implemented: true
+##     working: true
+##     file: "server.py, chat_service.py"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: false
+##     status_history:
+##         -working: "NA"
+##         -agent: "testing"
+##         -comment: "Regression test requested after backend/.env and Python dependencies were recreated. Testing end-to-end flow: login, create company, create assessment, start assessment (LLM greeting), chat (AI response), list assessments."
+##         -working: true
+##         -agent: "testing"
+##         -comment: "ALL 6 TESTS PASSED ✓ Regression test successful. (1) POST /api/auth/login: 200 OK, JWT token received ✓. (2) POST /api/companies: 200 OK, company created (ID: 6a44fa03f5ce0362fc5af475) ✓. (3) POST /api/assessments: 200 OK, assessment created (ID: 6a44fa03f5ce0362fc5af476) ✓. (4) POST /api/assessments/{id}/start: 200 OK, AI greeting received (132 chars: 'Welcome / Tervetuloa / Välkommen...') - LLM integration via EMERGENT_LLM_KEY (Claude Sonnet 4.5) working correctly, NOT 500 ✓. (5) POST /api/assessments/{id}/chat: 200 OK, AI response received (567 chars) after language selection ✓. (6) GET /api/assessments: 200 OK, list returned ✓. Backend logs clean, all LiteLLM calls successful. The critical bug is FIXED - AI assessment start and chat are working reliably after .env recreation."
+
+## test_plan:
+##   current_focus:
+##     - "Backend regression test after .env recreation (AI assessment flow)"
+##   stuck_tasks: []
+##   test_all: false
+##   test_priority: "high_first"
+
+## agent_communication:
+##     -agent: "testing"
+##     -message: "Regression test complete - ALL TESTS PASSED ✓. Verified the complete end-to-end AI assessment flow after backend/.env and Python dependencies were recreated. All 6 tests passed: login, create company, create assessment, start assessment (LLM greeting via EMERGENT_LLM_KEY), chat (AI response), and list assessments. The critical checks (steps 4 and 5) both returned 200 with non-empty AI responses, NOT 500. LLM integration is working correctly. Backend is healthy and ready for production use."
