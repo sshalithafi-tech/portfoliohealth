@@ -45,11 +45,12 @@ import "../components/landing/landing.css";
 /* ─────────────────────────── HOME PAGE (Block 2) ─────────────────────────── */
 const HomePage = ({ ctaTo, onShowTheory }) => (
   <main className="ph-page" id="page-home">
+    {/* Single fixed background image — shared by every section below so it
+        stays visually static while the sections scroll over it. */}
+    <div className="ph-global-bg" aria-hidden="true" />
+
     {/* H1 — Hero */}
-    <section className="ph-hero">
-      <div className="ph-hero-bg">
-        <div className="ph-hero-bg-image" aria-hidden="true" />
-      </div>
+    <section className="ph-hero" id="home-hero">
       <div className="ph-inner ph-hero-grid">
         <div className="ph-hero-left">
           <div className="ph-hero-badge">
@@ -112,7 +113,7 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
                 desc: "Research-grounded output — instrument developed as part of an IEM Master's thesis, University of Oulu (2026)",
               },
             ].map((s, i) => (
-              <div key={s.label} className="ph-glass-card ph-stat-card ph-animate-in" style={{ "--i": 4 + i }}>
+              <div key={s.label} className="ph-glass-card ph-liquid-glass ph-stat-card ph-animate-in" style={{ "--i": 4 + i }}>
                 <div className="ph-icon-badge">{s.icon}</div>
                 <span className="ph-stat-label">{s.label}</span>
                 <div className="ph-val">{s.val}</div>
@@ -121,7 +122,7 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
             ))}
           </div>
 
-          <div className="ph-scoring-disclosure ph-animate-in" style={{ "--i": 7 }}>
+          <div className="ph-scoring-disclosure ph-liquid-glass ph-animate-in" style={{ "--i": 7 }}>
             <Target size={16} style={{ color: "var(--gold-deep)", flexShrink: 0 }} />
             <span>
               Every assessment produces <strong>two scores</strong>: an equal-weighted PPDT
@@ -129,7 +130,7 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
             </span>
           </div>
 
-          <div className="ph-section-footer" style={{ marginTop: "var(--space-xl)" }}>
+          <div className="ph-section-footer dark" style={{ marginTop: "var(--space-xl)" }}>
             Assessment grounded in Hannila (2019) doctoral dissertation; Hannila,
             Salonen &amp; Vierimaa (2024), Product Wellbeing; and Hannila, Härkönen
             &amp; Haapasalo (2022), JDS 31(3), 258–279. University of Oulu.
@@ -141,7 +142,6 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
 
     {/* H3 — Four Pillars (navy) */}
     <Reveal as="section" className="ph-dark-section" id="framework">
-      <div className="ph-dark-bg-shared" aria-hidden="true" />
       <div className="ph-inner">
         <div className="ph-sec-head dark">
           <span className="ph-section-label dark">The PPDT Framework</span>
@@ -267,10 +267,10 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
     </Reveal>
 
     {/* H4 — Maturity levels */}
-    <Reveal as="section" className="ph-alt-section" id="maturity-levels">
+    <Reveal as="section" className="ph-alt-section ph-dark-glass-section" id="maturity-levels">
       <div className="ph-inner">
-        <div className="ph-sec-head">
-          <span className="ph-section-label">Maturity Model</span>
+        <div className="ph-sec-head dark">
+          <span className="ph-section-label dark">Maturity Model</span>
           <h2>Five precise levels. No interpretation required.</h2>
           <p className="ph-sub">
             Each level has exact definitions per pillar. Scores are tied to
@@ -291,12 +291,12 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
               <div className="ph-step-dot" style={{ background: s.bg }}>{s.lvl}</div>
               <div className="ph-step-name">{s.name}</div>
               <div className="ph-step-tag">{s.tag}</div>
-              <div className="ph-glass-card ph-desc-card">{s.desc}</div>
+              <div className="ph-glass-card ph-liquid-glass ph-desc-card">{s.desc}</div>
             </div>
           ))}
         </div>
 
-        <div className="ph-glass-card ph-weights-wrap">
+        <div className="ph-glass-card ph-liquid-glass ph-weights-wrap">
           <h4>Business-model weighting</h4>
           <div className="ph-table-scroll">
             <table className="ph-weights-table">
@@ -343,7 +343,7 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
           </ul>
         </div>
 
-        <div className="ph-glass-card ph-boost-callout">
+        <div className="ph-glass-card ph-liquid-glass ph-boost-callout">
           <Sliders size={20} />
           <p>
             <strong>Strategic-priority boost:</strong> if you declare a strategic
@@ -356,7 +356,7 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
           </p>
         </div>
 
-        <div className="ph-section-footer">
+        <div className="ph-section-footer dark">
           Weight matrix &amp; scoring logic: current IEM Master's thesis (University
           of Oulu, 2026), grounded in Hannila et al. (2020), JEIM, 33(1), 214–237.
         </div>
@@ -364,10 +364,10 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
     </Reveal>
 
     {/* H5 — How it works */}
-    <Reveal as="section" id="how-it-works">
+    <Reveal as="section" id="how-it-works" className="ph-dark-glass-section">
       <div className="ph-inner">
-        <div className="ph-sec-head">
-          <span className="ph-section-label">The Assessment Process</span>
+        <div className="ph-sec-head dark">
+          <span className="ph-section-label dark">The Assessment Process</span>
           <h2>Structured. Evidence-based. 45–60 minutes.</h2>
           <p className="ph-sub">
             Every score is earned through specific conversational evidence —
@@ -414,11 +414,11 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
               ],
             },
           ].map((p, i) => (
-            <PhaseCard key={p.n} n={p.n} title={p.title} body={p.body} items={p.items} style={{ "--i": i + 1 }} />
+            <PhaseCard key={p.n} n={p.n} title={p.title} body={p.body} items={p.items} dark style={{ "--i": i + 1 }} />
           ))}
         </div>
 
-        <div className="ph-section-footer">
+        <div className="ph-section-footer dark">
           Protocol derived from Hannila (2019) five preconditions. Methodology
           consistent with Hannila et al. (2020) empirical study across eight
           companies.
@@ -428,7 +428,6 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
 
     {/* H6 — CTA */}
     <Reveal as="section" className="ph-cta-section" id="cta">
-      <div className="ph-dark-bg-shared" aria-hidden="true" />
       <div className="ph-inner">
         <span className="ph-section-label dark">Ready to begin?</span>
         <h2>Find out exactly where your portfolio management stands — and what to do next.</h2>

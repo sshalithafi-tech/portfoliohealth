@@ -97,6 +97,27 @@
 .ph-site section { padding: var(--space-3xl) 5%; }
 .ph-site section .ph-inner { max-width: 1180px; margin: 0 auto; }
 
+/* ── Unified fixed background (Home page only) ──────────────────────────
+   One background image sits fixed behind the ENTIRE homepage — every
+   section below is transparent (or a thin glass panel) so the image
+   visually stays in place while the sections themselves scroll over it. */
+.ph-site .ph-page {
+  position: relative;
+  isolation: isolate; /* guarantees the z-index:-1 bg stays contained here */
+}
+.ph-site .ph-page .ph-global-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(165deg, rgba(6, 13, 21, 0.92) 0%, rgba(8, 17, 27, 0.88) 45%, rgba(10, 22, 34, 0.93) 100%),
+    url('https://customer-assets.emergentagent.com/job_ai-assessment-check/artifacts/eurm3j65_generated-image%20%289%29.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
 .ph-site .ph-glass-card {
   background: #fff;
   border: 1px solid var(--border);
@@ -111,16 +132,42 @@
   border-top-color: var(--gold-deep);
 }
 .ph-site .ph-dark-card {
-  background: var(--navy-mid);
-  border: 1px solid rgba(8, 145, 178, 0.14);
+  background: rgba(9, 16, 28, 0.72);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: var(--radius);
   transition: transform .22s ease, background .22s ease;
 }
 .ph-site .ph-dark-card:hover {
-  background: #1a2a3d;
-  border-color: rgba(8, 145, 178, 0.28);
+  background: rgba(14, 24, 40, 0.82);
+  border-color: rgba(103, 232, 249, 0.32);
   transform: translateY(-4px);
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.30);
+}
+
+/* "Liquid glass" modifier — translucent dark card with a frosted blur so the
+   fixed background image is faintly visible through it. Applied ON TOP of
+   .ph-glass-card (which stays plain white for the Theory page's light
+   sections) so only the Home-page instances that opt in are affected.
+   NOTE: opacity is intentionally high (~0.72) rather than a "light" glass —
+   the background photo has bright patches in places, and a too-translucent
+   card there would wash out the white text sitting on top of it. This still
+   keeps a soft blurred hint of the image visible while guaranteeing
+   consistent text contrast no matter what's behind any given card. */
+.ph-site .ph-glass-card.ph-liquid-glass {
+  background: rgba(9, 16, 28, 0.70);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-top: 2px solid var(--gold);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.30);
+}
+.ph-site .ph-glass-card.ph-liquid-glass:hover {
+  background: rgba(14, 24, 40, 0.80);
+  border-top-color: var(--gold-mid);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.38);
+  transform: translateY(-4px);
 }
 
 .ph-site .ph-btn-primary {
@@ -728,6 +775,56 @@
   font: 400 13px 'Inter'; color: #A8B5C5;
 }
 .ph-site .ph-cta-section .ph-meta-item svg { color: var(--gold); }
+
+/* ── Home-page dark-glass unification ────────────────────────────────────
+   Framework/CTA already had their own copy of the background image baked
+   in (from an earlier pass) — now redundant since the single fixed
+   .ph-global-bg covers the whole page, so these two become transparent. */
+#framework.ph-dark-section,
+#cta.ph-cta-section {
+  background-image: none;
+  background-color: transparent;
+}
+
+/* Hero: no longer has its own local background — sits on .ph-global-bg. */
+#home-hero { background: transparent; }
+#home-hero h1,
+#home-hero .ph-hero-badge + h1 { color: #F8FAFC; }
+#home-hero .ph-sub { color: #C7D2DA; }
+#home-hero .ph-meta-row,
+#home-hero .ph-meta-item { color: #A8B5C5; }
+#home-hero .ph-stat-card .ph-val { color: #F8FAFC; }
+#home-hero .ph-stat-card .ph-desc { color: #A8B5C5; }
+#home-hero .ph-scoring-disclosure.ph-liquid-glass {
+  color: #C7D2DA;
+}
+#home-hero .ph-scoring-disclosure.ph-liquid-glass strong { color: #F8FAFC; }
+#home-hero .ph-section-footer.dark { color: #6B7889; border-top-color: rgba(255,255,255,0.12); }
+
+/* Maturity Model + How It Works — converted to sit directly on the shared
+   fixed background image (transparent section bg + light text), matching
+   the Framework section's dark treatment. */
+#maturity-levels.ph-alt-section,
+#how-it-works.ph-dark-glass-section {
+  background: transparent;
+}
+#maturity-levels .ph-step-name { color: #F8FAFC; }
+#maturity-levels .ph-step-tag { color: #8CA0B3; }
+#maturity-levels .ph-desc-card { color: #C7D2DA; }
+#maturity-levels .ph-weights-wrap h4 { color: #F8FAFC; }
+#maturity-levels .ph-weights-table thead th { background: rgba(255,255,255,0.06); color: #F8FAFC; }
+#maturity-levels .ph-weights-table tbody td { color: #E2E8F0; border-bottom-color: rgba(255,255,255,0.10); }
+#maturity-levels .ph-weights-table tbody tr:nth-child(even) { background: rgba(255,255,255,0.03); }
+#maturity-levels .ph-weights-table .ph-bm-fail { color: #A8B5C5; }
+#maturity-levels .ph-bm-list li { color: #A8B5C5; border-top-color: rgba(255,255,255,0.10); }
+#maturity-levels .ph-boost-callout p { color: #C7D2DA; }
+#maturity-levels .ph-boost-callout strong { color: #F8FAFC; }
+
+#how-it-works .ph-phase-card.ph-liquid-glass h3,
+#how-it-works .ph-phase-card.ph-liquid-glass .ph-num { color: #F8FAFC; }
+#how-it-works .ph-phase-card.ph-liquid-glass p,
+#how-it-works .ph-phase-card.ph-liquid-glass li { color: #C7D2DA; }
+#how-it-works .ph-phase-card.ph-liquid-glass .ph-phase-toggle { color: var(--gold-mid); }
 
 /* Theory measure */
 .ph-site .ph-t2-grid {

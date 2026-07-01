@@ -7,11 +7,11 @@ import { ChevronDown } from "lucide-react";
  * a uniform height by default (grid + flex both stretch/pin consistently),
  * with a "Show details" toggle for the full content.
  */
-const PhaseCard = ({ n, title, body, items, style }) => {
+const PhaseCard = ({ n, title, body, items, style, dark }) => {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="ph-glass-card ph-phase-card ph-animate-in" style={style}>
+    <div className={`ph-glass-card ph-phase-card ph-animate-in${dark ? " ph-liquid-glass dark" : ""}`} style={style}>
       <div className="ph-num">{n}</div>
       <h3>{title}</h3>
       <p className={`ph-phase-body${expanded ? "" : " clamped"}`}>{body}</p>
