@@ -283,3 +283,68 @@ Seeded completed fixture assessment id 6b44c78c2ebdd66625059999 for admin (admin
 ## agent_communication:
 ##     -agent: "testing"
 ##     -message: "Regression test complete - ALL TESTS PASSED ✓. Verified the complete end-to-end AI assessment flow after backend/.env and Python dependencies were recreated. All 6 tests passed: login, create company, create assessment, start assessment (LLM greeting via EMERGENT_LLM_KEY), chat (AI response), and list assessments. The critical checks (steps 4 and 5) both returned 200 with non-empty AI responses, NOT 500. LLM integration is working correctly. Backend is healthy and ready for production use."
+
+## Update (main agent, 2026-07-01) — Report generation performance refactor (parallel LLM calls + caching)
+User added their ANTHROPIC_API_KEY (direct Anthropic SDK path now active — confirmed via
+`chat_service._anthropic_client` non-None). Refactored the single monolithic report-generation
+LLM call (previously ~16000 max_tokens in one shot, causing 4-5 min report generation) into:
+  1. SEED call (existing conversational flow, PPDT_SYSTEM_PROMPT's EMISSION CONTRACT shrunk in
+     server.py to ask for only raw facts + pillar scores + a short closing message — no narrative).
+  2. Three CONCURRENT specialist calls (new file backend/report_sections.py, `asyncio.gather`):
+     Call A = Sections 1-7 (Context/Overall Maturity/Pillar Levels/Dimension Scores/Weighted
+     Calc/Bottleneck/Governance), Call B = Sections 8-12 (Management Commitment/Assessment
+     Reliability/Decision-Type Vulnerability/Key Findings & Critical Gaps/Improvement Roadmap),
+     Call C = Section 13 (Benchmark & Consultant's Note). Section 14 (Academic References) was
+     already 100% static in pdf_builder.py — no LLM call needed, so closing_statement is now
+     hardcoded too (was static boilerplate text in the original schema anyway).
+  3. Merge (seed + 3 results, key-filtered per call to prevent cross-section overwrites) into the
+     EXACT same report JSON schema as before → same `chat_service.normalise_report_weights` call
+     (UNCHANGED — scoring/DBI/contextual-score logic untouched) → same persistence/response contract.
+     Wired into both `/chat` (main flow) and `/regenerate-report` (both its salvage-reparse path and
+     its ask-again path) in server.py.
+  - Fix 2 (prompt caching): `report_sections._call_specialist` uses the direct Anthropic SDK with
+    `system=[{"type":"text","text":static_block,"cache_control":{"type":"ephemeral"}}]` when
+    `ANTHROPIC_API_KEY` is configured (now active). Falls back to the Emergent Universal Key
+    (no caching, still concurrent) otherwise.
+  - Fix 3 (verbosity caps): caps were already in the original prompt (Rule 7); added a mechanical
+    server-side backstop `enforce_verbosity_caps()` (sentence/word trimming only, no scoring change)
+    for failure_pattern_narrative (3 sentences), pillar_interpretations (5 sentences/pillar),
+    pillar_interpretation_short (40 words/pillar), consultant_note (250 words), governance_signal_summary
+    (15 words/bullet, max 4).
+  - Added `_reconcile_roadmap_continuity()`: mechanical regex-based fix (reuses existing
+    `chat_service._parse_expected_gain`) forcing roadmap.immediate's expected_gain starting values to
+    exactly match confirmed pillar scores and each phase's end = next phase's start (Mandatory Rule 2
+    continuity), since Call B's roadmap generation is now a separate LLM call from the seed's scores.
+  - Verified: `backend/tests/test_report_fixes.py` (deterministic, no LLM calls) still PASSES
+    unchanged — confirms `normalise_report_weights` + both PDF builders are unaffected by this refactor.
+  - Did NOT change JSON schema field names, section order/count (still 14), scoring logic, DBI
+    computation, or business-model weights, per user constraint.
+
+## backend:
+##   - task: "Parallelized report generation (3 concurrent LLM calls) + Anthropic prompt caching + verbosity cap enforcement"
+##     implemented: true
+##     working: false
+##     file: "server.py, report_sections.py, chat_service.py"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: false
+##     status_history:
+##         -working: "NA"
+##         -agent: "main"
+##         -comment: "Replaced the single ~16000-token monolithic report-generation call with a small seed call + 3 concurrent specialist calls (asyncio.gather) in new file report_sections.py, merged back into the identical report schema, then through the unchanged chat_service.normalise_report_weights. Direct ANTHROPIC_API_KEY now configured (user-provided) so prompt caching (cache_control) is active on the 3 specialist calls. Deterministic test_report_fixes.py still passes. Needs a live end-to-end timed test: create assessment, run full ~12-turn conversation to completion, confirm report_ready + report populated with all 14 sections' worth of fields (no section dropped), confirm PDF + summary-PDF still render, and measure total wall-clock time for the final closing turn (target: well under the old 4-5 min; acceptance criteria is <90s for seed+3-parallel-calls combined, though total user-perceived time also includes the ~11 prior short conversational turns which were already fast)."
+##         -working: false
+##         -agent: "testing"
+##         -comment: "PERFORMANCE TEST COMPLETED. Drove full 20-turn conversation (language selection → context → 4 anchor questions → People/Process/Data/Technology pillar assessment → governance probe → close). TIMING: Report-ready turn took ~77 seconds (12:02:25 to 12:03:42 per backend logs) - PASSED <90s target. FIELD COMPLETENESS: 24/26 required fields present and non-empty. MISSING: benchmark_context and consultant_note (specialist Call C JSON parse error: 'Expecting ',' delimiter: line 3 column 671'). PRESENT: scores, equal_weighted_score (2.2), contextual_score (2.23), level_names, dimension_summaries, pillar_interpretations, pillar_interpretation_short, failure_pattern_name, failure_pattern_narrative, financial_consequence, ninety_day_projection, governance_observations, governance_assessment, governance_signal_summary, management_commitment, management_commitment_assessment, assessment_reliability, decision_vulnerability_ratings, decision_vulnerability, key_findings (list), critical_gaps (5 items, all with Precondition labels ✓), roadmap (immediate/short_term/strategic with expected_gain), first_action, closing_statement. ROADMAP CONTINUITY: ✓ PASSED - immediate phase starting values match pillar scores exactly (People: 2.0, Process: 2.5, Data: 2.0, Technology: 2.5). PDF GENERATION: ✓ Full PDF 35209 bytes, valid %PDF signature. ✓ Summary PDF 11301 bytes, valid %PDF signature. CRITICAL ISSUE: Specialist Call C (benchmark_context + consultant_note) returned malformed JSON and failed to parse. The LLM output had a JSON syntax error. This is a non-deterministic LLM output issue - the other 2 specialist calls (A and B) succeeded. The report is 92% complete and both PDFs render successfully, but the consultant's note section is missing from the final report."
+
+## test_plan:
+##   current_focus:
+##     - "Parallelized report generation (3 concurrent LLM calls) + Anthropic prompt caching + verbosity cap enforcement"
+##   stuck_tasks: []
+##   test_all: false
+##   test_priority: "high_first"
+
+## agent_communication:
+##     -agent: "main"
+##     -message: "Please test the report-generation performance refactor. Login admin@portfoliohealth.fi / Admin@12345 (see /app/memory/test_credentials.md). Create a company + assessment, POST /start, then drive a FULL conversation via POST /api/assessments/{id}/chat through all phases (language selection, context/anchor questions, People/Process/Data/Technology pillar questions, governance probe, 'anything else' confirm) until the response includes report_ready:true and a populated report object — this is the turn that now triggers the seed call + 3 concurrent specialist calls internally. TIME this final turn specifically (should be noticeably faster than before — previously took 4-5 minutes for the whole report; now should complete well under that). Verify the returned `report` object still has ALL of these top-level fields non-empty: scores, equal_weighted_score, contextual_score, level_names, dimension_summaries, pillar_interpretations, pillar_interpretation_short, failure_pattern_name, failure_pattern_narrative, financial_consequence, ninety_day_projection, governance_observations, governance_assessment, governance_signal_summary, management_commitment, assessment_reliability, decision_vulnerability_ratings, decision_vulnerability, key_findings (list), critical_gaps (list, each ending in a '(Precondition N: ...)' label), roadmap.immediate/short_term/strategic (each with expected_gain in 'People: X.X → X.X | ...' format), first_action, benchmark_context, consultant_note, closing_statement. Then GET /api/assessments/{id}/pdf and GET /api/assessments/{id}/summary-pdf and confirm both return 200 with valid %PDF bytes. Report the exact wall-clock time the final chat call took, and flag any missing/empty field."
+##     -agent: "testing"
+##     -message: "Testing complete. PERFORMANCE: ✓ Report generation took ~77 seconds (well under 90s target). COMPLETENESS: ✗ 2 fields missing (benchmark_context, consultant_note) due to specialist Call C JSON parse error. 24/26 fields present. CONTINUITY: ✓ Roadmap starting values match scores. PDFs: ✓ Both generated successfully. CRITICAL ISSUE: Specialist Call C (report_sections.py line 553) failed with JSON parse error 'Expecting ',' delimiter: line 3 column 671'. The LLM returned malformed JSON for the benchmark_context and consultant_note fields. This is a non-deterministic LLM output issue. Recommend adding JSON repair/retry logic in report_sections._extract_json_block or _call_specialist to handle malformed LLM outputs. The parallel architecture works correctly (Calls A and B succeeded), but Call C needs better error handling."
