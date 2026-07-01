@@ -474,7 +474,7 @@ LLM call (previously ~16000 max_tokens in one shot, causing 4-5 min report gener
 ##   - task: "AI assessment start + chat after environment reset (Claude Sonnet 5 chat model via direct Anthropic key)"
 ##     implemented: true
 ##     working: true
-##     file: "chat_service.py, server.py"
+##     file: "chat_service.py, report_sections.py, server.py"
 ##     stuck_count: 0
 ##     priority: "high"
 ##     needs_retesting: false
@@ -488,10 +488,12 @@ LLM call (previously ~16000 max_tokens in one shot, causing 4-5 min report gener
 ##         -working: true
 ##         -agent: "testing"
 ##         -comment: "BUG FIXED ✓ ALL 6 TESTS PASSED. Fixed the ThinkingBlock handling issue in chat_service.py _call_anthropic_direct() by iterating through response.content blocks and extracting only text blocks (block.type == 'text'), ignoring thinking blocks. Changed from 'return response.content[0].text' to 'text_blocks = [block.text for block in response.content if block.type == \"text\"]; return \"\".join(text_blocks) if text_blocks else \"\"'. Re-tested complete flow: (1) Login: 200 OK, JWT token received ✓. (2) Create company: 200 OK, company created ✓. (3) Create assessment: 200 OK, assessment created ✓. (4) Start assessment (CRITICAL CHECK): 200 OK, AI greeting received (119 chars: 'Welcome / Tervetuloa / Välkommen...'), NOT 500 ✓. (5) Chat message: 200 OK, AI response received (794 chars) ✓. (6) Regression check: 200 OK, assessments list retrieved ✓. Backend logs clean, no errors - both API calls show 'HTTP/1.1 200 OK'. IDEMPOTENCY VERIFIED: Calling /start twice returns identical greeting (119 chars both times) without error ✓. The AI assessment flow is working correctly with user's ANTHROPIC_API_KEY and Claude Sonnet 5 model."
+##         -working: true
+##         -agent: "main"
+##         -comment: "Applied the same defensive text-block-extraction fix to report_sections.py._call_specialist (was also using response.content[0].text unconditionally, same latent bug class) for consistency/future-proofing, even though it currently uses its own independent MODEL_NAME='claude-sonnet-4-5-20250929' which does not return thinking blocks today. Lint clean, backend restarted clean, no regressions."
 
 ## test_plan:
-##   current_focus:
-##     - "AI assessment start + chat after environment reset (Claude Sonnet 5 chat model via direct Anthropic key)"
+##   current_focus: []
 ##   stuck_tasks: []
 ##   test_all: false
 ##   test_priority: "high_first"

@@ -288,7 +288,10 @@ async def _call_specialist(*, static_block: str, dynamic_block: str, schema_bloc
                 messages=[{"role": "user", "content": user_content}],
             )
         response = await asyncio.to_thread(_do)
-        return response.content[0].text
+        # Defensive: extract only text blocks (some Claude models may return
+        # additional non-text content blocks, e.g. thinking blocks).
+        text_blocks = [block.text for block in response.content if getattr(block, "type", None) == "text"]
+        return "".join(text_blocks) if text_blocks else ""
 
     # Emergent fallback \u2014 no cache_control support, still runs concurrently.
     from emergentintegrations.llm.chat import LlmChat, UserMessage
