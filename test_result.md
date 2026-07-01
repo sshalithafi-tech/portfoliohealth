@@ -225,9 +225,43 @@ Seeded completed fixture assessment id 6b44c78c2ebdd66625059999 for admin (admin
 ##         -agent: "main"
 ##         -comment: "Replaced single-line <input> with an auto-growing <textarea> (max-h-40, overflow-y-auto) inside the existing form in ChatInput.jsx. Added onKeyDown: Enter (no Shift) -> e.preventDefault() + onSubmit(e) (sends message, matches existing sendMessage(e) signature which only calls e.preventDefault()); Shift+Enter -> not intercepted, so the browser inserts a newline natively. No changes to AssessmentChatPage.jsx (parent state/props contract for inputRef/inputValue/onChange/onSubmit unchanged), so no remount/cursor-reset risk. Did not touch backend, system prompt, or scoring/report code."
 
+## frontend:
+##   - task: "Results dashboard responsive layout + card alignment/padding + bottleneck severity indicator"
+##     implemented: true
+##     working: true
+##     file: "components/report/premium.css, components/report/AssessmentDashboard.jsx"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: false
+##     status_history:
+##         -working: "NA"
+##         -agent: "main"
+##         -comment: "Root cause of ragged/misaligned card grid: .bn-dashboard (wrapping the Bottleneck/Radar/Preconditions/DecisionImpact 2x2 grid) had `padding: 0` while every sibling section (.r2-.r9, including the top scorecard and roadmap rows) uses `padding: 24px 48px` — cards were bleeding to the full container edge instead of sharing the same gutter. Fixed to match siblings (added to both desktop and the existing 899px mobile media query). Added shared --card-padding (24px) / --card-padding-mobile (16px) tokens applied uniformly to .bn-card, .rb-phase (roadmap phase cards), .chart-container (Pillar Scores card) — replacing 3 previously-different padding shorthands. Added a new <600px breakpoint applying the mobile token + overflow-x:hidden safety net. Added an always-rendered 'Bottleneck Severity' qualitative label (Critical/High/Moderate/Low, derived from existing severity band — no raw DBI number exposed) to the Bottleneck card so it no longer looks sparse when the numeric DBI chip is absent. Grid columns (bn-grid-2x2: 1fr 1fr, roadmap-board: repeat(3,1fr)) were already equal-width — the fix was the container gutter/padding, not the column definitions."
+##         -working: true
+##         -agent: "testing"
+##         -comment: "ALL TESTS PASSED. Desktop (1920px/1440px): Bottleneck+Radar and Preconditions+DecisionImpact rows render as pixel-perfect equal-width columns (0.0px diff), all card rows share identical left/right boundaries with the top scorecard and roadmap rows. bottleneck-severity element found with text 'BOTTLENECK SEVERITY High', card height now comparable to its row sibling. Roadmap Phase 1/2/3 render as 3 equal-width columns (0.0px diff). Mobile (375px/320px): all card grids collapse to single column full-width, no horizontal scroll (scrollWidth==clientWidth), radar SVG fits within its card, all text readable."
+
+## frontend:
+##   - task: "Global nav bar responsive redesign (desktop/tablet/mobile + hamburger menu)"
+##     implemented: true
+##     working: true
+##     file: "pages/LandingPage.jsx, components/landing/landing.css"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: false
+##     status_history:
+##         -working: "NA"
+##         -agent: "main"
+##         -comment: "Nav previously had zero real breakpoints — a single @media(max-width:720px) rule just display:none'd the secondary links with no replacement, so they became completely unreachable on mobile. Rebuilt with: --nav-gap token (32px desktop / 16px <=1024px); >1024px shows the full row (all links); 600-1024px keeps Sign In + CTA visible on the main row but collapses Home/Research&Theory/Maturity Levels/The Framework into a hamburger-triggered slide-in drawer; <600px collapses everything (incl. Sign In/CTA) behind the hamburger, showing only logo + hamburger on the row. Drawer: fixed overlay + slide-in panel, all links stacked with 44px+ touch targets, CTA visually distinct (filled), closes on link click / backdrop click / Escape key, body scroll locked while open. Logo text swaps to abbreviated 'PortfolioHealth' <480px via two spans + CSS toggle (no two-line wrap). Nav stays position:fixed (sticky) at all breakpoints, unchanged desktop visual design/link destinations."
+##         -working: true
+##         -agent: "testing"
+##         -comment: "ALL TESTS PASSED. Desktop (1920px): full row (logo, Home, Research & Theory, Maturity Levels, The Framework, Sign In, CTA) visible, no wrap/overlap, hamburger correctly hidden. Tablet (834px/768px): Sign In + CTA remain in header row, hamburger visible, drawer opens with all 4 secondary links + Sign In + CTA, closes via close button and backdrop click. Mobile (375px): only logo + hamburger in header row, drawer contains all 6 items stacked, closes on link click (scrolls to target section) and backdrop click. 320px: logo abbreviates to 'PortfolioHealth', no wrapping. No horizontal scroll at 320/375/834/1920px. Nav remains fixed/sticky on scroll at all widths tested."
+
 ## test_plan:
 ##   current_focus:
 ##     - "Assessment chat input: multi-line textarea, Enter to send, Shift+Enter for newline"
+##     - "Results dashboard responsive layout + card alignment/padding + bottleneck severity indicator"
+##     - "Global nav bar responsive redesign (desktop/tablet/mobile + hamburger menu)"
 ##   stuck_tasks: []
 ##   test_all: false
 ##   test_priority: "high_first"
