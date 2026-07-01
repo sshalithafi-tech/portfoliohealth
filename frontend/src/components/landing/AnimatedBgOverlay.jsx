@@ -13,7 +13,8 @@ const PARTICLES = Array.from({ length: PARTICLE_COUNT }, (_, i) => {
   const drift = (i % 2 === 0 ? 1 : -1) * (10 + (i % 4) * 6);
   const rise = 140 + ((i * 5) % 90);
   const opacity = (0.35 + ((i * 13) % 40) / 100).toFixed(2);
-  return { left, size, duration, delay, drift, rise, opacity, top: 60 + ((i * 17) % 40) };
+  const isGold = i % 5 === 0; // ~1 in 5 particles gets a warm gold tint mixed into the cyan field
+  return { left, size, duration, delay, drift, rise, opacity, top: 60 + ((i * 17) % 40), isGold };
 });
 
 const AnimatedBgOverlay = () => (
@@ -23,7 +24,7 @@ const AnimatedBgOverlay = () => (
       {PARTICLES.map((p, i) => (
         <span
           key={i}
-          className="ph-particle"
+          className={`ph-particle${p.isGold ? " ph-particle-gold" : ""}`}
           style={{
             left: `${p.left}%`,
             top: `${p.top}%`,

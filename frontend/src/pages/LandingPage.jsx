@@ -7,7 +7,6 @@ import NavDropdown from "../components/landing/NavDropdown";
 import PhaseCard from "../components/landing/PhaseCard";
 import AnimatedBgOverlay from "../components/landing/AnimatedBgOverlay";
 import {
-  ClipboardCheck,
   Target,
   Layers,
   Clock,
@@ -94,37 +93,7 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
             Full assessment: 45–60 minutes · Conversational format · Structured PDF report
           </div>
 
-          <div className="ph-stat-grid">
-            {[
-              {
-                icon: <ClipboardCheck size={20} />,
-                label: "Assessment",
-                val: "4 Pillars",
-                desc: "People, Process, Data, Technology — evaluated in depth",
-              },
-              {
-                icon: <Target size={20} />,
-                label: "Output",
-                val: "Dual Score",
-                desc: "Equal-weighted baseline + business-model contextual score, Ad Hoc -> Predictive",
-              },
-              {
-                icon: <FileText size={20} />,
-                label: "Deliverable",
-                val: "Full Report",
-                desc: "Research-grounded output — instrument developed as part of an IEM Master's thesis, University of Oulu (2026)",
-              },
-            ].map((s, i) => (
-              <div key={s.label} className="ph-glass-card ph-liquid-glass ph-stat-card ph-animate-in" style={{ "--i": 4 + i }}>
-                <div className="ph-icon-badge">{s.icon}</div>
-                <span className="ph-stat-label">{s.label}</span>
-                <div className="ph-val">{s.val}</div>
-                <p className="ph-desc">{s.desc}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="ph-scoring-disclosure ph-liquid-glass ph-animate-in" style={{ "--i": 7 }}>
+          <div className="ph-scoring-disclosure ph-liquid-glass ph-animate-in" style={{ "--i": 4 }}>
             <Target size={16} style={{ color: "var(--gold-deep)", flexShrink: 0 }} />
             <span>
               Every assessment produces <strong>two scores</strong>: an equal-weighted PPDT

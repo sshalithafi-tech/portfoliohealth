@@ -492,6 +492,10 @@ User shared 4 zoomed screenshots with attached instructions and asked for direct
   - ~~Circuit-trace pulses~~ — **removed in follow-up** (see below).
   - Respects `prefers-reduced-motion: reduce` (animations disabled).
 - **Circuit traces → floating dust particles (2026-07-01, follow-up)** — user asked to remove the PCB circuit-trace overlay and replace with glowing floating dust particles instead. `AnimatedBgOverlay.jsx` rewritten: `.ph-bg-circuit` SVG removed entirely; new `.ph-bg-particles` container renders 26 small glowing cyan motes (`ph-particle`, module-level generated configs so positions don't re-randomize on re-render) that float upward with a gentle horizontal sway and fade in/out (`ph-particle-float` keyframes, 14-30s duration, staggered negative delays, per-particle CSS custom properties `--drift-x`/`--rise`/`--particle-opacity`). `ph-glow-drift` kept unchanged. Verified via 2 screenshots 4s apart — particle positions/opacity visibly changed, no console errors, no text-contrast regression.
+- **Gold-tint particles + hero stat cards removed (2026-07-01, follow-up 2)** — user asked to (a) mix in a few warm gold-tinted particles and (b) remove the 3 hero stat cards (4 Pillars / Dual Score / Full Report) shown in an uploaded screenshot.
+  - `AnimatedBgOverlay.jsx`: every 5th particle (`i % 5 === 0`) now gets a `ph-particle-gold` class; new CSS variant uses a warm gold radial-gradient + glow (`rgba(255,224,158,*)` / `rgba(232,180,90,*)`) instead of cyan, same float animation/timing.
+  - `LandingPage.jsx`: removed the entire `.ph-stat-grid` block (3 cards) from the hero; the scoring-disclosure callout now sits directly under the meta-row. Removed the now-unused `ClipboardCheck` icon import (`FileText`/`Target` still used elsewhere).
+  - Verified via screenshot: hero renders cleanly without the 3 cards, gold + cyan particles both visible drifting through the background, no console errors.
 
 ## Open / Backlog
 - P1: Real-LLM E2E verification of auto-emission after Turn 5 (pending Emergent LLM Key budget top-up).
