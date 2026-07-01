@@ -1,282 +1,331 @@
 #!/usr/bin/env python3
 """
-PPDT Capability Maturity Advisor - Backend API Testing
-Tests all API endpoints for functionality and integration
+Backend API Test Suite for PortfolioHealth Advisor
+Tests the complete AI assessment flow end-to-end
 """
 
 import requests
-import sys
 import json
+import sys
 from datetime import datetime
-from typing import Dict, Any, Optional
 
-class PPDTAPITester:
-    def __init__(self, base_url: str = "https://scoring-logic-fix.preview.emergentagent.com"):
-        self.base_url = base_url
+# Base URL from frontend/.env
+BASE_URL = "https://f0f12400-45cd-4941-b54c-279e9345466b.preview.emergentagent.com/api"
+
+# Test credentials from /app/memory/test_credentials.md
+ADMIN_EMAIL = "admin@portfoliohealth.fi"
+ADMIN_PASSWORD = "Admin@12345"
+
+# Color codes for output
+GREEN = '\033[92m'
+RED = '\033[91m'
+YELLOW = '\033[93m'
+BLUE = '\033[94m'
+RESET = '\033[0m'
+
+def log_success(message):
+    print(f"{GREEN}✓ {message}{RESET}")
+
+def log_error(message):
+    print(f"{RED}✗ {message}{RESET}")
+
+def log_info(message):
+    print(f"{BLUE}ℹ {message}{RESET}")
+
+def log_warning(message):
+    print(f"{YELLOW}⚠ {message}{RESET}")
+
+class TestSession:
+    def __init__(self):
         self.session = requests.Session()
-        self.session.headers.update({'Content-Type': 'application/json'})
-        self.tests_run = 0
-        self.tests_passed = 0
-        self.user_token = None
-        self.admin_user = None
-        self.test_company_id = None
-        self.test_assessment_id = None
+        self.token = None
+        self.user_id = None
+        self.company_id = None
+        self.assessment_id = None
+        self.errors = []
+        self.warnings = []
 
-    def log_test(self, name: str, success: bool, details: str = ""):
-        """Log test result"""
-        self.tests_run += 1
-        if success:
-            self.tests_passed += 1
-            print(f"✅ {name} - PASSED {details}")
-        else:
-            print(f"❌ {name} - FAILED {details}")
-        return success
-
-    def make_request(self, method: str, endpoint: str, expected_status: int = 200, 
-                    description: str = "", data: Optional[Dict] = None) -> tuple[bool, Dict]:
-        """Make HTTP request and validate response"""
-        url = f"{self.base_url}/api/{endpoint.lstrip('/')}"
+    def test_login(self):
+        """Test 1: Login with admin credentials"""
+        log_info("Test 1: POST /api/auth/login")
         
         try:
-            if method.upper() == 'GET':
-                response = self.session.get(url)
-            elif method.upper() == 'POST':
-                response = self.session.post(url, json=data)
-            elif method.upper() == 'PATCH':
-                response = self.session.patch(url, json=data)
-            else:
-                return False, {"error": f"Unsupported method: {method}"}
-
-            success = response.status_code == expected_status
+            response = self.session.post(
+                f"{BASE_URL}/auth/login",
+                json={
+                    "email": ADMIN_EMAIL,
+                    "password": ADMIN_PASSWORD
+                },
+                timeout=10
+            )
             
-            try:
-                response_data = response.json()
-            except:
-                response_data = {"text": response.text, "status_code": response.status_code}
-
-            if not success:
-                details = f"Expected {expected_status}, got {response.status_code}. Response: {response_data}"
-            else:
-                details = f"Status: {response.status_code}"
+            if response.status_code == 200:
+                data = response.json()
+                self.token = data.get("access_token")
+                self.user_id = data.get("user", {}).get("id")
                 
-            return self.log_test(description or f"{method} {endpoint}", success, details), response_data
-
+                if self.token and self.user_id:
+                    log_success(f"Login successful. User ID: {self.user_id}")
+                    log_info(f"Token received: {self.token[:20]}...")
+                    return True
+                else:
+                    log_error("Login response missing token or user_id")
+                    self.errors.append("Login: Missing token or user_id in response")
+                    return False
+            else:
+                log_error(f"Login failed with status {response.status_code}")
+                log_error(f"Response: {response.text}")
+                self.errors.append(f"Login failed: {response.status_code} - {response.text}")
+                return False
+                
         except Exception as e:
-            return self.log_test(description or f"{method} {endpoint}", False, f"Exception: {str(e)}"), {}
+            log_error(f"Login request failed: {str(e)}")
+            self.errors.append(f"Login exception: {str(e)}")
+            return False
 
-    def test_health_check(self) -> bool:
-        """Test API health check"""
-        success, data = self.make_request("GET", "/", 200, "API Health Check")
-        if success and "PPDT" in str(data.get("message", "")):
-            print(f"   API message: {data.get('message')}")
-            return True
-        return success
+    def test_create_company(self):
+        """Test 2: Create a company"""
+        log_info("Test 2: POST /api/companies")
+        
+        if not self.token:
+            log_error("Skipping - no auth token")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.token}"}
+            response = self.session.post(
+                f"{BASE_URL}/companies",
+                json={
+                    "name": "Nordic Manufacturing Solutions",
+                    "industry": "Industrial Manufacturing",
+                    "portfolio_size": "Large portfolio",
+                    "company_size": "Mid-market · 450 employees",
+                    "active_products": "28 active SKUs",
+                    "primary_challenge": "Portfolio complexity and profitability visibility"
+                },
+                headers=headers,
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                self.company_id = data.get("id")
+                
+                if self.company_id:
+                    log_success(f"Company created. ID: {self.company_id}")
+                    log_info(f"Company name: {data.get('name')}")
+                    return True
+                else:
+                    log_error("Company response missing ID")
+                    self.errors.append("Create company: Missing ID in response")
+                    return False
+            else:
+                log_error(f"Create company failed with status {response.status_code}")
+                log_error(f"Response: {response.text}")
+                self.errors.append(f"Create company failed: {response.status_code} - {response.text}")
+                return False
+                
+        except Exception as e:
+            log_error(f"Create company request failed: {str(e)}")
+            self.errors.append(f"Create company exception: {str(e)}")
+            return False
 
-    def test_admin_login(self) -> bool:
-        """Test admin login with provided credentials"""
-        login_data = {
-            "email": "admin@ppdt.com",
-            "password": "Admin123!"
-        }
+    def test_create_assessment(self):
+        """Test 3: Create an assessment"""
+        log_info("Test 3: POST /api/assessments")
         
-        success, data = self.make_request("POST", "/auth/login", 200, "Admin Login", login_data)
+        if not self.token or not self.company_id:
+            log_error("Skipping - missing token or company_id")
+            return False
         
-        if success and "id" in data:
-            self.admin_user = data
-            # Extract cookies for session management
-            print(f"   Admin user logged in: {data.get('name')} ({data.get('role')})")
-            return True
-        return False
+        try:
+            headers = {"Authorization": f"Bearer {self.token}"}
+            response = self.session.post(
+                f"{BASE_URL}/assessments",
+                json={
+                    "company_id": self.company_id,
+                    "respondent_name": "Maria Virtanen",
+                    "respondent_role": "Head of Product Portfolio"
+                },
+                headers=headers,
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                self.assessment_id = data.get("id")
+                
+                if self.assessment_id:
+                    log_success(f"Assessment created. ID: {self.assessment_id}")
+                    log_info(f"Respondent: {data.get('respondent_name')} ({data.get('respondent_role')})")
+                    log_info(f"Status: {data.get('status')}")
+                    return True
+                else:
+                    log_error("Assessment response missing ID")
+                    self.errors.append("Create assessment: Missing ID in response")
+                    return False
+            else:
+                log_error(f"Create assessment failed with status {response.status_code}")
+                log_error(f"Response: {response.text}")
+                self.errors.append(f"Create assessment failed: {response.status_code} - {response.text}")
+                return False
+                
+        except Exception as e:
+            log_error(f"Create assessment request failed: {str(e)}")
+            self.errors.append(f"Create assessment exception: {str(e)}")
+            return False
 
-    def test_user_registration(self) -> bool:
-        """Test user registration flow"""
-        timestamp = datetime.now().strftime("%H%M%S")
-        register_data = {
-            "email": f"test_{timestamp}@example.com",
-            "password": "Test123!",
-            "name": f"Test User {timestamp}"
-        }
+    def test_start_assessment(self):
+        """Test 4: CRITICAL - Start assessment (triggers LLM greeting)"""
+        log_info("Test 4: POST /api/assessments/{assessment_id}/start (CRITICAL - LLM greeting)")
         
-        success, data = self.make_request("POST", "/auth/register", 200, "User Registration", register_data)
+        if not self.token or not self.assessment_id:
+            log_error("Skipping - missing token or assessment_id")
+            return False
         
-        if success and "id" in data:
-            print(f"   Registered user: {data.get('name')} ({data.get('email')})")
-            return True
-        return False
+        try:
+            headers = {"Authorization": f"Bearer {self.token}"}
+            response = self.session.post(
+                f"{BASE_URL}/assessments/{self.assessment_id}/start",
+                headers=headers,
+                timeout=30  # LLM call may take longer
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                message = data.get("message", {})
+                content = message.get("content", "")
+                
+                if content and len(content) > 0:
+                    log_success("AI assessment started successfully!")
+                    log_info(f"AI greeting received ({len(content)} characters)")
+                    log_info(f"First 200 chars: {content[:200]}...")
+                    
+                    # Check if it's the expected multilingual greeting
+                    if "Welcome" in content or "Tervetuloa" in content or "Välkommen" in content:
+                        log_success("AI greeting contains expected multilingual welcome")
+                    else:
+                        log_warning("AI greeting doesn't contain expected welcome message")
+                        self.warnings.append("Start assessment: Unexpected greeting format")
+                    
+                    return True
+                else:
+                    log_error("AI greeting is empty!")
+                    self.errors.append("Start assessment: Empty AI greeting content")
+                    return False
+            elif response.status_code == 500:
+                log_error("CRITICAL: Assessment start returned 500 - Failed to start assessment")
+                log_error(f"Response: {response.text}")
+                self.errors.append(f"Start assessment FAILED: 500 - {response.text}")
+                return False
+            else:
+                log_error(f"Start assessment failed with status {response.status_code}")
+                log_error(f"Response: {response.text}")
+                self.errors.append(f"Start assessment failed: {response.status_code} - {response.text}")
+                return False
+                
+        except Exception as e:
+            log_error(f"Start assessment request failed: {str(e)}")
+            self.errors.append(f"Start assessment exception: {str(e)}")
+            return False
 
-    def test_auth_me(self) -> bool:
-        """Test getting current user info"""
-        success, data = self.make_request("GET", "/auth/me", 200, "Get Current User")
-        return success and "id" in data
+    def test_chat_message(self):
+        """Test 5: Send a chat message and verify AI responds"""
+        log_info("Test 5: POST /api/assessments/{assessment_id}/chat")
+        
+        if not self.token or not self.assessment_id:
+            log_error("Skipping - no token or assessment_id")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.token}"}
+            response = self.session.post(
+                f"{BASE_URL}/assessments/{self.assessment_id}/chat",
+                json={
+                    "message": "English"
+                },
+                headers=headers,
+                timeout=30  # LLM call may take longer
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                message = data.get("message", {})
+                content = message.get("content", "")
+                
+                if content and len(content) > 0:
+                    log_success("AI responded to chat message!")
+                    log_info(f"AI response received ({len(content)} characters)")
+                    log_info(f"First 200 chars: {content[:200]}...")
+                    
+                    # Check if report is ready (shouldn't be after just one message)
+                    report_ready = data.get("report_ready", False)
+                    if report_ready:
+                        log_warning("Report marked as ready after only one message (unexpected)")
+                        self.warnings.append("Chat: Report ready too early")
+                    
+                    return True
+                else:
+                    log_error("AI response is empty!")
+                    self.errors.append("Chat: Empty AI response content")
+                    return False
+            else:
+                log_error(f"Chat message failed with status {response.status_code}")
+                log_error(f"Response: {response.text}")
+                self.errors.append(f"Chat failed: {response.status_code} - {response.text}")
+                return False
+                
+        except Exception as e:
+            log_error(f"Chat message request failed: {str(e)}")
+            self.errors.append(f"Chat exception: {str(e)}")
+            return False
 
-    def test_dashboard_stats(self) -> bool:
-        """Test dashboard statistics endpoint"""
-        success, data = self.make_request("GET", "/dashboard/stats", 200, "Dashboard Stats")
-        
-        if success:
-            required_fields = ["total_assessments", "completed_assessments", "total_companies"]
-            has_all_fields = all(field in data for field in required_fields)
-            return self.log_test("Dashboard Stats - Required Fields", has_all_fields, 
-                               f"Fields: {list(data.keys())}")
-        return False
-
-    def test_create_company(self) -> bool:
-        """Test creating a new company"""
-        company_data = {
-            "name": f"Test Company {datetime.now().strftime('%H%M%S')}",
-            "industry": "Technology",
-            "portfolio_size": "100-500 products",
-            "primary_challenge": "Data integration and decision-making processes"
-        }
-        
-        success, data = self.make_request("POST", "/companies", 200, "Create Company", company_data)
-        
-        if success and "id" in data:
-            self.test_company_id = data["id"]
-            print(f"   Created company: {data.get('name')} (ID: {self.test_company_id})")
-            return True
-        return False
-
-    def test_get_companies(self) -> bool:
-        """Test retrieving companies list"""
-        success, data = self.make_request("GET", "/companies", 200, "Get Companies")
-        
-        if success and isinstance(data, list):
-            print(f"   Found {len(data)} companies")
-            return True
-        return False
-
-    def test_create_assessment(self) -> bool:
-        """Test creating a new assessment"""
-        if not self.test_company_id:
-            return self.log_test("Create Assessment", False, "No test company available")
-        
-        assessment_data = {
-            "company_id": self.test_company_id,
-            "respondent_name": "John Smith",
-            "respondent_role": "Product Manager"
-        }
-        
-        success, data = self.make_request("POST", "/assessments", 200, "Create Assessment", assessment_data)
-        
-        if success and "id" in data:
-            self.test_assessment_id = data["id"]
-            print(f"   Created assessment: {data.get('respondent_name')} (ID: {self.test_assessment_id})")
-            return True
-        return False
-
-    def test_get_assessments(self) -> bool:
-        """Test retrieving assessments list"""
-        success, data = self.make_request("GET", "/assessments", 200, "Get Assessments")
-        
-        if success and isinstance(data, list):
-            print(f"   Found {len(data)} assessments")
-            return True
-        return False
-
-    def test_start_assessment(self) -> bool:
-        """Test starting an assessment (AI greeting)"""
-        if not self.test_assessment_id:
-            return self.log_test("Start Assessment", False, "No test assessment available")
-        
-        success, data = self.make_request("POST", f"/assessments/{self.test_assessment_id}/start", 
-                                        200, "Start Assessment")
-        
-        if success and "message" in data:
-            message = data["message"]
-            if "content" in message and len(message["content"]) > 0:
-                print(f"   AI greeting received: {message['content'][:100]}...")
-                return True
-        return False
-
-    def test_chat_message(self) -> bool:
-        """Test sending a chat message to assessment"""
-        if not self.test_assessment_id:
-            return self.log_test("Send Chat Message", False, "No test assessment available")
-        
-        chat_data = {
-            "message": "Hello, I'm ready to begin the PPDT assessment for our company."
-        }
-        
-        success, data = self.make_request("POST", f"/assessments/{self.test_assessment_id}/chat", 
-                                        200, "Send Chat Message", chat_data)
-        
-        if success and "message" in data:
-            message = data["message"]
-            if "content" in message and len(message["content"]) > 0:
-                print(f"   AI response received: {message['content'][:100]}...")
-                return True
-        return False
-
-    def test_get_assessment_details(self) -> bool:
-        """Test retrieving specific assessment details"""
-        if not self.test_assessment_id:
-            return self.log_test("Get Assessment Details", False, "No test assessment available")
-        
-        success, data = self.make_request("GET", f"/assessments/{self.test_assessment_id}", 
-                                        200, "Get Assessment Details")
-        
-        if success and "id" in data:
-            print(f"   Assessment status: {data.get('status')}, Chat history: {len(data.get('chat_history', []))} messages")
-            return True
-        return False
-
-    def test_logout(self) -> bool:
-        """Test user logout"""
-        success, data = self.make_request("POST", "/auth/logout", 200, "User Logout")
-        return success
-
-    def run_comprehensive_test(self) -> int:
+    def run_all_tests(self):
         """Run all tests in sequence"""
-        print("🚀 Starting PPDT Capability Maturity Advisor API Tests")
-        print("=" * 60)
+        print("\n" + "="*80)
+        print("PortfolioHealth Advisor - Backend API Test Suite")
+        print("Testing AI Assessment Flow End-to-End")
+        print("="*80 + "\n")
         
-        # Basic connectivity
-        if not self.test_health_check():
-            print("❌ API health check failed - stopping tests")
-            return 1
+        results = {
+            "Login": self.test_login(),
+            "Create Company": self.test_create_company(),
+            "Create Assessment": self.test_create_assessment(),
+            "Start Assessment (LLM)": self.test_start_assessment(),
+            "Chat Message (LLM)": self.test_chat_message()
+        }
         
-        # Authentication tests
-        if not self.test_admin_login():
-            print("❌ Admin login failed - stopping tests")
-            return 1
+        print("\n" + "="*80)
+        print("TEST SUMMARY")
+        print("="*80)
         
-        self.test_user_registration()
-        self.test_auth_me()
+        passed = sum(1 for v in results.values() if v)
+        total = len(results)
         
-        # Core functionality tests
-        self.test_dashboard_stats()
+        for test_name, result in results.items():
+            status = f"{GREEN}PASS{RESET}" if result else f"{RED}FAIL{RESET}"
+            print(f"{test_name:30} {status}")
         
-        # Company management
-        self.test_create_company()
-        self.test_get_companies()
+        print(f"\nTotal: {passed}/{total} tests passed")
         
-        # Assessment workflow
-        self.test_create_assessment()
-        self.test_get_assessments()
-        self.test_start_assessment()
-        self.test_chat_message()
-        self.test_get_assessment_details()
+        if self.errors:
+            print(f"\n{RED}CRITICAL ERRORS:{RESET}")
+            for i, error in enumerate(self.errors, 1):
+                print(f"  {i}. {error}")
         
-        # Cleanup
-        self.test_logout()
+        if self.warnings:
+            print(f"\n{YELLOW}WARNINGS:{RESET}")
+            for i, warning in enumerate(self.warnings, 1):
+                print(f"  {i}. {warning}")
         
-        # Results
-        print("\n" + "=" * 60)
-        print(f"📊 Test Results: {self.tests_passed}/{self.tests_run} tests passed")
+        print("\n" + "="*80 + "\n")
         
-        if self.tests_passed == self.tests_run:
-            print("🎉 All tests passed!")
-            return 0
-        else:
-            failed = self.tests_run - self.tests_passed
-            print(f"⚠️  {failed} test(s) failed")
-            return 1
+        return passed == total
 
 def main():
-    """Main test execution"""
-    tester = PPDTAPITester()
-    return tester.run_comprehensive_test()
+    test_session = TestSession()
+    success = test_session.run_all_tests()
+    sys.exit(0 if success else 1)
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()

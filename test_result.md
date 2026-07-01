@@ -101,3 +101,38 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+## user_problem_statement: "The AI won't start the assessment. A new API key was added but it's still not working."
+
+## Root Cause (main agent, 2026-07-01):
+Both backend/.env and frontend/.env were MISSING entirely (environment reset). Backend crashed on startup with KeyError: 'MONGO_URL', so all /api routes (including assessment start which calls the LLM) failed. Recreated both .env files:
+- backend/.env: MONGO_URL, DB_NAME=portfoliohealth_db, JWT_SECRET, EMERGENT_LLM_KEY (Claude Sonnet 4.5 via emergentintegrations), ADMIN_EMAIL/PASSWORD
+- frontend/.env: REACT_APP_BACKEND_URL, WDS_SOCKET_PORT
+Verified LLM greeting call succeeds directly. Backend now healthy, admin seeded.
+
+## backend:
+##   - task: "AI assessment start + chat (LLM greeting via Emergent key)"
+##     implemented: true
+##     working: true
+##     file: "server.py, chat_service.py"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: false
+##     status_history:
+##         -working: "NA"
+##         -agent: "main"
+##         -comment: "Recreated missing .env files. Verified LLM greeting works standalone. Needs end-to-end API test."
+##         -working: true
+##         -agent: "testing"
+##         -comment: "Tested complete end-to-end flow: login, create company, create assessment, start assessment (LLM greeting), and chat message. All 5 tests PASSED. AI successfully starts assessment with multilingual greeting (Welcome/Tervetuloa/Välkommen) and responds to chat messages. LLM integration via EMERGENT_LLM_KEY (Claude Sonnet 4.5) working correctly. No errors encountered."
+
+## test_plan:
+##   current_focus:
+##     - "AI assessment start + chat (LLM greeting via Emergent key)"
+##   test_all: false
+##   test_priority: "high_first"
+
+## agent_communication:
+##     -agent: "main"
+##     -message: "Root cause was missing .env files causing backend crash. Recreated them. Please test: login as admin (admin@portfoliohealth.fi / Admin@12345), create a company, create an assessment, POST /api/assessments/{id}/start (should return an AI greeting, NOT 500), then send a chat message and confirm the AI responds. Focus on confirming the AI actually starts the assessment."
+##     -agent: "testing"
+##     -message: "Testing complete. All backend APIs working correctly. Tested full end-to-end flow: 1) Login with admin credentials ✓, 2) Create company ✓, 3) Create assessment ✓, 4) Start assessment (LLM greeting) ✓, 5) Chat message (AI response) ✓. The bug is FIXED - AI now successfully starts assessments and responds to chat. LLM integration via Claude Sonnet 4.5 (EMERGENT_LLM_KEY) working as expected. No issues found."
