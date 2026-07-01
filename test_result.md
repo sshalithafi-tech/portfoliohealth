@@ -743,3 +743,76 @@ Per user decision (1a: revert report-gen model; 2a: fix all Critical+Moderate au
 ## agent_communication:
 ##     -agent: "testing"
 ##     -message: "Homepage visual fixes testing complete - ALL 9 TESTS PASSED ✅. Verified at 1920x900 viewport per review request. (1) Hero background image: Technical blueprint style visible with fixed attachment and smooth zoom animation, text readable. (2) Carousel tag overlap: CRITICAL BUG FIXED - all 4 slides now have tags sitting BELOW cards with ~5px clean gap (was overlapping by 19px before). (3) Nav alignment: Home and Resources perfectly aligned (0.0px diff). (4) Dual-score formula cards: Minimal design confirmed - thin borders, uppercase plain text labels, no grey boxes. (5) Spacing: Sections tighter/cohesive (0.0px gaps). (6-8) Regressions: How It Works collapsible cards, Resources dropdown, and mobile hamburger menu all working correctly. No console errors. Ready for user validation."
+
+
+## Update (main agent, 2026-07-01) — Executive Summary PDF v3: "McKinsey/BCG one-pager" redesign
+Per explicit detailed design brief from the user (with a reference PDF of the previous output
+attached), did a full second-pass redesign of `executive_summary_builder.py`. Numbers/wording
+unchanged — this is a rendering/layout/typography-only change; no scoring, schema, or
+report-generation logic touched. `pdf_builder.py` (full 15-page report) is untouched.
+
+Key changes vs. the previous (v2) redesign:
+  - REMOVED the radar/spider chart entirely (was the v2 hero visual) per explicit instruction.
+    Replaced with 4 clean pillar score cards in a row (name, big score /5.0, thin single-colour
+    progress bar; the bottleneck pillar gets a small outlined "BOTTLENECK PILLAR" tag, not a
+    colour fill).
+  - New restrained colour system: neutral white/light-grey base (`INK`, `INK_SOFT`, `MUTED`,
+    `LINE`, `BG_ALT`) + exactly ONE accent (`ACCENT` = muted teal `#0E7490`) used for all
+    scores/emphasis. Red/amber (`RED`, `AMBER`) are now used ONLY for: (a) decision-vulnerability
+    Critical/High ratings, and (b) "Not Met" preconditions — nowhere else (no more traffic-light
+    banding on scores/levels/KPI cards).
+  - New typography: downloaded and embedded the real Inter font family (Regular/Medium/
+    SemiBold/Bold TTFs, statically instanced from Google's variable-font source via `fonttools`
+    since a direct static download wasn't available — verified glyph rendering incl. the arrow
+    character, which the OLD Helvetica-only Part-1A "arrow sanitization" logic previously had to
+    strip; Inter's full glyph table renders arrows fine). Fonts registered with a safe
+    Helvetica-fallback so the PDF can never fail to build if the TTFs are ever missing. Font
+    files live in `/app/backend/fonts/` (~1.4MB, tracked as project assets — not a pip dependency;
+    `fonttools` was only used as a one-time build tool to generate the static instances, not
+    imported by the running app).
+  - Consistent header/footer chrome on every page via a single `_make_page_chrome` canvas
+    callback: top brand line ("PortfolioHealth Advisor · Executive Summary") + company name;
+    bottom hairline + brand line + correct "Page X of 4" numbering.
+  - Preconditions redesigned as a 5-item checklist grid — every card shares the same neutral
+    white background; only the status word's colour + a thin 2pt top rule change per status
+    (Met=teal, Partial=amber, Not Met=red).
+  - Decision-vulnerability table: Critical/High get a small coloured badge; Medium/Low render as
+    plain neutral text (colour used "sparingly" per the brief).
+  - Page 4 scorecard + vulnerability tables: removed heavy box/grid borders, replaced with subtle
+    alternating row shading + thin horizontal rules only (per brief item #6).
+  - Uniform 1.6cm margins on all 4 sides (was asymmetric 1.5/1.8cm) for a cleaner, more
+    consistent grid per brief item #7.
+  - Verified via `analyze_file_tool` (AI visual/structural review) across 3 renders: (1) the
+    Lumivex fixture — confirmed no radar chart present, 4 clean pillar score cards, neutral
+    palette with red/amber appearing only on vulnerability/Not-Met flags, Inter font rendering,
+    subtle-row-shading tables, consistent header/footer with correct page numbers, no
+    overlap/clipping (98% confidence); found + fixed 2 minor issues (a "Technology" column-width
+    word-wrap and precondition-card spacing) and re-verified clean; (2) full 15-page report
+    (`pdf_builder.py`, untouched) still renders correctly (22420 bytes, unchanged) — confirms no
+    shared-code regression; (3) edge-case stress test (empty report + very long company name) —
+    no crash, no overlap.
+  - Lint clean (`mcp_lint_python`).
+
+## backend:
+##   - task: "Executive Summary PDF v3 — McKinsey/BCG one-pager redesign (Inter font, no radar, restrained colour system)"
+##     implemented: true
+##     working: "NA"
+##     file: "executive_summary_builder.py, fonts/Inter-*.ttf"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: true
+##     status_history:
+##         -working: "NA"
+##         -agent: "main"
+##         -comment: "Full second-pass visual redesign of the 4-page Executive Summary PDF per a detailed user design brief: removed the radar chart (replaced with 4 score cards + thin bars), embedded the real Inter font family, restrained the colour palette to neutral + ONE teal accent (red/amber reserved strictly for vulnerability Critical/High and Not-Met preconditions), cleaned up table borders to subtle row-shading, and unified the header/footer chrome + margins. No scoring/schema changes; pdf_builder.py (full report) untouched — verified still renders identical byte-for-byte (22420 bytes). Verified via analyze_file_tool AI visual review (98% confidence, no overlaps) plus an edge-case stress test. Needs API-level retest: GET /api/assessments/{id}/summary-pdf should return 200 with a valid, larger PDF (was ~13.2KB, now ~22.9KB reflecting the embedded Inter font subsets), plus regression of login/full-pdf/list endpoints."
+
+## test_plan:
+##   current_focus:
+##     - "Executive Summary PDF v3 — McKinsey/BCG one-pager redesign (Inter font, no radar, restrained colour system)"
+##   stuck_tasks: []
+##   test_all: false
+##   test_priority: "high_first"
+
+## agent_communication:
+##     -agent: "main"
+##     -message: "Did a second-pass full redesign of the Executive Summary PDF (executive_summary_builder.py) per a detailed user brief — no scoring/schema changes, purely rendering/typography/layout. Please test: (1) Login admin@portfoliohealth.fi / Admin@12345 (see /app/memory/test_credentials.md). (2) GET /api/assessments/6b44c78c2ebdd66625059999/summary-pdf returns 200, Content-Type application/pdf, bytes start with %PDF, and size is ~22-23KB (larger than the prior ~13.2KB, due to the newly embedded Inter font subsets — this is expected, not a bug). (3) Regression: GET /api/assessments/6b44c78c2ebdd66625059999/pdf (full report, untouched code) still returns 200 valid PDF (~22.4KB, unchanged). (4) Regression: GET /api/assessments still works and returns the seeded assessment. Do NOT drive a full AI conversation — only verify these PDF/report endpoints since only PDF-rendering code + new font asset files changed."
