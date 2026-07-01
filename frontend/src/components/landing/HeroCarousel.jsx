@@ -178,14 +178,16 @@ export const HeroCarousel = () => {
               className={`ph-carousel-slide${active ? " active" : ""}`}
               aria-hidden={!active}
             >
-              <Visual />
-              {active &&
-                slide.tags.map((tag) => (
-                  <div className={`ph-float-tag${staticMode ? " always-on" : ""}`} key={tag.label}>
-                    <span className="ph-float-tag-label">{tag.label}</span>
-                    <span className="ph-float-tag-desc">{tag.desc}</span>
-                  </div>
-                ))}
+              <div className="ph-carousel-visual">
+                <Visual />
+                {active &&
+                  slide.tags.map((tag) => (
+                    <div className={`ph-float-tag${staticMode ? " always-on" : ""}`} key={tag.label}>
+                      <span className="ph-float-tag-label">{tag.label}</span>
+                      <span className="ph-float-tag-desc">{tag.desc}</span>
+                    </div>
+                  ))}
+              </div>
             </div>
           );
         })}

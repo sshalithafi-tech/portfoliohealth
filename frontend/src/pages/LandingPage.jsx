@@ -5,6 +5,7 @@ import LogoMark from "../components/LogoMark";
 import Reveal from "../components/landing/Reveal";
 import HeroCarousel from "../components/landing/HeroCarousel";
 import NavDropdown from "../components/landing/NavDropdown";
+import PhaseCard from "../components/landing/PhaseCard";
 import {
   ClipboardCheck,
   Target,
@@ -530,12 +531,7 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
               ],
             },
           ].map((p, i) => (
-            <div key={p.n} className="ph-glass-card ph-phase-card ph-animate-in" style={{ "--i": i + 1 }}>
-              <div className="ph-num">{p.n}</div>
-              <h3>{p.title}</h3>
-              <p>{p.body}</p>
-              <ul>{p.items.map((it) => <li key={it}>{it}</li>)}</ul>
-            </div>
+            <PhaseCard key={p.n} n={p.n} title={p.title} body={p.body} items={p.items} style={{ "--i": i + 1 }} />
           ))}
         </div>
 
