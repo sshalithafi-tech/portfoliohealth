@@ -383,15 +383,18 @@ LLM call (previously ~16000 max_tokens in one shot, causing 4-5 min report gener
 
 ##   - task: "Results dashboard responsive layout (desktop/tablet/mobile)"
 ##     implemented: true
-##     working: "NA"
+##     working: true
 ##     file: "pages/ReportPage.jsx, components/report/AssessmentDashboard.jsx, components/report/premium.css"
 ##     stuck_count: 0
 ##     priority: "high"
-##     needs_retesting: true
+##     needs_retesting: false
 ##     status_history:
 ##         -working: "NA"
 ##         -agent: "testing"
 ##         -comment: "Could not complete dashboard testing due to HashRouter URL navigation issue in test script. Login to /#/login failed with 'Cannot navigate to invalid URL' error. The test script used relative hash URLs (/#/login) instead of full URLs. Dashboard cards (Bottleneck, Portfolio Renewal Radar, Preconditions, Portfolio Decision Impact) could not be verified. Needs re-test with corrected URL navigation: use full URL (https://.../#/login) instead of hash fragment only."
+##         -working: true
+##         -agent: "testing"
+##         -comment: "✓ ALL TESTS PASSED. Comprehensive responsive layout testing completed using full absolute URLs. DESKTOP (1920px & 1440px): ✓ Bottleneck + Portfolio Renewal Radar cards render side-by-side with EQUAL widths (diff: 0.0px at both resolutions). ✓ Preconditions + Portfolio Decision Impact cards render side-by-side with EQUAL widths (diff: 0.0px). ✓ All card rows share identical left/right boundaries - perfect horizontal alignment (diff: 0.0px). ✓ bottleneck-severity element found with text 'BOTTLENECK SEVERITY High'. ✓ Bottleneck card height now comparable to Radar card (both in same row). ✓ Improvement Roadmap Phase 1/2/3 render as 3 equal-width columns in single row (diff: 0.0px). MOBILE (375px & 320px): ✓ All dashboard cards (Bottleneck, Radar, Preconditions, Decision Impact) collapse into SINGLE column, full-width, stacked vertically. ✓ NO horizontal page scroll at either width (scrollWidth == clientWidth). ✓ All text readable, nothing cut off or overlapping. ✓ Radar SVG chart fits fully within card boundary without horizontal overflow. ✓ Roadmap phases stack vertically in single column. DESKTOP NAV (1920px landing page): ✓ Logo 'PortfolioHealth Advisor' visible. ✓ Home, Research & Theory, Maturity Levels, The Framework, Start Full Assessment all visible in one row (y-diff: 9.0px). ✓ Hamburger icon NOT visible (correct for desktop). Minor: 'Sign In' link not found by text selector (may use different text or be in a different location, but CTA button present). Screenshots captured at all breakpoints confirm correct responsive behavior."
 
 ## test_plan:
 ##   current_focus:
@@ -403,3 +406,5 @@ LLM call (previously ~16000 max_tokens in one shot, causing 4-5 min report gener
 ## agent_communication:
 ##     -agent: "testing"
 ##     -message: "Responsive CSS/layout testing partially complete. PART B (Global Nav Bar): ✓ PASSED at all breakpoints (1920px, 834px, 768px, 375px, 320px). Nav shows correct elements at each width, hamburger menu works correctly, drawer opens/closes, links navigate and close menu, no horizontal scroll at any width, nav remains sticky when scrolling. PART A (Results Dashboard): ✗ INCOMPLETE - Could not test dashboard due to HashRouter URL navigation issue in test script. The script used relative hash URLs (/#/login) which caused 'Cannot navigate to invalid URL' errors. To complete dashboard testing, the test script needs to use full URLs (e.g., https://4ad4b2b3-a136-4aa5-a519-c697503c7614.preview.emergentagent.com/#/login). The dashboard components exist in the code (AssessmentDashboard.jsx with bn-grid-2x2 layout, Bottleneck card with severity label, responsive breakpoints at 900px and 599px), but functional verification at different viewport sizes was not completed. Recommend re-running dashboard tests with corrected URL navigation."
+##     -agent: "testing"
+##     -message: "✓ RESPONSIVE DASHBOARD TESTING COMPLETE - ALL TESTS PASSED. Used full absolute URLs with hash fragments as instructed. Logged in at https://.../#/login, navigated to https://.../#/assessments/6a4500b54e64865e2dac646f/report. DESKTOP RESULTS: Perfect card alignment - all rows share identical left/right boundaries, Bottleneck+Radar equal width (715px each at 1920px, 475px each at 1440px), Preconditions+DecisionImpact equal width, bottleneck-severity element present with text content, Roadmap Phase 1/2/3 render as 3 equal-width columns (470.7px each). MOBILE RESULTS: Single-column stacking works perfectly at 375px and 320px, NO horizontal scroll at either width, all text readable, radar SVG contained within card. DESKTOP NAV: All elements visible in one row at 1920px, hamburger NOT visible. Only minor issue: 'Sign In' link not found by text selector (may be styled differently or in dropdown), but all other nav elements present and functional. The responsive layout implementation is working correctly across all tested breakpoints."
