@@ -653,3 +653,30 @@ Per user decision (1a: revert report-gen model; 2a: fix all Critical+Moderate au
 ## agent_communication:
 ##     -agent: "testing"
 ##     -message: "Homepage visual polish testing complete at 1920x900 desktop. CRITICAL ISSUE: Hero carousel floating annotation tags OVERLAP mock cards by ~19px on ALL 4 slides. The CSS positions tags at bottom: -34px (landing.css line 1159) which causes overlap instead of sitting cleanly below. This needs to be fixed - tags should be positioned BELOW the card with a positive gap, not overlapping. PASSED: (1) How It Works collapsible cards work perfectly - all 4 cards equal height (215.2px, 0.0px diff), expand/collapse functionality working correctly. (2) Equal card heights verified in all 3 sections (Hero stats, What You Receive, Why This Matters) - all 0.0px diff. (3) Four Pillars section has gradient + grid texture + cyan glow, text readable. (4) Regression checks passed - nav text sharp, Resources dropdown working (3 items, opens/closes correctly), smooth scrolling working. Console: only expected 401 errors. Main agent needs to fix the carousel annotation tag CSS positioning."
+
+## Update (testing agent, 2026-07-01) — Homepage visual fixes comprehensive test
+## frontend:
+##   - task: "Homepage visual fixes (hero background, carousel tags, nav alignment, dual-score cards, spacing)"
+##     implemented: true
+##     working: true
+##     file: "pages/LandingPage.jsx, components/landing/HeroCarousel.jsx, components/landing/landing.css"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: false
+##     status_history:
+##         -working: "NA"
+##         -agent: "testing"
+##         -comment: "Comprehensive testing of homepage visual fixes at 1920x900 viewport per review request. Testing 6 specific fixes plus 3 regression checks."
+##         -working: true
+##         -agent: "testing"
+##         -comment: "✅ ALL 9 TESTS PASSED. (1) HERO BACKGROUND IMAGE: ✓ Technical blueprint-style background image visible (cyan linework on dark, URL: eurm3j65_generated-image.png). ✓ Background positioned center right with linear gradient overlay (fading white/light on left where headline sits to transparent on right). ✓ Fixed attachment confirmed (background-attachment: scroll, scroll, fixed) for parallax effect. ✓ Smooth zoom animation active (ph-hero-bg-zoom, 26s ease-in-out, scale 1 to 1.045). ✓ Headline text fully readable with good contrast (opacity: 0.9). ✓ Scrolled slowly through hero section - no awkward jumps/glitches, animation smooth. (2) CAROUSEL TAG OVERLAP FIX (RE-VERIFIED CRITICAL BUG): ✓✓✓ FIXED - ALL 4 SLIDES PASS ✓✓✓. Clicked through all 4 carousel dots (Pillar Scores, Bottleneck Diagnostic, 90-Day Roadmap, Executive Summary). For EACH slide, floating annotation tag (dark navy box) now sits BELOW the card with clean 5px gap (Slide 1: 4.9px, Slide 2: 5.1px, Slide 3: 5.2px, Slide 4: 5.2px). Tag CSS bottom: -58px (was -34px before, which caused 19px overlap). Tags do NOT overlap/cover any card text or numbers. Previous critical bug is FIXED. (3) NAV BAR ALIGNMENT FIX: ✓ Home and Resources text perfectly vertically aligned at 1920px width (vertical difference: 0.0px, both centered at 33.5px). ✓ CSS align-items: center confirmed on .ph-nav-tabs. Resources no longer sits noticeably lower than Home. (4) DUAL-SCORE FORMULA CARDS: ✓ Both cards ('Overall Score (Equal-Weighted)' and 'Overall Score (Business-Model Adjusted)') have cleaner, minimal look. ✓ Thin single-pixel top border divider (1px solid, not thick colored border). ✓ Labels 'PRIMARY' and 'SECONDARY' shown as plain small uppercase letter-spaced text (text-transform: uppercase, no filled pill badges, transparent background). ✓ Formula line has thin bottom-border divider (1px solid) instead of solid grey code box (transparent background). All 5 design checks passed. (5) SPACING: ✓ Vertical gap Hero → 'Why This Matters': 0.0px. ✓ Vertical gap 'Why This Matters' → 'What You Receive': 0.0px. Sections feel tighter/more cohesive (not huge 180px stacked gaps). (6) REGRESSION - HOW IT WORKS: ✓ 4 collapsible cards found. ✓ First card expands ('Show details' → 'Show less') and collapses correctly. (7) REGRESSION - RESOURCES DROPDOWN: ✓ Opens with 3 items (Research & Theory, Maturity Levels, The Framework). ✓ Closes when clicking outside. (8) REGRESSION - MOBILE HAMBURGER MENU: ✓ Visible at 390px width. ✓ Opens drawer with 4 menu items. ✓ Closes correctly via close button. (9) CONSOLE ERRORS: ✓ No unexpected console errors (only expected 401 for /api/auth/me). All fixes working correctly, no regressions found."
+
+## test_plan:
+##   current_focus: []
+##   stuck_tasks: []
+##   test_all: false
+##   test_priority: "high_first"
+
+## agent_communication:
+##     -agent: "testing"
+##     -message: "Homepage visual fixes testing complete - ALL 9 TESTS PASSED ✅. Verified at 1920x900 viewport per review request. (1) Hero background image: Technical blueprint style visible with fixed attachment and smooth zoom animation, text readable. (2) Carousel tag overlap: CRITICAL BUG FIXED - all 4 slides now have tags sitting BELOW cards with ~5px clean gap (was overlapping by 19px before). (3) Nav alignment: Home and Resources perfectly aligned (0.0px diff). (4) Dual-score formula cards: Minimal design confirmed - thin borders, uppercase plain text labels, no grey boxes. (5) Spacing: Sections tighter/cohesive (0.0px gaps). (6-8) Regressions: How It Works collapsible cards, Resources dropdown, and mobile hamburger menu all working correctly. No console errors. Ready for user validation."

@@ -49,7 +49,9 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
   <main className="ph-page" id="page-home">
     {/* H1 — Hero */}
     <section className="ph-hero">
-      <div className="ph-hero-bg" />
+      <div className="ph-hero-bg">
+        <div className="ph-hero-bg-image" aria-hidden="true" />
+      </div>
       <div className="ph-inner ph-hero-grid">
         <div className="ph-hero-left">
           <div className="ph-hero-badge">

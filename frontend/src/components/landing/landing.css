@@ -65,7 +65,7 @@
   --l5: #1A5276; --l5-bg: #E3EDF3; --l5-bd: #A4C3D6;
 
   --space-xs: 8px; --space-sm: 16px; --space-md: 24px;
-  --space-lg: 32px; --space-xl: 48px; --space-2xl: 64px; --space-3xl: 90px;
+  --space-lg: 32px; --space-xl: 48px; --space-2xl: 64px; --space-3xl: 76px;
 
   --radius-sm: 10px; --radius: 16px; --radius-lg: 28px; --radius-pill: 50px;
 
@@ -240,10 +240,37 @@
   position: absolute;
   inset: 0;
   z-index: 0;
-  background:
-    radial-gradient(ellipse 80% 50% at 65% 20%, rgba(8, 145, 178, 0.10) 0%, transparent 70%),
-    radial-gradient(ellipse 50% 60% at 5% 80%, rgba(12, 27, 42, 0.04) 0%, transparent 60%),
-    var(--bg);
+  overflow: hidden;
+  background: var(--bg);
+}
+.ph-site .ph-hero-bg-image {
+  position: absolute;
+  inset: -3%;
+  background-image:
+    linear-gradient(100deg, var(--bg) 0%, rgba(247, 249, 251, 0.90) 34%, rgba(247, 249, 251, 0.42) 58%, rgba(12, 27, 42, 0.22) 100%),
+    radial-gradient(ellipse 80% 50% at 65% 20%, rgba(8, 145, 178, 0.12) 0%, transparent 70%),
+    url('https://customer-assets.emergentagent.com/job_ai-assessment-check/artifacts/eurm3j65_generated-image%20%289%29.png');
+  background-size: cover, cover, cover;
+  background-position: center, center, center right;
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  background-attachment: scroll, scroll, fixed;
+  opacity: 0.9;
+  animation: ph-hero-bg-zoom 26s ease-in-out infinite alternate;
+  will-change: transform;
+}
+@keyframes ph-hero-bg-zoom {
+  0%   { transform: scale(1); }
+  100% { transform: scale(1.045); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ph-site .ph-hero-bg-image { animation: none; }
+}
+@media (max-width: 1024px) {
+  .ph-site .ph-hero-bg-image {
+    background-attachment: scroll, scroll, scroll;
+    background-position: center, center, center;
+    opacity: 0.7;
+  }
 }
 
 /* Top nav
@@ -302,7 +329,7 @@
 /* Desktop nav groups — Home/Research tabs + secondary links + Sign In/CTA.
    Visible only above the tablet breakpoint; collapsed into the hamburger
    drawer below it. */
-.ph-site .ph-nav-tabs.ph-nav-desktop-only { display: flex; gap: 4px; }
+.ph-site .ph-nav-tabs.ph-nav-desktop-only { display: flex; align-items: center; gap: 4px; }
 .ph-site .ph-nav-tab {
   background: transparent; color: var(--text-mid);
   font: 500 14px 'Inter';
@@ -582,20 +609,23 @@
 }
 
 .ph-site .ph-formula-callout {
-  padding: 22px 26px; margin-top: 32px;
-  border-left: 4px solid var(--gold);
+  padding: 34px 32px 30px; margin-top: 32px;
+  border-top: 1px solid var(--border) !important;
+  box-shadow: none;
 }
+.ph-site .ph-formula-callout:hover { transform: none; box-shadow: none; border-top-color: var(--border) !important; }
 .ph-site .ph-formula-callout h4 {
-  font: 700 15px 'Inter'; color: var(--navy); margin-bottom: 12px;
+  font: 700 16px 'Inter'; color: var(--navy); margin-bottom: 16px; letter-spacing: -0.2px;
 }
 .ph-site .ph-formula-callout .ph-formula {
-  background: var(--bg-alt); border-radius: var(--radius-sm);
-  padding: 14px 18px;
+  background: transparent; border-radius: 0;
+  padding: 0 0 16px; margin-bottom: 16px;
+  border-bottom: 1px solid var(--border);
   font-family: ui-monospace, 'JetBrains Mono', SFMono-Regular, Menlo, monospace;
-  font-size: 14px; color: var(--navy);
+  font-size: 15px; color: var(--navy); letter-spacing: -0.2px;
 }
 .ph-site .ph-formula-callout .ph-note {
-  font: 400 var(--text-base) 'Inter'; color: var(--slate); margin-top: 12px;
+  font: 400 var(--text-base) 'Inter'; color: var(--slate); margin-top: 0;
 }
 
 /* Process grid */
@@ -952,14 +982,14 @@
 }
 .ph-site .ph-formula-callout { position: relative; }
 .ph-site .ph-formula-tag {
-  display: inline-block; font: 700 10px 'Inter'; letter-spacing: 1px;
-  text-transform: uppercase; padding: 4px 10px; border-radius: 999px; margin-bottom: 10px;
+  display: inline-block; font: 700 10.5px 'Inter'; letter-spacing: 2px;
+  text-transform: uppercase; padding: 0; margin-bottom: 12px; background: none !important;
 }
-.ph-site .ph-formula-tag.primary { background: var(--blue-soft); color: var(--gold-deep); }
-.ph-site .ph-formula-tag.secondary { background: #F1F5F9; color: var(--slate); }
+.ph-site .ph-formula-tag.primary { color: var(--gold-deep); }
+.ph-site .ph-formula-tag.secondary { color: var(--muted); }
 .ph-site .ph-match-note {
-  margin-top: 18px; padding: 14px 18px; border-radius: var(--radius-sm);
-  background: var(--bg-alt); border: 1px dashed var(--border);
+  margin-top: 24px; padding: 18px 0 0; border-radius: 0;
+  background: none; border: none; border-top: 1px solid var(--border);
   font: 400 var(--text-base) 'Inter'; color: var(--slate); line-height: 1.6;
 }
 .ph-site .ph-match-note strong { color: var(--navy); }
@@ -1068,7 +1098,7 @@
   position: relative;
   width: 100%;
   max-width: 380px;
-  min-height: 300px;
+  min-height: 320px;
 }
 .ph-site .ph-carousel-slide {
   position: absolute;
@@ -1156,7 +1186,7 @@
 }
 .ph-site .ph-float-tag {
   position: absolute;
-  bottom: -34px;
+  bottom: -58px;
   right: 6px;
   max-width: 220px;
   background: var(--navy);
@@ -1172,7 +1202,7 @@
 .ph-site .ph-float-tag-desc { font: 400 11.5px 'Inter'; color: #C9D3DE; line-height: 1.4; }
 .ph-site .ph-float-tag.always-on { animation: none; opacity: 1; transform: none; }
 
-.ph-site .ph-carousel-dots { display: flex; gap: 8px; justify-content: center; margin-top: 20px; position: absolute; bottom: -36px; left: 0; right: 0; }
+.ph-site .ph-carousel-dots { display: flex; gap: 8px; justify-content: center; margin-top: 20px; position: absolute; bottom: -80px; left: 0; right: 0; }
 .ph-site .ph-carousel-dot {
   width: 8px; height: 8px; border-radius: 50%;
   background: var(--border); border: none; cursor: pointer; padding: 0;
