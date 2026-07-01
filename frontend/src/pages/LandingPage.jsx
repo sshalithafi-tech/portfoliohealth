@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../App";
 import LogoMark from "../components/LogoMark";
+import Reveal from "../components/landing/Reveal";
+import HeroCarousel from "../components/landing/HeroCarousel";
+import NavDropdown from "../components/landing/NavDropdown";
 import {
   ClipboardCheck,
   Target,
@@ -33,6 +36,9 @@ import {
   CircleSlash,
   Scale,
   Sliders,
+  Gauge,
+  MonitorSmartphone,
+  ChevronDown,
 } from "lucide-react";
 
 import "../components/landing/landing.css";
@@ -43,93 +49,135 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
     {/* H1 — Hero */}
     <section className="ph-hero">
       <div className="ph-hero-bg" />
-      <div className="ph-inner">
-        <div className="ph-hero-badge">
-          <span className="ph-pulse-dot" />
-          Grounded in peer-reviewed IEM research · University of Oulu
+      <div className="ph-inner ph-hero-grid">
+        <div className="ph-hero-left">
+          <div className="ph-hero-badge">
+            <span className="ph-pulse-dot" />
+            Grounded in peer-reviewed IEM research · University of Oulu
+          </div>
+
+          <h1 className="ph-animate-in" style={{ "--i": 1 }}>
+            One clear{" "}
+            <span style={{ color: "var(--gold-deep)" }}>verdict</span> on your
+            portfolio's next move.
+          </h1>
+
+          <p className="ph-sub ph-animate-in" style={{ "--i": 2 }}>
+            A structured, research-backed assessment that scores People,
+            Process, Data &amp; Technology — then names the exact bottleneck
+            stalling your decisions.
+          </p>
+
+          <div className="ph-cta-row ph-animate-in" style={{ "--i": 3 }}>
+            <Link to={ctaTo} data-testid="hero-start-btn" className="ph-btn-primary">
+              Start Full Assessment <ArrowRight size={16} />
+            </Link>
+            <a
+              href="#how-it-works"
+              data-testid="hero-how-btn"
+              className="ph-btn-secondary"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" });
+              }}
+            >
+              How it works <ArrowDown size={16} />
+            </a>
+          </div>
+
+          <div className="ph-meta-row">
+            <Clock size={16} style={{ color: "var(--gold-deep)" }} />
+            Full assessment: 45–60 minutes · Conversational format · Structured PDF report
+          </div>
+
+          <div className="ph-stat-grid">
+            {[
+              {
+                icon: <ClipboardCheck size={20} />,
+                label: "Assessment",
+                val: "4 Pillars",
+                desc: "People, Process, Data, Technology — evaluated in depth",
+              },
+              {
+                icon: <Target size={20} />,
+                label: "Output",
+                val: "Dual Score",
+                desc: "Equal-weighted baseline + business-model contextual score, Ad Hoc -> Predictive",
+              },
+              {
+                icon: <FileText size={20} />,
+                label: "Deliverable",
+                val: "Full Report",
+                desc: "Research-grounded output — instrument developed as part of an IEM Master's thesis, University of Oulu (2026)",
+              },
+            ].map((s, i) => (
+              <div key={s.label} className="ph-glass-card ph-stat-card ph-animate-in" style={{ "--i": 4 + i }}>
+                <div className="ph-icon-badge">{s.icon}</div>
+                <span className="ph-stat-label">{s.label}</span>
+                <div className="ph-val">{s.val}</div>
+                <p className="ph-desc">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="ph-scoring-disclosure ph-animate-in" style={{ "--i": 7 }}>
+            <Target size={16} style={{ color: "var(--gold-deep)", flexShrink: 0 }} />
+            <span>
+              Every assessment produces <strong>two scores</strong>: an equal-weighted PPDT
+              baseline and a contextual score adjusted for your business model and strategic priority.
+            </span>
+          </div>
+
+          <div className="ph-section-footer" style={{ marginTop: "var(--space-xl)" }}>
+            Assessment grounded in Hannila (2019) doctoral dissertation; Hannila,
+            Salonen &amp; Vierimaa (2024), Product Wellbeing; and Hannila, Härkönen
+            &amp; Haapasalo (2022), JDS 31(3), 258–279. University of Oulu.
+          </div>
         </div>
 
-        <h1 className="ph-animate-in" style={{ "--i": 1 }}>
-          Diagnose your{" "}
-          <span style={{ color: "var(--gold-deep)" }}>product portfolio</span>{" "}
-          decision-making maturity.
-        </h1>
-
-        <p className="ph-sub ph-animate-in" style={{ "--i": 2 }}>
-          A structured, research-backed PPDT assessment that reveals exactly
-          where your portfolio capability breaks down — and what to fix first.
-        </p>
-
-        <div className="ph-cta-row ph-animate-in" style={{ "--i": 3 }}>
-          <Link to={ctaTo} data-testid="hero-start-btn" className="ph-btn-primary">
-            Start Full Assessment <ArrowRight size={16} />
-          </Link>
-          <a
-            href="#how-it-works"
-            data-testid="hero-how-btn"
-            className="ph-btn-secondary"
-            onClick={(e) => {
-              e.preventDefault();
-              document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" });
-            }}
-          >
-            How it works <ArrowDown size={16} />
-          </a>
-        </div>
-
-        <div className="ph-meta-row">
-          <Clock size={16} style={{ color: "var(--gold-deep)" }} />
-          Full assessment: 45–60 minutes · Conversational format · Structured PDF report
-        </div>
-
-        <div className="ph-stat-grid">
-          {[
-            {
-              icon: <ClipboardCheck size={20} />,
-              label: "Assessment",
-              val: "4 Pillars",
-              desc: "People, Process, Data, Technology — evaluated in depth",
-            },
-            {
-              icon: <Target size={20} />,
-              label: "Output",
-              val: "Dual Score",
-              desc: "Equal-weighted baseline + business-model contextual score, Ad Hoc -> Predictive",
-            },
-            {
-              icon: <FileText size={20} />,
-              label: "Deliverable",
-              val: "Full Report",
-              desc: "Research-grounded output — instrument developed as part of an IEM Master's thesis, University of Oulu (2026)",
-            },
-          ].map((s, i) => (
-            <div key={s.label} className="ph-glass-card ph-stat-card ph-animate-in" style={{ "--i": 4 + i }}>
-              <div className="ph-icon-badge">{s.icon}</div>
-              <span className="ph-stat-label">{s.label}</span>
-              <div className="ph-val">{s.val}</div>
-              <p className="ph-desc">{s.desc}</p>
-            </div>
-          ))}
-        </div>
-
-        <div className="ph-scoring-disclosure ph-animate-in" style={{ "--i": 7 }}>
-          <Target size={16} style={{ color: "var(--gold-deep)", flexShrink: 0 }} />
-          <span>
-            Every assessment produces <strong>two scores</strong>: an equal-weighted PPDT
-            baseline and a contextual score adjusted for your business model and strategic priority.
-          </span>
-        </div>
-
-        <div className="ph-section-footer" style={{ marginTop: "var(--space-xl)" }}>
-          Assessment grounded in Hannila (2019) doctoral dissertation; Hannila,
-          Salonen &amp; Vierimaa (2024), Product Wellbeing; and Hannila, Härkönen
-          &amp; Haapasalo (2022), JDS 31(3), 258–279. University of Oulu.
+        <div className="ph-hero-right ph-animate-in" style={{ "--i": 3 }}>
+          <HeroCarousel />
         </div>
       </div>
     </section>
 
+    {/* H1.5 — Why This Matters */}
+    <Reveal as="section" id="why-this-matters">
+      <div className="ph-inner">
+        <div className="ph-sec-head">
+          <span className="ph-section-label">Why This Matters</span>
+          <h2>The gap isn't ambition. It's decision capability.</h2>
+        </div>
+        <div className="ph-why-grid">
+          {[
+            {
+              icon: <Search size={20} />,
+              title: "Most decisions run on incomplete data",
+              body: "Without a data pillar strong enough to trust, portfolio calls default to whoever argues loudest in the room — not what the numbers actually show.",
+            },
+            {
+              icon: <AlertTriangle size={20} />,
+              title: "One weak pillar stalls the whole portfolio",
+              body: "People, Process, Data and Technology are interdependent. A single lagging pillar becomes the ceiling on every decision the other three enable.",
+            },
+            {
+              icon: <ShieldCheck size={20} />,
+              title: "Governance gaps compound over time",
+              body: "Undocumented ownership and audit-trail-free decisions don't stay small — every quarter without governance makes the eventual fix more expensive.",
+            },
+          ].map((c, i) => (
+            <Reveal as="div" key={c.title} delay={i * 90} className="ph-glass-card ph-why-card">
+              <div className="ph-icon-badge">{c.icon}</div>
+              <h3>{c.title}</h3>
+              <p>{c.body}</p>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </Reveal>
+
     {/* H2 — What you receive */}
-    <section>
+    <Reveal as="section">
       <div className="ph-inner">
         <div className="ph-sec-head">
           <span className="ph-section-label">What you receive</span>
@@ -173,10 +221,10 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
           IEM research group, University of Oulu.
         </div>
       </div>
-    </section>
+    </Reveal>
 
     {/* H3 — Four Pillars (navy) */}
-    <section className="ph-dark-section" id="framework">
+    <Reveal as="section" className="ph-dark-section" id="framework">
       <div className="ph-inner">
         <div className="ph-sec-head dark">
           <span className="ph-section-label dark">The PPDT Framework</span>
@@ -299,10 +347,10 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
           258–279.
         </div>
       </div>
-    </section>
+    </Reveal>
 
     {/* H4 — Maturity levels */}
-    <section className="ph-alt-section" id="maturity-levels">
+    <Reveal as="section" className="ph-alt-section" id="maturity-levels">
       <div className="ph-inner">
         <div className="ph-sec-head">
           <span className="ph-section-label">Maturity Model</span>
@@ -429,10 +477,10 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
           of Oulu, 2026), grounded in Hannila et al. (2020), JEIM, 33(1), 214–237.
         </div>
       </div>
-    </section>
+    </Reveal>
 
     {/* H5 — How it works */}
-    <section id="how-it-works">
+    <Reveal as="section" id="how-it-works">
       <div className="ph-inner">
         <div className="ph-sec-head">
           <span className="ph-section-label">The Assessment Process</span>
@@ -497,10 +545,83 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
           companies.
         </div>
       </div>
-    </section>
+    </Reveal>
+
+    {/* H5.5 — Product Preview */}
+    <Reveal as="section" className="ph-alt-section" id="product-preview">
+      <div className="ph-inner">
+        <div className="ph-sec-head">
+          <span className="ph-section-label">See It In Action</span>
+          <h2>Your results, in one dashboard.</h2>
+          <p className="ph-sub">
+            Every assessment resolves into a single, board-ready view: dual
+            scores, the named bottleneck, and a phased roadmap — no
+            spreadsheets, no guesswork.
+          </p>
+        </div>
+        <div className="ph-device-frame">
+          <div className="ph-device-chrome">
+            <span className="ph-device-dot" /><span className="ph-device-dot" /><span className="ph-device-dot" />
+            <span className="ph-device-url">portfoliohealth.fi/assessments/report</span>
+          </div>
+          <div className="ph-device-body">
+            <div className="ph-device-row">
+              {[
+                { label: "People", val: 3.2 },
+                { label: "Process", val: 2.4 },
+                { label: "Data", val: 2.8 },
+                { label: "Technology", val: 1.6 },
+              ].map((p) => (
+                <div className="ph-device-chip" key={p.label}>
+                  <span className="ph-device-chip-label">{p.label}</span>
+                  <span className="ph-device-chip-val">{p.val.toFixed(1)}</span>
+                </div>
+              ))}
+            </div>
+            <div className="ph-device-callout">
+              <AlertTriangle size={16} />
+              <span><strong>Bottleneck: Technology</strong> — Decision Vulnerability: Critical</span>
+            </div>
+            <div className="ph-device-roadmap">
+              {["Immediate", "Short-term", "Strategic"].map((phase) => (
+                <div className="ph-device-roadmap-phase" key={phase}>{phase}</div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </Reveal>
+
+    {/* H5.75 — Before / After */}
+    <Reveal as="section" id="before-after">
+      <div className="ph-inner">
+        <div className="ph-sec-head">
+          <span className="ph-section-label">The Shift</span>
+          <h2>From gut feel to a governed, prioritized plan.</h2>
+        </div>
+        <div className="ph-compare-grid">
+          <div className="ph-compare-panel ph-compare-before">
+            <span className="ph-compare-tag">Before</span>
+            <ul>
+              <li><XCircle size={18} />Gut-feel decisions, no shared evidence base</li>
+              <li><XCircle size={18} />No visibility into which pillar is holding you back</li>
+              <li><XCircle size={18} />No governance trail — decisions undocumented</li>
+            </ul>
+          </div>
+          <div className="ph-compare-panel ph-compare-after">
+            <span className="ph-compare-tag">After</span>
+            <ul>
+              <li><CheckCircle2 size={18} />One weighted score, equal-weighted and business-model adjusted</li>
+              <li><CheckCircle2 size={18} />A named bottleneck pillar, ranked by decision impact</li>
+              <li><CheckCircle2 size={18} />A 90-day roadmap with phases and owners</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </Reveal>
 
     {/* H6 — CTA */}
-    <section className="ph-cta-section" id="cta">
+    <Reveal as="section" className="ph-cta-section" id="cta">
       <div className="ph-inner">
         <span className="ph-section-label dark">Ready to begin?</span>
         <h2>Find out exactly where your portfolio management stands — and what to do next.</h2>
@@ -523,7 +644,7 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
           &amp; Haapasalo (2022), JDS 31(3), 258–279.
         </div>
       </div>
-    </section>
+    </Reveal>
   </main>
 );
 
@@ -937,6 +1058,7 @@ const LandingPage = () => {
   const navigate = useNavigate();
   const [page, setPage] = useState("home");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [resourcesOpen, setResourcesOpen] = useState(false);
 
   const ctaTo = user ? "/dashboard" : "/register";
 
@@ -947,6 +1069,7 @@ const LandingPage = () => {
   // menu on escape — standard slide-in menu behavior.
   useEffect(() => {
     document.body.style.overflow = mobileMenuOpen ? "hidden" : "";
+    if (!mobileMenuOpen) setResourcesOpen(false);
     const onKey = (e) => { if (e.key === "Escape") setMobileMenuOpen(false); };
     window.addEventListener("keydown", onKey);
     return () => {
@@ -995,23 +1118,17 @@ const LandingPage = () => {
           >
             Home
           </button>
-          <button
-            type="button"
-            data-page="page-theory"
-            data-testid="nav-tab-theory"
-            className={`ph-nav-tab ${page === "theory" ? "active" : ""}`}
-            onClick={showTheory}
-          >
-            Research &amp; Theory
-          </button>
+          <NavDropdown
+            label="Resources"
+            triggerTestId="nav-dropdown-resources"
+            items={[
+              { label: "Research & Theory", onClick: showTheory },
+              { label: "Maturity Levels", onClick: () => jumpToSection("maturity-levels") },
+              { label: "The Framework", onClick: () => jumpToSection("framework") },
+            ]}
+          />
         </div>
         <div className="ph-nav-right ph-nav-desktop-only">
-          <span className="ph-nav-link" onClick={() => jumpToSection("maturity-levels")}>
-            Maturity Levels
-          </span>
-          <span className="ph-nav-link" onClick={() => jumpToSection("framework")}>
-            The Framework
-          </span>
           {user ? (
             <Link to="/dashboard" data-testid="nav-dashboard-btn" className="ph-btn-primary ph-nav-cta">
               Dashboard <ArrowRight size={14} />
@@ -1086,15 +1203,29 @@ const LandingPage = () => {
               <button type="button" className={`ph-nav-drawer-link ${page === "home" ? "active" : ""}`} onClick={showHome}>
                 Home
               </button>
-              <button type="button" className={`ph-nav-drawer-link ${page === "theory" ? "active" : ""}`} onClick={showTheory}>
-                Research &amp; Theory
+              <button
+                type="button"
+                className="ph-nav-drawer-link ph-drawer-subtoggle"
+                aria-expanded={resourcesOpen}
+                data-testid="nav-drawer-resources-toggle"
+                onClick={() => setResourcesOpen((v) => !v)}
+              >
+                Resources
+                <ChevronDown size={16} className={`ph-nav-dropdown-chevron${resourcesOpen ? " open" : ""}`} />
               </button>
-              <button type="button" className="ph-nav-drawer-link" onClick={() => jumpToSection("maturity-levels")}>
-                Maturity Levels
-              </button>
-              <button type="button" className="ph-nav-drawer-link" onClick={() => jumpToSection("framework")}>
-                The Framework
-              </button>
+              {resourcesOpen && (
+                <div className="ph-drawer-sublist">
+                  <button type="button" className={`ph-nav-drawer-link ${page === "theory" ? "active" : ""}`} onClick={showTheory}>
+                    Research &amp; Theory
+                  </button>
+                  <button type="button" className="ph-nav-drawer-link" onClick={() => jumpToSection("maturity-levels")}>
+                    Maturity Levels
+                  </button>
+                  <button type="button" className="ph-nav-drawer-link" onClick={() => jumpToSection("framework")}>
+                    The Framework
+                  </button>
+                </div>
+              )}
               <div className="ph-nav-drawer-divider" />
               {user ? (
                 <Link to="/dashboard" className="ph-nav-drawer-cta" onClick={() => setMobileMenuOpen(false)}>
