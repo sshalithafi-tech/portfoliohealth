@@ -502,6 +502,8 @@ User shared 4 zoomed screenshots with attached instructions and asked for direct
   - `landing.css`: added `.ph-particle-white` variant (soft warm-white radial gradient + glow) alongside the existing cyan/gold variants.
   - Verified via screenshot: noticeably denser field with cyan/gold/white particles all visible, no console errors, no readability regression.
 
+- **Particle scatter fix (2026-07-01, follow-up 4)** — user reported particles appearing "in lines" like lined-up bubbles. Root cause: the previous golden-angle (`i*137.5 % 100`) + linear-permutation (`i*17 % 42`) formulas are both linear functions of the index `i`, so plotting `(left_i, top_i)` pairs produced a visible lattice/diagonal pattern instead of true scatter. Replaced with a seeded `mulberry32` PRNG (fixed seed so positions stay stable across re-renders) generating fully independent `left`/`top`/`size`/`duration`/`delay`/`drift`/`rise`/`opacity`/`variant` per particle — no linear relationship to index. Verified via screenshot: particles now genuinely scattered across the full viewport, no visible lines/pattern, no console errors.
+
 ## Open / Backlog
 - P1: Real-LLM E2E verification of auto-emission after Turn 5 (pending Emergent LLM Key budget top-up).
 - P1: Hydration could expand to also rewrite R2 callout/bullets, R4 evidence, R7 roadmap actions, R8 decision impact when those exist on `assessment.report` — currently they remain static narrative from the template. Today's hydration covers R1, R5, R6 (the data-driven sections); narrative sections still show the Northpine demo content unless future LLM output populates new keys.
