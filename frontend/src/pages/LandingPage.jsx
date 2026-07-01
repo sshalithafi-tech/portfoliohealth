@@ -5,6 +5,7 @@ import LogoMark from "../components/LogoMark";
 import Reveal from "../components/landing/Reveal";
 import NavDropdown from "../components/landing/NavDropdown";
 import PhaseCard from "../components/landing/PhaseCard";
+import AnimatedBgOverlay from "../components/landing/AnimatedBgOverlay";
 import {
   ClipboardCheck,
   Target,
@@ -48,6 +49,7 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
     {/* Single fixed background image — shared by every section below so it
         stays visually static while the sections scroll over it. */}
     <div className="ph-global-bg" aria-hidden="true" />
+    <AnimatedBgOverlay />
 
     {/* H1 — Hero */}
     <section className="ph-hero" id="home-hero">

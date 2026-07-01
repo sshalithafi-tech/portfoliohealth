@@ -487,6 +487,10 @@ User shared 4 zoomed screenshots with attached instructions and asked for direct
 - **Login/Register brand panel**: `BrandPanel` (shared between `LoginPage.jsx` and `RegisterPage.jsx`) changed from `justify-between` (content split top/bottom) to `justify-center` (vertically centered). Added a "← Back to Home" link (`data-testid="brand-panel-home-link"`) top-left of the panel, and made the logo+wordmark clickable (`data-testid="brand-panel-logo-link"`) — both route to `/`.
 - **Liquid-glass card readability** (carried over from previous session's fix): verified via live screenshot — `#maturity-levels` and `#how-it-works` liquid-glass cards render dark navy bg with clear white/light-gray text against the shared background image, fully legible. No further change needed.
 - Verified via screenshots (desktop 1920px): hero CTAs, stat cards, login page, register page all render correctly. User declined formal testing_agent pass for this round.
+- **Animated background (2026-07-01, same session)** — user asked to "animate the background image to match the theme", chose mix of (b) drifting glow + (c) circuit-trace pulses. New `components/landing/AnimatedBgOverlay.jsx` renders on the Home page only, layered between `.ph-global-bg` (static photo) and all content (z-index -1, pointer-events none):
+  - `.ph-bg-glow` — two radial cyan gradients, `mix-blend-mode: screen`, `background-position` animated via `ph-glow-drift` keyframes (26s ease-in-out infinite alternate) for a slow drifting light effect.
+  - `.ph-bg-circuit` — inline SVG, 5 PCB-style L-shaped trace paths with a Gaussian-blur glow filter; each trace has a static faint base line + an animated bright dash (`stroke-dasharray` + `ph-circuit-flow` keyframes, 8-12s linear infinite, staggered delays) simulating data pulses travelling along circuit traces.
+  - Respects `prefers-reduced-motion: reduce` (animations disabled). Verified via 2 screenshots 3s apart — pulse position visibly moved, no console errors, text contrast unaffected.
 
 ## Open / Backlog
 - P1: Real-LLM E2E verification of auto-emission after Turn 5 (pending Emergent LLM Key budget top-up).

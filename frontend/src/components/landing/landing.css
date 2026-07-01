@@ -118,6 +118,64 @@
   background-repeat: no-repeat;
 }
 
+/* (b) Slowly drifting cyan glow — layered above the fixed photo, below all
+   content. Uses mix-blend-mode:screen so it only brightens/tints, never
+   darkens or reduces text contrast. */
+.ph-site .ph-page .ph-bg-glow {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: 0.55;
+  background-image:
+    radial-gradient(circle 620px at 20% 20%, rgba(8, 145, 178, 0.28) 0%, transparent 70%),
+    radial-gradient(circle 520px at 80% 75%, rgba(103, 232, 249, 0.16) 0%, transparent 70%);
+  background-repeat: no-repeat;
+  animation: ph-glow-drift 26s ease-in-out infinite alternate;
+  will-change: background-position;
+}
+@keyframes ph-glow-drift {
+  0%   { background-position: 15% 15%, 85% 80%; }
+  50%  { background-position: 55% 45%, 45% 40%; }
+  100% { background-position: 85% 70%, 15% 20%; }
+}
+
+/* (c) PCB-style circuit traces with a glowing pulse travelling along them —
+   ties into the tech-blueprint texture already in the background photo. */
+.ph-site .ph-page .ph-bg-circuit {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+  opacity: 0.85;
+}
+.ph-site .ph-bg-circuit .ph-circuit-base {
+  fill: none;
+  stroke: rgba(103, 232, 249, 0.10);
+  stroke-width: 1.5;
+}
+.ph-site .ph-bg-circuit .ph-circuit-pulse {
+  fill: none;
+  stroke: rgba(103, 232, 249, 0.85);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 46 1400;
+  animation-name: ph-circuit-flow;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+@keyframes ph-circuit-flow {
+  from { stroke-dashoffset: 0; }
+  to   { stroke-dashoffset: -1446; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ph-site .ph-page .ph-bg-glow { animation: none; }
+  .ph-site .ph-bg-circuit .ph-circuit-pulse { animation: none; opacity: 0; }
+}
+
 .ph-site .ph-glass-card {
   background: #fff;
   border: 1px solid var(--border);
