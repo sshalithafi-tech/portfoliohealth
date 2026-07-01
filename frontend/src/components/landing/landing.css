@@ -529,7 +529,7 @@
   gap: 16px; max-width: 780px;
   align-items: stretch;
 }
-.ph-site .ph-stat-card { padding: 22px 24px; display: flex; flex-direction: column; height: 100%; }
+.ph-site .ph-stat-card { padding: 22px 24px; display: flex; flex-direction: column; height: 100%; min-height: 232px; }
 .ph-site .ph-stat-card .ph-icon-badge {
   width: 38px; height: 38px; border-radius: var(--radius-sm);
   background: var(--gold-soft); color: var(--gold-deep);
@@ -800,6 +800,25 @@
 }
 #home-hero .ph-scoring-disclosure.ph-liquid-glass strong { color: #F8FAFC; }
 #home-hero .ph-section-footer.dark { color: #6B7889; border-top-color: rgba(255,255,255,0.12); }
+
+/* Hero sits directly on the dark global background now (no local light
+   gradient like the Theory hero), so the navy-on-navy primary CTA was
+   nearly invisible next to the white secondary CTA. Give it the same
+   high-contrast white-bg/dark-text treatment as the secondary button,
+   with a bolder navy border + stronger lift so it still reads as primary. */
+#home-hero .ph-btn-primary {
+  background: #fff;
+  color: var(--navy);
+  border: 1.5px solid #fff;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.32);
+}
+#home-hero .ph-btn-primary:hover {
+  background: var(--gold-soft);
+  border-color: var(--gold-soft);
+  color: var(--navy);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.38);
+}
 
 /* Maturity Model + How It Works — converted to sit directly on the shared
    fixed background image (transparent section bg + light text), matching

@@ -480,6 +480,14 @@ User requested a precise 5-point design update to unify the dashboard + PDF and 
 - PDF download HTTP 200, 28KB, valid `%PDF-1.4`/`%%EOF`
 - PDF page 4 analysis confirms band coloring: People/Process/Tech 2.5 → green, Data 2.0 → amber ✅
 
+## Landing/Auth Polish Pass (2026-07-01 — current session)
+User shared 4 zoomed screenshots with attached instructions and asked for direct fixes (no test agent needed):
+- **Hero primary CTA contrast fix**: `#home-hero .ph-btn-primary` ("Start Full Assessment") was navy-bg/cyan-text sitting directly on the new dark global background — nearly invisible next to the white "How it works" secondary button. Added scoped override in `landing.css` so the hero primary CTA now renders white-bg/navy-text (matches secondary button's high-contrast treatment) with a bolder shadow to keep primary prominence. Other `.ph-btn-primary` usages (nav, CTA section, theory hero) were left untouched since they already have adequate contrast in their own contexts.
+- **Hero stat cards uniform sizing**: added `min-height: 232px` to `.ph-stat-card` (4 Pillars / Dual Score / Full Report) as a fail-safe so all three cards render the same height/width regardless of description text length or animation-timing artifacts (grid already had `align-items:stretch`).
+- **Login/Register brand panel**: `BrandPanel` (shared between `LoginPage.jsx` and `RegisterPage.jsx`) changed from `justify-between` (content split top/bottom) to `justify-center` (vertically centered). Added a "← Back to Home" link (`data-testid="brand-panel-home-link"`) top-left of the panel, and made the logo+wordmark clickable (`data-testid="brand-panel-logo-link"`) — both route to `/`.
+- **Liquid-glass card readability** (carried over from previous session's fix): verified via live screenshot — `#maturity-levels` and `#how-it-works` liquid-glass cards render dark navy bg with clear white/light-gray text against the shared background image, fully legible. No further change needed.
+- Verified via screenshots (desktop 1920px): hero CTAs, stat cards, login page, register page all render correctly. User declined formal testing_agent pass for this round.
+
 ## Open / Backlog
 - P1: Real-LLM E2E verification of auto-emission after Turn 5 (pending Emergent LLM Key budget top-up).
 - P1: Hydration could expand to also rewrite R2 callout/bullets, R4 evidence, R7 roadmap actions, R8 decision impact when those exist on `assessment.report` — currently they remain static narrative from the template. Today's hydration covers R1, R5, R6 (the data-driven sections); narrative sections still show the Northpine demo content unless future LLM output populates new keys.

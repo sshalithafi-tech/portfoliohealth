@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth, formatApiErrorDetail } from "../App";
-import { Eye, EyeOff, UserPlus, Target, Layers, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, UserPlus, Target, Layers, ShieldCheck, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import LogoMark from "../components/LogoMark";
 
@@ -26,9 +26,16 @@ const BrandPanel = ({ tagline, points }) => (
           "radial-gradient(ellipse 55% 45% at 22% 22%, rgba(8,145,178,0.35) 0%, transparent 62%), radial-gradient(ellipse 50% 40% at 85% 90%, rgba(103,232,249,0.16) 0%, transparent 60%)",
       }}
     />
-    <div className="relative z-10 flex flex-col justify-between px-14 py-16 w-full">
+    <Link
+      to="/"
+      data-testid="brand-panel-home-link"
+      className="absolute top-8 left-14 z-20 inline-flex items-center gap-2 text-[#8FA3B5] hover:text-white text-sm font-medium transition-colors"
+    >
+      <ArrowLeft size={16} /> Back to Home
+    </Link>
+    <div className="relative z-10 flex flex-col justify-center px-14 py-16 w-full">
       <div>
-        <div className="flex items-center gap-4">
+        <Link to="/" data-testid="brand-panel-logo-link" className="flex items-center gap-4 w-fit">
           <LogoMark className="w-14 h-14 rounded-2xl shadow-lg" radius={20} />
           <div>
             <h1 className="text-3xl font-light text-white font-['Outfit'] leading-none">
@@ -36,7 +43,7 @@ const BrandPanel = ({ tagline, points }) => (
             </h1>
             <p className="text-[#8FA3B5] text-sm mt-1 tracking-wide">Advisor</p>
           </div>
-        </div>
+        </Link>
 
         <p className="mt-12 text-[#E2E8F0] text-2xl font-light leading-snug max-w-md font-['Outfit']">
           {tagline}
@@ -55,13 +62,13 @@ const BrandPanel = ({ tagline, points }) => (
             </div>
           ))}
         </div>
-      </div>
 
-      <div className="pt-10 border-t border-white/10">
-        <p className="text-xs text-[#6B7C8E] leading-relaxed max-w-sm">
-          PPM Capability Maturity Framework · Research-grounded instrument developed
-          as part of an IEM Master's thesis, University of Oulu.
-        </p>
+        <div className="mt-12 pt-10 border-t border-white/10">
+          <p className="text-xs text-[#6B7C8E] leading-relaxed max-w-sm">
+            PPM Capability Maturity Framework · Research-grounded instrument developed
+            as part of an IEM Master's thesis, University of Oulu.
+          </p>
+        </div>
       </div>
     </div>
   </div>
