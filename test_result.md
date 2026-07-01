@@ -598,8 +598,7 @@ Per user decision (1a: revert report-gen model; 2a: fix all Critical+Moderate au
 ##         -comment: "REGRESSION TEST PASSED ✓. All 11 tests completed successfully. Model revert verified: claude-sonnet-4-5-20250929 now generates reports reliably with ALL 26/26 fields present and non-empty (vs. Sonnet 5 which left 5 fields empty). Critical fields verified: contextual_score=2.3 (non-zero), failure_pattern_name/narrative populated, governance_assessment/signal_summary populated. Roadmap continuity verified. Both PDFs generated successfully (32KB full, 10KB summary). All 4 audit fixes verified working: JWT_SECRET fail-fast (no crash), chat_history persistence (15 turns saved), PDF error handling (both PDFs OK), max_length validation (422 for 9000-char message). Idempotency verified (/start returns same greeting). Backend logs show clean execution with no specialist call errors or retries. The 5 fields that failed with Sonnet 5 are now working correctly with Sonnet 4.5."
 
 ## test_plan:
-##   current_focus:
-##     - "Revert report-gen to Sonnet 4.5 + Critical/Moderate audit fixes (JWT fail-fast, chat data-persist ordering, PDF error handling, input length validation)"
+##   current_focus: []
 ##   stuck_tasks: []
 ##   test_all: false
 ##   test_priority: "high_first"
