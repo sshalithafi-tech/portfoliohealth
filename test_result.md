@@ -190,3 +190,23 @@ Seeded completed fixture assessment id 6b44c78c2ebdd66625059999 for admin (admin
 ##     -message: "Please retest the report/PDF endpoints via API. Login admin@portfoliohealth.fi / Admin@12345. There is a SEEDED completed assessment id=6b44c78c2ebdd66625059999 (Lumivex Photonics). Verify: (1) GET /api/assessments/6b44c78c2ebdd66625059999 returns 200 and report.ninety_day_projection.score_current == report.scores.overall == report.equal_weighted_score (3.6), and score_projected (3.9) > score_current, and bottleneck_level_current == 'Defined' (matches level_names.process). (2) GET /api/assessments/6b44c78c2ebdd66625059999/pdf returns 200 with application/pdf (bytes start %PDF). (3) GET /api/assessments/6b44c78c2ebdd66625059999/summary-pdf returns 200 with a valid PDF. (4) Also do a quick regression: login, GET /api/assessments works. Do NOT attempt a full AI chat completion. Report any 4xx/5xx."
 ##     -agent: "testing"
 ##     -message: "Testing complete - ALL TESTS PASSED ✓. Report/PDF refactor regression + verification successful. All 5 tests passed: (1) Login with admin credentials ✓, (2) Report consistency with ALL invariants verified (score equality, projection logic, bottleneck levels, new fields) ✓, (3) Full PDF generation (22KB, valid) ✓, (4) Executive summary PDF (8.6KB, valid) ✓, (5) Regression test for assessments list ✓. The refactor is working correctly - no issues found. Ready for production."
+
+## Update (main agent, 2026-07-01) — Frontend: Home content + Login/Register redesign
+- Home (LandingPage.jsx): Hero dual-score card + scoring disclosure + citation footer; "What You Receive" dual-score/bottleneck/roadmap copy + citations; PPDT Framework balance principle callout + updated pillar descriptions + business-model sensitivity callout; Maturity Model now has dual-score formulas (Equal-Weighted + Business-Model Adjusted), a business-model weight table (ETO/CETO/CTO/Standard/Bulk with per-pillar % + failure modes + explainers), strategic-priority +5% boost callout, refined 5 level descriptions; How-it-works Phase 1 business-model selection + Phase 4 dual-output; CTA academic citation footer. Global: Product Wellbeing = 2024 (Hannila, Salonen & Vierimaa), JDS 258–279, "validated" softened to research-grounded.
+- Auth (LoginPage.jsx, RegisterPage.jsx): premium redesign with navy gradient brand panel (logo, tagline, feature list, grid+glow) matching homepage theme; polished form cards with cyan accents. All data-testid preserved (login-email-input, login-password-input, login-submit-button, register-name-input, register-email-input, register-password-input, register-submit-button). NOTE: app uses HashRouter — routes are /#/login and /#/register.
+- New CSS appended to components/landing/landing.css (.ph-scoring-disclosure, .ph-balance-callout, .ph-dual-formula-grid, .ph-weights-table, .ph-bm-list, .ph-boost-callout, etc). Frontend compiles successfully.
+
+## frontend:
+##   - task: "Home page content update + premium Login/Register redesign"
+##     implemented: true
+##     working: "NA"
+##     file: "pages/LandingPage.jsx, pages/LoginPage.jsx, pages/RegisterPage.jsx, components/landing/landing.css"
+##     needs_retesting: true
+##     status_history:
+##         -working: "NA"
+##         -agent: "main"
+##         -comment: "Redesigned auth pages + extensive home content. Verified compile + login/register screenshots. Needs functional + rendering test."
+
+## agent_communication:
+##     -agent: "main"
+##     -message: "Frontend testing approved by user. App uses HashRouter (URLs: /#/, /#/login, /#/register). Test: (1) Login page at /#/login renders premium 2-panel layout; login with admin@portfoliohealth.fi / Admin@12345 succeeds and redirects to /#/dashboard. (2) Register page at /#/register renders and client-side validation shows error for password < 6 chars (do NOT create a real duplicate account unless needed; a fresh random email is fine, but focus on validation + rendering). (3) Home page at /#/ renders without console errors and shows the new sections: Hero 'Dual Score' stat card + scoring disclosure, 'What You Receive' cards, PPDT balance principle callout, business-model sensitivity callout, Maturity section dual-score formulas + business-model WEIGHT TABLE (5 rows: ETO/CETO/CTO/Standard/Bulk) + strategic-priority boost callout, and the 5 maturity levels. (4) Header nav anchors (Maturity Levels, The Framework) scroll correctly. Report any console errors or missing sections."

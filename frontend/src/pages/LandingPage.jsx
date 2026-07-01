@@ -29,6 +29,8 @@ import {
   Microscope,
   Lightbulb,
   CircleSlash,
+  Scale,
+  Sliders,
 } from "lucide-react";
 
 import "../components/landing/landing.css";
@@ -89,14 +91,14 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
             {
               icon: <Target size={20} />,
               label: "Output",
-              val: "5-Level Score",
-              desc: "Ad Hoc → Predictive with bottleneck diagnosis",
+              val: "Dual Score",
+              desc: "Equal-weighted baseline + business-model contextual score, Ad Hoc -> Predictive",
             },
             {
               icon: <FileText size={20} />,
               label: "Deliverable",
               val: "Full Report",
-              desc: "Phased roadmap, decision risks, improvement actions",
+              desc: "Research-grounded output — instrument developed as part of an IEM Master's thesis, University of Oulu (2026)",
             },
           ].map((s, i) => (
             <div key={s.label} className="ph-glass-card ph-stat-card ph-animate-in" style={{ "--i": 4 + i }}>
@@ -108,10 +110,18 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
           ))}
         </div>
 
+        <div className="ph-scoring-disclosure ph-animate-in" style={{ "--i": 7 }}>
+          <Target size={16} style={{ color: "var(--gold-deep)", flexShrink: 0 }} />
+          <span>
+            Every assessment produces <strong>two scores</strong>: an equal-weighted PPDT
+            baseline and a contextual score adjusted for your business model and strategic priority.
+          </span>
+        </div>
+
         <div className="ph-section-footer" style={{ marginTop: "var(--space-xl)" }}>
-          Assessment grounded in Hannila (2019) doctoral dissertation and IEM
-          publications by Hannila, Härkönen, Haapasalo &amp; Silvola (2018–2022),
-          University of Oulu.
+          Assessment grounded in Hannila (2019) doctoral dissertation; Hannila,
+          Salonen &amp; Vierimaa (2024), Product Wellbeing; and Hannila, Härkönen
+          &amp; Haapasalo (2022), JDS 31(3), 258–279. University of Oulu.
         </div>
       </div>
     </section>
@@ -132,20 +142,20 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
             {
               tag: "01",
               icon: <Target size={28} />,
-              title: "Maturity Score per Pillar",
-              body: "Each PPDT pillar scored 1.0–5.0 against maturity level definitions. Every score is grounded in specific evidence from the conversation — not self-declaration.",
+              title: "Dual Maturity Score",
+              body: "Your maturity is expressed as two complementary values: (1) an equal-weighted score — all four PPDT pillars at 25% each, the academically grounded baseline consistent with the PPDT balance principle (Hannila, Salonen & Vierimaa, 2024); and (2) a contextual score — pillar weights adjusted for your business model (Bulk, Standard, CTO, CETO, ETO) using Customer Order Decoupling Point logic.",
             },
             {
               tag: "02",
               icon: <AlertTriangle size={28} />,
               title: "Bottleneck Identification",
-              body: "The weakest pillar caps your overall capability regardless of how strong the others score. The report names it explicitly and makes the decision risk concrete.",
+              body: "The lowest-scoring pillar is identified as your primary bottleneck — the dimension that most constrains real-world portfolio decision quality regardless of strength in the other three pillars (Hannila et al., 2022).",
             },
             {
               tag: "03",
               icon: <MapIcon size={28} />,
               title: "Phased Improvement Roadmap",
-              body: "Three-phase plan (0–3 months, 3–12 months, 12+ months) with actions tied to each pillar, always sequenced bottleneck-first.",
+              body: "Three-phase plan (0–3 months, 3–12 months, 12+ months) with actions tied to each pillar, sequenced bottleneck-first. Roadmap logic: Hannila et al. (2020), JEIM, 33(1), 214–237.",
             },
           ].map((c, i) => (
             <div key={c.tag} className="ph-glass-card ph-step-card ph-animate-in" style={{ "--i": i + 1 }}>
@@ -157,8 +167,8 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
           ))}
         </div>
         <div className="ph-section-footer">
-          Hannila (2019) · Hannila et al. (2020, 2022) · Silvola (2018) · IEM
-          research group, University of Oulu.
+          Hannila, Salonen &amp; Vierimaa (2024) · Hannila et al. (2020, 2022) ·
+          IEM research group, University of Oulu.
         </div>
       </div>
     </section>
@@ -175,12 +185,25 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
           </p>
         </div>
 
+        <div className="ph-balance-callout">
+          <Scale size={22} />
+          <p>
+            <strong>The balance principle:</strong> <em>“All aspects of the PPDT
+            should be balanced and adjusted to support the product journey”</em>
+            (Hannila, Salonen &amp; Vierimaa, 2024, Product Wellbeing, Ch. 3). A
+            company scoring high in three pillars but low in one is <strong>not</strong>
+            {" "}a high-maturity organisation — capability is only as strong as its
+            weakest operational dimension. This is why the assessment identifies a
+            bottleneck pillar, not just an average score.
+          </p>
+        </div>
+
         <div className="ph-four-grid">
           {[
             {
               letter: "P",
               title: "People",
-              desc: "Roles, responsibilities, governance ownership, data accountability.",
+              desc: "Leadership commitment, data literacy, cross-functional cooperation, and cultural receptivity to trusting data over intuition in decision-making.",
               icon: <Users size={20} />,
               levels: [
                 { t: "L1 No defined PPM roles", active: false },
@@ -193,7 +216,7 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
             {
               letter: "P",
               title: "Process",
-              desc: "Formal review cycles, change control, decision traceability.",
+              desc: "Governance arrangements, lifecycle management processes, and portfolio decision cadences that put PPM into structured, repeatable practice.",
               icon: <Workflow size={20} />,
               levels: [
                 { t: "L1 Verbal decisions, no audit trail", active: false },
@@ -206,7 +229,7 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
             {
               letter: "D",
               title: "Data",
-              desc: "The most common bottleneck. Siloed data caps the entire portfolio system regardless of technology.",
+              desc: "Availability, quality, and integration of master data and transaction data needed for product-level analysis — including product-level profitability, lifecycle stage, and variant cost visibility.",
               icon: <Database size={20} />,
               levels: [
                 { t: "L1 Spreadsheets and email threads", active: false },
@@ -219,7 +242,7 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
             {
               letter: "T",
               title: "Technology",
-              desc: "Not which tools you own — but which are open during portfolio decisions.",
+              desc: "Business IT systems (ERP, PLM, BI, CRM) that collect, control, and convert data into actionable portfolio intelligence — and their degree of integration into portfolio decision workflows.",
               icon: <Cpu size={20} />,
               levels: [
                 { t: "L1 Excel only, no integration", active: false },
@@ -257,6 +280,17 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
           </p>
         </div>
 
+        <div className="ph-bottleneck-callout" style={{ borderColor: "rgba(103,232,249,0.35)" }}>
+          <Sliders size={22} />
+          <p>
+            <strong>Business-model sensitivity:</strong> The critical pillar
+            varies by business model. For Engineer-to-Order companies, People and
+            Process dominate. For Standard product companies, Data is the primary
+            failure mode. For Bulk manufacturers, Process and Technology are
+            co-critical. Your contextual score reflects this.
+          </p>
+        </div>
+
         <div className="ph-section-footer dark">
           PPDT framework: Hannila (2019). Operationalized through Hannila,
           Härkönen &amp; Haapasalo (2022), Journal of Decision Systems, 31(3),
@@ -280,11 +314,11 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
         <div className="ph-level-track">
           <div className="ph-spine" />
           {[
-            { lvl: 1, name: "Ad Hoc",     tag: "Foundational",  bg: "var(--l1)", desc: "No formal structures. Verbal decisions. Data in personal spreadsheets." },
-            { lvl: 2, name: "Developing", tag: "Awareness",     bg: "var(--l2)", desc: "Departmental silos. Recurring meetings but no audit trail or central governance." },
-            { lvl: 3, name: "Defined",    tag: "Established",   bg: "var(--l3)", desc: "Formal change control. PLM-ERP integration active. Product profitability retrievable.", l3: true },
-            { lvl: 4, name: "Managed",    tag: "Governed",      bg: "var(--l4)", desc: "Enterprise governance. Data quality SLAs. Portfolio reviews minuted and traceable." },
-            { lvl: 5, name: "Predictive", tag: "Optimised",     bg: "var(--l5)", desc: "AI-assisted. Automated governance. Real-time traceability end-to-end." },
+            { lvl: 1, name: "Ad Hoc",     tag: "Foundational",  bg: "var(--l1)", desc: "Intuition-driven, who-shouts-loudest mentality, no systematic portfolio process." },
+            { lvl: 2, name: "Developing", tag: "Awareness",     bg: "var(--l2)", desc: "Some processes exist but inconsistently applied; data fragmented." },
+            { lvl: 3, name: "Defined",    tag: "Established",   bg: "var(--l3)", desc: "Documented processes, centralised data exists but not yet driving real-time decisions.", l3: true },
+            { lvl: 4, name: "Managed",    tag: "Governed",      bg: "var(--l4)", desc: "Evidence-based decisions, real-time data, traceable governance." },
+            { lvl: 5, name: "Predictive", tag: "Optimised",     bg: "var(--l5)", desc: "Continuously optimised, automated alerts, leading indicators integrated." },
           ].map((s) => (
             <div key={s.lvl} className={`ph-level-step ${s.l3 ? "l3" : ""}`}>
               <div className="ph-step-dot" style={{ background: s.bg }}>{s.lvl}</div>
@@ -295,21 +329,102 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
           ))}
         </div>
 
-        <div className="ph-glass-card ph-formula-callout">
-          <h4>How the overall score is calculated:</h4>
-          <div className="ph-formula">
-            (People × 0.25) + (Process × 0.25) + (Data × 0.25) + (Technology × 0.25) = Overall Score
+        <div className="ph-dual-formula-grid">
+          <div className="ph-glass-card ph-formula-callout">
+            <span className="ph-formula-tag primary">Primary</span>
+            <h4>Overall Score (Equal-Weighted)</h4>
+            <div className="ph-formula">
+              (People + Process + Data + Technology) ÷ 4
+            </div>
+            <p className="ph-note">
+              Academically grounded, model-neutral baseline consistent with the
+              PPDT balance principle. Provides cross-company comparability.
+              Hannila, Salonen &amp; Vierimaa (2024), Product Wellbeing, Ch. 3.
+            </p>
           </div>
-          <p className="ph-note">
-            Equal weighting is the validated baseline. Business-model-specific
-            weighting is an open research question (RQ5, current Master's
-            thesis research).
+          <div className="ph-glass-card ph-formula-callout">
+            <span className="ph-formula-tag secondary">Secondary</span>
+            <h4>Overall Score (Business-Model Adjusted)</h4>
+            <div className="ph-formula">
+              (People × w₁) + (Process × w₂) + (Data × w₃) + (Technology × w₄)
+            </div>
+            <p className="ph-note">
+              Operationally relevant score where pillar weights are set by your
+              business model. CODP framework — Wikner &amp; Rudberg (2004); Haug,
+              Ladeby &amp; Edwards (2009); applied to PPDT by Hannila et al. (2024).
+            </p>
+          </div>
+        </div>
+
+        <p className="ph-match-note">
+          <strong>When they match:</strong> if both scores are identical, your
+          stated strategic priority was ambiguous — the equal-weighted baseline
+          applies without adjustment. This is intentional, not a bug.
+        </p>
+
+        <div className="ph-glass-card ph-weights-wrap">
+          <h4>Business-model weighting</h4>
+          <div className="ph-table-scroll">
+            <table className="ph-weights-table">
+              <thead>
+                <tr>
+                  <th>Business Model</th>
+                  <th>People</th>
+                  <th>Process</th>
+                  <th>Data</th>
+                  <th>Technology</th>
+                  <th>Primary Failure Mode</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  ["ETO (Engineer-to-Order)", "35%", "30%", "20%", "15%", "Knowledge loss, reactive firefighting"],
+                  ["CETO (Configure & Engineer-to-Order)", "25%", "30%", "25%", "20%", "Path-allocation ambiguity, governance gaps"],
+                  ["CTO (Configure-to-Order)", "20%", "25%", "30%", "25%", "Variant proliferation, unprofitable configurations"],
+                  ["Standard", "15%", "30%", "35%", "20%", "No product-level profitability, portfolio explosion"],
+                  ["Bulk", "10%", "35%", "20%", "35%", "Inefficient operations, manual intervention at scale"],
+                ].map((row) => (
+                  <tr key={row[0]}>
+                    <td className="ph-bm-name">{row[0]}</td>
+                    <td>{row[1]}</td>
+                    <td>{row[2]}</td>
+                    <td>{row[3]}</td>
+                    <td>{row[4]}</td>
+                    <td className="ph-bm-fail">{row[5]}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <ul className="ph-bm-list">
+            {[
+              ["Bulk", "Producing goods in large quantities, typically at reduced price. Competitive advantage is purely operational. Technology and Process automation are mandatory at scale."],
+              ["Standard", "Manufactured at scale with predetermined specifications. The critical gap is product-level profitability — knowing which variants earn margins vs. silently consuming cost."],
+              ["CTO", "Standard base design with customer-selectable options. Variant proliferation is the primary failure mode; Data and Technology are co-critical."],
+              ["CETO", "Each order requires both configuration selection and custom engineering. The path-allocation decision (CTO vs. ETO route per order) is a Process governance challenge."],
+              ["ETO", "Nothing is designed or manufactured until the customer orders. Maximum dependency on People (individual expertise, knowledge retention) and Process (per-order governance)."],
+            ].map(([k, v]) => (
+              <li key={k}><strong>{k}</strong> — {v}</li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="ph-glass-card ph-boost-callout">
+          <Sliders size={20} />
+          <p>
+            <strong>Strategic-priority boost:</strong> if you declare a strategic
+            priority that maps cleanly to a single pillar (e.g. “data governance” →
+            Data; “PLM implementation” → Technology), that pillar receives a
+            <strong> +5% weight bonus</strong> and the remaining three share the
+            −5% equally. If your priority is ambiguous (e.g. “digital
+            transformation”), no boost is applied and the business-model weights
+            run unadjusted.
           </p>
         </div>
 
         <div className="ph-section-footer">
-          Hannila et al. (2020), Journal of Enterprise Information Management,
-          33(1), 214–237. 8-company empirical study.
+          Weight matrix &amp; scoring logic: current IEM Master's thesis (University
+          of Oulu, 2026), grounded in Hannila et al. (2020), JEIM, 33(1), 214–237.
         </div>
       </div>
     </section>
@@ -330,11 +445,11 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
           {[
             {
               n: "01", title: "Context Setting",
-              body: "We understand your organisation before scoring anything.",
+              body: "We understand your organisation first. You select your primary business model (Bulk / Standard / CTO / CETO / ETO) and declare a strategic priority — these two inputs determine your contextual score weighting.",
               items: [
                 "Industry and company size",
-                "Business model (ETO / CTO / CETO / Standard)",
-                "Your role and what prompted the assessment",
+                "Business model: Bulk / Standard / CTO / CETO / ETO",
+                "Strategic priority + what prompted the assessment",
               ],
             },
             {
@@ -357,9 +472,9 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
             },
             {
               n: "04", title: "Report Generation",
-              body: "A full HTML/PDF report with all mandatory sections.",
+              body: "A full HTML/PDF report containing both an equal-weighted score (the academically grounded baseline) and a contextual score (adjusted for your business model). The bottleneck pillar is identified from the equal-weighted baseline.",
               items: [
-                "Pillar scores and overall maturity level",
+                "Dual score: equal-weighted baseline + contextual",
                 "Bottleneck analysis and decision vulnerabilities",
                 "Three-phase improvement roadmap",
               ],
@@ -398,6 +513,12 @@ const HomePage = ({ ctaTo, onShowTheory }) => (
           <div className="ph-meta-item"><Clock size={16} />45–60 minutes</div>
           <div className="ph-meta-item"><FileText size={16} />Full structured PDF report</div>
           <div className="ph-meta-item"><BookOpen size={16} />IEM research-grounded</div>
+        </div>
+        <div className="ph-section-footer dark" style={{ marginTop: "var(--space-lg)" }}>
+          Assessment grounded in: Hannila (2019) doctoral dissertation · Hannila,
+          Salonen &amp; Vierimaa (2024) Product Wellbeing · Hannila, Koskinen,
+          Härkönen &amp; Haapasalo (2020), JEIM 33(1), 214–237 · Hannila, Härkönen
+          &amp; Haapasalo (2022), JDS 31(3), 258–279.
         </div>
       </div>
     </section>
