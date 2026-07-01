@@ -1228,7 +1228,6 @@
   gap: 16px;
   min-height: 0;
 }
-.ph-report .bn-card--hero { padding: 26px 28px; }
 
 .ph-report .bn-card-head-block { display: flex; flex-direction: column; gap: 6px; }
 .ph-report .bn-card-head {
@@ -1421,16 +1420,7 @@
 }
 .ph-report .bn-dec-label { font: 500 13px/1.3 'Inter'; color: #1E293B; }
 
-/* --- CARD 4 · Portfolio Renewal Radar (full-width hero) --------------- */
-.ph-report .bn-radar-body {
-  display: grid;
-  grid-template-columns: minmax(0, 380px) 1fr;
-  gap: 28px;
-  align-items: center;
-}
-@media (max-width: 760px) {
-  .ph-report .bn-radar-body { grid-template-columns: 1fr; gap: 18px; }
-}
+/* --- CARD 4 · Portfolio Renewal Radar (half-width, stacked) ---------- */
 .ph-report .bn-radar-stage {
   display: flex;
   align-items: center;
@@ -1438,9 +1428,9 @@
   background: radial-gradient(circle at 50% 50%, #F0FBFD 0%, #FFFFFF 70%);
   border: 1px solid #E5E7EB;
   border-radius: 12px;
-  padding: 12px;
+  padding: 10px;
 }
-.ph-report .bn-radar-svg { width: 100%; max-width: 360px; height: auto; }
+.ph-report .bn-radar-svg { width: 100%; max-width: 320px; height: auto; }
 .ph-report .bn-radar-ring     { fill: none; stroke: #E2E8F0; stroke-width: 1; stroke-dasharray: 2 4; }
 .ph-report .bn-radar-spoke    { stroke: #E2E8F0; stroke-width: 1; }
 .ph-report .bn-radar-ringlabel{ font: 500 9.5px 'Inter'; fill: #94A3B8; letter-spacing: 0.04em; text-transform: uppercase; }
@@ -1451,32 +1441,37 @@
   fill: #1E293B;
   letter-spacing: -0.1px;
 }
-.ph-report .bn-radar-legend { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
-.ph-report .bn-radar-legend-head {
-  font: 600 11px/1 'Inter';
+
+.ph-report .bn-radar-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid #F1F5F9;
+}
+.ph-report .bn-radar-callout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.ph-report .bn-radar-callout-label {
+  font: 600 11px 'Inter';
   letter-spacing: 0.10em;
   text-transform: uppercase;
   color: #64748B;
 }
-.ph-report .bn-radar-legend-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; }
-.ph-report .bn-radar-legend-row {
-  display: grid;
-  grid-template-columns: 14px 1fr auto;
-  align-items: center;
-  gap: 10px;
-  padding: 7px 4px;
-  border-bottom: 1px solid #F1F5F9;
-}
-.ph-report .bn-radar-legend-row:last-child { border-bottom: none; }
-.ph-report .bn-radar-dot { width: 10px; height: 10px; border-radius: 999px; box-shadow: 0 0 0 2px rgba(255,255,255,0.9); }
-.ph-report .bn-radar-legend-label { font: 500 13px/1.3 'Inter'; color: #1E293B; }
 .ph-report .bn-radar-legend-scale {
   display: flex;
-  gap: 14px;
-  font: 500 11px 'Inter';
+  gap: 16px;
+  justify-content: center;
+  font: 500 11.5px/1 'Inter';
   color: #64748B;
-  padding-top: 6px;
-  border-top: 1px solid #F1F5F9;
+}
+.ph-report .bn-radar-legend-scale span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 

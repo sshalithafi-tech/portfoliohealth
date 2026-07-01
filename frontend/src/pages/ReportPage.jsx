@@ -516,7 +516,7 @@ const R5Calculation = ({ data }) => {
               <p className="r5-col-empty">
                 Business-model weighting produced the same overall score as the equal-weighted baseline
                 {business_model ? ` for ${business_model}` : ""}. This is intentional — it signals balanced
-                pillar performance relative to the business model's demands.
+                pillar performance relative to the business model&apos;s demands.
               </p>
             </div>
           )}
