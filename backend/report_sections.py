@@ -45,9 +45,13 @@ import chat_service  # reuse the existing Anthropic/Emergent client plumbing
 
 logger = logging.getLogger(__name__)
 
-MODEL_NAME = "claude-sonnet-4-5-20250929"  # report-generation model — intentionally
+MODEL_NAME = "claude-sonnet-5"  # report-generation model — intentionally
 # independent of chat_service.CHAT_MODEL_NAME so upgrading the assessment
 # chat model never silently changes the report-generation model.
+# (Upgraded from claude-sonnet-4-5-20250929 to match the chat engine, per
+# user request. The Extended-Thinking-safe text-block extraction fix in
+# _call_specialist already handles the ThinkingBlock content-parts this
+# model can return.)
 
 MAX_TOKENS_A = 4500
 MAX_TOKENS_B = 6000

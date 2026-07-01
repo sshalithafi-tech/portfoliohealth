@@ -504,7 +504,44 @@ LLM call (previously ~16000 max_tokens in one shot, causing 4-5 min report gener
 ##     -agent: "testing"
 ##     -message: "Testing complete - ALL 6 TESTS PASSED ✓. CRITICAL BUG FOUND AND FIXED: Claude Sonnet 5 Extended Thinking returns ThinkingBlock content blocks that don't have a .text attribute. The code was failing with 'ThinkingBlock' object has no attribute 'text' when trying to access response.content[0].text. Fixed by iterating through content blocks and extracting only text blocks (block.type == 'text'). After fix, all tests passed: (1) Login ✓, (2) Create company ✓, (3) Create assessment ✓, (4) Start assessment with AI greeting (200, 119 chars) ✓, (5) Chat message with AI response (200, 794 chars) ✓, (6) Regression check ✓. Idempotency verified: calling /start twice returns identical greeting. Backend logs clean, no errors. The AI assessment flow is working correctly with user's ANTHROPIC_API_KEY and Claude Sonnet 5."
 
+## Update (main agent, 2026-07-01) — Report generation model upgraded to Claude Sonnet 5
+- report_sections.py MODEL_NAME changed from "claude-sonnet-4-5-20250929" to "claude-sonnet-5" (matches
+  chat_service.CHAT_MODEL_NAME now, per user request). No prompt/schema/scoring changes.
+- Verified via direct diagnostic call to _call_specialist (the exact code path used by all 3 concurrent
+  report specialist calls, including cache_control system-block usage) — succeeds, returns valid JSON.
+- Deterministic backend/tests/test_report_fixes.py re-verified passing (no LLM calls, unaffected).
+- needs_retesting: true — full live-conversation report generation test to confirm all 26 report fields
+  still populate correctly and both PDFs render with the new model.
+
+## backend:
+##   - task: "Report generation model upgrade to Claude Sonnet 5 (report_sections.py)"
+##     implemented: true
+##     working: false
+##     file: "report_sections.py"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: false
+##     status_history:
+##         -working: "NA"
+##         -agent: "main"
+##         -comment: "Changed MODEL_NAME to 'claude-sonnet-5' to match the chat engine. Direct diagnostic call to _call_specialist (with cache_control system block, same code path as the 3 concurrent report calls) succeeds. Deterministic test_report_fixes.py passes. Needs a live full-conversation test: drive assessment to report_ready:true, confirm all 26 report fields present/non-empty (scores, contextual_score, dimension_summaries, pillar_interpretations, failure_pattern_narrative, financial_consequence, ninety_day_projection, governance fields, management_commitment, decision_vulnerability, key_findings, critical_gaps, roadmap w/ continuity, benchmark_context, consultant_note, closing_statement), then GET /pdf and /summary-pdf both return valid 200 PDFs."
+##         -working: false
+##         -agent: "testing"
+##         -comment: "CRITICAL ISSUE: Specialist Call A (sections 1-7) failed both retry attempts with JSON parse errors from Claude Sonnet 5, causing 5 essential fields to be missing/empty. TIMING: Report generation took ~165 seconds (2m 45s) from turn start (13:37:24) to completion (13:40:09). Seed call: 7s. Three concurrent specialist calls: Call A failed both attempts (attempt 1: 113s, attempt 2: 45s) with 'Expecting ',' delimiter' JSON parse errors at different positions (line 31 col 4, line 19 col 4). Calls B and C succeeded. FIELD COMPLETENESS: 21/26 fields present and non-empty. MISSING/EMPTY (5): contextual_score (0.0, should be recomputed), failure_pattern_name (empty), failure_pattern_narrative (empty), governance_assessment (empty), governance_signal_summary (empty list). PRESENT FIELDS: scores (all 2.0), equal_weighted_score (2.0), level_names, dimension_summaries, pillar_interpretations, pillar_interpretation_short, financial_consequence, ninety_day_projection, governance_observations, management_commitment (Medium), management_commitment_assessment (264 chars), assessment_reliability, decision_vulnerability_ratings, decision_vulnerability (759 chars), key_findings (5 items), critical_gaps (5 items, all with Precondition labels ✓), roadmap (all 3 phases with expected_gain), first_action, benchmark_context (237 chars), consultant_note (1810 chars, ~250 words ✓), closing_statement (277 chars). ROADMAP CONTINUITY: ✓ VERIFIED - immediate phase starting values match pillar scores exactly (People: 2.0, Process: 2.0, Data: 2.0, Technology: 2.0). PDFs: ✓ Full PDF 26639 bytes valid, ✓ Summary PDF 9286 bytes valid. ROOT CAUSE: Claude Sonnet 5 is returning malformed JSON for specialist Call A (sections 1-7) that contains contextual_score, failure_pattern_name/narrative, and governance fields. The retry logic is working correctly (attempted twice), but both attempts failed. The fallback defaults prevented a crash, but the report is incomplete. This is a non-deterministic LLM output quality issue specific to Claude Sonnet 5's JSON generation for this particular prompt/schema combination."
+
+## test_plan:
+##   current_focus:
+##     - "Report generation model upgrade to Claude Sonnet 5 (report_sections.py)"
+##   stuck_tasks:
+##     - "Report generation model upgrade to Claude Sonnet 5 (report_sections.py)"
+##   test_all: false
+##   test_priority: "high_first"
+
 ## agent_communication:
+##     -agent: "main"
+##     -message: "Upgraded report generation (report_sections.py) from claude-sonnet-4-5-20250929 to claude-sonnet-5, matching the chat engine. Please drive a FULL conversation via POST /api/assessments/{id}/chat (language selection -> context/anchor questions -> People/Process/Data/Technology pillar questions -> governance probe -> close) until report_ready:true. Confirm all 26 report fields are present and non-empty (see prior test runs in this file for the full field list), roadmap continuity holds (immediate phase start values == confirmed pillar scores), and both GET /api/assessments/{id}/pdf and /summary-pdf return valid 200 PDFs. Report timing and any JSON-parse retry behavior seen in logs."
+##     -agent: "testing"
+##     -message: "CRITICAL ISSUE FOUND: Claude Sonnet 5 upgrade causes specialist Call A (sections 1-7) to fail with JSON parse errors, resulting in 5 missing fields (contextual_score, failure_pattern_name, failure_pattern_narrative, governance_assessment, governance_signal_summary). The retry logic works correctly (2 attempts), but both fail. Report generation completes in ~165 seconds with fallback defaults, but the report is incomplete. Timing is acceptable (<90s target was for the old single-call approach; the new parallel approach with retries takes longer but is still reasonable). The core issue is Claude Sonnet 5's JSON generation quality for the specialist Call A prompt/schema. RECOMMENDATION: Either (1) revert report_sections.py MODEL_NAME back to 'claude-sonnet-4-5-20250929' (keep chat engine on Sonnet 5), OR (2) investigate and fix the specialist Call A prompt/schema to work reliably with Claude Sonnet 5 (may need prompt engineering, schema simplification, or additional JSON repair logic). The parallel architecture and retry logic are working correctly - this is purely a model output quality issue."
 ##     -agent: "testing"
 ##     -message: "Responsive CSS/layout testing partially complete. PART B (Global Nav Bar): ✓ PASSED at all breakpoints (1920px, 834px, 768px, 375px, 320px). Nav shows correct elements at each width, hamburger menu works correctly, drawer opens/closes, links navigate and close menu, no horizontal scroll at any width, nav remains sticky when scrolling. PART A (Results Dashboard): ✗ INCOMPLETE - Could not test dashboard due to HashRouter URL navigation issue in test script. The script used relative hash URLs (/#/login) which caused 'Cannot navigate to invalid URL' errors. To complete dashboard testing, the test script needs to use full URLs (e.g., https://ai-assessment-check.preview.emergentagent.com/#/login). The dashboard components exist in the code (AssessmentDashboard.jsx with bn-grid-2x2 layout, Bottleneck card with severity label, responsive breakpoints at 900px and 599px), but functional verification at different viewport sizes was not completed. Recommend re-running dashboard tests with corrected URL navigation."
 ##     -agent: "testing"
