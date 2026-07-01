@@ -22,6 +22,14 @@
   --border: #E5E7EB;
   --danger: #EF4444;
   --success: #22C55E;
+  /* Shared card padding token (Issue A3) — every dashboard "card" component
+     (Bottleneck, Preconditions, Portfolio Renewal Radar, Portfolio Decision
+     Impact, Improvement Roadmap phase cards, Pillar Scores chart card) uses
+     this single value so spacing is identical card-to-card at every
+     breakpoint. The r1 hero cover intentionally keeps its own larger
+     hero-scale padding (it's a full-bleed banner, not a bordered card). */
+  --card-padding: 24px;
+  --card-padding-mobile: 16px;
   /* Maturity score palette — dynamic numeric-band scale
      1.0–1.4 red · 1.5–2.4 amber · 2.5–3.4 green · 3.5–4.4 sky · 4.5–5.0 emerald */
   --l1: #DC2626; --l1-bg: #FEE2E2; --l1-bd: #FCA5A5;
@@ -859,7 +867,7 @@
   border: 1px solid var(--border);
   border-top: 3px solid var(--gold);
   border-radius: 14px;
-  padding: 24px 22px;
+  padding: var(--card-padding);
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -962,7 +970,7 @@
 /* ============ R9 Dashboard ============ */
 .ph-report .r9 { padding: 24px 48px; }
 .ph-report .chart-container {
-  padding: 24px 24px 18px;
+  padding: var(--card-padding);
   background: #fff;
   border: 1px solid var(--border);
   border-left: 3px solid var(--gold);
@@ -1181,13 +1189,31 @@
   .ph-report .r1-right { width: 100%; max-width: none; align-items: flex-start; text-align: left; }
   .ph-report .r1-strip { padding: 22px 24px 28px; grid-template-columns: repeat(2, 1fr); gap: 12px; }
   .ph-report .r2, .ph-report .r3, .ph-report .r4, .ph-report .r5,
-  .ph-report .r6, .ph-report .r7, .ph-report .r8, .ph-report .r9, .ph-report .r10 {
+  .ph-report .r6, .ph-report .r7, .ph-report .r8, .ph-report .bn-dashboard,
+  .ph-report .r9, .ph-report .r10 {
     padding: 20px 20px;
   }
   .ph-report .r3 { grid-template-columns: 1fr; }
   .ph-report .roadmap-board { grid-template-columns: 1fr; }
   .ph-report .r10-grid { grid-template-columns: 1fr; }
   .ph-report .report-footer { padding: 16px 20px; }
+}
+/* True mobile (<600px, per the shared breakpoint set used across the whole
+   app): switch every card to the mobile padding token and guarantee no
+   horizontal overflow at the 320–600px reference range. */
+@media (max-width: 599px) {
+  .ph-report .bn-card,
+  .ph-report .rb-phase,
+  .ph-report .chart-container {
+    padding: var(--card-padding-mobile);
+  }
+  .ph-report .r2, .ph-report .r3, .ph-report .r4, .ph-report .r5,
+  .ph-report .r6, .ph-report .r7, .ph-report .r8, .ph-report .bn-dashboard,
+  .ph-report .r9, .ph-report .r10 {
+    padding: var(--card-padding-mobile);
+  }
+  .ph-report { overflow-x: hidden; }
+  .ph-report .bn-radar-svg { max-width: 100%; }
 }
 
 /* =====================================================================
@@ -1204,7 +1230,16 @@
   --bn-advanced: #0EA5E9;
 }
 
-.ph-report .bn-dashboard { margin: 32px 0; padding: 0; background: transparent; }
+.ph-report .bn-dashboard {
+  /* Same horizontal gutter as every sibling section (.r2–.r9 all use
+     `padding: 24px 48px`) so the card grid aligns to the exact same left/
+     right edges as the top scorecard and roadmap rows (Issue A1 fix — this
+     was previously `padding: 0`, which let these cards bleed to the full
+     container width while every other section was inset by 48px). */
+  margin: 0;
+  padding: 24px 48px;
+  background: transparent;
+}
 .ph-report .bn-grid-2x2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1221,7 +1256,7 @@
   background: #FFFFFF;
   border: 1px solid #E5E7EB;
   border-radius: 16px;
-  padding: 22px 24px;
+  padding: var(--card-padding);
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.02), 0 8px 24px -16px rgba(15, 23, 42, 0.10);
   display: flex;
   flex-direction: column;
@@ -1369,6 +1404,18 @@
   font: 500 11px 'Inter';
   color: #94A3B8;
   font-style: italic;
+}
+.ph-report .bn-bn-severity {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0;
+}
+.ph-report .bn-bn-severity-label {
+  font: 700 10px/1 'Inter', sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64748B;
 }
 .ph-report .bn-bn-explanation {
   margin: 0;

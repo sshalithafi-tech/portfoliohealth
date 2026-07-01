@@ -28,6 +28,8 @@ import {
   ShieldCheck,
   Microscope,
   Lightbulb,
+  Menu,
+  X,
   CircleSlash,
   Scale,
   Sliders,
@@ -934,17 +936,36 @@ const LandingPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [page, setPage] = useState("home");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const ctaTo = user ? "/dashboard" : "/register";
 
   // Smooth-scroll to top whenever page changes
   useEffect(() => { window.scrollTo({ top: 0, behavior: "smooth" }); }, [page]);
 
-  const showHome = () => setPage("home");
-  const showTheory = () => setPage("theory");
+  // Lock body scroll while the mobile menu is open, and always close the
+  // menu on escape — standard slide-in menu behavior.
+  useEffect(() => {
+    document.body.style.overflow = mobileMenuOpen ? "hidden" : "";
+    const onKey = (e) => { if (e.key === "Escape") setMobileMenuOpen(false); };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [mobileMenuOpen]);
+
+  const showHome = () => { setPage("home"); setMobileMenuOpen(false); };
+  const showTheory = () => { setPage("theory"); setMobileMenuOpen(false); };
   const jumpToHomeCta = () => {
     setPage("home");
+    setMobileMenuOpen(false);
     setTimeout(() => document.getElementById("cta")?.scrollIntoView({ behavior: "smooth" }), 80);
+  };
+  const jumpToSection = (id) => {
+    if (page !== "home") setPage("home");
+    setMobileMenuOpen(false);
+    setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" }), 60);
   };
 
   return (
@@ -959,9 +980,12 @@ const LandingPage = () => {
           data-testid="brand-logo"
         >
           <LogoMark className="ph-logo-mark" radius={18} />
-          <span className="ph-name">PortfolioHealth Advisor</span>
+          <span className="ph-name ph-name-full">PortfolioHealth Advisor</span>
+          <span className="ph-name ph-name-short">PortfolioHealth</span>
         </div>
-        <div className="ph-nav-tabs">
+
+        {/* Desktop nav — hidden ≤1024px, replaced by the hamburger menu below */}
+        <div className="ph-nav-tabs ph-nav-desktop-only">
           <button
             type="button"
             data-page="page-home"
@@ -981,23 +1005,11 @@ const LandingPage = () => {
             Research &amp; Theory
           </button>
         </div>
-        <div className="ph-nav-right">
-          <span
-            className="ph-nav-link"
-            onClick={() => {
-              if (page !== "home") setPage("home");
-              setTimeout(() => document.getElementById("maturity-levels")?.scrollIntoView({ behavior: "smooth" }), 60);
-            }}
-          >
+        <div className="ph-nav-right ph-nav-desktop-only">
+          <span className="ph-nav-link" onClick={() => jumpToSection("maturity-levels")}>
             Maturity Levels
           </span>
-          <span
-            className="ph-nav-link"
-            onClick={() => {
-              if (page !== "home") setPage("home");
-              setTimeout(() => document.getElementById("framework")?.scrollIntoView({ behavior: "smooth" }), 60);
-            }}
-          >
+          <span className="ph-nav-link" onClick={() => jumpToSection("framework")}>
             The Framework
           </span>
           {user ? (
@@ -1013,7 +1025,95 @@ const LandingPage = () => {
             </>
           )}
         </div>
+
+        {/* Tablet (600–1024px): keep Sign In / CTA visible, collapse the rest */}
+        <div className="ph-nav-tablet-actions">
+          {user ? (
+            <Link to="/dashboard" data-testid="nav-dashboard-btn-tablet" className="ph-btn-primary ph-nav-cta">
+              Dashboard
+            </Link>
+          ) : (
+            <>
+              <Link to="/login" data-testid="nav-login-link-tablet" className="ph-nav-link">Sign In</Link>
+              <Link to={ctaTo} data-testid="nav-cta-btn-tablet" className="ph-btn-primary ph-nav-cta">
+                Start Assessment
+              </Link>
+            </>
+          )}
+        </div>
+
+        {/* Hamburger — visible ≤1024px */}
+        <button
+          type="button"
+          className="ph-nav-hamburger"
+          aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={mobileMenuOpen}
+          data-testid="nav-hamburger-btn"
+          onClick={() => setMobileMenuOpen((v) => !v)}
+        >
+          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
       </nav>
+
+      {/* Mobile / tablet slide-in menu — collapses ALL nav links.
+          Sign In + CTA are also duplicated here so they always work even at
+          widths where the tablet-actions row itself hides (<600px). */}
+      {mobileMenuOpen && (
+        <div
+          className="ph-nav-overlay"
+          data-testid="nav-mobile-overlay"
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          <div
+            className="ph-nav-drawer"
+            role="dialog"
+            aria-label="Navigation menu"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="ph-nav-drawer-head">
+              <span className="ph-name">PortfolioHealth Advisor</span>
+              <button
+                type="button"
+                className="ph-nav-drawer-close"
+                aria-label="Close menu"
+                data-testid="nav-drawer-close-btn"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <X size={22} />
+              </button>
+            </div>
+            <div className="ph-nav-drawer-links">
+              <button type="button" className={`ph-nav-drawer-link ${page === "home" ? "active" : ""}`} onClick={showHome}>
+                Home
+              </button>
+              <button type="button" className={`ph-nav-drawer-link ${page === "theory" ? "active" : ""}`} onClick={showTheory}>
+                Research &amp; Theory
+              </button>
+              <button type="button" className="ph-nav-drawer-link" onClick={() => jumpToSection("maturity-levels")}>
+                Maturity Levels
+              </button>
+              <button type="button" className="ph-nav-drawer-link" onClick={() => jumpToSection("framework")}>
+                The Framework
+              </button>
+              <div className="ph-nav-drawer-divider" />
+              {user ? (
+                <Link to="/dashboard" className="ph-nav-drawer-cta" onClick={() => setMobileMenuOpen(false)}>
+                  Dashboard <ArrowRight size={16} />
+                </Link>
+              ) : (
+                <>
+                  <Link to="/login" className="ph-nav-drawer-link" onClick={() => setMobileMenuOpen(false)}>
+                    Sign In
+                  </Link>
+                  <Link to={ctaTo} className="ph-nav-drawer-cta" onClick={() => setMobileMenuOpen(false)}>
+                    Start Full Assessment <ArrowRight size={16} />
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {page === "home"
         ? <HomePage ctaTo={ctaTo} onShowTheory={showTheory} />

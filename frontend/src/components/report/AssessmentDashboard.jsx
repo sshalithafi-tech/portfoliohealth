@@ -47,6 +47,16 @@ const SEVERITY_COLORS = {
   muted: "#94A3B8",
 };
 
+// Qualitative label shown for the always-visible Bottleneck Severity line.
+// DBI itself is a derived/conceptual metric — we surface a plain-language
+// label here rather than the raw index number.
+const SEVERITY_LABELS = {
+  critical: "Critical",
+  warning: "High",
+  good: "Moderate",
+  advanced: "Low",
+};
+
 const PILLAR_LABELS = {
   people: "People",
   process: "Process",
@@ -272,6 +282,10 @@ const BottleneckCard = ({ data }) => {
               )}
             </div>
           )}
+          <div className="bn-bn-severity" data-testid="bottleneck-severity">
+            <span className="bn-bn-severity-label">Bottleneck Severity</span>
+            <StatusChip label={SEVERITY_LABELS[sev] || "—"} severity={sev} />
+          </div>
           <p className="bn-bn-explanation" data-testid="bottleneck-insight">{explanation}</p>
         </div>
       </div>

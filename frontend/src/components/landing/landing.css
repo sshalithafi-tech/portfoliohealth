@@ -246,8 +246,16 @@
     var(--bg);
 }
 
-/* Top nav */
+/* Top nav
+   Breakpoints (shared across the whole responsive fix):
+     Desktop  >1024px — full row, all links visible
+     Tablet   600–1024px — Sign In / CTA stay visible, secondary links + tabs
+              collapse into the hamburger drawer
+     Mobile   <600px — only logo + hamburger visible on the row itself
+   --nav-gap is the single source of truth for the link spacing so desktop
+   and tablet only differ by this one value. */
 .ph-site .ph-nav {
+  --nav-gap: 32px;
   position: fixed; top: 0; left: 0; right: 0; height: 68px; z-index: 100;
   background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(20px);
@@ -258,8 +266,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--nav-gap);
 }
-.ph-site .ph-brand { display: flex; align-items: center; gap: 12px; }
+.ph-site .ph-brand { display: flex; align-items: center; gap: 12px; min-width: 0; flex-shrink: 0; }
 .ph-site .ph-brand .ph-logo-mark {
   width: 36px;
   height: 36px;
@@ -278,13 +287,28 @@
   letter-spacing: -.4px;
   border: 1px solid rgba(8, 145, 178, 0.35);
 }
-.ph-site .ph-brand .ph-name { font-weight: 700; font-size: 15px; color: var(--navy); letter-spacing: -0.2px; }
-.ph-site .ph-nav-tabs { display: flex; gap: 4px; }
+.ph-site .ph-brand .ph-name {
+  font-weight: 700; font-size: 15px; color: var(--navy); letter-spacing: -0.2px;
+  white-space: nowrap;
+}
+/* Single-line abbreviated lockup below 480px so the wordmark never wraps
+   or collides with the hamburger. */
+.ph-site .ph-brand .ph-name-short { display: none; }
+@media (max-width: 480px) {
+  .ph-site .ph-brand .ph-name-full { display: none; }
+  .ph-site .ph-brand .ph-name-short { display: inline; }
+}
+
+/* Desktop nav groups — Home/Research tabs + secondary links + Sign In/CTA.
+   Visible only above the tablet breakpoint; collapsed into the hamburger
+   drawer below it. */
+.ph-site .ph-nav-tabs.ph-nav-desktop-only { display: flex; gap: 4px; }
 .ph-site .ph-nav-tab {
   background: transparent; color: var(--text-mid);
   font: 500 14px 'Inter';
   padding: 8px 20px; border-radius: var(--radius-pill);
   border: none; cursor: pointer; transition: all .2s;
+  white-space: nowrap;
 }
 .ph-site .ph-nav-tab.active {
   background: var(--gold-soft);
@@ -292,19 +316,103 @@
   font-weight: 600;
   border: 1px solid var(--gold-mid);
 }
-.ph-site .ph-nav-right { display: flex; align-items: center; gap: 22px; }
+.ph-site .ph-nav-right.ph-nav-desktop-only { display: flex; align-items: center; gap: var(--nav-gap); flex-shrink: 0; }
 .ph-site .ph-nav-link {
   font: 500 14px 'Inter'; color: var(--slate);
   cursor: pointer; transition: color .2s;
+  white-space: nowrap;
+  min-height: 14px; /* text-only baseline; drawer variant gets the 44px target */
 }
 .ph-site .ph-nav-link:hover { color: var(--gold-deep); }
 .ph-site .ph-nav-cta {
   padding: 9px 22px; font-size: 13.5px;
+  white-space: nowrap;
 }
 .ph-site .ph-page { padding-top: 68px; }
-@media (max-width: 720px) {
-  .ph-site .ph-nav-right .ph-nav-link { display: none; }
-  .ph-site .ph-nav-tab { padding: 6px 12px; font-size: 13px; }
+
+/* Tablet-only compact actions row (Sign In + CTA), and the hamburger button
+   — both hidden on desktop by default. */
+.ph-site .ph-nav-tablet-actions { display: none; align-items: center; gap: 14px; flex-shrink: 0; margin-left: auto; }
+.ph-site .ph-nav-hamburger {
+  display: none;
+  align-items: center; justify-content: center;
+  width: 44px; height: 44px;
+  background: transparent; border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--navy);
+  cursor: pointer; flex-shrink: 0;
+  margin-left: auto;
+  transition: background .2s, border-color .2s;
+}
+.ph-site .ph-nav-hamburger:hover { background: var(--gold-soft); border-color: var(--gold-mid); }
+
+@media (max-width: 1024px) {
+  .ph-site .ph-nav { --nav-gap: 16px; padding: 0 24px; }
+  .ph-site .ph-nav-tabs.ph-nav-desktop-only,
+  .ph-site .ph-nav-right.ph-nav-desktop-only { display: none; }
+  .ph-site .ph-nav-tablet-actions { display: flex; }
+  .ph-site .ph-nav-hamburger { display: flex; }
+}
+@media (max-width: 599px) {
+  /* Mobile: header row shows only logo + hamburger — Sign In / CTA move
+     into the drawer to guarantee no wrapping/overflow down to 320px. */
+  .ph-site .ph-nav { padding: 0 16px; }
+  .ph-site .ph-nav-tablet-actions { display: none; }
+}
+
+/* Slide-in mobile/tablet drawer (used ≤1024px) */
+.ph-site .ph-nav-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(12, 27, 42, 0.45);
+  backdrop-filter: blur(2px);
+  animation: ph-fade-in 0.18s ease;
+}
+@keyframes ph-fade-in { from { opacity: 0; } to { opacity: 1; } }
+.ph-site .ph-nav-drawer {
+  position: fixed; top: 0; right: 0; bottom: 0;
+  width: min(320px, 86vw);
+  background: #fff;
+  box-shadow: -8px 0 32px rgba(12, 27, 42, 0.18);
+  display: flex; flex-direction: column;
+  animation: ph-slide-in 0.22s cubic-bezier(.22,.61,.36,1);
+  overflow-y: auto;
+}
+@keyframes ph-slide-in { from { transform: translateX(100%); } to { transform: translateX(0); } }
+.ph-site .ph-nav-drawer-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.ph-site .ph-nav-drawer-head .ph-name { font-size: 14px; }
+.ph-site .ph-nav-drawer-close {
+  display: flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px;
+  background: transparent; border: none; color: var(--navy); cursor: pointer;
+  border-radius: 10px; transition: background .2s;
+}
+.ph-site .ph-nav-drawer-close:hover { background: var(--bg-alt); }
+.ph-site .ph-nav-drawer-links { display: flex; flex-direction: column; padding: 8px 12px 24px; gap: 2px; }
+.ph-site .ph-nav-drawer-link {
+  display: flex; align-items: center;
+  min-height: 44px;
+  padding: 0 12px;
+  font: 500 15px 'Inter'; color: var(--slate);
+  background: transparent; border: none; border-radius: 10px;
+  text-align: left; cursor: pointer; text-decoration: none;
+  transition: background .2s, color .2s;
+}
+.ph-site .ph-nav-drawer-link:hover { background: var(--bg-alt); color: var(--gold-deep); }
+.ph-site .ph-nav-drawer-link.active { background: var(--gold-soft); color: var(--gold-deep); font-weight: 600; }
+.ph-site .ph-nav-drawer-divider { height: 1px; background: var(--border); margin: 10px 4px; }
+.ph-site .ph-nav-drawer-cta {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 48px;
+  margin: 6px 4px 0;
+  padding: 0 16px;
+  font: 600 15px 'Inter'; color: #fff;
+  background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+  border-radius: 12px;
+  text-decoration: none;
 }
 
 /* Hero */
