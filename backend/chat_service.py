@@ -248,7 +248,19 @@ async def call_llm_with_history(
     *, session_id: str, system_message: str, history: list, user_message: str
 ) -> str:
     if _anthropic_client is not None:
-        return await _call_anthropic_direct(system_message, history, user_message)
+        try:
+            return await _call_anthropic_direct(system_message, history, user_message)
+        except Exception as exc:
+            # The user's own Claude key is primary. If it transiently fails
+            # (rate limit, credit exhaustion, network) and an Emergent key is
+            # available (preview env), fall back so the assessment still starts.
+            if EMERGENT_LLM_KEY:
+                logger.warning(
+                    "chat_service: direct Anthropic call failed (%s); "
+                    "falling back to Emergent Universal Key", exc,
+                )
+                return await _call_emergent(session_id, system_message, history, user_message)
+            raise
     return await _call_emergent(session_id, system_message, history, user_message)
 
 

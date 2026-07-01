@@ -124,6 +124,9 @@ Verified LLM greeting call succeeds directly. Backend now healthy, admin seeded.
 ##         -working: true
 ##         -agent: "testing"
 ##         -comment: "Tested complete end-to-end flow: login, create company, create assessment, start assessment (LLM greeting), and chat message. All 5 tests PASSED. AI successfully starts assessment with multilingual greeting (Welcome/Tervetuloa/Välkommen) and responds to chat messages. LLM integration via EMERGENT_LLM_KEY (Claude Sonnet 4.5) working correctly. No errors encountered."
+##         -working: true
+##         -agent: "testing"
+##         -comment: "Re-tested with user's ANTHROPIC_API_KEY (Claude Sonnet 4.5 direct). All 5 tests PASSED: 1) Login ✓, 2) Create company ✓, 3) Create assessment ✓, 4) Start assessment (LLM greeting) ✓ - returned HTTP 200 with 132-char multilingual greeting, 5) Chat message ✓ - AI responded with 546-char message. Also verified idempotency: calling /start twice returns same greeting without error. Backend logs clean. AI assessment flow working reliably with user's Claude key."
 
 ## test_plan:
 ##   current_focus:
@@ -136,3 +139,15 @@ Verified LLM greeting call succeeds directly. Backend now healthy, admin seeded.
 ##     -message: "Root cause was missing .env files causing backend crash. Recreated them. Please test: login as admin (admin@portfoliohealth.fi / Admin@12345), create a company, create an assessment, POST /api/assessments/{id}/start (should return an AI greeting, NOT 500), then send a chat message and confirm the AI responds. Focus on confirming the AI actually starts the assessment."
 ##     -agent: "testing"
 ##     -message: "Testing complete. All backend APIs working correctly. Tested full end-to-end flow: 1) Login with admin credentials ✓, 2) Create company ✓, 3) Create assessment ✓, 4) Start assessment (LLM greeting) ✓, 5) Chat message (AI response) ✓. The bug is FIXED - AI now successfully starts assessments and responds to chat. LLM integration via Claude Sonnet 4.5 (EMERGENT_LLM_KEY) working as expected. No issues found."
+
+## Update (main agent, 2026-07-01) — Claude key + start-assessment hardening
+- Validated user's ANTHROPIC_API_KEY directly against Anthropic API: VALID, model claude-sonnet-4-5-20250929 accessible.
+- Backend now uses the user's Claude key as primary (Anthropic SDK direct).
+- Added resilience in chat_service.call_llm_with_history: if the direct Anthropic call fails AND EMERGENT_LLM_KEY exists (preview only), it falls back to Emergent so start-assessment never hard-fails. Production (Render, no EMERGENT_LLM_KEY) behavior unchanged (raises as before).
+- needs_retesting: true for "AI assessment start + chat".
+
+## agent_communication:
+##     -agent: "main"
+##     -message: "Re-test the AI assessment start + chat flow using the user's Claude key. Login admin@portfoliohealth.fi / Admin@12345, create company, create assessment, POST /api/assessments/{id}/start must return a non-empty AI greeting (200, not 500), then POST /api/assessments/{id}/chat must return an AI response. Confirm the AI starts the assessment reliably."
+##     -agent: "testing"
+##     -message: "Testing complete. AI assessment flow verified working with user's ANTHROPIC_API_KEY. All 5 backend tests PASSED (login, create company, create assessment, start assessment with LLM greeting, chat with AI response). The critical bug is FIXED - POST /api/assessments/{id}/start returns HTTP 200 with non-empty greeting (NOT 500). Idempotency verified: calling /start multiple times returns same greeting. Backend logs clean, no errors. The user's Claude API key (claude-sonnet-4-5-20250929) is working correctly with fallback to EMERGENT_LLM_KEY if needed. Ready for user validation."
