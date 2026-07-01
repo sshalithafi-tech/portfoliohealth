@@ -5,6 +5,7 @@ Contains section-building functions used by the FastAPI routes in
 `server.py` to keep route handlers small and focused.
 """
 from io import BytesIO
+import copy
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -20,6 +21,58 @@ from reportlab.platypus import (
 
 CONTACT_EMAIL = "shalitha.samarakoonmudiyanselage@student.oulu.fi"
 DIMENSIONS = ["people", "process", "data", "technology"]
+
+
+# ============================================================
+# TEXT SANITISATION (Part 1A — arrow / chevron encoding)
+# ============================================================
+# The default PDF fonts (Helvetica / WinAnsi) cannot render Unicode arrows
+# (→ U+2192) or heavy chevrons, so they surface as "®" / "«" in some viewers.
+# We replace the whole arrow family with the ASCII-safe "->" at render time.
+# This runs on a DEEP COPY of the report so the stored data / web UI keep the
+# nicer Unicode glyph — only the PDF text is normalised.
+_ARROW_TRANSLATION = {
+    0x2192: "->",   # →  rightwards arrow
+    0x2794: "->",   # ➔  heavy wide-headed arrow
+    0x2799: "->",   # ➙
+    0x279C: "->",   # ➜
+    0x279D: "->",   # ➝
+    0x279E: "->",   # ➞
+    0x27A1: "->",   # ➡
+    0x27A4: "->",   # ➤
+    0x27F6: "->",   # ⟶  long rightwards arrow
+    0x21D2: "=>",   # ⇒  rightwards double arrow
+    0x21FE: "->",   # ⇾
+    0x2B62: "->",   # ⭢
+    0x25B6: "->",   # ▶
+    0x25BA: "->",   # ►
+    0x2039: "<",    # ‹  single left angle quote
+    0x203A: ">",    # ›  single right angle quote
+}
+
+
+def _ascii_arrows(text):
+    """Replace Unicode arrows/chevrons with ASCII-safe equivalents."""
+    if not isinstance(text, str):
+        return text
+    return text.translate(_ARROW_TRANSLATION)
+
+
+def sanitize_report_text(obj):
+    """Recursively return a copy of `obj` with all string values arrow-safe."""
+    if isinstance(obj, str):
+        return _ascii_arrows(obj)
+    if isinstance(obj, list):
+        return [sanitize_report_text(v) for v in obj]
+    if isinstance(obj, dict):
+        return {k: sanitize_report_text(v) for k, v in obj.items()}
+    return obj
+
+
+def sanitized_assessment(assessment: dict) -> dict:
+    """Deep-copy an assessment and arrow-sanitise its text for PDF rendering."""
+    safe = copy.deepcopy(assessment or {})
+    return sanitize_report_text(safe)
 
 # --- Brand palette (Premium SaaS — Deep Teal accent) ---
 # `GOLD` keeps its legacy name for backwards-compat; the value is now deep teal.
@@ -229,7 +282,7 @@ def build_cover_page(story, assessment, report):
 
     score_badge_rows = [
         [Paragraph(
-            '<font size="8" color="#94A3B8"><b>OVERALL MATURITY SCORE</b></font>',
+            '<font size="8" color="#94A3B8"><b>OVERALL SCORE (EQUAL-WEIGHTED)</b></font>',
             ParagraphStyle("CovScoreLabel", alignment=1, leading=12),
         )],
         [Paragraph(
@@ -342,12 +395,6 @@ def build_toc_page(story):
 
     num_style = ParagraphStyle(
         "TocNum", fontName="Helvetica-Bold", fontSize=10, leading=12, textColor=GOLD,
-    )
-    title_style = ParagraphStyle(
-        "TocItemTitle", fontName="Helvetica-Bold", fontSize=10, leading=13, textColor=NAVY,
-    )
-    sub_style = ParagraphStyle(
-        "TocItemSub", fontName="Helvetica-Oblique", fontSize=8, leading=10, textColor=TEXT_MUTED,
     )
     marker_style = ParagraphStyle(
         "TocMarker", fontSize=7.5, leading=10, textColor=colors.HexColor("#94A3B8"), alignment=2,
@@ -623,18 +670,12 @@ def build_company_info(story, assessment, report, body):
 
 
 def build_overall_score(story, scores, report, level_names, heading, body):
-    # ── Equal-weighted score: ALWAYS the simple average of the four pillar
-    #    scores. We recompute here as a safety net so the PDF never displays
-    #    a contextual value in the equal-weighted slot, even if upstream data
-    #    drifts. This mirrors recompute_dual_scores() in chat_service.py.
-    pillar_keys = ("people", "process", "data", "technology")
-    try:
-        pillar_vals = [float(scores.get(p, 0) or 0) for p in pillar_keys]
-        if any(pillar_vals):
-            equal = round(sum(pillar_vals) / 4.0, 1)
-        else:
-            equal = scores.get("overall", "N/A")
-    except (TypeError, ValueError):
+    # ── Overall Score (Equal-Weighted): the single academic-baseline source.
+    #    Pull directly from the canonical field (equal_weighted_score, which
+    #    equals scores.overall after normalisation) — never recalculated or
+    #    separately-rounded here, so every rendered location agrees (Part 1B).
+    equal = report.get("equal_weighted_score")
+    if equal is None:
         equal = scores.get("overall", "N/A")
     ctx = report.get("contextual_score")
     lvl_overall = level_names.get("overall") or _derive_level_name(equal)
@@ -647,7 +688,7 @@ def build_overall_score(story, scores, report, level_names, heading, body):
         score_text = f"{equal}"
     eq_cell = [
         [Paragraph(
-            '<font size="7" color="#0891B2"><b>EQUAL-WEIGHTED SCORE · PRIMARY</b></font>',
+            '<font size="7" color="#0891B2"><b>OVERALL SCORE (EQUAL-WEIGHTED) · PRIMARY</b></font>',
             ParagraphStyle("EqLabel", leading=10),
         )],
         [Paragraph(
@@ -675,7 +716,7 @@ def build_overall_score(story, scores, report, level_names, heading, body):
     if isinstance(ctx, (int, float)):
         ctx_rows = [
             [Paragraph(
-                '<font size="7" color="#94A3B8"><b>CONTEXTUAL SCORE · SECONDARY</b></font>',
+                '<font size="7" color="#94A3B8"><b>OVERALL SCORE (BUSINESS-MODEL ADJUSTED) · SECONDARY</b></font>',
                 ParagraphStyle("CtxLabel", leading=10),
             )],
             [Paragraph(
@@ -691,7 +732,7 @@ def build_overall_score(story, scores, report, level_names, heading, body):
     else:
         ctx_rows = [
             [Paragraph(
-                '<font size="7" color="#94A3B8"><b>CONTEXTUAL SCORE · SECONDARY</b></font>',
+                '<font size="7" color="#94A3B8"><b>OVERALL SCORE (BUSINESS-MODEL ADJUSTED) · SECONDARY</b></font>',
                 ParagraphStyle("CtxLabel", leading=10),
             )],
             [Paragraph(
@@ -946,24 +987,46 @@ def build_dimension_scores_table(story, scores, level_names, dim_summaries, head
     story.append(Spacer(1, 16))
 
 
-def build_weighted_breakdown(story, scores, weights_raw, weights_norm, heading, body):
-    # Methodology one-liner (mirrors the web ScoreMethodology blurb)
+def build_weighted_breakdown(story, scores, report, heading, body):
+    # This section is the business-model contextual derivation. It uses the
+    # contextual weights and its total equals the canonical contextual_score
+    # field, so it never diverges from the "Overall Score (Business-Model
+    # Adjusted)" shown in Section 02 (Part 1B).
+    pillar_keys = ("people", "process", "data", "technology")
+    ctx_weights = report.get("contextual_weights") or {}
+    if not ctx_weights:
+        # Fallback to declared/normalised weights for legacy reports.
+        ctx_weights = report.get("weights_normalised") or {d: 0.25 for d in pillar_keys}
+
     story.append(Paragraph(
-        "The overall score is a weighted sum across the four PPDT pillars. "
-        "Weights reflect what <b>the organisation</b> declared as most strategically important \u2014 "
-        "so a low score in a high-weight pillar has a disproportionate impact on overall maturity.",
+        "This is the <b>business-model adjusted</b> derivation of the overall score. "
+        "Pillar weights reflect the organisation's business model (and stated strategic "
+        "priority) \u2014 so a low score in a high-weight pillar has a disproportionate "
+        "impact. The equal-weighted baseline (25% each) remains the primary score.",
         body,
     ))
     story.append(Spacer(1, 6))
 
     data = [["Pillar", "Raw Score", "Weight", "Contribution"]]
     for dim in DIMENSIONS:
-        s = scores.get(dim, 0)
-        w_norm = weights_norm.get(dim, 0.25)
-        data.append([dim.capitalize(), str(s), f"{w_norm * 100:.1f}%", f"{s * w_norm:.2f}"])
-    data.append(["", "", "Overall:", f"{scores.get('overall', 0):.2f}"])
+        try:
+            s = float(scores.get(dim, 0) or 0)
+        except (TypeError, ValueError):
+            s = 0.0
+        w = float(ctx_weights.get(dim, 0.25) or 0)
+        data.append([dim.capitalize(), f"{s:g}", f"{w * 100:.1f}%", f"{s * w:.2f}"])
 
-    table = Table(data, colWidths=[90, 80, 100, 100])
+    # Total = the canonical contextual_score (single source), falling back to
+    # the exact weighted sum so the column arithmetic always reconciles.
+    ctx_total = report.get("contextual_score")
+    if not isinstance(ctx_total, (int, float)):
+        ctx_total = sum(
+            float(scores.get(d, 0) or 0) * float(ctx_weights.get(d, 0.25) or 0)
+            for d in DIMENSIONS
+        )
+    data.append(["", "", "Overall (Business-Model Adjusted):", f"{float(ctx_total):.2f}"])
+
+    table = Table(data, colWidths=[80, 70, 180, 80])
     table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), NAVY),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
@@ -1190,12 +1253,11 @@ def build_full_assessment_pdf(assessment: dict) -> BytesIO:
       13 Benchmark & Consultant's Note  +  Closing
     """
     report = assessment["report"]
+    # Arrow-safe copy for PDF rendering (Part 1A). Stored data / web UI keep
+    # the original Unicode glyphs; only the PDF text is normalised.
+    assessment = sanitized_assessment(assessment)
+    report = assessment["report"]
     scores = report.get("scores", {}) or {}
-    weights_raw = report.get("weights_raw", {"people": 5, "process": 5, "data": 5, "technology": 5})
-    raw_total = sum(weights_raw.values()) or 1
-    weights_norm = report.get("weights_normalised", {
-        d: weights_raw.get(d, 5) / raw_total for d in DIMENSIONS
-    })
     level_names = report.get("level_names", {}) or {}
     dim_summaries = report.get("dimension_summaries", {}) or {}
 
@@ -1231,8 +1293,8 @@ def build_full_assessment_pdf(assessment: dict) -> BytesIO:
     # --- Group C: Dimension Scores + Weighted Calc ---
     build_section_label(story, styles, 4, "Dimension Scores", "Raw pillar grades (1\u20135)")
     build_dimension_scores_table(story, scores, level_names, dim_summaries, heading)
-    build_section_label(story, styles, 5, "Weighted Score Calculation", "How the overall score is derived from strategic weighting")
-    build_weighted_breakdown(story, scores, weights_raw, weights_norm, heading, body)
+    build_section_label(story, styles, 5, "Weighted Score Calculation", "Business-model adjusted derivation of the overall score")
+    build_weighted_breakdown(story, scores, report, heading, body)
     story.append(PageBreak())
 
     # --- Group D: Bottleneck + Governance ---
@@ -1357,7 +1419,7 @@ def build_quick_assessment_pdf(quick: dict) -> BytesIO:
         body))
     story.append(Spacer(1, 12))
     story.append(Paragraph(
-        "<b>Schedule a Full Assessment →</b> Contact your PortfolioHealth Advisor consultant",
+        "<b>Schedule a Full Assessment -></b> Contact your PortfolioHealth Advisor consultant",
         cta_style))
 
     build_pdf_closing(story, styles)

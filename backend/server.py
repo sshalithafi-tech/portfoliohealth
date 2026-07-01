@@ -629,6 +629,10 @@ MANDATORY RULE 4 — FAILURE PATTERN SELECTION
   Sentence 2 — which portfolio decision type is most at risk and why.
   Sentence 3 — what capability the organisation is MISSING as a result.
 
+Do NOT exceed 3 sentences under any circumstance. If more context is needed, it belongs in `critical_gaps`, not here.
+
+CLIENT-SPECIFIC EVIDENCE (non-optional): the pattern NAME and 3-sentence structure come from the library above, but the supporting detail MUST incorporate at least one specific fact drawn from THIS respondent's own answers — a named system, a named decision, or a named event they mentioned during the assessment (e.g. "the Windchill-to-SAP handoff", "the delayed Q3 discontinuation of the legacy sensor line"). Never rely solely on the generic library description; ground the narrative in what this organisation actually told you.
+
 
 MANDATORY RULE 5 — 90-DAY PROJECTION
 
@@ -702,6 +706,12 @@ JSON SCHEMA — wrap the JSON in a single fenced code block:
     "data": "...",
     "technology": "..."
   },
+  "pillar_interpretation_short": {
+    "people": "Max 2 short sentences (<= 40 words total). A condensed, standalone interpretation for the Executive Summary scorecard. Generate independently — do NOT truncate or copy pillar_interpretations. Zero citations, zero precondition numbers.",
+    "process": "...",
+    "data": "...",
+    "technology": "..."
+  },
   "management_commitment": "Low | Medium | High",
   "management_commitment_assessment": "...",
   "bottleneck_pillar": "People | Process | Data | Technology",
@@ -747,6 +757,12 @@ JSON SCHEMA — wrap the JSON in a single fenced code block:
     "technology": "..."
   },
   "governance_assessment": "...",
+  "governance_signal_summary": [
+    "3-4 plain-language bullets, each UNDER 15 words.",
+    "Zero citations, zero precondition numbers.",
+    "No repeated sentences from critical_gaps — generated separately with its own plain tone.",
+    "This is a DIFFERENT field from critical_gaps: it is the Executive Summary governance snapshot."
+  ],
   "decision_vulnerability_ratings": {
     "discontinuation": "Low | Medium | High | Critical",
     "new_launch": "Low | Medium | High | Critical",
@@ -763,6 +779,7 @@ JSON SCHEMA — wrap the JSON in a single fenced code block:
   ],
   "roadmap": {
     "immediate": {
+      "action_summary": "ONE sentence (<= 25 words) capturing the core move for this phase — for the Executive Summary roadmap. Distinct from the detailed multi-point `actions` field. No citations.",
       "actions": "...",
       "pillar_focus": "...",
       "governance_milestone": "...",
@@ -771,6 +788,7 @@ JSON SCHEMA — wrap the JSON in a single fenced code block:
       "timeframe": "0–3 months"
     },
     "short_term": {
+      "action_summary": "ONE sentence (<= 25 words) capturing the core move for this phase — for the Executive Summary roadmap. Distinct from the detailed `actions` field. No citations.",
       "actions": "... (MANDATORY RULE 3b: if Process score < 3.0, include the Cooper Stage-Gate intake sentence verbatim)",
       "pillar_focus": "...",
       "governance_milestone": "...",
@@ -779,6 +797,7 @@ JSON SCHEMA — wrap the JSON in a single fenced code block:
       "timeframe": "3–12 months"
     },
     "strategic": {
+      "action_summary": "ONE sentence (<= 25 words) capturing the core move for this phase — for the Executive Summary roadmap. Distinct from the detailed `actions` field. No citations.",
       "actions": "...",
       "pillar_focus": "...",
       "governance_milestone": "...",
@@ -803,7 +822,18 @@ JSON SCHEMA — wrap the JSON in a single fenced code block:
 
 The ```json block MUST include every top-level field shown above. Never abbreviate the block. Equal-weighted scoring: set equal_weighted_score to the 25%/25%/25%/25% baseline. Set contextual_score using the business model weights from the CONTEXTUAL SCORING block above — these will differ unless the business model is unknown. All level names in `level_names` must be one of: Ad Hoc, Developing, Defined, Managed, Predictive (or localised equivalents if the conversation was in Finnish/Swedish).
 
-MANDATORY RULES 1, 2, 3, 4, 5, and 6 above are not optional and override any conflicting instinct to shorten or summarise."""
+MANDATORY RULE 7 — WRITING STYLE (applies to ALL narrative fields)
+
+- Default sentence length is 15-20 words. Break any sentence exceeding 30 words into two sentences.
+- `failure_pattern_narrative`: hard cap at 3 sentences (see Rule 4) — no exceptions.
+- `pillar_interpretations` (Full Report, long form): cap at 5 sentences per pillar. Structure each as 3 short labelled clauses rather than one dense paragraph, in this order: (1) what's working, (2) what's the gap, (3) why this score.
+- `pillar_interpretation_short`: max 2 short sentences per pillar, generated independently (not a truncation of the long form).
+- `governance_signal_summary`: 3-4 bullets, each under 15 words, plain language, zero citations, zero precondition numbers, and no sentences repeated from `critical_gaps`.
+- `consultant_note`: this is the flagship long-form section and may be rich and narrative, but cap it at 250 words maximum. Stay premium, not sprawling.
+- CITATIONS: remove ALL inline citation parentheticals (e.g. "(Precondition 3: ...)", "(Hannila et al., 2020)", "(Cooper et al., 2001)") from every field that renders in the Executive Summary — that includes `failure_pattern_narrative`, `pillar_interpretation_short`, `governance_signal_summary`, `financial_consequence`, `ninety_day_projection`, `first_action`, `key_findings`, and each roadmap `action_summary`. Citations and precondition labels are permitted ONLY in Full-Report fields (`critical_gaps`, `decision_vulnerability`, `roadmap.*.actions`, `benchmark_context`, `consultant_note`) that map to the Academic Framework & References section.
+- NO REPEATED PHRASES ACROSS FIELDS: if `failure_pattern_narrative`, `critical_gaps`, and `governance_signal_summary` would otherwise restate the same fact, write each from a DIFFERENT angle — operational consequence (failure_pattern_narrative) vs. structural gap (critical_gaps) vs. accountability gap (governance_signal_summary). Never copy a sentence between fields.
+
+MANDATORY RULES 1, 2, 3, 4, 5, 6, and 7 above are not optional and override any conflicting instinct to shorten or summarise."""
 
 # Auth Routes
 @api_router.post("/auth/register")

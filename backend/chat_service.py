@@ -449,6 +449,136 @@ def recompute_dual_scores(report_data: dict) -> dict:
     return report_data
 
 
+# ---------------------------------------------------------------------------
+# 90-day projection — deterministic recomputation (Part 1C)
+# ---------------------------------------------------------------------------
+# The projection MUST derive from the SAME Phase-1 ("immediate") expected_gain
+# values used in the roadmap, and score_current MUST equal the overall
+# equal-weighted score shown on page 1. We recompute both here so the two
+# sections can never drift apart, regardless of what the LLM emitted.
+
+_MATURITY_LEVELS = ["Ad Hoc", "Developing", "Defined", "Managed", "Predictive"]
+
+
+def _band_from_score(score: float) -> int:
+    """Map a maturity score to its 0-4 level band (mirrors pdf_builder)."""
+    try:
+        n = float(score)
+    except (TypeError, ValueError):
+        return 0
+    if n < 1.5:
+        return 0
+    if n < 2.5:
+        return 1
+    if n < 3.5:
+        return 2
+    if n < 4.5:
+        return 3
+    return 4
+
+
+def _shift_level(current_level: str, delta_bands: int) -> str:
+    """Move a level label up/down by `delta_bands`, keeping the authoritative
+    current label as the anchor so it always matches the rest of the report."""
+    cur = (current_level or "").strip().lower()
+    idx = next(
+        (i for i, lvl in enumerate(_MATURITY_LEVELS) if lvl.lower() == cur),
+        None,
+    )
+    if idx is None:
+        return current_level or ""
+    new_idx = max(0, min(len(_MATURITY_LEVELS) - 1, idx + delta_bands))
+    return _MATURITY_LEVELS[new_idx]
+
+
+def _parse_expected_gain(text: str) -> dict:
+    """Parse 'People: 2.0 -> 2.5 | Process: 1.5 -> 2.5 | ...' into
+    {pillar: (start, end)}. Tolerant of '->', '→' and 'to' separators."""
+    result: dict = {}
+    if not text or not isinstance(text, str):
+        return result
+    pattern = re.compile(
+        r"(people|process|data|technology)\s*:\s*([\d.]+)\s*(?:->|\u2192|to)\s*([\d.]+)",
+        re.IGNORECASE,
+    )
+    for m in pattern.finditer(text):
+        try:
+            result[m.group(1).lower()] = (float(m.group(2)), float(m.group(3)))
+        except (TypeError, ValueError):
+            continue
+    return result
+
+
+def recompute_ninety_day_projection(report_data: dict) -> dict:
+    """Force the 90-day projection to agree with page-1 overall + Phase-1 roadmap.
+
+    Invariants:
+      • score_current            == equal_weighted_score (page-1 overall).
+      • score_projected          == equal-weighted average of the Phase-1
+                                    ("immediate") expected_gain END values,
+                                    capped at +0.8 (Mandatory Rule 5).
+      • score_delta              == score_projected - score_current.
+      • bottleneck_level_current == level_names[bottleneck_pillar] (authoritative).
+      • bottleneck_level_projected derived from the Phase-1 END score of the
+        bottleneck pillar, shifted from the authoritative current level.
+    """
+    pillars = ["people", "process", "data", "technology"]
+    scores = report_data.get("scores") or {}
+    eq = report_data.get("equal_weighted_score")
+    if eq is None:
+        eq = scores.get("overall")
+    if eq is None:
+        return report_data
+
+    proj = report_data.get("ninety_day_projection")
+    if not isinstance(proj, dict):
+        proj = {}
+        report_data["ninety_day_projection"] = proj
+
+    try:
+        current = round(float(eq), 1)
+    except (TypeError, ValueError):
+        return report_data
+    proj["score_current"] = current
+
+    roadmap = report_data.get("roadmap") or {}
+    immediate = roadmap.get("immediate") if isinstance(roadmap, dict) else None
+    gains = {}
+    if isinstance(immediate, dict):
+        gains = _parse_expected_gain(immediate.get("expected_gain", ""))
+
+    end_scores = {}
+    for p in pillars:
+        try:
+            cur_p = float(scores.get(p, 0) or 0)
+        except (TypeError, ValueError):
+            cur_p = 0.0
+        end_scores[p] = gains[p][1] if p in gains else cur_p
+
+    projected = round(sum(end_scores.values()) / 4.0, 1)
+    if projected - current > 0.8:
+        projected = round(current + 0.8, 1)
+    if projected < current:
+        projected = current
+    proj["score_projected"] = projected
+    proj["score_delta"] = round(projected - current, 1)
+
+    bottleneck = (report_data.get("bottleneck_pillar") or "").strip().lower()
+    level_names = report_data.get("level_names") or {}
+    if bottleneck in pillars:
+        cur_level = level_names.get(bottleneck) or proj.get("bottleneck_level_current") or ""
+        proj["bottleneck_level_current"] = cur_level
+        try:
+            cur_pillar_score = float(scores.get(bottleneck, 0) or 0)
+        except (TypeError, ValueError):
+            cur_pillar_score = 0.0
+        end_pillar_score = end_scores.get(bottleneck, cur_pillar_score)
+        delta_bands = _band_from_score(end_pillar_score) - _band_from_score(cur_pillar_score)
+        proj["bottleneck_level_projected"] = _shift_level(cur_level, delta_bands)
+
+    return report_data
+
+
 def normalise_report_weights(report_data: dict) -> dict:
     if not report_data.get("weights_raw"):
         report_data["weights_raw"] = {"people": 5, "process": 5, "data": 5, "technology": 5}
@@ -458,4 +588,5 @@ def normalise_report_weights(report_data: dict) -> dict:
         report_data["weights_normalised"] = {k: round(v / total, 4) for k, v in raw.items()}
     normalise_business_model(report_data)
     recompute_dual_scores(report_data)
+    recompute_ninety_day_projection(report_data)
     return report_data

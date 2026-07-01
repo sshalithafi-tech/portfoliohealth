@@ -45,6 +45,7 @@ from pdf_builder import (
     make_report_styles,
     BAND_COLORS_HEX,
     _page_decoration,
+    sanitized_assessment,
 )
 
 
@@ -110,6 +111,21 @@ def _pillar_label(key: str) -> str:
     return {"people": "People", "process": "Process", "data": "Data", "technology": "Technology"}.get(
         key, key.capitalize()
     )
+
+
+def _first_sentence(text: str, max_chars: int = 220) -> str:
+    """Return the first sentence of `text` (fallback when a short field is
+    missing). Keeps the Executive Summary concise without the full detail."""
+    t = (text or "").strip()
+    if not t:
+        return ""
+    import re as _re
+    m = _re.search(r"(.+?[.!?])(\s|$)", t)
+    sentence = m.group(1).strip() if m else t
+    if len(sentence) > max_chars:
+        cut = sentence[:max_chars]
+        sentence = cut[: cut.rfind(" ")].rstrip() + "\u2026"
+    return sentence
 
 
 # ============================================================
@@ -220,12 +236,12 @@ def _build_page1(story, report, styles, assessment):
         sign = "+" if gap >= 0 else ""
         direction = dbi.get("direction", "").replace("-", " ")
         callout = (
-            f"<b>Overall {overall:.2f} / 5.0</b> &nbsp;·&nbsp; "
+            f"<b>Overall (Equal-Weighted) {overall:.2f} / 5.0</b> &nbsp;·&nbsp; "
             f"<b>DBI</b> {_pillar_label(dbi['pillar'])} "
             f"<font color='#94A3B8'>({sign}{float(gap):.2f}, {direction})</font>"
         )
     else:
-        callout = f"<b>Overall {overall:.2f} / 5.0</b>"
+        callout = f"<b>Overall (Equal-Weighted) {overall:.2f} / 5.0</b>"
     story.append(Paragraph(callout, styles["lead"]))
     story.append(Spacer(0, 4))
 
@@ -342,19 +358,26 @@ def _build_page2(story, report, styles):
     story.append(_preconditions_row(preconditions, styles))
     story.append(Spacer(0, 12))
 
-    # Governance signal (2 gaps + 1 positive)
+    # Governance signal (2B) — a SEPARATE short field, not a copy of critical_gaps.
     story.append(Paragraph("GOVERNANCE SIGNAL", styles["eyebrow"]))
-    critical_gaps = report.get("critical_gaps") or []
-    key_findings = report.get("key_findings") or []
-    gaps = [g for g in critical_gaps[:2] if g]
-    positive = next((f for f in key_findings if isinstance(f, str) and any(
-        w in f.lower() for w in ("strong", "clear", "established", "documented", "consistent")
-    )), None)
+    gov_summary = report.get("governance_signal_summary") or []
     bullets = []
-    for g in gaps:
-        bullets.append(f"<font color='#DC2626'>•</font> {g}")
-    if positive:
-        bullets.append(f"<font color='#10B981'>•</font> {positive}")
+    if isinstance(gov_summary, list) and any(gov_summary):
+        for b in gov_summary:
+            if isinstance(b, str) and b.strip():
+                bullets.append(f"<font color='#0891B2'>&bull;</font> {b.strip()}")
+    else:
+        # Legacy fallback: distil from critical_gaps + a positive finding.
+        critical_gaps = report.get("critical_gaps") or []
+        key_findings = report.get("key_findings") or []
+        gaps = [g for g in critical_gaps[:2] if g]
+        positive = next((f for f in key_findings if isinstance(f, str) and any(
+            w in f.lower() for w in ("strong", "clear", "established", "documented", "consistent")
+        )), None)
+        for g in gaps:
+            bullets.append(f"<font color='#DC2626'>&bull;</font> {g}")
+        if positive:
+            bullets.append(f"<font color='#10B981'>&bull;</font> {positive}")
     for b in bullets:
         story.append(Paragraph(b, styles["body"]))
     if not bullets:
@@ -375,15 +398,15 @@ def _build_page2(story, report, styles):
         "Portfolio decisions will begin arriving with evidence rather than opinion. "
         "Leadership can close the loop on discontinuation and change decisions inside a monthly cadence."
     )
-    comparable = ninety.get("comparable_outcome") or "Reduced portfolio-decision cycle time (Hannila, 2019)."
+    comparable = ninety.get("comparable_outcome") or "Reduced portfolio-decision cycle time."
 
     proj_tbl = Table(
         [[
             Paragraph(
                 f"<font size='9' color='#0891B2'><b>90-DAY PROJECTION</b></font><br/><br/>"
-                f"<b>Score:</b> {sc:.1f} → <b>{sp:.1f}</b> "
-                f"<font color='#94A3B8'>(Δ {sd:+.1f})</font><br/>"
-                f"<b>Bottleneck level:</b> {bl_c} → {bl_p}<br/>",
+                f"<b>Score:</b> {sc:.1f} -> <b>{sp:.1f}</b> "
+                f"<font color='#94A3B8'>(&#916; {sd:+.1f})</font><br/>"
+                f"<b>Bottleneck level:</b> {bl_c} -> {bl_p}<br/>",
                 styles["body"],
             ),
             Paragraph(
@@ -430,9 +453,11 @@ def _build_page3(story, report, styles):
 
     for phase_key, label, window in RELABEL:
         phase = roadmap.get(phase_key) or {}
-        actions = phase.get("actions") or "—"
-        pillar_focus = phase.get("pillar_focus") or "—"
-        owner = phase.get("management_required") or "—"
+        # 2A — Executive Summary renders ONLY the one-sentence action, not the
+        # full numbered action list (that detail stays exclusive to the Full Report).
+        action = phase.get("action_summary") or _first_sentence(phase.get("actions", "")) or "\u2014"
+        pillar_focus = phase.get("pillar_focus") or "\u2014"
+        owner = phase.get("management_required") or "\u2014"
         milestone = phase.get("governance_milestone") or ""
         expected_gain = phase.get("expected_gain") or ""
 
@@ -444,7 +469,7 @@ def _build_page3(story, report, styles):
                     styles["body"],
                 ),
                 Paragraph(
-                    f"<b>Action:</b> {actions}<br/>"
+                    f"<b>Action:</b> {action}<br/>"
                     f"<b>Who owns it:</b> {owner}<br/>"
                     f"<b>What it unlocks:</b> {milestone or pillar_focus}",
                     styles["body"],
@@ -478,6 +503,7 @@ def _build_page4(story, report, styles):
     scores = report.get("scores") or {}
     level_names = report.get("level_names") or {}
     interps = report.get("pillar_interpretations") or {}
+    interps_short = report.get("pillar_interpretation_short") or {}
     summaries = report.get("dimension_summaries") or {}
     reliability = (report.get("assessment_reliability") or {}).get("confidence") or "—"
     mgmt = report.get("management_commitment") or "—"
@@ -492,11 +518,14 @@ def _build_page4(story, report, styles):
     for dim in DIMENSIONS:
         s = float(scores.get(dim, 0) or 0)
         lvl = _capitalise_level(level_names.get(dim, ""))
-        interp = (interps.get(dim) or summaries.get(dim) or "").strip()
-        # Truncate to ~180 chars for "2-line" feel
-        if len(interp) > 200:
-            cut = interp[:200]
-            interp = cut[: cut.rfind(" ")] + "…"
+        # 2C — use the separate short field; only fall back to a truncated
+        # long-form interpretation for legacy reports missing the short field.
+        interp = (interps_short.get(dim) or "").strip()
+        if not interp:
+            interp = (interps.get(dim) or summaries.get(dim) or "").strip()
+            if len(interp) > 200:
+                cut = interp[:200]
+                interp = cut[: cut.rfind(" ")] + "\u2026"
         band = BAND_COLORS_HEX[score_band(s)]
         rows.append([
             Paragraph(f"<b>{_pillar_label(dim)}</b>", styles["body"]),
@@ -571,6 +600,9 @@ def _build_page4(story, report, styles):
 
 def build_executive_summary_pdf(assessment: dict) -> BytesIO:
     """Assemble the 4-page Executive Summary PDF into an in-memory buffer."""
+    # Arrow-safe copy for PDF rendering (Part 1A) — stored data / UI keep the
+    # original glyphs; only PDF text is normalised.
+    assessment = sanitized_assessment(assessment)
     report = assessment.get("report") or {}
     buffer = BytesIO()
     doc = SimpleDocTemplate(

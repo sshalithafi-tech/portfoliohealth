@@ -151,3 +151,42 @@ Verified LLM greeting call succeeds directly. Backend now healthy, admin seeded.
 ##     -message: "Re-test the AI assessment start + chat flow using the user's Claude key. Login admin@portfoliohealth.fi / Admin@12345, create company, create assessment, POST /api/assessments/{id}/start must return a non-empty AI greeting (200, not 500), then POST /api/assessments/{id}/chat must return an AI response. Confirm the AI starts the assessment reliably."
 ##     -agent: "testing"
 ##     -message: "Testing complete. AI assessment flow verified working with user's ANTHROPIC_API_KEY. All 5 backend tests PASSED (login, create company, create assessment, start assessment with LLM greeting, chat with AI response). The critical bug is FIXED - POST /api/assessments/{id}/start returns HTTP 200 with non-empty greeting (NOT 500). Idempotency verified: calling /start multiple times returns same greeting. Backend logs clean, no errors. The user's Claude API key (claude-sonnet-4-5-20250929) is working correctly with fallback to EMERGENT_LLM_KEY if needed. Ready for user validation."
+
+## Update (main agent, 2026-07-01) — Report/PDF refactor (Parts 1-4)
+Implemented prompt + PDF rendering fixes (no schema field renames, no scoring/DBI logic change, no RAG):
+- 1A Arrow encoding: added sanitize_report_text/_ascii_arrows in pdf_builder.py; both PDF builders render on an arrow-safe deep copy (→ becomes ->). Verified in extracted PDF text (no raw arrows; "Windchill -> SAP" renders).
+- 1B Overall score: build_overall_score reads single-source equal_weighted_score; weighted breakdown now uses contextual_weights and totals to contextual_score; labels standardized to "Overall Score (Equal-Weighted)" and "Overall Score (Business-Model Adjusted)" across cover, section 2/5, exec page1.
+- 1C 90-day projection: new recompute_ninety_day_projection in chat_service (wired into normalise_report_weights) derives score_current=overall and score_projected/bottleneck_level_projected from roadmap.immediate expected_gain. Fixture: 3.6 -> 3.9, Defined -> Managed.
+- 2A/2B/2C: added prompt fields action_summary, governance_signal_summary, pillar_interpretation_short; exec summary renders these (with legacy fallbacks).
+- 3/4: added WRITING STYLE rule 7 + client-specific failure_pattern_narrative requirement in system prompt.
+Deterministic fixture test (tests/test_report_fixes.py) PASSES; both PDFs generate.
+Seeded completed fixture assessment id 6b44c78c2ebdd66625059999 for admin (admin@portfoliohealth.fi / Admin@12345).
+
+## backend:
+##   - task: "Report normalization + PDF generation (Parts 1-4 fixes)"
+##     implemented: true
+##     working: true
+##     file: "chat_service.py, pdf_builder.py, executive_summary_builder.py, server.py"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: false
+##     status_history:
+##         -working: "NA"
+##         -agent: "main"
+##         -comment: "Verified deterministically + via extracted PDF text. Needs API-level retest of PDF endpoints + report consistency."
+##         -working: true
+##         -agent: "testing"
+##         -comment: "ALL TESTS PASSED ✓ Regression + verification complete for seeded assessment 6b44c78c2ebdd66625059999 (Lumivex Photonics). (1) Login: 200 ✓ (2) Report consistency: ALL invariants verified - scores.overall == equal_weighted_score == score_current (all 3.6) ✓, score_projected (3.9) > score_current (3.6) ✓, bottleneck_level_current == 'Defined' (matches level_names.process) ✓, bottleneck_level_projected == 'Managed' ✓, new fields present: governance_signal_summary (list, 3 items) ✓, pillar_interpretation_short (dict, 4 keys) ✓, roadmap.immediate.action_summary ✓. (3) Full PDF: 200, application/pdf, %PDF signature, 22420 bytes (>5000) ✓. (4) Summary PDF: 200, application/pdf, %PDF signature, 8651 bytes (>3000) ✓. (5) Regression GET /api/assessments: 200, returns list of 4 assessments, seeded assessment found ✓. No errors, all endpoints working correctly."
+
+## test_plan:
+##   current_focus:
+##     - "Report normalization + PDF generation (Parts 1-4 fixes)"
+##   stuck_tasks: []
+##   test_all: false
+##   test_priority: "high_first"
+
+## agent_communication:
+##     -agent: "main"
+##     -message: "Please retest the report/PDF endpoints via API. Login admin@portfoliohealth.fi / Admin@12345. There is a SEEDED completed assessment id=6b44c78c2ebdd66625059999 (Lumivex Photonics). Verify: (1) GET /api/assessments/6b44c78c2ebdd66625059999 returns 200 and report.ninety_day_projection.score_current == report.scores.overall == report.equal_weighted_score (3.6), and score_projected (3.9) > score_current, and bottleneck_level_current == 'Defined' (matches level_names.process). (2) GET /api/assessments/6b44c78c2ebdd66625059999/pdf returns 200 with application/pdf (bytes start %PDF). (3) GET /api/assessments/6b44c78c2ebdd66625059999/summary-pdf returns 200 with a valid PDF. (4) Also do a quick regression: login, GET /api/assessments works. Do NOT attempt a full AI chat completion. Report any 4xx/5xx."
+##     -agent: "testing"
+##     -message: "Testing complete - ALL TESTS PASSED ✓. Report/PDF refactor regression + verification successful. All 5 tests passed: (1) Login with admin credentials ✓, (2) Report consistency with ALL invariants verified (score equality, projection logic, bottleneck levels, new fields) ✓, (3) Full PDF generation (22KB, valid) ✓, (4) Executive summary PDF (8.6KB, valid) ✓, (5) Regression test for assessments list ✓. The refactor is working correctly - no issues found. Ready for production."
