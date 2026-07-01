@@ -40,6 +40,7 @@ export const ChatInput = ({ inputRef, inputValue, onChange, onSubmit, disabled, 
             placeholder="Type your response... (Shift+Enter for new line)"
             disabled={disabled || isCompleted}
             autoComplete="off"
+            maxLength={8000}
             className="flex-1 min-w-0 px-3 py-2 sm:px-4 sm:py-3 glass-input rounded-xl outline-none disabled:opacity-50 text-sm sm:text-base resize-none leading-relaxed max-h-40 overflow-y-auto"
           />
           <button

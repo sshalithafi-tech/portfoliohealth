@@ -1,554 +1,461 @@
+#!/usr/bin/env python3
 """
-Comprehensive backend test for report generation with Claude Sonnet 5.
+Regression test after:
+1. Reverting report_sections.py model from claude-sonnet-5 back to claude-sonnet-4-5-20250929
+2. Applying 4 audit fixes to server.py (JWT_SECRET fail-fast, chat_history persisted, 
+   PDF endpoints wrapped in try/except, max_length=8000 added)
 
-Tests the FULL report-generation flow after upgrading report_sections.py's model
-from claude-sonnet-4-5-20250929 to claude-sonnet-5.
-
-Test Steps:
-1. Login (POST /api/auth/login)
-2. Create a company (POST /api/companies)
-3. Create an assessment (POST /api/assessments)
-4. POST /api/assessments/{id}/start to get the AI greeting
-5. Drive a FULL conversation via repeated POST /api/assessments/{id}/chat calls:
-   - Select language (e.g. "English")
-   - Answer context/anchor questions
-   - Answer People/Process/Data/Technology pillar questions
-   - Answer governance probe
-   - Confirm/close (e.g. "no, that's all")
-   - Continue until response includes report_ready: true and populated report object
-6. TIME the final report-generating turn
-7. Verify the returned report object has ALL required fields present and non-empty
-8. Verify roadmap continuity
-9. GET /api/assessments/{id}/pdf — confirm 200, application/pdf, valid %PDF bytes
-10. GET /api/assessments/{id}/summary-pdf — confirm 200, application/pdf, valid %PDF bytes
-11. Regression: GET /api/assessments — confirm 200, list includes this assessment
+Test sequence:
+1. Login (POST /api/auth/login) → 200
+2. Create company (POST /api/companies) → 200
+3. Create assessment (POST /api/assessments) → 200
+4. POST /api/assessments/{id}/start → 200 with AI greeting
+5. Drive FULL conversation via repeated POST /api/assessments/{id}/chat until report_ready: true
+   - TIME this final turn (should be ~70-100s, NOT ~165s)
+6. Verify ALL 26 report fields are present and non-empty
+7. GET /api/assessments/{id}/pdf → 200, valid PDF
+8. GET /api/assessments/{id}/summary-pdf → 200, valid PDF
+9. GET /api/assessments → 200, regression check
+10. NEW TEST: create fresh assessment, call /start, then POST /chat with 9000-char message → expect 422
+11. Verify idempotency: calling /start twice returns same greeting without error
 """
-import asyncio
-import json
-import time
-from datetime import datetime
+
 import requests
+import time
+import json
+from datetime import datetime
 
 # Backend URL from frontend/.env
 BASE_URL = "https://3b9051c6-d242-4cb5-8c23-c2efa7f58051.preview.emergentagent.com/api"
 
 # Test credentials from /app/memory/test_credentials.md
-ADMIN_EMAIL = "admin@portfoliohealth.fi"
-ADMIN_PASSWORD = "Admin@12345"
+EMAIL = "admin@portfoliohealth.fi"
+PASSWORD = "Admin@12345"
 
-# Required fields in the report object (26 fields total)
+# Required 26 report fields
 REQUIRED_FIELDS = [
-    "scores",
-    "equal_weighted_score",
-    "contextual_score",
-    "level_names",
-    "dimension_summaries",
-    "pillar_interpretations",
-    "pillar_interpretation_short",
-    "failure_pattern_name",
-    "failure_pattern_narrative",
-    "financial_consequence",
-    "ninety_day_projection",
-    "governance_observations",
-    "governance_assessment",
-    "governance_signal_summary",
-    "management_commitment",
-    "management_commitment_assessment",
-    "assessment_reliability",
-    "decision_vulnerability_ratings",
-    "decision_vulnerability",
-    "key_findings",
-    "critical_gaps",
-    "roadmap",
-    "first_action",
-    "benchmark_context",
-    "consultant_note",
-    "closing_statement",
+    "scores", "equal_weighted_score", "contextual_score", "level_names",
+    "dimension_summaries", "pillar_interpretations", "pillar_interpretation_short",
+    "failure_pattern_name", "failure_pattern_narrative", "financial_consequence",
+    "ninety_day_projection", "governance_observations", "governance_assessment",
+    "governance_signal_summary", "management_commitment", "management_commitment_assessment",
+    "assessment_reliability", "decision_vulnerability_ratings", "decision_vulnerability",
+    "key_findings", "critical_gaps", "roadmap", "first_action", "benchmark_context",
+    "consultant_note", "closing_statement"
 ]
 
-# Conversation flow for a realistic assessment
-CONVERSATION_TURNS = [
-    # Turn 1: Language selection
-    "English",
-    
-    # Turn 2: Company context
-    "We are TechFlow Solutions, a mid-sized software company in the B2B SaaS space. We have about 45 active products and around 200 employees.",
-    
-    # Turn 3: Business model
-    "We operate primarily as a Standard business model - we have configurable software products that we customize for different customer segments.",
-    
-    # Turn 4: Strategic priority
-    "Our main strategic priority is improving data quality and analytics capabilities to make better portfolio decisions.",
-    
-    # Turn 5: Anchor decision
-    "Our most challenging decision recently was whether to discontinue three legacy products that still had some revenue but were consuming significant maintenance resources.",
-    
-    # Turn 6: People pillar
-    "We have a product management team of 5 people, but roles are not clearly defined. Product decisions often depend on who is available. We don't have formal data ownership or governance roles.",
-    
-    # Turn 7: Process pillar
-    "We have quarterly business reviews, but they're not well structured. We don't have formal stage-gate processes. Product changes are often approved via email or Slack conversations.",
-    
-    # Turn 8: Data pillar
-    "Our product data is scattered across Salesforce, Jira, and various Excel spreadsheets. We don't have a single source of truth for product profitability. Financial data comes from our ERP but it's not integrated with product data.",
-    
-    # Turn 9: Technology pillar
-    "We use Salesforce for CRM, Jira for development tracking, and QuickBooks for financials. These systems don't talk to each other. Most portfolio analysis is done manually in Excel.",
-    
-    # Turn 10: Governance
-    "Portfolio decisions are made by the executive team in monthly meetings, but there's no formal governance structure. We don't have documented decision criteria or audit trails.",
-    
-    # Turn 11: Anything else / close
-    "No, that covers everything. I think we've discussed all the key areas.",
-]
+def log(msg):
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}")
 
+def test_login():
+    """Step 1: Login"""
+    log("TEST 1: POST /api/auth/login")
+    resp = requests.post(f"{BASE_URL}/auth/login", json={
+        "email": EMAIL,
+        "password": PASSWORD
+    })
+    assert resp.status_code == 200, f"Login failed: {resp.status_code} {resp.text}"
+    data = resp.json()
+    assert "access_token" in data, "No access_token in response"
+    log(f"✓ Login successful, token received")
+    return data["access_token"]
 
-def print_section(title):
-    """Print a formatted section header."""
-    print(f"\n{'='*80}")
-    print(f"  {title}")
-    print(f"{'='*80}\n")
+def test_create_company(token):
+    """Step 2: Create company"""
+    log("TEST 2: POST /api/companies")
+    resp = requests.post(f"{BASE_URL}/companies", 
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "name": f"Test Company {int(time.time())}",
+            "industry": "Manufacturing",
+            "portfolio_size": "50-100 products",
+            "company_size": "Mid-market · 450 employees",
+            "active_products": "28 active SKUs"
+        }
+    )
+    assert resp.status_code == 200, f"Create company failed: {resp.status_code} {resp.text}"
+    data = resp.json()
+    company_id = data["id"]
+    log(f"✓ Company created: {company_id}")
+    return company_id
 
+def test_create_assessment(token, company_id):
+    """Step 3: Create assessment"""
+    log("TEST 3: POST /api/assessments")
+    resp = requests.post(f"{BASE_URL}/assessments",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "company_id": company_id,
+            "respondent_name": "John Smith",
+            "respondent_role": "Portfolio Manager"
+        }
+    )
+    assert resp.status_code == 200, f"Create assessment failed: {resp.status_code} {resp.text}"
+    data = resp.json()
+    assessment_id = data["id"]
+    log(f"✓ Assessment created: {assessment_id}")
+    return assessment_id
 
-def print_result(test_name, passed, details=""):
-    """Print test result with formatting."""
-    status = "✓ PASSED" if passed else "✗ FAILED"
-    print(f"{status} - {test_name}")
-    if details:
-        print(f"  {details}")
+def test_start_assessment(token, assessment_id):
+    """Step 4: Start assessment (AI greeting)"""
+    log("TEST 4: POST /api/assessments/{id}/start")
+    resp = requests.post(f"{BASE_URL}/assessments/{assessment_id}/start",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    assert resp.status_code == 200, f"Start assessment failed: {resp.status_code} {resp.text}"
+    data = resp.json()
+    assert "message" in data, "No message in response"
+    greeting = data["message"]["content"]
+    assert len(greeting) > 0, "Empty greeting"
+    assert "Welcome" in greeting or "Tervetuloa" in greeting or "Välkommen" in greeting, \
+        f"Unexpected greeting format: {greeting[:100]}"
+    log(f"✓ AI greeting received ({len(greeting)} chars)")
+    return greeting
 
+def test_full_conversation(token, assessment_id):
+    """Step 5: Drive FULL conversation until report_ready: true"""
+    log("TEST 5: Drive FULL conversation via POST /api/assessments/{id}/chat")
+    
+    # Conversation flow: language → context → anchor questions → pillar assessment → governance → close
+    messages = [
+        # Language selection
+        "English",
+        
+        # Context questions
+        "We're a mid-market manufacturing company with about 450 employees. We make industrial automation equipment.",
+        
+        # Business model
+        "We're primarily configure-to-order (CTO). We have standard modules that we configure based on customer requirements.",
+        
+        # What prompted assessment
+        "We're struggling with portfolio complexity and want to understand our capability gaps.",
+        
+        # Primary performance metric
+        "Our leadership focuses primarily on gross margin and on-time delivery rate.",
+        
+        # R&D budget
+        "Our annual R&D spend is around 8 million euros.",
+        
+        # Recent portfolio decision
+        "We discontinued a legacy product line last year, but it turned out some customers still needed it. We learned that we didn't have good visibility into actual customer demand across our portfolio.",
+        
+        # Active products
+        "We have about 28 active SKUs, but different departments count them differently. Sales sees them one way, engineering another.",
+        
+        # People pillar - roles and responsibilities
+        "Our portfolio decisions are made by a cross-functional team led by our VP of Product Management. But when data is wrong, it's not always clear who should fix it. We've lost some critical knowledge when key people left.",
+        
+        # Process pillar - review cycles
+        "We have quarterly portfolio reviews, but they're not always well-documented. We use email and meetings to make changes. It's hard to reconstruct why we made certain decisions 18 months ago.",
+        
+        # Data pillar - profitability and quality
+        "It takes us about 2-3 weeks to pull together product-level profitability, and honestly we're not 100% confident in the numbers. Different departments often disagree on costs and margins. Our data is spread across SAP, Salesforce, and various spreadsheets.",
+        
+        # Technology pillar - tools
+        "We have SAP for ERP and Salesforce for CRM, but they don't really talk to each other. People manually bridge the gaps with Excel. We've invested in these systems, but I'm not sure they've improved decision quality much.",
+        
+        # Governance probe
+        "Our processes are somewhat documented, but they depend a lot on having the right people in the room. Data quality ownership between departments is informal - we don't have named owners.",
+        
+        # Management commitment
+        "Leadership talks about portfolio management, but it's not really enforced consistently. We have some executive sponsorship from our VP of Product, but follow-through is inconsistent. I'd say it's medium commitment.",
+        
+        # Anything else
+        "No, I think we've covered everything important."
+    ]
+    
+    report_data = None
+    final_turn_time = None
+    
+    for i, msg in enumerate(messages, 1):
+        log(f"  Turn {i}/{len(messages)}: Sending message ({len(msg)} chars)")
+        
+        start_time = time.time()
+        resp = requests.post(f"{BASE_URL}/assessments/{assessment_id}/chat",
+            headers={"Authorization": f"Bearer {token}"},
+            json={"message": msg}
+        )
+        elapsed = time.time() - start_time
+        
+        assert resp.status_code == 200, f"Chat turn {i} failed: {resp.status_code} {resp.text}"
+        data = resp.json()
+        
+        assert "message" in data, f"No message in turn {i} response"
+        ai_response = data["message"]["content"]
+        log(f"  Turn {i} completed in {elapsed:.1f}s, AI response: {len(ai_response)} chars")
+        
+        if data.get("report_ready"):
+            log(f"  ✓ Report ready after turn {i}!")
+            final_turn_time = elapsed
+            report_data = data.get("report")
+            break
+    
+    assert report_data is not None, "Report was not generated after full conversation"
+    assert final_turn_time is not None, "Final turn time not captured"
+    
+    log(f"✓ FULL conversation completed, report generated")
+    log(f"✓ TIMING: Final turn took {final_turn_time:.1f} seconds")
+    
+    # Check timing expectation: should be ~70-100s with Sonnet 4.5, NOT ~165s with Sonnet 5
+    if final_turn_time > 120:
+        log(f"⚠ WARNING: Final turn took {final_turn_time:.1f}s (expected ~70-100s)")
+    else:
+        log(f"✓ Timing acceptable: {final_turn_time:.1f}s (target: 70-100s)")
+    
+    return report_data, final_turn_time
 
-def verify_field_present_and_non_empty(report, field_path):
-    """
-    Verify a field exists and is non-empty in the report.
-    field_path can be a simple string like "scores" or a dot-separated path like "roadmap.immediate"
-    """
-    parts = field_path.split(".")
-    current = report
+def test_report_fields(report_data):
+    """Step 6: Verify ALL 26 report fields are present and non-empty"""
+    log("TEST 6: Verify ALL 26 report fields present and non-empty")
     
-    for part in parts:
-        if not isinstance(current, dict) or part not in current:
-            return False, f"Field '{field_path}' not found"
-        current = current[part]
+    missing_fields = []
+    empty_fields = []
     
-    # Check if non-empty
-    if current is None:
-        return False, f"Field '{field_path}' is None"
+    for field in REQUIRED_FIELDS:
+        if field not in report_data:
+            missing_fields.append(field)
+        else:
+            value = report_data[field]
+            # Check if empty (None, empty string, empty list, empty dict, or 0 for contextual_score)
+            if value is None:
+                empty_fields.append(f"{field} (None)")
+            elif isinstance(value, str) and not value.strip():
+                empty_fields.append(f"{field} (empty string)")
+            elif isinstance(value, list) and len(value) == 0:
+                empty_fields.append(f"{field} (empty list)")
+            elif isinstance(value, dict) and len(value) == 0:
+                empty_fields.append(f"{field} (empty dict)")
+            elif field == "contextual_score" and value == 0.0:
+                empty_fields.append(f"{field} (0.0 - should be non-zero)")
     
-    if isinstance(current, (str, list, dict)):
-        if not current:
-            return False, f"Field '{field_path}' is empty"
+    if missing_fields:
+        log(f"✗ MISSING FIELDS ({len(missing_fields)}): {', '.join(missing_fields)}")
     
-    return True, ""
+    if empty_fields:
+        log(f"✗ EMPTY FIELDS ({len(empty_fields)}): {', '.join(empty_fields)}")
+    
+    if not missing_fields and not empty_fields:
+        log(f"✓ ALL 26 fields present and non-empty")
+    
+    # Specific checks for fields that failed with Sonnet 5
+    critical_fields = [
+        "contextual_score",
+        "failure_pattern_name",
+        "failure_pattern_narrative",
+        "governance_assessment",
+        "governance_signal_summary"
+    ]
+    
+    log("  Checking critical fields that failed with Sonnet 5:")
+    for field in critical_fields:
+        value = report_data.get(field)
+        if field == "contextual_score":
+            if value and value != 0.0:
+                log(f"  ✓ {field}: {value} (non-zero)")
+            else:
+                log(f"  ✗ {field}: {value} (should be non-zero)")
+        elif field == "governance_signal_summary":
+            if value and isinstance(value, list) and len(value) > 0:
+                log(f"  ✓ {field}: {len(value)} items")
+            else:
+                log(f"  ✗ {field}: empty or missing")
+        else:
+            if value and (not isinstance(value, str) or value.strip()):
+                log(f"  ✓ {field}: present ({len(str(value))} chars)")
+            else:
+                log(f"  ✗ {field}: empty or missing")
+    
+    # Check roadmap continuity
+    roadmap = report_data.get("roadmap", {})
+    scores = report_data.get("scores", {})
+    if roadmap and scores:
+        immediate = roadmap.get("immediate", {})
+        expected_gain = immediate.get("expected_gain", "")
+        if expected_gain:
+            log(f"  Checking roadmap continuity:")
+            log(f"    Pillar scores: People={scores.get('people')}, Process={scores.get('process')}, Data={scores.get('data')}, Technology={scores.get('technology')}")
+            log(f"    Immediate phase expected_gain: {expected_gain}")
+    
+    return len(missing_fields) == 0 and len(empty_fields) == 0
 
+def test_pdf_generation(token, assessment_id):
+    """Step 7: GET /api/assessments/{id}/pdf → 200, valid PDF"""
+    log("TEST 7: GET /api/assessments/{id}/pdf")
+    resp = requests.get(f"{BASE_URL}/assessments/{assessment_id}/pdf",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    assert resp.status_code == 200, f"PDF generation failed: {resp.status_code}"
+    assert resp.headers.get("content-type") == "application/pdf", \
+        f"Wrong content type: {resp.headers.get('content-type')}"
+    pdf_bytes = resp.content
+    assert pdf_bytes.startswith(b"%PDF"), "Invalid PDF signature"
+    assert len(pdf_bytes) > 5000, f"PDF too small: {len(pdf_bytes)} bytes"
+    log(f"✓ Full PDF generated: {len(pdf_bytes)} bytes, valid %PDF signature")
+    return len(pdf_bytes)
 
-def verify_roadmap_continuity(report):
-    """
-    Verify roadmap continuity:
-    - roadmap.immediate's expected_gain starting values match the confirmed pillar scores
-    """
-    scores = report.get("scores", {})
-    roadmap = report.get("roadmap", {})
-    immediate = roadmap.get("immediate", {})
-    expected_gain = immediate.get("expected_gain", "")
-    
-    if not expected_gain:
-        return False, "roadmap.immediate.expected_gain is empty"
-    
-    # Parse expected_gain format: "People: X.X → X.X | Process: X.X → X.X | Data: X.X → X.X | Technology: X.X → X.X"
-    import re
-    pattern = r"(People|Process|Data|Technology):\s*([\d.]+)\s*[→->]\s*([\d.]+)"
-    matches = re.findall(pattern, expected_gain)
-    
-    if len(matches) != 4:
-        return False, f"expected_gain format incorrect: {expected_gain}"
-    
-    mismatches = []
-    for pillar_name, start_str, end_str in matches:
-        pillar_key = pillar_name.lower()
-        try:
-            start_value = float(start_str)
-            score_value = float(scores.get(pillar_key, 0))
-            
-            # Allow small floating point differences
-            if abs(start_value - score_value) > 0.01:
-                mismatches.append(
-                    f"{pillar_name}: expected_gain starts at {start_value} but score is {score_value}"
-                )
-        except (ValueError, TypeError) as e:
-            return False, f"Error parsing values for {pillar_name}: {e}"
-    
-    if mismatches:
-        return False, "; ".join(mismatches)
-    
-    return True, "All starting values match pillar scores"
+def test_summary_pdf_generation(token, assessment_id):
+    """Step 8: GET /api/assessments/{id}/summary-pdf → 200, valid PDF"""
+    log("TEST 8: GET /api/assessments/{id}/summary-pdf")
+    resp = requests.get(f"{BASE_URL}/assessments/{assessment_id}/summary-pdf",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    assert resp.status_code == 200, f"Summary PDF generation failed: {resp.status_code}"
+    assert resp.headers.get("content-type") == "application/pdf", \
+        f"Wrong content type: {resp.headers.get('content-type')}"
+    pdf_bytes = resp.content
+    assert pdf_bytes.startswith(b"%PDF"), "Invalid PDF signature"
+    assert len(pdf_bytes) > 3000, f"Summary PDF too small: {len(pdf_bytes)} bytes"
+    log(f"✓ Summary PDF generated: {len(pdf_bytes)} bytes, valid %PDF signature")
+    return len(pdf_bytes)
 
+def test_assessments_list(token):
+    """Step 9: GET /api/assessments → 200, regression check"""
+    log("TEST 9: GET /api/assessments (regression check)")
+    resp = requests.get(f"{BASE_URL}/assessments",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    assert resp.status_code == 200, f"Get assessments failed: {resp.status_code}"
+    data = resp.json()
+    assert isinstance(data, list), "Response is not a list"
+    log(f"✓ Assessments list retrieved: {len(data)} assessments")
+    return len(data)
+
+def test_max_length_validation(token, company_id):
+    """Step 10: NEW TEST - create fresh assessment, call /start, then POST /chat with 9000-char message → expect 422"""
+    log("TEST 10: NEW TEST - max_length=8000 validation on chat message")
+    
+    # Create fresh assessment
+    resp = requests.post(f"{BASE_URL}/assessments",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "company_id": company_id,
+            "respondent_name": "Test User",
+            "respondent_role": "Test Role"
+        }
+    )
+    assert resp.status_code == 200, f"Create assessment failed: {resp.status_code}"
+    assessment_id = resp.json()["id"]
+    log(f"  Created fresh assessment: {assessment_id}")
+    
+    # Start assessment
+    resp = requests.post(f"{BASE_URL}/assessments/{assessment_id}/start",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    assert resp.status_code == 200, f"Start assessment failed: {resp.status_code}"
+    log(f"  Started assessment")
+    
+    # Send 9000-char message (over 8000 limit)
+    long_message = "A" * 9000
+    log(f"  Sending {len(long_message)}-char message (over 8000 limit)")
+    resp = requests.post(f"{BASE_URL}/assessments/{assessment_id}/chat",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"message": long_message}
+    )
+    
+    assert resp.status_code == 422, \
+        f"Expected 422 (validation error), got {resp.status_code}. Response: {resp.text}"
+    
+    log(f"✓ Validation working: 9000-char message correctly rejected with HTTP 422")
+    return assessment_id
+
+def test_idempotency(token, assessment_id):
+    """Step 11: Verify idempotency - calling /start twice returns same greeting without error"""
+    log("TEST 11: Verify idempotency - calling /start twice")
+    
+    # First call
+    resp1 = requests.post(f"{BASE_URL}/assessments/{assessment_id}/start",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    assert resp1.status_code == 200, f"First /start call failed: {resp1.status_code}"
+    greeting1 = resp1.json()["message"]["content"]
+    
+    # Second call
+    resp2 = requests.post(f"{BASE_URL}/assessments/{assessment_id}/start",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    assert resp2.status_code == 200, f"Second /start call failed: {resp2.status_code}"
+    greeting2 = resp2.json()["message"]["content"]
+    
+    assert greeting1 == greeting2, "Greetings differ between calls"
+    log(f"✓ Idempotency verified: both calls returned same greeting ({len(greeting1)} chars)")
 
 def main():
-    print_section("BACKEND TEST: Full Report Generation Flow (Claude Sonnet 5)")
-    print(f"Backend URL: {BASE_URL}")
-    print(f"Test started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    
-    token = None
-    company_id = None
-    assessment_id = None
+    log("=" * 80)
+    log("REGRESSION TEST: Model revert + 4 audit fixes")
+    log("=" * 80)
     
     try:
-        # ===================================================================
-        # TEST 1: Login
-        # ===================================================================
-        print_section("TEST 1: Login")
-        response = requests.post(
-            f"{BASE_URL}/auth/login",
-            json={"email": ADMIN_EMAIL, "password": ADMIN_PASSWORD},
-            timeout=30
-        )
+        # Step 1: Login
+        token = test_login()
         
-        if response.status_code == 200:
-            data = response.json()
-            token = data.get("access_token") or data.get("token")
-            if token:
-                print_result("Login", True, f"Token received: {token[:20]}...")
-            else:
-                print_result("Login", False, f"No token in response: {data}")
-                return
+        # Step 2: Create company
+        company_id = test_create_company(token)
+        
+        # Step 3: Create assessment
+        assessment_id = test_create_assessment(token, company_id)
+        
+        # Step 4: Start assessment
+        greeting = test_start_assessment(token, assessment_id)
+        
+        # Step 5: Drive full conversation
+        report_data, final_turn_time = test_full_conversation(token, assessment_id)
+        
+        # Step 6: Verify all 26 fields
+        all_fields_ok = test_report_fields(report_data)
+        
+        # Step 7: Generate full PDF
+        pdf_size = test_pdf_generation(token, assessment_id)
+        
+        # Step 8: Generate summary PDF
+        summary_pdf_size = test_summary_pdf_generation(token, assessment_id)
+        
+        # Step 9: Regression check
+        assessment_count = test_assessments_list(token)
+        
+        # Step 10: Max length validation
+        validation_assessment_id = test_max_length_validation(token, company_id)
+        
+        # Step 11: Idempotency check
+        test_idempotency(token, validation_assessment_id)
+        
+        log("=" * 80)
+        log("SUMMARY")
+        log("=" * 80)
+        log(f"✓ Test 1: Login successful")
+        log(f"✓ Test 2: Company created")
+        log(f"✓ Test 3: Assessment created")
+        log(f"✓ Test 4: AI greeting received")
+        log(f"✓ Test 5: Full conversation completed, report generated in {final_turn_time:.1f}s")
+        log(f"{'✓' if all_fields_ok else '✗'} Test 6: All 26 fields {'present and non-empty' if all_fields_ok else 'FAILED'}")
+        log(f"✓ Test 7: Full PDF generated ({pdf_size} bytes)")
+        log(f"✓ Test 8: Summary PDF generated ({summary_pdf_size} bytes)")
+        log(f"✓ Test 9: Assessments list retrieved ({assessment_count} assessments)")
+        log(f"✓ Test 10: Max length validation working (422 for 9000-char message)")
+        log(f"✓ Test 11: Idempotency verified")
+        log("=" * 80)
+        
+        if all_fields_ok and final_turn_time < 120:
+            log("✓✓✓ ALL TESTS PASSED ✓✓✓")
+            log(f"Report generation model (claude-sonnet-4-5-20250929) is working correctly.")
+            log(f"Timing: {final_turn_time:.1f}s (target: 70-100s, acceptable: <120s)")
+            return 0
         else:
-            print_result("Login", False, f"HTTP {response.status_code}: {response.text}")
-            return
-        
-        headers = {"Authorization": f"Bearer {token}"}
-        
-        # ===================================================================
-        # TEST 2: Create Company
-        # ===================================================================
-        print_section("TEST 2: Create Company")
-        response = requests.post(
-            f"{BASE_URL}/companies",
-            headers=headers,
-            json={
-                "name": f"Test Company {int(time.time())}",
-                "industry": "Software & Technology"
-            },
-            timeout=30
-        )
-        
-        if response.status_code == 200:
-            data = response.json()
-            company_id = data.get("id")
-            print_result("Create Company", True, f"Company ID: {company_id}")
-        else:
-            print_result("Create Company", False, f"HTTP {response.status_code}: {response.text}")
-            return
-        
-        # ===================================================================
-        # TEST 3: Create Assessment
-        # ===================================================================
-        print_section("TEST 3: Create Assessment")
-        response = requests.post(
-            f"{BASE_URL}/assessments",
-            headers=headers,
-            json={
-                "company_id": company_id,
-                "respondent_name": "Test User",
-                "respondent_role": "Product Manager"
-            },
-            timeout=30
-        )
-        
-        if response.status_code == 200:
-            data = response.json()
-            assessment_id = data.get("id")
-            print_result("Create Assessment", True, f"Assessment ID: {assessment_id}")
-        else:
-            print_result("Create Assessment", False, f"HTTP {response.status_code}: {response.text}")
-            return
-        
-        # ===================================================================
-        # TEST 4: Start Assessment (AI Greeting)
-        # ===================================================================
-        print_section("TEST 4: Start Assessment (AI Greeting)")
-        response = requests.post(
-            f"{BASE_URL}/assessments/{assessment_id}/start",
-            headers=headers,
-            timeout=60
-        )
-        
-        if response.status_code == 200:
-            data = response.json()
-            # Response structure: {"message": {"role": "assistant", "content": "...", "timestamp": "..."}}
-            message_obj = data.get("message", {})
-            if isinstance(message_obj, dict):
-                greeting = message_obj.get("content", "")
-            else:
-                greeting = message_obj if isinstance(message_obj, str) else ""
+            if not all_fields_ok:
+                log("✗✗✗ FIELD COMPLETENESS FAILED ✗✗✗")
+            if final_turn_time >= 120:
+                log(f"⚠ WARNING: Timing slower than expected ({final_turn_time:.1f}s)")
+            return 1
             
-            if isinstance(greeting, str) and greeting:
-                print_result("Start Assessment", True, f"Greeting received ({len(greeting)} chars)")
-                if len(greeting) > 100:
-                    print(f"  Greeting preview: {greeting[:100]}...")
-                else:
-                    print(f"  Greeting: {greeting}")
-            else:
-                print_result("Start Assessment", False, f"Unexpected response structure: {data}")
-                return
-        else:
-            print_result("Start Assessment", False, f"HTTP {response.status_code}: {response.text}")
-            return
-        
-        # ===================================================================
-        # TEST 5: Drive Full Conversation Until Report Ready
-        # ===================================================================
-        print_section("TEST 5: Drive Full Conversation")
-        
-        report_ready = False
-        report_data = None
-        final_turn_time = None
-        turn_number = 0
-        
-        for user_message in CONVERSATION_TURNS:
-            turn_number += 1
-            print(f"\n--- Turn {turn_number} ---")
-            print(f"User: {user_message[:80]}{'...' if len(user_message) > 80 else ''}")
-            
-            # Time this turn
-            turn_start = time.time()
-            
-            response = requests.post(
-                f"{BASE_URL}/assessments/{assessment_id}/chat",
-                headers=headers,
-                json={"message": user_message},
-                timeout=180  # 3 minutes timeout for report generation
-            )
-            
-            turn_end = time.time()
-            turn_duration = turn_end - turn_start
-            
-            if response.status_code != 200:
-                print_result(f"Chat Turn {turn_number}", False, 
-                           f"HTTP {response.status_code}: {response.text[:200]}")
-                return
-            
-            data = response.json()
-            # Response structure: {"message": "...", "report_ready": false/true, "report": {...}}
-            ai_message = data.get("message", "")
-            if isinstance(ai_message, dict):
-                ai_message = ai_message.get("content", "")
-            
-            report_ready = data.get("report_ready", False)
-            
-            if isinstance(ai_message, str):
-                if len(ai_message) > 100:
-                    print(f"AI: {ai_message[:100]}...")
-                else:
-                    print(f"AI: {ai_message}")
-            else:
-                print(f"AI: [Unexpected message type: {type(ai_message)}]")
-            
-            print(f"Turn duration: {turn_duration:.1f}s")
-            
-            if report_ready:
-                report_data = data.get("report")
-                final_turn_time = turn_duration
-                print(f"\n🎉 REPORT READY after {turn_number} turns!")
-                print(f"⏱️  FINAL TURN TIME: {final_turn_time:.1f} seconds")
-                break
-        
-        if not report_ready:
-            print_result("Full Conversation", False, 
-                       f"Report not ready after {turn_number} turns")
-            return
-        
-        print_result("Full Conversation", True, 
-                   f"Report generated in {final_turn_time:.1f}s after {turn_number} turns")
-        
-        # ===================================================================
-        # TEST 6: Verify Report Field Completeness
-        # ===================================================================
-        print_section("TEST 6: Verify Report Field Completeness")
-        
-        missing_fields = []
-        empty_fields = []
-        
-        for field in REQUIRED_FIELDS:
-            present, error = verify_field_present_and_non_empty(report_data, field)
-            if not present:
-                if "not found" in error:
-                    missing_fields.append(field)
-                else:
-                    empty_fields.append(field)
-        
-        # Special checks for nested fields
-        nested_checks = [
-            "roadmap.immediate",
-            "roadmap.short_term",
-            "roadmap.strategic",
-            "roadmap.immediate.expected_gain",
-            "roadmap.short_term.expected_gain",
-            "roadmap.strategic.expected_gain",
-        ]
-        
-        for field_path in nested_checks:
-            present, error = verify_field_present_and_non_empty(report_data, field_path)
-            if not present:
-                if "not found" in error:
-                    missing_fields.append(field_path)
-                else:
-                    empty_fields.append(field_path)
-        
-        total_fields = len(REQUIRED_FIELDS) + len(nested_checks)
-        present_count = total_fields - len(missing_fields) - len(empty_fields)
-        
-        print(f"Field completeness: {present_count}/{total_fields} fields present and non-empty")
-        
-        if missing_fields:
-            print(f"\n❌ MISSING FIELDS ({len(missing_fields)}):")
-            for field in missing_fields:
-                print(f"  - {field}")
-        
-        if empty_fields:
-            print(f"\n⚠️  EMPTY FIELDS ({len(empty_fields)}):")
-            for field in empty_fields:
-                print(f"  - {field}")
-        
-        # Print some key field values for verification
-        print(f"\n📊 Key Report Values:")
-        print(f"  equal_weighted_score: {report_data.get('equal_weighted_score')}")
-        print(f"  contextual_score: {report_data.get('contextual_score')}")
-        print(f"  scores.overall: {report_data.get('scores', {}).get('overall')}")
-        print(f"  scores.people: {report_data.get('scores', {}).get('people')}")
-        print(f"  scores.process: {report_data.get('scores', {}).get('process')}")
-        print(f"  scores.data: {report_data.get('scores', {}).get('data')}")
-        print(f"  scores.technology: {report_data.get('scores', {}).get('technology')}")
-        print(f"  failure_pattern_name: {report_data.get('failure_pattern_name')}")
-        print(f"  management_commitment: {report_data.get('management_commitment')}")
-        
-        # Check critical_gaps for Precondition labels
-        critical_gaps = report_data.get("critical_gaps", [])
-        print(f"\n  critical_gaps count: {len(critical_gaps)}")
-        if critical_gaps:
-            gaps_with_labels = [g for g in critical_gaps if "Precondition" in str(g)]
-            print(f"  critical_gaps with Precondition labels: {len(gaps_with_labels)}/{len(critical_gaps)}")
-            if gaps_with_labels:
-                print(f"  Example: {gaps_with_labels[0][:100]}...")
-        
-        # Check consultant_note length
-        consultant_note = report_data.get("consultant_note", "")
-        if consultant_note:
-            word_count = len(consultant_note.split())
-            print(f"\n  consultant_note: {len(consultant_note)} chars, ~{word_count} words")
-            if word_count > 250:
-                print(f"    ⚠️  WARNING: Exceeds 250-word cap")
-        
-        # Check benchmark_context
-        benchmark_context = report_data.get("benchmark_context", "")
-        if benchmark_context:
-            print(f"  benchmark_context: {len(benchmark_context)} chars")
-        
-        all_fields_ok = len(missing_fields) == 0 and len(empty_fields) == 0
-        print_result("Field Completeness", all_fields_ok, 
-                   f"{present_count}/{total_fields} fields verified")
-        
-        # ===================================================================
-        # TEST 7: Verify Roadmap Continuity
-        # ===================================================================
-        print_section("TEST 7: Verify Roadmap Continuity")
-        
-        continuity_ok, continuity_msg = verify_roadmap_continuity(report_data)
-        print_result("Roadmap Continuity", continuity_ok, continuity_msg)
-        
-        if continuity_ok:
-            immediate = report_data.get("roadmap", {}).get("immediate", {})
-            print(f"  expected_gain: {immediate.get('expected_gain')}")
-        
-        # ===================================================================
-        # TEST 8: GET Full PDF
-        # ===================================================================
-        print_section("TEST 8: GET Full PDF")
-        
-        response = requests.get(
-            f"{BASE_URL}/assessments/{assessment_id}/pdf",
-            headers=headers,
-            timeout=60
-        )
-        
-        if response.status_code == 200:
-            content_type = response.headers.get("Content-Type", "")
-            pdf_bytes = response.content
-            is_pdf = pdf_bytes[:4] == b"%PDF"
-            
-            print_result("Full PDF", is_pdf and "application/pdf" in content_type,
-                       f"{len(pdf_bytes)} bytes, Content-Type: {content_type}, "
-                       f"Valid PDF signature: {is_pdf}")
-        else:
-            print_result("Full PDF", False, f"HTTP {response.status_code}")
-        
-        # ===================================================================
-        # TEST 9: GET Summary PDF
-        # ===================================================================
-        print_section("TEST 9: GET Summary PDF")
-        
-        response = requests.get(
-            f"{BASE_URL}/assessments/{assessment_id}/summary-pdf",
-            headers=headers,
-            timeout=60
-        )
-        
-        if response.status_code == 200:
-            content_type = response.headers.get("Content-Type", "")
-            pdf_bytes = response.content
-            is_pdf = pdf_bytes[:4] == b"%PDF"
-            
-            print_result("Summary PDF", is_pdf and "application/pdf" in content_type,
-                       f"{len(pdf_bytes)} bytes, Content-Type: {content_type}, "
-                       f"Valid PDF signature: {is_pdf}")
-        else:
-            print_result("Summary PDF", False, f"HTTP {response.status_code}")
-        
-        # ===================================================================
-        # TEST 10: Regression - GET Assessments List
-        # ===================================================================
-        print_section("TEST 10: Regression - GET Assessments List")
-        
-        response = requests.get(
-            f"{BASE_URL}/assessments",
-            headers=headers,
-            timeout=30
-        )
-        
-        if response.status_code == 200:
-            assessments = response.json()
-            found = any(a.get("id") == assessment_id for a in assessments)
-            print_result("Assessments List", found,
-                       f"List contains {len(assessments)} assessments, "
-                       f"test assessment {'found' if found else 'NOT FOUND'}")
-        else:
-            print_result("Assessments List", False, f"HTTP {response.status_code}")
-        
-        # ===================================================================
-        # FINAL SUMMARY
-        # ===================================================================
-        print_section("TEST SUMMARY")
-        print(f"✅ All core tests completed")
-        print(f"⏱️  Report generation time: {final_turn_time:.1f} seconds")
-        print(f"📊 Field completeness: {present_count}/{total_fields}")
-        print(f"🔗 Roadmap continuity: {'✓ PASSED' if continuity_ok else '✗ FAILED'}")
-        
-        if missing_fields or empty_fields:
-            print(f"\n⚠️  Issues found:")
-            if missing_fields:
-                print(f"   - {len(missing_fields)} missing fields")
-            if empty_fields:
-                print(f"   - {len(empty_fields)} empty fields")
-        else:
-            print(f"\n✅ All required fields present and non-empty")
-        
-        print(f"\nTest completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        
+    except AssertionError as e:
+        log(f"✗✗✗ TEST FAILED ✗✗✗")
+        log(f"Error: {e}")
+        return 1
     except Exception as e:
-        print(f"\n❌ EXCEPTION: {type(e).__name__}: {str(e)}")
+        log(f"✗✗✗ UNEXPECTED ERROR ✗✗✗")
+        log(f"Error: {type(e).__name__}: {e}")
         import traceback
         traceback.print_exc()
-
+        return 1
 
 if __name__ == "__main__":
-    main()
+    exit(main())

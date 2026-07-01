@@ -45,7 +45,12 @@ db = client[os.environ['DB_NAME']]
 JWT_ALGORITHM = "HS256"
 
 def get_jwt_secret() -> str:
-    return os.environ.get("JWT_SECRET", "default-secret-change-me")
+    # No insecure fallback: JWT_SECRET must be explicitly configured, exactly
+    # like MONGO_URL/DB_NAME above. A hardcoded default here would let anyone
+    # who reads this source forge valid auth tokens if the env var is ever
+    # missing — fail fast instead so a misconfiguration is caught immediately
+    # at startup rather than silently running insecurely.
+    return os.environ["JWT_SECRET"]
 
 # Password Hashing
 def hash_password(password: str) -> str:
@@ -141,8 +146,8 @@ async def create_notification(
 # Pydantic Models
 class UserRegister(BaseModel):
     email: EmailStr
-    password: str
-    name: str
+    password: str = Field(..., max_length=200)
+    name: str = Field(..., max_length=300)
 
 class UserLogin(BaseModel):
     email: EmailStr
@@ -156,12 +161,12 @@ class UserResponse(BaseModel):
     created_at: str
 
 class CompanyCreate(BaseModel):
-    name: str
-    industry: str
-    portfolio_size: Optional[str] = None
-    company_size: Optional[str] = None  # e.g. "Mid-market · 450 employees"
-    active_products: Optional[str] = None  # e.g. "28 active SKUs"
-    primary_challenge: Optional[str] = None
+    name: str = Field(..., max_length=300)
+    industry: str = Field(..., max_length=300)
+    portfolio_size: Optional[str] = Field(None, max_length=300)
+    company_size: Optional[str] = Field(None, max_length=300)  # e.g. "Mid-market · 450 employees"
+    active_products: Optional[str] = Field(None, max_length=300)  # e.g. "28 active SKUs"
+    primary_challenge: Optional[str] = Field(None, max_length=3000)
 
 class CompanyResponse(BaseModel):
     id: str
@@ -176,8 +181,8 @@ class CompanyResponse(BaseModel):
 
 class AssessmentCreate(BaseModel):
     company_id: str
-    respondent_name: str
-    respondent_role: str
+    respondent_name: str = Field(..., max_length=300)
+    respondent_role: str = Field(..., max_length=300)
 
 class ChatMessage(BaseModel):
     role: str  # 'user' or 'assistant'
@@ -192,7 +197,7 @@ class AssessmentUpdate(BaseModel):
     report: Optional[Dict[str, Any]] = None
 
 class SendMessageRequest(BaseModel):
-    message: str
+    message: str = Field(..., max_length=8000)
 
 # Contact email for closing statement
 CONTACT_EMAIL = "shalitha.samarakoonmudiyanselage@student.oulu.fi"
@@ -904,6 +909,13 @@ async def send_chat_message(assessment_id: str, request: SendMessageRequest, cur
     }
     chat_history.append(assistant_msg)
 
+    # Persist the conversational turn immediately (before attempting report
+    # generation below) so the user's answer + the AI's reply are never lost
+    # from the DB even if report generation raises an unexpected error.
+    await db.assessments.update_one(
+        {"_id": ObjectId(assessment_id)}, {"$set": {"chat_history": chat_history}}
+    )
+
     # Try to extract the SEED report JSON from the assistant message (fast —
     # raw facts + scores only). If present, fire the 3 concurrent specialist
     # calls to generate the rich narrative sections, then merge.
@@ -921,8 +933,8 @@ async def send_chat_message(assessment_id: str, request: SendMessageRequest, cur
         scores = report_data.get("scores")
         status = "completed"
 
-    # Persist
-    update_data = {"chat_history": chat_history}
+    # Persist report/score/status fields (chat_history already saved above)
+    update_data = {}
     if report_data:
         update_data["report"] = report_data
         update_data["weights_raw"] = report_data.get("weights_raw")
@@ -933,7 +945,8 @@ async def send_chat_message(assessment_id: str, request: SendMessageRequest, cur
         update_data["status"] = "completed"
         update_data["completed_at"] = datetime.now(timezone.utc).isoformat()
 
-    await db.assessments.update_one({"_id": ObjectId(assessment_id)}, {"$set": update_data})
+    if update_data:
+        await db.assessments.update_one({"_id": ObjectId(assessment_id)}, {"$set": update_data})
 
     # Notifications on completion
     if status == "completed":
@@ -982,7 +995,11 @@ async def regenerate_report(assessment_id: str, current_user: dict = Depends(get
     if last_asst:
         salvaged_seed = extract_report_json(last_asst.get("content", ""))
         if salvaged_seed and salvaged_seed.get("ready_for_report"):
-            salvaged = await generate_report_sections(salvaged_seed, chat_history)
+            try:
+                salvaged = await generate_report_sections(salvaged_seed, chat_history)
+            except Exception as exc:
+                logging.error(f"Report section generation error (salvage): {exc}")
+                raise HTTPException(status_code=500, detail="Failed to generate the full report. Please try again.")
             salvaged = normalise_report_weights(salvaged)
             scores = salvaged.get("scores")
             await db.assessments.update_one(
@@ -1028,23 +1045,29 @@ async def regenerate_report(assessment_id: str, current_user: dict = Depends(get
         "timestamp": datetime.now(timezone.utc).isoformat(),
     })
 
+    # Persist this turn immediately (before report generation) so it's never
+    # lost regardless of what happens next (parse failure or report-gen failure).
+    await db.assessments.update_one(
+        {"_id": ObjectId(assessment_id)}, {"$set": {"chat_history": chat_history}}
+    )
+
     report_data = extract_report_json(response_text)
     if not report_data or not report_data.get("ready_for_report"):
-        await db.assessments.update_one(
-            {"_id": ObjectId(assessment_id)}, {"$set": {"chat_history": chat_history}}
-        )
         raise HTTPException(
             status_code=502,
             detail="The model did not return a valid JSON block. Please try regenerating again.",
         )
 
-    report_data = await generate_report_sections(report_data, chat_history)
+    try:
+        report_data = await generate_report_sections(report_data, chat_history)
+    except Exception as exc:
+        logging.error(f"Report section generation error (regenerate): {exc}")
+        raise HTTPException(status_code=500, detail="Failed to generate the full report. Please try again.")
     report_data = normalise_report_weights(report_data)
     scores = report_data.get("scores")
     await db.assessments.update_one(
         {"_id": ObjectId(assessment_id)},
         {"$set": {
-            "chat_history": chat_history,
             "status": "completed",
             "report": report_data,
             "scores": scores,
@@ -1096,7 +1119,11 @@ async def generate_pdf_report(assessment_id: str, current_user: dict = Depends(g
     if not assessment.get("report"):
         raise HTTPException(status_code=400, detail="Assessment report not yet generated")
 
-    buffer = build_full_assessment_pdf(assessment)
+    try:
+        buffer = build_full_assessment_pdf(assessment)
+    except Exception as exc:
+        logging.error(f"PDF generation error (full report): {exc}")
+        raise HTTPException(status_code=500, detail="Failed to generate the PDF report. Please try again.")
     filename = (
         f"PortfolioHealth_Assessment_"
         f"{assessment.get('company_name', 'Report').replace(' ', '_')}_"
@@ -1135,7 +1162,11 @@ async def generate_executive_summary_pdf(
                 assessment_id, exc_info=True,
             )
 
-    buffer = build_executive_summary_pdf(assessment)
+    try:
+        buffer = build_executive_summary_pdf(assessment)
+    except Exception as exc:
+        logging.error(f"PDF generation error (executive summary): {exc}")
+        raise HTTPException(status_code=500, detail="Failed to generate the summary PDF. Please try again.")
     filename = (
         f"PortfolioHealth_ExecSummary_"
         f"{assessment.get('company_name', 'Report').replace(' ', '_')}_"
@@ -1684,10 +1715,10 @@ LEVEL_GAPS = {
 }
 
 class QuickAssessmentSubmit(BaseModel):
-    company_name: str
-    industry: str
-    respondent_name: Optional[str] = None
-    respondent_email: Optional[str] = None
+    company_name: str = Field(..., max_length=300)
+    industry: str = Field(..., max_length=300)
+    respondent_name: Optional[str] = Field(None, max_length=300)
+    respondent_email: Optional[str] = Field(None, max_length=300)
     answers: Dict[str, int]  # question_id -> selected_value
 
 class QuickAssessmentSave(BaseModel):
@@ -1902,7 +1933,6 @@ class DynamicCORSMiddleware:
 
         async def send_with_cors(message):
             if message["type"] == "http.response.start":
-                headers = dict(message.get("headers", []))
                 raw_headers = list(message.get("headers", []))
                 # Remove any existing CORS headers
                 raw_headers = [(k, v) for k, v in raw_headers if k.lower() not in [

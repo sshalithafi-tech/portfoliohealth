@@ -45,13 +45,16 @@ import chat_service  # reuse the existing Anthropic/Emergent client plumbing
 
 logger = logging.getLogger(__name__)
 
-MODEL_NAME = "claude-sonnet-5"  # report-generation model — intentionally
+MODEL_NAME = "claude-sonnet-4-5-20250929"  # report-generation model — intentionally
 # independent of chat_service.CHAT_MODEL_NAME so upgrading the assessment
 # chat model never silently changes the report-generation model.
-# (Upgraded from claude-sonnet-4-5-20250929 to match the chat engine, per
-# user request. The Extended-Thinking-safe text-block extraction fix in
-# _call_specialist already handles the ThinkingBlock content-parts this
-# model can return.)
+# (Briefly tried claude-sonnet-5 here per user request, but live testing showed
+# Specialist Call A (sections 1-7: contextual_score/failure_pattern/governance)
+# consistently failed JSON parsing on both attempts with that model, leaving
+# 5 report fields empty and nearly tripling report-gen turn time (~165s vs
+# ~73s). Reverted back to the proven-reliable Sonnet 4.5 per user decision.
+# The Extended-Thinking-safe text-block extraction fix in _call_specialist
+# is kept regardless, as defensive future-proofing.)
 
 MAX_TOKENS_A = 4500
 MAX_TOKENS_B = 6000
